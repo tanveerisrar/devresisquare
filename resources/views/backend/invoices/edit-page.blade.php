@@ -1,6 +1,6 @@
-{{-- @extends('backend.layout.app')
+@extends('backend.layout.app')
 
-@section('content') --}}
+@section('content')
 <div class="container">
     <h2>Edit Invoice #{{ $invoice->invoice_number }}</h2>
 
@@ -108,7 +108,7 @@
     </form>
 </div>
 
-{{-- @endsection --}}
+@endsection
 
 @section('page.scripts')
 

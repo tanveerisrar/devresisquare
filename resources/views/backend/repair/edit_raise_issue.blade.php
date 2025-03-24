@@ -15,9 +15,9 @@
             <button class=" float-end btn btn-primary" data-bs-toggle="modal" data-bs-target="#workOrderModal">{{ $repairIssue->workOrder ? 'Edit Work Order' : 'Create Work Order' }}</button>
         </div>
     </div>
+    <a href="{{ route('admin.repair.workorder.invoice', $repairIssue->id) }}" class="btn btn-primary">View Work Order & Invoice</a>
 
-    <!-- Work Order Modal -->
-    @include('backend.work_orders.work_order_form')
+
 
     <form id="repair-form-page" action="{{ route('admin.property_repairs.update', $repairIssue->id) }}" method="POST">
         @csrf
@@ -839,17 +839,17 @@
 
         initSelectedProperties();
         
-        // Function to get the selected property address from the table
-        function getSelectedPropertyAddress() {
-            var selectedProperty = $('#dynamic_property_table tbody tr:first td:first').text(); // Get first row's address column
-            return selectedProperty ? selectedProperty.trim() : 'N/A';
-        }
+        // // Function to get the selected property address from the table
+        // function getSelectedPropertyAddress() {
+        //     var selectedProperty = $('#dynamic_property_table tbody tr:first td:first').text(); // Get first row's address column
+        //     return selectedProperty ? selectedProperty.trim() : 'N/A';
+        // }
 
-        // When the Work Order modal is opened, set the property address
-        $(document).on('click', '#workOrderModal', function () {
-            var propertyAddress = getSelectedPropertyAddress();
-            $('.set-property-address').text(propertyAddress); // Set address in modal
-        });
+        // // When the Work Order modal is opened, set the property address
+        // $(document).on('click', '#workOrderModal', function () {
+        //     var propertyAddress = getSelectedPropertyAddress();
+        //     $('.set-property-address').text(propertyAddress); // Set address in modal
+        // });
 
         $(document).on('keyup keydown', '#search_property1', function () {
             var query = $(this).val().trim();

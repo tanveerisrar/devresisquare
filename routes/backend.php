@@ -231,6 +231,7 @@ Route::middleware('auth')->group(function () {
                 Route::post('/repair/check-last-step', 'checkLastStep')->name('repair.checkLastStep');
                 Route::get('/get-repair-categories', 'getCategories')->name('get.repair.categories');
                 Route::get('/selected-property/tenants', 'getPropertyTenants')->name('get.property_repairs.tenants');
+                Route::get('/repair/{repair}/workorder-invoice', 'workOrderInvoice')->name('repair.workorder.invoice');
             });
         });
 
@@ -254,6 +255,7 @@ Route::middleware('auth')->group(function () {
             Route::controller(WorkOrderController::class)->group(function () {
                 Route::post('/store', 'store')->name('work_orders.store');  // Save new work order
                 Route::get('/get/{repairIssueId}', 'getWorkOrder')->name('work_orders.get');  // Get work order by repair issue id
+                Route::get('/generate-pdf/{id}', 'generateWorkOrderPDF')->name('workorder.generate.invoice');
             });
         });
 

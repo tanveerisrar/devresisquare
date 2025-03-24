@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Backend;
 
 use App\Models\User;
 use App\Models\Contact;
+use App\Models\Invoice;
 use App\Models\JobType;
 use App\Models\Tenancy;
+use App\Models\TaxRates;
+use App\Models\WorkOrder;
 use App\Models\RepairIssue;
 use App\Models\RepairPhoto;
 use App\Models\TenantMember;
-use App\Models\WorkOrder;
 use Illuminate\Http\Request;
 use App\Models\RepairHistory;
 use App\Models\RepairCategory;
@@ -587,6 +589,36 @@ class PropertyRepairController
     // }
 
 
-    // Additional methods as necessary
+    public function workOrderInvoice($repairId)
+    {
+        // Fetch the repair details
+        $repairIssue = RepairIssue::findOrFail($repairId);
+
+        // Fetch the work order related to this repair
+        $workorder = WorkOrder::where('repair_issue_id', $repairIssue->id)->first();
+
+        // Fetch the invoice related to this repair
+        $invoice = Invoice::where('work_order_id', $workorder->id)->first();
+
+        $jobTypes = JobType::getHierarchy();
+
+        // Fetch available contacts for invoice
+        $contacts = Contact::all();
+
+        // Fetch tax rates
+        $taxRates = TaxRates::all();
+
+        // Fetch contractor assignment details (cost_price & quote_attachment)
+        $contractorAssignment = RepairIssueContractorAssignment::where('repair_issue_id', $repairIssue->id)
+            ->where('contractor_id', $repairIssue->final_contractor_id)
+            ->first();
+
+        $contractorCost = $contractorAssignment->cost_price ?? 0; // Get assigned cost price
+        $quoteAttachment = $contractorAssignment->quote_attachment ?? null; // Get quote attachment
+
+        // Pass data to the view
+        return view('backend.repair.workorder-invoice', compact('repairIssue', 'workorder', 'invoice', 'contacts', 'taxRates', 'jobTypes', 'contractorCost', 'quoteAttachment'));
+    }
+
 }
 

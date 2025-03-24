@@ -528,19 +528,33 @@ if (!function_exists('get_contact_address_name_by_id')) {
                 return 'N/A';
             }
 
-            // Build the full address
-            $fullAddress = implode(', ', array_filter([
+            // Filter out empty address fields
+            $addressParts = array_filter([
                 $contact->address_line_1,
                 $contact->address_line_2,
                 $contact->postcode,
                 $contact->city,
                 $contact->country
-            ]));
+            ]);
+
+            // If all address fields are empty, set a default message
+            $fullAddress = !empty($addressParts) ? implode(', ', $addressParts) : 'Address not available';
+
+            // Handle empty email and phone separately
+            $email = !empty($contact->email) ? "Email: {$contact->email}" : '';
+            $phone = !empty($contact->phone) ? "Phone: {$contact->phone}" : '';
+
+            // Ensure email or phone is displayed, otherwise show a default message
+            $contactInfo = trim($email . '<br>' . $phone);
+            if (empty($contactInfo)) {
+                $contactInfo = 'Contact details not available';
+            }
 
             // Return formatted contact details as a string
-            return "<strong>{$contact->full_name}</strong><br>{$fullAddress}<br>Email: {$contact->email}<br>Phone: {$contact->phone}";
+            return "<strong>{$contact->full_name}</strong><br>{$fullAddress}<br>{$contactInfo}";
         });
     }
+
 }
 
 
@@ -639,3 +653,97 @@ if (!function_exists('getInvoiceStatusText')) {
         ][$statusId] ?? 'Unknown';
     }
 }
+
+if (!function_exists('get_property_address_by_id')) {
+    /**
+     * Fetch the address of a property by its ID and cache the result.
+     *
+     * @param int $propertyId
+     * @return string
+     */
+    function get_property_address_by_id($propertyId)
+    {
+        return Cache::rememberForever("property_address_{$propertyId}", function () use ($propertyId) {
+            $property = Property::where('id', $propertyId)->first(['line_1', 'line_2', 'postcode', 'city', 'country']);
+
+            // Define a default message if address is missing
+            $defaultAddress = 'No address available';
+
+            // Check if all address fields are empty
+            if ($property) {
+                $addressParts = array_filter([
+                    $property->line_1 ?? '',
+                    $property->line_2 ?? '',
+                    $property->postcode ?? '',
+                    $property->city ?? '',
+                    $property->country ?? ''
+                ]);
+
+                // If all address fields are empty, use default message
+                return empty($addressParts) ? $defaultAddress : implode(', ', $addressParts);
+            }
+
+            return $defaultAddress;  // If no property is found
+        });
+    }
+}
+
+if (!function_exists('attachmentViewer')) {
+    function attachmentViewer($fileUrl, $title = 'View Attachment', $buttonClass = 'btn btn-primary', $modalSize = 'lg', $customWidth = null, $customHeight = null)
+    {
+        if (!$fileUrl) {
+            return '';
+        }
+
+        $fileExtension = pathinfo($fileUrl, PATHINFO_EXTENSION);
+        $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        $pdfExtensions = ['pdf'];
+
+        $modalId = 'attachmentModal_' . md5($fileUrl);
+
+        // Define Bootstrap modal size classes
+        $modalSizeClass = '';
+        if ($modalSize === 'sm') {
+            $modalSizeClass = 'modal-sm';
+        } elseif ($modalSize === 'lg') {
+            $modalSizeClass = 'modal-lg';
+        } elseif ($modalSize === 'xl') {
+            $modalSizeClass = 'modal-xl';
+        }
+
+        // Generate the button
+        $button = '<button type="button" class="' . $buttonClass . '" data-bs-toggle="modal" data-bs-target="#' . $modalId . '">' . $title . '</button>';
+
+        // Generate the modal
+        $modal = '<div class="modal fade" id="' . $modalId . '" tabindex="-1" aria-labelledby="' . $modalId . '_label" aria-hidden="true">
+            <div class="modal-dialog ' . $modalSizeClass . ' modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="' . $modalId . '_label">Attachment Preview</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center" style="' . ($customWidth ? 'max-width:' . $customWidth . ';' : '') . ($customHeight ? 'height:' . $customHeight . '; overflow:auto;' : '') . '">';
+
+        // Check file type and render accordingly
+        if (in_array(strtolower($fileExtension), $imageExtensions)) {
+            $modal .= '<img src="' . $fileUrl . '" class="img-fluid" alt="Attachment">';
+        } elseif (in_array(strtolower($fileExtension), $pdfExtensions)) {
+            $modal .= '<iframe src="' . $fileUrl . '" width="100%" height="500px" style="border: none;"></iframe>';
+        } else {
+            $modal .= '<p>Unable to preview this file type. <a href="' . $fileUrl . '" target="_blank">Download File</a></p>';
+        }
+
+        $modal .= '</div>
+                </div>
+            </div>
+        </div>';
+
+        return $button . $modal;
+    }
+}
+/*
+{!! attachmentViewer(uploaded_asset($quoteAttachment), 'View Quote', 'btn btn-primary', 'lg') !!}
+{!! attachmentViewer(uploaded_asset($quoteAttachment), 'View Quote', 'btn btn-primary', 'sm') !!}
+{!! attachmentViewer(uploaded_asset($quoteAttachment), 'View Quote', 'btn btn-primary', 'xl') !!}
+{!! attachmentViewer(uploaded_asset($quoteAttachment), 'View Quote', 'btn btn-primary', '', '600px', '400px') !!}
+*/

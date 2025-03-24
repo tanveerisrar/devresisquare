@@ -61,6 +61,13 @@ class WorkOrder extends Model
     {
         return $this->hasOne(Invoice::class);
     }
+
+    public function items()
+    {
+        return $this->hasMany(WorkOrderItem::class);
+    }
+
+
     // Relationship with Supplier
     // public function supplier()
     // {
