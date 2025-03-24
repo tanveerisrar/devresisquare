@@ -14,12 +14,12 @@ return new class extends Migration
         Schema::create('work_order_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('work_order_id')->constrained('work_orders')->onDelete('cascade'); // Work Order Reference
-            $table->string('title');
-            $table->longText('description');
-            $table->decimal('unit_price', 10, 2);
-            $table->decimal('quantity');
-            $table->decimal('tax_rate', 5, 2)->default(0); // Tax Rate Percentage
-            $table->decimal('total_price', 10, 2);
+            $table->string('title')->nullable();
+            $table->longText('description')->nullable();
+            $table->decimal('unit_price', 10, 2)->nullable();
+            $table->decimal('quantity')->nullable();
+            $table->decimal('tax_rate', 5, 2)->default(0)->nullable(); // Tax Rate Percentage
+            $table->decimal('total_price', 10, 2)->nullable();
             $table->timestamps();
         });
     }

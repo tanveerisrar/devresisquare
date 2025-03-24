@@ -255,6 +255,7 @@ Route::middleware('auth')->group(function () {
             Route::controller(WorkOrderController::class)->group(function () {
                 Route::post('/store', 'store')->name('work_orders.store');  // Save new work order
                 Route::get('/get/{repairIssueId}', 'getWorkOrder')->name('work_orders.get');  // Get work order by repair issue id
+                Route::get('/generate-pdf/{id}', 'generateWorkOrderPDF')->name('workorder.generate.invoice');
             });
         });
 

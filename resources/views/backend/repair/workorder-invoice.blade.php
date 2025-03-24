@@ -110,10 +110,16 @@
             // });
 
             // Initialize jQuery validation on form load
-            initValidate('#workOrderForm');
+            // initValidate('#workOrderForm');
 
             $('#workOrderForm').submit(function (e) {
                 e.preventDefault();
+
+                // Initialize validation only on submit
+                initValidate('#workOrderForm');
+
+                // Disable default HTML5 validation (optional, but useful for safety)
+                $(this).attr('novalidate', 'novalidate');
 
                 // Check if form is valid before submitting
                 if (!$(this).valid()) {
@@ -129,7 +135,7 @@
                     contentType: false,
                     success: function (response) {
                         AIZ.plugins.notify('success', response.message);
-                        $('#workOrderModal').modal('hide');
+                        // $('#workOrderModal').modal('hide');
                         location.reload(); // Refresh the page to show new work orders
                     },
                     error: function (error) {
@@ -358,6 +364,14 @@
                 calculateworkorderTotals();
             });
 
+            $(document).on('change', '.tax-name', function () {
+                let row = $(this).closest('tr');
+                let selectedTaxRate = $(this).find(':selected').data('rate');
+                row.find('.tax-rate').val(selectedTaxRate);
+                calculateworkorderTotals();
+            });
+            // Initial calculation on page load
+            $('.unit-price, .quantity, .tax-name').trigger('change');
             // Add New Item Row
             $(document).on('click', '.add-item', function () {
                 let index = $('#workorder-items tr').length;
@@ -385,6 +399,14 @@
 
                 $('#workorder-items').append(newRow);
 
+                // Set default tax rate of first option
+                let lastRow = $('#workorder-items tr').last();
+                let firstTaxRate = lastRow.find('.tax-name option:first').data('rate') || 0;
+                lastRow.find('.tax-rate').val(firstTaxRate);
+
+                calculateworkorderTotals(); // Recalculate totals
+
+                
                 // Change the previous row's Add button to Remove
                 $('#workorder-items tr').eq(index - 1).find('.add-item').removeClass('btn-success add-item').addClass('btn-danger remove-item').html('<i class="fa-solid fa-minus"></i>');
             });

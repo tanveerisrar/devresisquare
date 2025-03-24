@@ -1,4 +1,4 @@
-<form id="workOrderForm" action="{{ route('admin.work_orders.store') }}" method="POST">
+<form id="workOrderForm" action="{{ route('admin.work_orders.store') }}" method="POST" novalidate>
     @csrf
     <input type="hidden" id="repair_issue_id" name="repair_issue_id" value="{{ $repairIssue->id }}">
     <input type="hidden" id="work_order_id" name="work_order_id" value="{{ $repairIssue->workOrder->id ?? '' }}">
@@ -211,19 +211,49 @@
             </div>
         </div>
         @if ($quoteAttachment)
-            <div class="mb-3">
-                <label class="form-label">Quote Attachment</label>
-                <br>
-                <a href="{{ asset('storage/' . $quoteAttachment) }}" target="_blank" class="btn btn-primary">
-                    View Quote Attachment
-                </a>
-            </div>
-        @endif
+        <div class="mb-3">
+            <label class="form-label">Quote Attachment</label>
+            <br>
+            <x-attachment-viewer 
+                file-url="{{ uploaded_asset($quoteAttachment) }}" 
+                title="View Quote Attachment"
+                button-class="btn btn-success"
+                icon-class="fa-solid fa-eye"
+                modal-size="modal-xl"
+                modal-scrollable="false"
+                background-color="#f8f9fa"
+                border-radius="12px"
+                close-button-class="btn-close-dark"
+                downloadable="true"
+            />
+
+            {{-- <x-attachment-viewer 
+            file-url="{{ uploaded_asset($quoteAttachment) }}" 
+            title="View Quote Attachment"
+            button-class="btn btn-success"
+            icon-class="bi bi-eye"
+            modal-size="modal-xl"
+            modal-scrollable="true"
+            preview-width="100%"
+            preview-height="500px"
+            background-color="#f8f9fa"
+            border-radius="12px"
+            close-button-class="btn-close-dark"
+            downloadable="true"
+        /> --}}
+        
+
+        </div>
+    @endif
+    
 
     </div>
 
     <div class="modal-footer">
         <button type="submit" class="btn btn-success">Save Work Order</button>
-        <button type="button" class="btn btn-info" id="generateInvoiceBtn">Generate Invoice</button>
+        <button type="button" class="btn btn-info" onclick="window.location.href='{{ route('admin.workorder.generate.invoice', $workorder->id ?? 0) }}'">
+            Generate Work Order Invoice PDF
+        </button>
+        <button type="button" class="btn btn-primary" id="generateInvoiceBtn">Generate Invoice</button>
     </div>
 </form>
