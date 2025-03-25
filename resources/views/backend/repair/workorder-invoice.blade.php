@@ -150,32 +150,41 @@
             });
 
             $(document).on("click", "#generateInvoiceBtn", function () {
-                let workOrderId = $("#work_order_id").val();
+                let $btn = $(this); // Store $(this) to avoid repeated lookups
+                let workOrderId = $("#work_order_id").val() || $btn.data('workorder-id');
+
+                if (!workOrderId) {
+                    AIZ.plugins.notify('warning', 'No Work Order found!');
+                    // alert("No Work Order found!");
+                    return;
+                }
 
                 // Build the URL using the named route and replace the placeholder with the work order ID
                 var url = "{{ route('admin.invoices.generate', ['workOrderId' => 'id']) }}".replace('id', workOrderId);
 
-
-                if (!workOrderId) {
-                    alert("No Work Order found!");
-                    return;
-                }
-
                 $.ajax({
                     url: url,
                     type: "POST",
-                    headers: {
-                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
+                    data: {
+                        _token: "{{ csrf_token() }}"
+                    },
+                    beforeSend: function () {
+                        $('#generateInvoiceBtn').text('Generating...').prop('disabled', true);
                     },
                     success: function (response) {
-                        alert(response.message);
-
-                        // Freeze the form
-                        $("#workOrderForm :input").prop("disabled", true);
-                        $("#generateInvoiceBtn").text("Invoice Generated").prop("disabled", true);
+                        $('#invoice-message').html(`<div class="alert alert-success">${response.message}</div>`);
+                        AIZ.plugins.notify('success', response.message);
+                        $btn.text('Invoice Generated').prop('disabled', true); // Disable after success
+                        setTimeout(function () {
+                            location.reload();
+                        }, 3000);
                     },
-                    error: function (xhr) {
-                        alert(xhr.responseJSON.message);
+                    error: function (error) {
+                        // console.error(error);
+                        let errorMessage = error.responseJSON?.message || 'Error Generating Invoice';
+                        AIZ.plugins.notify('danger', errorMessage);
+                        $('#invoice-message').html(`<div class="alert alert-danger">${errorMessage}</div>`);
+                        $('#generateInvoiceBtn').text('Generate Invoice').prop('disabled', false);
                     }
                 });
             });
@@ -257,12 +266,13 @@
             // Show Contact Details When a Contact is Selected
             $(document).on("change", "#invoiceToSelect", function () {
                 var selectedOption = $(this).find(':selected');
-                // var name = selectedOption.data('name');
+                var name = selectedOption.data('name');
                 var address = selectedOption.data('address');
                 var phone = selectedOption.data('phone');
                 var email = selectedOption.data('email');
 
                 if (address) {
+                    $('#contactName').text(name);
                     $('#contactAddress').text(address);
                     $('#contactPhone').text(phone);
                     $('#contactEmail').text(email);
@@ -367,13 +377,20 @@
             $(document).on('change', '.tax-name', function () {
                 let row = $(this).closest('tr');
                 let selectedTaxRate = $(this).find(':selected').data('rate');
-                row.find('.tax-rate').val(selectedTaxRate);
+
+                // Set tax rate input only if it's not already pre-filled
+                let taxRateInput = row.find('.tax-rate');
+                if (!taxRateInput.val()) {
+                    taxRateInput.val(selectedTaxRate);
+                }
+
                 calculateworkorderTotals();
             });
+
             // Initial calculation on page load
             $('.unit-price, .quantity, .tax-name').trigger('change');
             // Add New Item Row
-            $(document).on('click', '.add-item', function () {
+            $(document).on('click', '.add-workorder-item', function () {
                 let index = $('#workorder-items tr').length;
                 let taxOptions = `{!! $taxRates->map(fn($rate) => "<option value='$rate->id' data-rate='$rate->rate'>$rate->name</option>")->join('') !!}`;
 
@@ -392,7 +409,7 @@
                         <td><input type="text" class="form-control tax-amount" readonly></td>                   
                         <td><input type="text" class="form-control total-price" readonly></td>
                         <td>
-                            <button type="button" class="btn btn-success add-item"><i class="fa-solid fa-plus"></i></button>
+                            <button type="button" class="btn btn-success add-workorder-item"><i class="fa-solid fa-plus"></i></button>
                         </td>
                     </tr>
                 `;
@@ -408,7 +425,7 @@
 
                 
                 // Change the previous row's Add button to Remove
-                $('#workorder-items tr').eq(index - 1).find('.add-item').removeClass('btn-success add-item').addClass('btn-danger remove-item').html('<i class="fa-solid fa-minus"></i>');
+                $('#workorder-items tr').eq(index - 1).find('.add-workorder-item').removeClass('btn-success add-workorder-item').addClass('btn-danger remove-item').html('<i class="fa-solid fa-minus"></i>');
             });
 
             // Remove Item Row
@@ -418,15 +435,109 @@
 
                 // If only one row left, make sure it has "Add More" instead of "Remove"
                 if ($('#workorder-items tr').length === 1) {
-                    $('#workorder-items tr').eq(0).find('.remove-item').removeClass('btn-danger remove-item').addClass('btn-success add-item').html('<i class="fa-solid fa-plus"></i>');
+                    $('#workorder-items tr').eq(0).find('.remove-item').removeClass('btn-danger remove-item').addClass('btn-success add-workorder-item').html('<i class="fa-solid fa-plus"></i>');
                 } else {
                     // Ensure last row always has Add More button
-                    $('#workorder-items tr').last().find('td:last').html('<button type="button" class="btn btn-success add-item"><i class="fa-solid fa-plus"></i></button>');
+                    $('#workorder-items tr').last().find('td:last').html('<button type="button" class="btn btn-success add-workorder-item"><i class="fa-solid fa-plus"></i></button>');
                 }
             });
 
             // Initial Calculation on Load
             calculateworkorderTotals();
+
+
+            /*invoice*/
+            function calculateInvoiceTotals() {
+                let subtotal_invoice = 0;
+                let taxTotal_invoice = 0;
+
+                $('#invoice-items tr').each(function () {
+                    let row = $(this);
+                    let unitPrice = parseFloat(row.find('.unit-price_invoice').val()) || 0;
+                    let quantity = parseInt(row.find('.quantity_invoice').val()) || 1;
+                    let taxRate = parseFloat(row.find('.tax-rate_invoice').val()) || 0;
+
+                    let itemTotal = unitPrice * quantity;
+                    let taxAmount = (itemTotal * taxRate) / 100;
+                    
+                    row.find('.tax-amount_invoice').val(taxAmount.toFixed(2));
+                    row.find('.total-price_invoice').val(itemTotal.toFixed(2));
+
+                    subtotal_invoice += itemTotal;
+                    taxTotal_invoice += taxAmount;
+                });
+
+                let grandTotal = subtotal_invoice + taxTotal_invoice;
+
+                $('#subtotal_invoice').val(subtotal_invoice.toFixed(2));
+                $('#tax_total_invoice').val(taxTotal_invoice.toFixed(2));
+                $('#grand-total_invoice').val(grandTotal.toFixed(2));
+            }
+
+            $(document).on('input change', '.unit-price_invoice, .quantity_invoice, .tax-rate_invoice', function () {
+                calculateInvoiceTotals();
+            });
+
+            $(document).on('change', '.name_invoice', function () {
+                let row = $(this).closest('tr');
+                let selectedTaxRate = $(this).find(':selected').data('rate');
+
+                // Set tax rate input only if it's not already pre-filled
+                let taxRateInput = row.find('.tax-rate_invoice');
+                if (!taxRateInput.val()) {
+                    taxRateInput.val(selectedTaxRate);
+                }
+
+                calculateInvoiceTotals();
+            });
+
+            $(document).on('click', '.add-invoice-item', function () {
+                let index = $('#invoice-items tr').length;
+                
+                let newRow_invoice = `
+                    <tr>
+                        <td><input type="text" name="items[${index}][title]" class="form-control" required></td>
+                        <td><input type="text" name="items[${index}][description]" class="form-control" required></td>
+                        <td><input type="number" name="items[${index}][unit_price]" class="form-control unit-price_invoice" required></td>
+                        <td><input type="number" name="items[${index}][quantity]" class="form-control quantity_invoice" required></td>
+                        <td><input type="number" name="items[${index}][tax_rate]" class="form-control tax-rate_invoice" value="0.00" required></td>
+                        <td><input type="text" class="form-control tax-amount_invoice" readonly></td>
+                        <td><input type="text" class="form-control total-price_invoice" readonly></td>
+                        <td>
+                            <button type="button" class="btn btn-success add-invoice-item"><i class="fa-solid fa-plus"></i></button>
+                        </td>
+                    </tr>
+                `;
+                $('#invoice-items').append(newRow_invoice);
+
+                // Set default tax rate of first option
+                let lastRow = $('#invoice-items tr').last();
+                let firstTaxRate = lastRow.find('.tax-name option:first').data('rate') || 0;
+                lastRow.find('.tax-rate').val(firstTaxRate);
+
+                calculateInvoiceTotals(); // Recalculate totals
+
+                
+                // Change the previous row's Add button to Remove
+                $('#invoice-items tr').eq(index - 1).find('.add-invoice-item').removeClass('btn-success add-invoice-item').addClass('btn-danger remove-item').html('<i class="fa-solid fa-minus"></i>');
+
+            });
+
+            // Remove Item Row
+            $(document).on('click', '.remove-invoice-item', function () {
+                $(this).closest('tr').remove();
+                calculateInvoiceTotals();
+
+                // If only one row left, make sure it has "Add More" instead of "Remove"
+                if ($('#invoice-items tr').length === 1) {
+                    $('#invoice-items tr').eq(0).find('.remove-invoice-item').removeClass('btn-danger remove-invoice-item').addClass('btn-success add-invoice-item').html('<i class="fa-solid fa-plus"></i>');
+                } else {
+                    // Ensure last row always has Add More button
+                    $('#invoice-items tr').last().find('td:last').html('<button type="button" class="btn btn-success add-invoice-item"><i class="fa-solid fa-plus"></i></button>');
+                }
+            });
+
+            calculateInvoiceTotals();
         });
     </script>
 @endsection

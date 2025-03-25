@@ -54,7 +54,7 @@ class InvoiceController
      */
     public function createFromWorkOrder(Request $request, $workOrderId)
     {
-        $workOrder = WorkOrder::with(['jobType', 'repairIssue.property'])->findOrFail($workOrderId);
+        $workOrder = WorkOrder::with(['jobType', 'repairIssue.property', 'items'])->findOrFail($workOrderId);
 
         // Check if an invoice already exists for this Work Order
         if ($workOrder->invoice) {
@@ -74,15 +74,27 @@ class InvoiceController
 
         // Create the invoice
         $invoiceNumber = generateReferenceNumber(Invoice::class, 'invoice_no', 'RESISQREINV');
-        if($workOrder->charge_to_landlord > 0){
-            $subTotal = $workOrder->actual_cost + $workOrder->charge_to_landlord;
-        }else{
-            $subTotal = $workOrder->actual_cost;
+        
+        // Calculate invoice totals dynamically from Work Order items
+        $subtotal = 0;
+        $taxTotal = 0;
+        $grandTotal = 0;
+
+        foreach ($workOrder->items as $item) {
+            $rowSubtotal = $item->unit_price * $item->quantity;
+            $taxAmount = ($rowSubtotal * $item->tax_rate) / 100;
+            $rowTotal = $rowSubtotal + $taxAmount;
+
+            $subtotal += $rowSubtotal;
+            $taxTotal += $taxAmount;
+            $grandTotal += $rowTotal;
         }
-        // $taxAmount = ($workOrder->actual_cost * 20) / 100;  // Assume 20% VAT
-        $taxAmount = 0;
-        $totalAmount = $subTotal + $taxAmount;
-        $notes = $workOrder->extra_notes;
+        
+        // Include charge to landlord if applicable
+        if ($workOrder->charge_to_landlord > 0) {
+            $subtotal += $workOrder->charge_to_landlord;
+            $grandTotal += $workOrder->charge_to_landlord;
+        }
         
         $invoice = Invoice::create([
             'invoice_number' => $invoiceNumber,
@@ -91,11 +103,10 @@ class InvoiceController
             'contact_id' => $workOrder->invoice_to_id,
             'invoice_date' => now(),
             'due_date' => now()->addDays(30), // Default 30 days due
-            'subtotal' => $subTotal,
-            'tax_amount' => $taxAmount,
-            'notes' => $notes,
-            // 'tax_amount' => ($workOrder->actual_cost * 20) / 100, // Assume 20% VAT
-            'total_amount' => $totalAmount,
+            'subtotal' => $subtotal,
+            'tax_amount' => $taxTotal,
+            'notes' => $workOrder->extra_notes,
+            'total_amount' => $grandTotal,
             'status_id' => 1, // "Pending" by default
             'invoiced_date_time' => now(),
         ]);
@@ -105,27 +116,20 @@ class InvoiceController
         // echo "</pre>";
         // exit();
 
-        // Add Work Order details as an invoice item
-        InvoiceItems::create([
-            'invoice_id' => $invoice->id,
-            'description' => "Work Order #{$workOrder->works_order_no} - " . $workOrder->job_scope,
-            'unit_price' => $workOrder->actual_cost,
-            'quantity' => 1,
-            'total_price' => $workOrder->actual_cost,
-            // 'tax_rate_id' => 1, // Assume Standard VAT (20%)
-        ]);
-
-        // 🔹 Add Additional Charge to Landlord (if applicable)
-        if ($workOrder->charge_to_landlord > 0) {
-            InvoiceItems::create([
-                'invoice_id' => $invoice->id,
-                'description' => "Charge to Landlord for Work Order #{$workOrder->works_order_no}",
-                'unit_price' => $workOrder->charge_to_landlord,
-                'quantity' => 1,
-                'total_price' => $workOrder->charge_to_landlord,
-            ]);
+        if($workOrder->items){
+            // Add Work Order items as invoice items
+            foreach ($workOrder->items as $item) {
+                InvoiceItems::create([
+                    'invoice_id' => $invoice->id,
+                    'title' => $item->title,
+                    'description' => $item->description,
+                    'unit_price' => $item->unit_price,
+                    'quantity' => $item->quantity,
+                    'total_price' => $item->unit_price * $item->quantity,
+                ]);
+            }
         }
-        
+                
         return response()->json([
             'message' => 'Invoice generated successfully!',
             'invoice_id' => $invoice->id

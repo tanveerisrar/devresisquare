@@ -139,7 +139,7 @@
                         <td><input type="text" class="form-control tax-amount" readonly></td>
                         <td><input type="text" class="form-control total-price" readonly></td>
                         <td>
-                            <button type="button" class="btn btn-success add-item"><i
+                            <button type="button" class="btn btn-success add-workorder-item"><i
                                     class="fa-solid fa-plus"></i></button>
                         </td>
                     </tr>
@@ -158,19 +158,23 @@
                                 <select name="items[{{ $index }}][tax_name]" class="form-control tax-name">
                                     @foreach ($taxRates as $taxRate)
                                         <option value="{{ $taxRate->id }}" data-rate="{{ $taxRate->rate }}"
-                                            {{ $item->tax_name == $taxRate->name ? 'selected' : '' }}>
+                                            {{ $item->tax_rate_id == $taxRate->id ? 'selected' : '' }}>
                                             {{ $taxRate->name }}
                                         </option>
                                     @endforeach
                                 </select>
+                            </td>                                    
+                            <td>
+                                <input type="number" name="items[{{ $index }}][tax_rate]" 
+                                    class="form-control tax-rate" 
+                                    value="{{ $item->tax_rate ?? ($taxRates->where('id', $item->tax_rate_id)->first()->rate ?? 0) }}" 
+                                    required>
                             </td>
-                            <td><input type="number" name="items[{{ $index }}][tax_rate]"
-                                    class="form-control tax-rate" value="{{ $item->tax_rate }}" required></td>
                             <td><input type="text" class="form-control tax-amount" readonly></td>
                             <td><input type="text" class="form-control total-price" readonly></td>
                             <td>
                                 @if ($loop->last)
-                                    <button type="button" class="btn btn-success add-item"><i
+                                    <button type="button" class="btn btn-success add-workorder-item"><i
                                             class="fa-solid fa-plus"></i></button>
                                 @else
                                     <button type="button" class="btn btn-danger remove-item"><i
@@ -249,11 +253,10 @@
 
     </div>
 
-    <div class="modal-footer">
+    <div id="invoice-message" class="mt-2"></div>
+    <div class="d-flex gap-3 float-end">
         <button type="submit" class="btn btn-success">Save Work Order</button>
-        <button type="button" class="btn btn-info" onclick="window.location.href='{{ route('admin.workorder.generate.invoice', $workorder->id ?? 0) }}'">
-            Generate Work Order Invoice PDF
-        </button>
-        <button type="button" class="btn btn-primary" id="generateInvoiceBtn">Generate Invoice</button>
+        <button type="button" class="btn btn-info" onclick="window.location.href='{{ route('admin.workorder.generate.invoice', $workorder->id ?? 0) }}'">Generate Work Order PDF </button>
+        <button id="generateInvoiceBtn" data-workorder-id="{{ $workorder->id ?? '' }}" class="btn btn-primary" {{ $workorder->invoice ? 'disabled' : '' }}> {{ $workorder->invoice ? 'Invoice Generated' : 'Generate Invoice' }} </button>
     </div>
 </form>

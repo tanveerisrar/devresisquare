@@ -89,7 +89,7 @@ class WorkOrderController
                     'description' => $item['description'] ?? '',
                     'unit_price' => $item['unit_price'],
                     'quantity' => $item['quantity'],
-                    'tax_name' => $item['tax_name'],
+                    'tax_rate_id' => $item['tax_name'],
                     'tax_rate' => $item['tax_rate'],
                     'total_price' => $total,
                 ]);
