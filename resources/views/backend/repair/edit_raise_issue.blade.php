@@ -5,19 +5,14 @@
     .border-danger {
     border: 2px solid #dc3545 !important;
 }
-
 </style>
-    <div class="row align-items-center m-4">
-        <div class="col-6">
-            <h1>Edit Repair Issue</h1>
-        </div>
-        <div class="col-6">
-            <button class=" float-end btn btn-primary" data-bs-toggle="modal" data-bs-target="#workOrderModal">{{ $repairIssue->workOrder ? 'Edit Work Order' : 'Create Work Order' }}</button>
-        </div>
+<div class="container">
+
+    <div class="d-flex justify-content-between align-items-center mt-2 mt-md-4">
+        <h1>Edit Repair Issue</h1>
+        <a class="btn btn-primary float-end" href="{{ route('admin.repair.workorder.invoice', $repairIssue->id) }}">{{ $repairIssue->workOrder ? 'Edit Work Order & Invoice' : 'Create Work Order & Invoice' }}</a>
+        {{-- <button class=" float-end btn btn-primary" data-bs-toggle="modal" data-bs-target="#workOrderModal">{{ $repairIssue->workOrder ? 'Edit Work Order' : 'Create Work Order' }}</button> --}}
     </div>
-    <a href="{{ route('admin.repair.workorder.invoice', $repairIssue->id) }}" class="btn btn-primary">View Work Order & Invoice</a>
-
-
 
     <form id="repair-form-page" action="{{ route('admin.property_repairs.update', $repairIssue->id) }}" method="POST">
         @csrf
@@ -365,7 +360,7 @@
                 </div>
             </div>
         </div>
-
+        @if($repairIssue->workOrder) 
         <div class="row">
             <div class="col-md-12">
                 <div class="card">
@@ -373,32 +368,70 @@
                         <h5>Work Order #{{ $repairIssue->workOrder->works_order_no }} Details</h5>
                     </div>
                     <div class="card-body">
-                        @if($repairIssue->workOrder)                            
+                                                   
                             <div class="row">
-                                <div class="col-6">
+                                <div class="col-12">
                                     <p><strong>Job Status:</strong> {{ $repairIssue->workOrder->job_status }}</p>
-                                    <p><strong>Job Type:</strong> {{ $repairIssue->workOrder->jobType->name ?? 'N/A' }}</p>
-                                    <p><strong>Job Sub Type:</strong> {{ $repairIssue->workOrder->jobSubType->name ?? 'N/A' }}</p>
-                                    <p><strong>Job Scope:</strong> {{ $repairIssue->workOrder->job_scope }}</p>
+                                    <p><strong>Job Type:</strong> {{ $repairIssue->workOrder->jobType->name ?? '' }}</p>
+                                    <p><strong>Job Sub Type:</strong> {{ $repairIssue->workOrder->jobSubType->name ?? '' }}</p>
+                                    <p><strong>Job Scope:</strong>
+                                    
+
+                                        @if(!empty($repairIssue->workOrder->items))
+                                            @php
+                                                $items = json_decode($repairIssue->workOrder->items, true);
+                                            @endphp
+                                        
+                                            @if(is_array($items) && count($items) > 0)
+                                                <div class="row">
+                                                    @foreach($items as $item)
+                                                        <div class="col-md-3">
+                                                            <div class="card mb-3">
+                                                                <div class="card-body">
+                                                                    <h5 class="card-title">{{ $item['title'] ?? 'N/A' }}</h5>
+                                                                    <p class="card-text"><strong>Description:</strong> {{ $item['description'] ?? 'N/A' }}</p>
+                                                                    <p><strong>Unit Price:</strong> ${{ isset($item['unit_price']) ? number_format($item['unit_price'], 2) : '0.00' }}</p>
+                                                                    <p><strong>Quantity:</strong> {{ $item['quantity'] ?? '0' }}</p>
+                                                                    <p><strong>Tax Rate:</strong> {{ isset($item['tax_rate']) ? $item['tax_rate'] . '%' : 'N/A' }}</p>
+                                                                    <p><strong>Total Price:</strong> ${{ isset($item['total_price']) ? number_format($item['total_price'], 2) : '0.00' }}</p>
+                                                                    {{-- <p><strong>Created At:</strong> 
+                                                                        @if(!empty($item['created_at']))
+                                                                            {{ \Carbon\Carbon::parse($item['created_at'])->format('d-m-Y H:i') }}
+                                                                        @else
+                                                                            N/A
+                                                                        @endif
+                                                                    </p> --}}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            @else
+                                                <p>No job scope items available.</p>
+                                            @endif
+                                        @else
+                                            <p>Job scope data is not available or invalid.</p>
+                                        @endif
+                                    </p>
                             
-                                    <p><strong>Tentative Start Date:</strong> {{ formatDate($repairIssue->workOrder->tentative_start_date ?? 'N/A') }}</p>
-                                    <p><strong>Tentative End Date:</strong> {{ formatDate($repairIssue->workOrder->tentative_end_date ?? 'N/A') }}</p>
-                                    <p><strong>Booked Date:</strong> {{ formatDate($repairIssue->workOrder->booked_date ?? 'N/A') }}</p>
+                                    <p><strong>Tentative Start Date:</strong> {{ formatDate($repairIssue->workOrder->tentative_start_date ?? '') }}</p>
+                                    <p><strong>Tentative End Date:</strong> {{ formatDate($repairIssue->workOrder->tentative_end_date ?? '') }}</p>
+                                    <p><strong>Booked Date:</strong> {{ formatDate($repairIssue->workOrder->booked_date ?? '') }}</p>
                                     <p><strong>Invoice To:</strong> {{ $repairIssue->workOrder->invoice_to }}</p>
                                     <p><strong>Payment Terms:</strong> {{ $repairIssue->workOrder->payment_by }}</p>
-                                </div>
+                                {{-- </div>
                             
-                                <div class="col-6">
+                                <div class="col-3"> --}}
                                 
-                                    <p><strong>Estimated Cost:</strong> {{getPoundSymbol()}}{{ number_format($repairIssue->workOrder->estimated_cost, 2) }}</p>
+                                    {{-- <p><strong>Estimated Cost:</strong> {{getPoundSymbol()}}{{ number_format($repairIssue->workOrder->estimated_cost, 2) }}</p>
                                     <p><strong>Actual Cost:</strong> {{getPoundSymbol()}}{{ number_format($repairIssue->workOrder->actual_cost, 2) }}</p>
-                                    <p><strong>Charge to Landlord:</strong> {{getPoundSymbol()}}{{ number_format($repairIssue->workOrder->charge_to_landlord, 2) }}</p>
+                                    <p><strong>Charge to Landlord:</strong> {{getPoundSymbol()}}{{ number_format($repairIssue->workOrder->charge_to_landlord, 2) }}</p> --}}
                             
                                     <p><strong>Status:</strong> 
                                         <span class="badge bg-success">{{ $repairIssue->workOrder->status }}</span>
                                     </p>
                             
-                                    <p><strong>Date And Time:</strong> {{ formatDateTime($repairIssue->workOrder->date_time ?? 'N/A') }}</p>
+                                    {{-- <p><strong>Date And Time:</strong> {{ formatDateTime($repairIssue->workOrder->date_time ?? '') }}</p> --}}
                                     <p><strong>Extra Notes:</strong> {{ $repairIssue->workOrder->extra_notes }}</p>
                             
                                     <!-- Quote Attachment (if available) -->
@@ -413,22 +446,21 @@
                                     @endif
                                 </div>
                             </div>
-                        @endif
-                        @if(!$repairIssue->workOrder)
-                            <p class="text-danger">No work order found for this issue.</p>
-                        @endif
-                            
                     </div>
                 </div>
             </div>
         </div>        
-    
+        @else
+            {{-- <p class="text-danger">No work order found for this issue.</p> --}}
+        @endif
 
         
         <button type="submit" class="float-end btn btn-primary">Update</button>
     </form>
 
     <a href="{{ route('admin.property_repairs.index') }}" class="float-start btn btn-secondary">Back to List</a>
+</div>
+    
 </div>
 @endsection
 {{-- Include the partial to push Select2 assets into the stacks --}}
@@ -503,44 +535,7 @@
         //     });
         // });
         
-        // $("button[id='work_order_save_btn']").on('click', function(e) {
-        //     e.preventDefault();
-        //     initValidate('#workOrderForm');
-        // });
-
-        // Initialize jQuery validation on form load
-        initValidate('#workOrderForm');
-
-        $('#workOrderForm').submit(function (e) {
-            e.preventDefault();
-                    
-            // Check if form is valid before submitting
-            if (!$(this).valid()) {
-                return;
-            }
-            
-            var formData = new FormData(this);
-            $.ajax({
-                url: "{{ route('admin.work_orders.store') }}",
-                type: "POST",
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function (response) {
-                    AIZ.plugins.notify('success', response.message);
-                    $('#workOrderModal').modal('hide');
-                    location.reload(); // Refresh the page to show new work orders
-                },
-                error: function (error) {
-                    console.error(error);
-                    let errorMessage = error.responseJSON?.message || 'Error Creating Work Order';
-                    AIZ.plugins.notify('danger', errorMessage);
-                }
-                // error: function (xhr) {
-                //     alert("Error Creating Work Order: " + xhr.responseJSON.message);
-                // }
-            });
-        });
+       
 
         $(document).on("click", "#generateInvoiceBtn", function () {
             let workOrderId = $("#work_order_id").val();

@@ -8,6 +8,7 @@ use App\Models\TaxRates;
 use App\Models\WorkOrder;
 use App\Models\InvoiceItems;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use niklasravnsborg\LaravelPdf\Facades\Pdf;
 
 
@@ -109,6 +110,7 @@ class InvoiceController
             'total_amount' => $grandTotal,
             'status_id' => 1, // "Pending" by default
             'invoiced_date_time' => now(),
+            'created_by' => auth()->id(),
         ]);
 
         // echo "<pre>";
@@ -129,11 +131,13 @@ class InvoiceController
                 ]);
             }
         }
-                
-        return response()->json([
-            'message' => 'Invoice generated successfully!',
-            'invoice_id' => $invoice->id
-        ]);
+        flash('Invoice generated successfully!')->success();
+        return back();
+        // return redirect()->route('admin.invoices.index');
+        // return response()->json([
+        //     'message' => 'Invoice generated successfully!',
+        //     'invoice_id' => $invoice->id
+        // ]);
     }
 
     /**
@@ -201,18 +205,52 @@ class InvoiceController
 
     public function update(Request $request, $invoiceId)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'invoice_number' => 'required|string|max:255',
             'invoice_date' => 'required|date',
             'due_date' => 'required|date',
+            'invoice_to' => 'required|string|max:255',
+            // 'invoice_to_id' => 'required|exists:contacts,id',
             'contact_id' => 'required|exists:contacts,id',
-            'items.*.description' => 'required|string|max:255',
+            'items' => 'required|array',
+            'items.*.title' => 'required|string|max:255',
+            'items.*.description' => 'nullable|string|max:255',
             'items.*.unit_price' => 'required|numeric|min:0',
             'items.*.quantity' => 'required|integer|min:1',
+            'items.*.tax_rate' => 'required|numeric|min:0|max:100',
         ]);
+    
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation Failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
 
-        // Fetch invoice
+        // Fetch the invoice
         $invoice = Invoice::findOrFail($invoiceId);
+        $workOrder = $invoice->workOrder; // Get associated Work Order
+
+        // Recalculate totals
+        $subtotal = 0;
+        $taxTotal = 0;
+        $grandTotal = 0;
+
+        foreach ($request->items as $item) {
+            $rowSubtotal = $item['unit_price'] * $item['quantity'];
+            $taxAmount = ($rowSubtotal * $item['tax_rate']) / 100;
+            $rowTotal = $rowSubtotal + $taxAmount;
+
+            $subtotal += $rowSubtotal;
+            $taxTotal += $taxAmount;
+            $grandTotal += $rowTotal;
+        }
+
+        // Include charge to landlord if applicable
+        if ($workOrder && $workOrder->charge_to_landlord > 0) {
+            $subtotal += $workOrder->charge_to_landlord;
+            $grandTotal += $workOrder->charge_to_landlord;
+        }
 
         // Update invoice details
         $invoice->update([
@@ -221,21 +259,28 @@ class InvoiceController
             'due_date' => $request->due_date,
             'contact_id' => $request->contact_id,
             'notes' => $request->notes,
+            'subtotal' => $subtotal,
+            'tax_amount' => $taxTotal,
+            'total_amount' => $grandTotal,
+            'updated_by' => auth()->id(),
         ]);
 
-        // Update invoice items
-        $invoice->items()->delete(); // Remove existing items
+        // Delete old items and add new ones
+        $invoice->items()->delete();
         foreach ($request->items as $item) {
             InvoiceItems::create([
                 'invoice_id' => $invoice->id,
-                'description' => $item['description'],
+                'title' => $item['title'],
+                'description' => $item['description'] ?? '',
                 'unit_price' => $item['unit_price'],
                 'quantity' => $item['quantity'],
-                'total_price' => $item['unit_price'] * $item['quantity'],
+                'tax_rate' => $item['tax_rate'],
+                'total_price' => ($item['unit_price'] * $item['quantity']),
             ]);
         }
 
-        return redirect()->route('admin.invoices.index')->with('success', 'Invoice updated successfully!');
+        flash('Invoice updated successfully!')->success();
+        return redirect()->route('admin.invoices.index');
     }
 
 }

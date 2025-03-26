@@ -47,7 +47,7 @@
             <tr>
                 <td>{{ $invoice->invoice_number }}</td>
                 <td>{{ optional($invoice->workOrder)->works_order_no }}</td>
-                <td>{{ optional($invoice->workOrder->repairIssue->property)->name ?? 'N/A' }}</td>
+                <td>{{ getPropertyDetails($invoice->property_id, ['prop_ref_no', 'prop_name', 'line_1', 'line_2', 'city', 'country']) }}</td>
                 <td>{{ optional($invoice->contact)->full_name ?? 'N/A' }}</td>
                 <td>£{{ number_format($invoice->total_amount, 2) }}</td>
                 <td>

@@ -594,30 +594,28 @@ class PropertyRepairController
         // Fetch the repair details
         $repairIssue = RepairIssue::findOrFail($repairId);
 
-        // Fetch the work order related to this repair
+        // Fetch work order
         $workorder = WorkOrder::where('repair_issue_id', $repairIssue->id)->first();
+        $invoice = $workorder ? Invoice::where('work_order_id', $workorder->id)->first() : null;
 
-        // Fetch the invoice related to this repair
-        $invoice = Invoice::where('work_order_id', $workorder->id)->first();
+        // Determine mode
+        $mode = (!$workorder || !$invoice) ? 'create' : 'edit';
 
+        // Fetch necessary data
         $jobTypes = JobType::getHierarchy();
-
-        // Fetch available contacts for invoice
         $contacts = Contact::all();
-
-        // Fetch tax rates
         $taxRates = TaxRates::all();
 
-        // Fetch contractor assignment details (cost_price & quote_attachment)
+        // Contractor assignment details
         $contractorAssignment = RepairIssueContractorAssignment::where('repair_issue_id', $repairIssue->id)
             ->where('contractor_id', $repairIssue->final_contractor_id)
             ->first();
 
-        $contractorCost = $contractorAssignment->cost_price ?? 0; // Get assigned cost price
-        $quoteAttachment = $contractorAssignment->quote_attachment ?? null; // Get quote attachment
+        $contractorCost = $contractorAssignment->cost_price ?? 0;
+        $quoteAttachment = $contractorAssignment->quote_attachment ?? null;
 
         // Pass data to the view
-        return view('backend.repair.workorder-invoice', compact('repairIssue', 'workorder', 'invoice', 'contacts', 'taxRates', 'jobTypes', 'contractorCost', 'quoteAttachment'));
+        return view('backend.repair.workorder-invoice', compact('repairIssue', 'workorder', 'invoice', 'contacts', 'taxRates', 'jobTypes', 'contractorCost', 'quoteAttachment', 'mode'));
     }
 
 }

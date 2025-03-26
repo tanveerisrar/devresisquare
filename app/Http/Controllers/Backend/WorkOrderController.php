@@ -43,8 +43,16 @@ class WorkOrderController
         ]);
 
         // Check if we're updating an existing Work Order
-        if ($request->has('work_order_id')) {
-            $workOrder = WorkOrder::findOrFail($request->work_order_id);
+        if (!empty($request->work_order_id)) {
+            $workOrder = WorkOrder::find($request->work_order_id);
+        
+            if (!$workOrder) {
+                return response()->json([
+                    'message' => 'Work Order not found!',
+                    'error' => true
+                ], 404);
+            }
+        
             $workOrder->update([
                 'repair_issue_id' => $request->repair_issue_id,
                 'job_type_id' => $request->job_type_id,
@@ -52,15 +60,15 @@ class WorkOrderController
                 'job_status' => $request->job_status,
                 'tentative_start_date' => $request->tentative_start_date,
                 'tentative_end_date' => $request->tentative_end_date,
+                'invoice_to' => $request->invoice_to,
                 'booked_date' => $request->booked_date,
                 'status' => $request->status,
                 'extra_notes' => $request->extra_notes,
             ]);
-
-            // Delete existing Work Order Items before re-adding
+        
             $workOrder->items()->delete();
         } else {
-            // Create a new Work Order
+            // Creating a new Work Order
             $workOrderNumber = generateReferenceNumber(WorkOrder::class, 'works_order_no', 'RESISQREWO');
             $workOrder = WorkOrder::create([
                 'works_order_no' => $workOrderNumber,
@@ -70,11 +78,13 @@ class WorkOrderController
                 'job_status' => $request->job_status,
                 'tentative_start_date' => $request->tentative_start_date,
                 'tentative_end_date' => $request->tentative_end_date,
+                'invoice_to' => $request->invoice_to,
                 'booked_date' => $request->booked_date,
                 'status' => $request->status,
                 'extra_notes' => $request->extra_notes,
             ]);
         }
+        
         \Log::info('Items Data:', $request->items);
         // Handle Work Order Items
         if (!empty($request->items)) {

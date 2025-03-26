@@ -5,7 +5,8 @@
     $propertyId = $repairIssue->property->id;
 @endphp
     <div class="container">
-        <h2>Work Order & Invoice</h2>
+        <h2>{{ !$workorder ? 'Create Work Order & Invoice' : 'Edit Work Order & Invoice' }}</h2>
+        <hr>    
 
         <!-- Hidden field for selected property IDs -->
         <input type="hidden" id="property_id" name="property_id" value="{{ $propertyId }}">
@@ -16,9 +17,17 @@
                 <a class="nav-link active" id="workorder-tab" data-bs-toggle="tab" href="#workorder">Work Order</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" id="invoice-tab" data-bs-toggle="tab" href="#invoice">Invoice</a>
+                @if(!$invoice)
+                    <span class="d-inline-block" tabindex="0" data-bs-toggle="tooltip" title="Generate Invoice First">
+                        <a class="nav-link disabled" id="invoice-tab" style="pointer-events: none;">Invoice</a>
+                    </span>
+                @else
+                    <a class="nav-link" id="invoice-tab" data-bs-toggle="tab" href="#invoice">Invoice</a>
+                @endif
             </li>
         </ul>
+        
+
 
         <!-- Tab Content -->
         <div class="tab-content mt-3">
@@ -42,6 +51,13 @@
 
 @section('page.scripts')
     <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+
         $(document).ready(function () {
             function loadJobSubTypes(jobTypeId, selectedSubTypeId = null) {
                 if (!jobTypeId) {
@@ -216,7 +232,7 @@
                     success: function (response) {
                         var dropdown = '<div class="form-group">';
                         dropdown += '<label class="form-label">Select ' + invoiceTo + '</label>';
-                        dropdown += '<select name="invoice_to_id" id="invoiceToSelect" class="form-control">';
+                        dropdown += '<select name="contact_id" id="invoiceToSelect" class="form-control">';
                         dropdown += '<option value="">Select ' + invoiceTo + '</option>';
 
                         $.each(response, function (index, item) {
@@ -380,7 +396,7 @@
 
                 // Set tax rate input only if it's not already pre-filled
                 let taxRateInput = row.find('.tax-rate');
-                if (!taxRateInput.val()) {
+                if (!taxRateInput.val() || taxRateInput.val() == 0) {
                     taxRateInput.val(selectedTaxRate);
                 }
 
@@ -423,7 +439,6 @@
 
                 calculateworkorderTotals(); // Recalculate totals
 
-                
                 // Change the previous row's Add button to Remove
                 $('#workorder-items tr').eq(index - 1).find('.add-workorder-item').removeClass('btn-success add-workorder-item').addClass('btn-danger remove-item').html('<i class="fa-solid fa-minus"></i>');
             });
