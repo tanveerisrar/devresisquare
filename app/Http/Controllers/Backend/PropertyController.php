@@ -664,6 +664,52 @@ private function getTabContent($tabname, $propertyId, $property)
 
         return redirect()->route('admin.properties.index')->with('success', 'Selected properties restored successfully.');
     }
+
+    public function loadForm(Request $request)
+    {
+        $property = Property::find($request->property_id);
+        $formType = $request->form_type;
+    
+        if (!$property) {
+            return response()->json(['error' => 'Property not found'], 404);
+        }
+
+        return view("backend.properties.forms.$formType", compact('propertyId'))->render() 
+            ?? response()->json(['error' => 'Invalid form type'], 400);
+    }
+    
+    public function saveForm(Request $request)
+    {
+        $property = Property::find($request->input('property_id'));
+        $formType = $request->input('form_type');
+    
+        if (!$property) {
+            return response()->json(['error' => 'Property not found'], 404);
+        }
+    
+        // Handle different form types dynamically
+        if ($formType === 'availability_pricing') {
+            $property->available_from = $request->input('available_from');
+            $property->price = $request->input('price');
+            $property->letting_price = $request->input('letting_price');
+        } elseif ($formType === 'some_other_form') {
+            // Handle other form types dynamically
+            $property->some_field = $request->input('some_field');
+        }
+    
+        $property->save();
+    
+        // Render updated section
+        $updatedView = view("backend.properties.partials.$formType", compact('property'))->render();
+    
+        return response()->json([
+            'success' => 'Form updated successfully', 
+            'updated_html' => $updatedView
+        ]);
+    }
+    
+    
+
     // // Method to load the tab content for a specific property and tab
     // public function showTabContent($property_id, $tabname)
     // {

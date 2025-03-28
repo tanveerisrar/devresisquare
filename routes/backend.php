@@ -89,6 +89,10 @@ Route::middleware('auth')->group(function () {
             Route::post('/restore/{id}', 'restore')->name('restore');
             Route::post('/bulk-restore', 'bulkRestore')->name('bulk-restore');
             // Route::get('/{property_id}/{tabname}',  'showTabContent')->name('tabcontent');
+
+            Route::get('/load-form', 'loadForm')->name('loadForm');
+            Route::post('/save-form', 'saveForm')->name('saveForm');
+
         });
 
         // Designation

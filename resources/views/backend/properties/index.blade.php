@@ -255,7 +255,66 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="{{ asset('/asset/backend/js/property-offer.js') }}"></script>
 <script>
+    // Open modal and load form via AJAX
+    $(document).on("click", ".editForm", function () {
+        let formType = $(this).data("form");
+        let propertyId = $(this).data("id");
+
+        $.ajax({
+            url: "{{ route('admin.properties.loadForm') }}", // Route to get form dynamically
+            type: "GET",
+            data: { form_type: formType, property_id: propertyId },
+            success: function (response) {
+                $("#ajaxModal .modal-body").html(response);
+                $("#ajaxModal").modal("show");
+            },
+            error: function () {
+                alert("Failed to load form.");
+            }
+        });
+    });
+    $(document).on("submit", "#ajaxModal form", function (e) {
+        e.preventDefault(); 
+
+        let form = $(this);
+        let formData = form.serialize();
+        let formType = form.find('input[name="form_type"]').val(); // Get form type dynamically
+        let propertyId = form.find('input[name="property_id"]').val(); // Get property ID
+
+        $.ajax({
+            url: "{{ route('admin.properties.saveForm') }}", 
+            type: "POST",
+            data: formData,
+            success: function (response) {
+                if (response.success) {
+                    // Dynamically update the relevant accordion section
+                    $("#section-" + formType + "-" + propertyId).html(response.updated_html);
+
+                    // Close the modal
+                    $("#ajaxModal").modal("hide");
+                } else {
+                    alert("Error: " + response.error);
+                }
+            },
+            error: function () {
+                alert("Something went wrong!");
+            }
+        });
+    });
+
     $(document).ready(function() {
+        let isExpanded = true; // Initially, all accordions are open
+    
+        $(document).on('click', '#toggleAll', function() {
+            if (isExpanded) {
+                $(".accordion-collapse").collapse('hide'); // Collapse all
+                $(this).text("Expand All");
+            } else {
+                $(".accordion-collapse").collapse('show'); // Expand all
+                $(this).text("Collapse All");
+            }
+            isExpanded = !isExpanded; // Toggle state
+        });
 
         // Step 1: Event listener for clicks on the document for the "Add New Contact" button
         $(document).on('click', '#addContactBtn', function() {

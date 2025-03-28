@@ -157,6 +157,130 @@
     {{-- pv_content end  --}}
 </div>
 <div class="pvd_content_wrapper">
+<!-- Button to Collapse/Expand All -->
+<div class="d-flex justify-content-end mb-3">
+    <button id="toggleAll" class="btn btn-primary">Collapse All</button>
+</div>
+
+    
+    <div class="accordion" id="propertyAccordion">
+
+    <!-- Availability and Pricing -->
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingAvailability">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAvailability" aria-expanded="true" aria-controls="collapseAvailability">
+                Availability & Pricing
+            </button>
+            <button class="float-end btn btn-primary float-right editForm" data-form="availability_pricing" data-id="{{ $property->id }}">
+                Edit
+            </button>
+        </h2>
+        <div id="collapseAvailability" class="accordion-collapse collapse show" aria-labelledby="headingAvailability">
+            <div class="accordion-body" id="section-availability_pricing-{{ $property->id }}">
+                @include('backend.properties.popup_forms.availability_pricing', ['property' => $property])
+            </div>
+        </div>
+    </div>
+
+    
+        <!-- Property Information -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingPropertyInfo">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePropertyInfo" aria-expanded="true" aria-controls="collapsePropertyInfo">
+                    Property Information
+                </button>
+            </h2>
+            <div id="collapsePropertyInfo" class="accordion-collapse collapse show" aria-labelledby="headingPropertyInfo">
+                <div class="accordion-body">
+                    <strong>Property Type:</strong> {{ $propertyType }} <br>
+                    <strong>Transaction Type:</strong> {{ $transactionType }} <br>
+                    <strong>Specific Property Type:</strong> {{ $specificPropertyType }}
+                </div>
+            </div>
+        </div>
+    
+        <!-- Features -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingFeatures">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFeatures" aria-expanded="true" aria-controls="collapseFeatures">
+                    Features
+                </button>
+            </h2>
+            <div id="collapseFeatures" class="accordion-collapse collapse show" aria-labelledby="headingFeatures">
+                <div class="accordion-body">
+                    <ul>
+                        @foreach($allFeatures as $feature)
+                            <li>{{ $feature }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+        <!-- Services -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingServices">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseServices" aria-expanded="true" aria-controls="collapseServices">
+                    Services
+                </button>
+            </h2>
+            <div id="collapseServices" class="accordion-collapse collapse show" aria-labelledby="headingServices">
+                <div class="accordion-body">
+                    <strong>Service:</strong> {{ $service }}
+                </div>
+            </div>
+        </div>
+    
+        <!-- Current Status -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingStatus">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStatus" aria-expanded="true" aria-controls="collapseStatus">
+                    Current Status
+                </button>
+            </h2>
+            <div id="collapseStatus" class="accordion-collapse collapse show" aria-labelledby="headingStatus">
+                <div class="accordion-body">
+                    <strong>Status:</strong> {{ $currentStatus }} <br>
+                    <strong>Status Description:</strong> {{ $statusDescription }}
+                </div>
+            </div>
+        </div>
+    
+        <!-- Details -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingDetails">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDetails" aria-expanded="true" aria-controls="collapseDetails">
+                    Details
+                </button>
+            </h2>
+            <div id="collapseDetails" class="accordion-collapse collapse show" aria-labelledby="headingDetails">
+                <div class="accordion-body">
+                    <strong>Bedrooms:</strong> {{ $bedroom }} <br>
+                    <strong>Bathrooms:</strong> {{ $bathroom }} <br>
+                    <strong>Reception:</strong> {{ $reception }} <br>
+                    <strong>Floor:</strong> {{ $floor }}
+                </div>
+            </div>
+        </div>
+    
+        <!-- Accessibility -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingAccessibility">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAccessibility" aria-expanded="true" aria-controls="collapseAccessibility">
+                    Accessibility
+                </button>
+            </h2>
+            <div id="collapseAccessibility" class="accordion-collapse collapse show" aria-labelledby="headingAccessibility">
+                <div class="accordion-body">
+                    <strong>Parking:</strong> {{ $parking }} <br>
+                    <strong>Balcony:</strong> {{ $balcony }} <br>
+                    <strong>Garden:</strong> {{ $garden }}
+                </div>
+            </div>
+        </div>
+    
+    </div>
+
     {{-- mobile view only start  --}}
     <div class="pv_content mobile_only">
         <div class="rs_property_icons">
@@ -200,6 +324,7 @@
     </div>
     {{-- pv_content end  --}}
     {{-- mobile view only end  --}}
+
     <div class="pvd_other_content border_bottom">
         <div class="row">
             <div class="col-lg-4 col-12">
