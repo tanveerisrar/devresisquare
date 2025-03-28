@@ -18,6 +18,7 @@ return new class extends Migration
             $table->longText('description')->nullable();
             $table->decimal('unit_price', 10, 2)->nullable();
             $table->decimal('quantity')->nullable();
+            $table->foreignId('tax_rate_id')->nullable()->constrained('tax_rates')->onDelete('set null');
             $table->decimal('tax_rate', 5, 2)->default(0)->nullable(); // Tax Rate Percentage
             $table->decimal('total_price', 10, 2)->nullable();
             $table->timestamps();

@@ -8,6 +8,7 @@ use App\Models\TaxRates;
 use App\Models\WorkOrder;
 use App\Models\InvoiceItems;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use niklasravnsborg\LaravelPdf\Facades\Pdf;
 
 
@@ -54,7 +55,7 @@ class InvoiceController
      */
     public function createFromWorkOrder(Request $request, $workOrderId)
     {
-        $workOrder = WorkOrder::with(['jobType', 'repairIssue.property'])->findOrFail($workOrderId);
+        $workOrder = WorkOrder::with(['jobType', 'repairIssue.property', 'items'])->findOrFail($workOrderId);
 
         // Check if an invoice already exists for this Work Order
         if ($workOrder->invoice) {
@@ -74,15 +75,27 @@ class InvoiceController
 
         // Create the invoice
         $invoiceNumber = generateReferenceNumber(Invoice::class, 'invoice_no', 'RESISQREINV');
-        if($workOrder->charge_to_landlord > 0){
-            $subTotal = $workOrder->actual_cost + $workOrder->charge_to_landlord;
-        }else{
-            $subTotal = $workOrder->actual_cost;
+        
+        // Calculate invoice totals dynamically from Work Order items
+        $subtotal = 0;
+        $taxTotal = 0;
+        $grandTotal = 0;
+
+        foreach ($workOrder->items as $item) {
+            $rowSubtotal = $item->unit_price * $item->quantity;
+            $taxAmount = ($rowSubtotal * $item->tax_rate) / 100;
+            $rowTotal = $rowSubtotal + $taxAmount;
+
+            $subtotal += $rowSubtotal;
+            $taxTotal += $taxAmount;
+            $grandTotal += $rowTotal;
         }
-        // $taxAmount = ($workOrder->actual_cost * 20) / 100;  // Assume 20% VAT
-        $taxAmount = 0;
-        $totalAmount = $subTotal + $taxAmount;
-        $notes = $workOrder->extra_notes;
+        
+        // Include charge to landlord if applicable
+        if ($workOrder->charge_to_landlord > 0) {
+            $subtotal += $workOrder->charge_to_landlord;
+            $grandTotal += $workOrder->charge_to_landlord;
+        }
         
         $invoice = Invoice::create([
             'invoice_number' => $invoiceNumber,
@@ -91,13 +104,13 @@ class InvoiceController
             'contact_id' => $workOrder->invoice_to_id,
             'invoice_date' => now(),
             'due_date' => now()->addDays(30), // Default 30 days due
-            'subtotal' => $subTotal,
-            'tax_amount' => $taxAmount,
-            'notes' => $notes,
-            // 'tax_amount' => ($workOrder->actual_cost * 20) / 100, // Assume 20% VAT
-            'total_amount' => $totalAmount,
+            'subtotal' => $subtotal,
+            'tax_amount' => $taxTotal,
+            'notes' => $workOrder->extra_notes,
+            'total_amount' => $grandTotal,
             'status_id' => 1, // "Pending" by default
             'invoiced_date_time' => now(),
+            'created_by' => auth()->id(),
         ]);
 
         // echo "<pre>";
@@ -105,31 +118,26 @@ class InvoiceController
         // echo "</pre>";
         // exit();
 
-        // Add Work Order details as an invoice item
-        InvoiceItems::create([
-            'invoice_id' => $invoice->id,
-            'description' => "Work Order #{$workOrder->works_order_no} - " . $workOrder->job_scope,
-            'unit_price' => $workOrder->actual_cost,
-            'quantity' => 1,
-            'total_price' => $workOrder->actual_cost,
-            // 'tax_rate_id' => 1, // Assume Standard VAT (20%)
-        ]);
-
-        // 🔹 Add Additional Charge to Landlord (if applicable)
-        if ($workOrder->charge_to_landlord > 0) {
-            InvoiceItems::create([
-                'invoice_id' => $invoice->id,
-                'description' => "Charge to Landlord for Work Order #{$workOrder->works_order_no}",
-                'unit_price' => $workOrder->charge_to_landlord,
-                'quantity' => 1,
-                'total_price' => $workOrder->charge_to_landlord,
-            ]);
+        if($workOrder->items){
+            // Add Work Order items as invoice items
+            foreach ($workOrder->items as $item) {
+                InvoiceItems::create([
+                    'invoice_id' => $invoice->id,
+                    'title' => $item->title,
+                    'description' => $item->description,
+                    'unit_price' => $item->unit_price,
+                    'quantity' => $item->quantity,
+                    'total_price' => $item->unit_price * $item->quantity,
+                ]);
+            }
         }
-        
-        return response()->json([
-            'message' => 'Invoice generated successfully!',
-            'invoice_id' => $invoice->id
-        ]);
+        flash('Invoice generated successfully!')->success();
+        return back();
+        // return redirect()->route('admin.invoices.index');
+        // return response()->json([
+        //     'message' => 'Invoice generated successfully!',
+        //     'invoice_id' => $invoice->id
+        // ]);
     }
 
     /**
@@ -197,18 +205,52 @@ class InvoiceController
 
     public function update(Request $request, $invoiceId)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'invoice_number' => 'required|string|max:255',
             'invoice_date' => 'required|date',
             'due_date' => 'required|date',
+            'invoice_to' => 'required|string|max:255',
+            // 'invoice_to_id' => 'required|exists:contacts,id',
             'contact_id' => 'required|exists:contacts,id',
-            'items.*.description' => 'required|string|max:255',
+            'items' => 'required|array',
+            'items.*.title' => 'required|string|max:255',
+            'items.*.description' => 'nullable|string|max:255',
             'items.*.unit_price' => 'required|numeric|min:0',
             'items.*.quantity' => 'required|integer|min:1',
+            'items.*.tax_rate' => 'required|numeric|min:0|max:100',
         ]);
+    
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation Failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
 
-        // Fetch invoice
+        // Fetch the invoice
         $invoice = Invoice::findOrFail($invoiceId);
+        $workOrder = $invoice->workOrder; // Get associated Work Order
+
+        // Recalculate totals
+        $subtotal = 0;
+        $taxTotal = 0;
+        $grandTotal = 0;
+
+        foreach ($request->items as $item) {
+            $rowSubtotal = $item['unit_price'] * $item['quantity'];
+            $taxAmount = ($rowSubtotal * $item['tax_rate']) / 100;
+            $rowTotal = $rowSubtotal + $taxAmount;
+
+            $subtotal += $rowSubtotal;
+            $taxTotal += $taxAmount;
+            $grandTotal += $rowTotal;
+        }
+
+        // Include charge to landlord if applicable
+        if ($workOrder && $workOrder->charge_to_landlord > 0) {
+            $subtotal += $workOrder->charge_to_landlord;
+            $grandTotal += $workOrder->charge_to_landlord;
+        }
 
         // Update invoice details
         $invoice->update([
@@ -217,21 +259,28 @@ class InvoiceController
             'due_date' => $request->due_date,
             'contact_id' => $request->contact_id,
             'notes' => $request->notes,
+            'subtotal' => $subtotal,
+            'tax_amount' => $taxTotal,
+            'total_amount' => $grandTotal,
+            'updated_by' => auth()->id(),
         ]);
 
-        // Update invoice items
-        $invoice->items()->delete(); // Remove existing items
+        // Delete old items and add new ones
+        $invoice->items()->delete();
         foreach ($request->items as $item) {
             InvoiceItems::create([
                 'invoice_id' => $invoice->id,
-                'description' => $item['description'],
+                'title' => $item['title'],
+                'description' => $item['description'] ?? '',
                 'unit_price' => $item['unit_price'],
                 'quantity' => $item['quantity'],
-                'total_price' => $item['unit_price'] * $item['quantity'],
+                'tax_rate' => $item['tax_rate'],
+                'total_price' => ($item['unit_price'] * $item['quantity']),
             ]);
         }
 
-        return redirect()->route('admin.invoices.index')->with('success', 'Invoice updated successfully!');
+        flash('Invoice updated successfully!')->success();
+        return redirect()->route('admin.invoices.index');
     }
 
 }

@@ -75,7 +75,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-6 mb-3">
+                <div class="col-md-4 mb-3">
                     <div class="form-group">
                         <label class="form-label">Booked Date</label>
                         <input type="date" name="booked_date" class="form-control"
@@ -84,7 +84,7 @@
                 </div>
 
                 <!-- Status Dropdown (Dynamically Updated) -->
-                <div class="col-md-6 mb-3">
+                <div class="col-md-4 mb-3">
                     <div class="form-group">
                         <label class="form-label">Work Order Status</label>
                         <select required name="status" id="statusSelect" class="form-control">
@@ -92,7 +92,28 @@
                         </select>
                     </div>
                 </div>
-
+                <div class="col-md-4 mb-3">
+                    <div class="form-group">
+                        <label class="form-label d-block">Charge To</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="invoice_to" value="Landlord"
+                                id="invoice_landlord" required {{ old('invoice_to', $repairIssue->workOrder->invoice_to ?? '') == 'Landlord' ? 'checked' : '' }}>
+                            <label class="form-check-label" for="invoice_landlord">Landlord</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="invoice_to" value="Tenant"
+                                id="invoice_tenant" {{ old('invoice_to', $repairIssue->workOrder->invoice_to ?? '') == 'Tenant' ? 'checked' : '' }}>
+                            <label class="form-check-label" for="invoice_tenant">Tenant</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="invoice_to" value="Company"
+                                id="invoice_company" {{ old('invoice_to', $repairIssue->workOrder->invoice_to ?? '') == 'Company' ? 'checked' : '' }}>
+                            <label class="form-check-label" for="invoice_company">
+                                Company
+                            </label>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -114,7 +135,7 @@
                 </tr>
             </thead>
             <tbody id="workorder-items">
-                @if ($workorder->items->isEmpty())
+                @if (!$workorder || $workorder->items->isEmpty())
                     <tr>
                         <td><input type="text" name="items[0][title]" class="form-control" required></td>
                         <td>
@@ -122,7 +143,7 @@
                                 value="{{ old('items[0][description]', $repairIssue->description ?? '') }}" required>
                         </td>
                         <td><input type="number" name="items[0][unit_price]" class="form-control unit-price"
-                                value="{{ old('items[0][unit_price]', $workorder->items->first()->unit_price ?? $contractorCost) }}"
+                                value="{{ old('items[0][unit_price]',  $contractorCost) }}"
                                 required>
                         </td>
                         <td><input type="number" name="items[0][quantity]" min="1" value="1"
@@ -139,7 +160,7 @@
                         <td><input type="text" class="form-control tax-amount" readonly></td>
                         <td><input type="text" class="form-control total-price" readonly></td>
                         <td>
-                            <button type="button" class="btn btn-success add-item"><i
+                            <button type="button" class="btn btn-success add-workorder-item"><i
                                     class="fa-solid fa-plus"></i></button>
                         </td>
                     </tr>
@@ -158,19 +179,23 @@
                                 <select name="items[{{ $index }}][tax_name]" class="form-control tax-name">
                                     @foreach ($taxRates as $taxRate)
                                         <option value="{{ $taxRate->id }}" data-rate="{{ $taxRate->rate }}"
-                                            {{ $item->tax_name == $taxRate->name ? 'selected' : '' }}>
+                                            {{ $item->tax_rate_id == $taxRate->id ? 'selected' : '' }}>
                                             {{ $taxRate->name }}
                                         </option>
                                     @endforeach
                                 </select>
+                            </td>                                    
+                            <td>
+                                <input type="number" name="items[{{ $index }}][tax_rate]" 
+                                    class="form-control tax-rate" 
+                                    value="{{ $item->tax_rate ?? ($taxRates->where('id', $item->tax_rate_id)->first()->rate ?? 0) }}" 
+                                    required>
                             </td>
-                            <td><input type="number" name="items[{{ $index }}][tax_rate]"
-                                    class="form-control tax-rate" value="{{ $item->tax_rate }}" required></td>
                             <td><input type="text" class="form-control tax-amount" readonly></td>
                             <td><input type="text" class="form-control total-price" readonly></td>
                             <td>
                                 @if ($loop->last)
-                                    <button type="button" class="btn btn-success add-item"><i
+                                    <button type="button" class="btn btn-success add-workorder-item"><i
                                             class="fa-solid fa-plus"></i></button>
                                 @else
                                     <button type="button" class="btn btn-danger remove-item"><i
@@ -201,8 +226,7 @@
         </table>
 
         <!-- Hidden Field to Store the Preselected Status -->
-        <input type="hidden" id="existingStatus"
-            value="{{ old('status', $repairIssue->workOrder->status ?? '') }}">
+        <input type="hidden" id="existingStatus" value="{{ old('status', $repairIssue->workOrder->status ?? '') }}">
 
         <div class="col-md-12 mb-3">
             <div class="form-group">
@@ -249,11 +273,35 @@
 
     </div>
 
-    <div class="modal-footer">
+    <div id="invoice-message" class="mt-2"></div>
+    <div class="d-flex gap-3 float-end">
+        <!-- Save Work Order Button -->
         <button type="submit" class="btn btn-success">Save Work Order</button>
-        <button type="button" class="btn btn-info" onclick="window.location.href='{{ route('admin.workorder.generate.invoice', $workorder->id ?? 0) }}'">
-            Generate Work Order Invoice PDF
-        </button>
-        <button type="button" class="btn btn-primary" id="generateInvoiceBtn">Generate Invoice</button>
+    
+        <!-- Generate Work Order PDF Button -->
+        <span class="d-inline-block" data-bs-toggle="tooltip" title="{{ !$workorder ? 'Create Work Order first' : '' }}">
+            <button type="button" class="btn btn-info"
+                onclick="{{ $workorder ? "window.location.href='".route('admin.workorder.generate.invoice', $workorder->id)."'" : '' }}"
+                {{ !$workorder ? 'disabled' : '' }}>
+                Download Work Order PDF
+            </button>
+        </span>
+    
+        <!-- Generate Invoice Button -->
+        <span class="d-inline-block" data-bs-toggle="tooltip" title="{{ !$workorder ? 'Create Work Order first' : ($invoice ? 'Invoice already generated' : '') }}">
+            <button id="generateInvoiceBtn" data-workorder-id="{{ $workorder->id ?? '' }}" 
+                class="btn btn-primary"  
+                {{ !$workorder || $invoice ? 'disabled' : '' }}>
+                {{ $workorder && $invoice ? 'Invoice Generated' : 'Generate Invoice' }}
+            </button>
+        </span>
     </div>
+    
+              
+        
+    {{-- <div class="d-flex gap-3 float-end">
+        <button type="submit" class="btn btn-success">Save Work Order</button>
+        <button type="button" class="btn btn-info" onclick="window.location.href='{{ route('admin.workorder.generate.invoice', $workorder->id ?? 0) }}'">Generate Work Order PDF </button>
+        <button id="generateInvoiceBtn" data-workorder-id="{{ $workorder->id ?? '' }}" class="btn btn-primary" {{ $workorder->invoice ? 'disabled' : '' }}> {{ $workorder->invoice ? 'Invoice Generated' : 'Generate Invoice' }} </button>
+    </div> --}}
 </form>

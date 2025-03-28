@@ -22,6 +22,9 @@ class Invoice extends Model
         'total_amount',
         'status_id',
         'invoiced_date_time',
+        'notes',
+        'created_by',
+        'updated_by',
     ];
 
     public function workOrder()

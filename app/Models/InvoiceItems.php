@@ -13,11 +13,13 @@ class InvoiceItems extends Model
 
     protected $fillable = [
         'invoice_id',
+        'title',
         'description',
         'unit_price',
         'quantity',
         'total_price',
-        'tax_rate_id'
+        // 'tax_rate_id'
+        'tax_rate'
     ];
 
     // Relationship with Invoice

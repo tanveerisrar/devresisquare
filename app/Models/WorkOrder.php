@@ -15,7 +15,7 @@ class WorkOrder extends Model
         'repair_issue_id',
         'job_type_id',
         'job_sub_type_id',
-        // 'job_status',
+        'job_status',
         'job_scope',
         'tentative_start_date',
         'tentative_end_date',
