@@ -673,10 +673,20 @@ private function getTabContent($tabname, $propertyId, $property)
         if (!$property) {
             return response()->json(['error' => 'Property not found'], 404);
         }
-
-        return view("backend.properties.forms.$formType", compact('propertyId'))->render() 
-            ?? response()->json(['error' => 'Invalid form type'], 400);
+    
+        $viewPath = "backend.properties.popup_forms.$formType";
+    
+        // Check if the form view exists
+        if (!view()->exists($viewPath)) {
+            return response()->json(['error' => 'Invalid form type'], 400);
+        }
+    
+        // Render the form and return it
+        $html = view($viewPath, ['property' => $property, 'editMode' => true])->render();
+        
+        return response()->json(['success' => true, 'form_html' => $html]);
     }
+    
     
     public function saveForm(Request $request)
     {
@@ -686,21 +696,33 @@ private function getTabContent($tabname, $propertyId, $property)
         if (!$property) {
             return response()->json(['error' => 'Property not found'], 404);
         }
-    
-        // Handle different form types dynamically
-        if ($formType === 'availability_pricing') {
-            $property->available_from = $request->input('available_from');
-            $property->price = $request->input('price');
-            $property->letting_price = $request->input('letting_price');
-        } elseif ($formType === 'some_other_form') {
-            // Handle other form types dynamically
-            $property->some_field = $request->input('some_field');
+
+        // Save the form data based on the form type
+        switch ($formType) {
+            case 'availability_pricing':
+                $data = $request->only(['available_from', 'price', 'letting_price']);
+                break;
+            case 'property_info':
+                $data = $request->only(['property_type', 'transaction_type', 'specific_property_type']);
+                break;
+            default:
+                return response()->json(['error' => 'Invalid form type'], 400);
         }
+
+        // Handle different form types dynamically
+        // if ($formType === 'availability_pricing') {
+        //     $property->available_from = $request->input('available_from');
+        //     $property->price = $request->input('price');
+        //     $property->letting_price = $request->input('letting_price');
+        // } elseif ($formType === 'some_other_form') {
+        //     // Handle other form types dynamically
+        //     $property->some_field = $request->input('some_field');
+        // }
     
-        $property->save();
+        $property->update($data);
     
         // Render updated section
-        $updatedView = view("backend.properties.partials.$formType", compact('property'))->render();
+        $updatedView = view("backend.properties.popup_forms.$formType", compact('property'))->render();
     
         return response()->json([
             'success' => 'Form updated successfully', 

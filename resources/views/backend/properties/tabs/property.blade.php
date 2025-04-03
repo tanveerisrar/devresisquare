@@ -37,9 +37,11 @@
             $bedroom = $property->bedroom ?? '';
             $bathroom = $property->bathroom ?? '';
             $reception = $property->reception ?? '';
+            $parkingLocation = $property->parking_location ?? 'N/A';
             $parking = booleanToYesNo($property->parking) ?? '';
             $balcony = booleanToYesNo($property->balcony) ?? '';
             $garden = booleanToYesNo($property->garden) ?? '';
+            $petsAllowed = booleanToYesNo($property->pets_allow) ?? '';
             $service = $property->service ?? '';
             $collectingRent = booleanToYesNo($property->collecting_rent) ?? '';
             $floor = $property->floor ?? '';
@@ -64,6 +66,7 @@
             $lettingPrice = $property->letting_price ?? '';
             $tenure = $property->tenure ?? '';
             $lengthOfLease = $property->length_of_lease ?? '';
+            $epcRequired = booleanToYesNo($property->epc_required) ?? '';
             $epcRating = $property->epc_rating ?? '';
             $isGas = $property->is_gas ?? '';
             $photos = $property->photos ?? '';
@@ -161,46 +164,43 @@
 <div class="d-flex justify-content-end mb-3">
     <button id="toggleAll" class="btn btn-primary">Collapse All</button>
 </div>
-
     
     <div class="accordion" id="propertyAccordion">
 
-    <!-- Availability and Pricing -->
-    <div class="accordion-item">
-        <h2 class="accordion-header" id="headingAvailability">
-            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAvailability" aria-expanded="true" aria-controls="collapseAvailability">
-                Availability & Pricing
-            </button>
-            <button class="float-end btn btn-primary float-right editForm" data-form="availability_pricing" data-id="{{ $property->id }}">
-                Edit
-            </button>
-        </h2>
-        <div id="collapseAvailability" class="accordion-collapse collapse show" aria-labelledby="headingAvailability">
-            <div class="accordion-body" id="section-availability_pricing-{{ $property->id }}">
-                @include('backend.properties.popup_forms.availability_pricing', ['property' => $property])
-            </div>
-        </div>
-    </div>
-
-    
-        <!-- Property Information -->
+        @php
+            $formSections = [
+                'availability_pricing' => 'Availability & Pricing',
+                'property_info' => 'Property Information',
+                'property_features' => 'Property Features',
+                'property_details' => 'Details',
+                'property_services' => 'Service',
+                'property_accessibility' => 'Accessibility',
+                // 'location_details' => 'Location Details',
+                // 'legal_documents' => 'Legal Documents'
+            ];
+        @endphp
+        
+        @foreach($formSections as $formType => $title)
         <div class="accordion-item">
-            <h2 class="accordion-header" id="headingPropertyInfo">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePropertyInfo" aria-expanded="true" aria-controls="collapsePropertyInfo">
-                    Property Information
+            <h2 class="accordion-header" id="heading-{{ $formType }}">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ $formType }}" aria-expanded="true" aria-controls="collapse-{{ $formType }}">
+                    {{ $title }}
                 </button>
             </h2>
-            <div id="collapsePropertyInfo" class="accordion-collapse collapse show" aria-labelledby="headingPropertyInfo">
-                <div class="accordion-body">
-                    <strong>Property Type:</strong> {{ $propertyType }} <br>
-                    <strong>Transaction Type:</strong> {{ $transactionType }} <br>
-                    <strong>Specific Property Type:</strong> {{ $specificPropertyType }}
+            <div id="collapse-{{ $formType }}" class="accordion-collapse collapse show" aria-labelledby="heading-{{ $formType }}">
+                <button class="btn btn-primary float-end editForm" data-form="{{ $formType }}" data-id="{{ $property->id }}">
+                    Edit
+                </button>
+                <div class="accordion-body" id="section-{{ $formType }}-{{ $property->id }}">
+                    @include("backend.properties.popup_forms.$formType", ['property' => $property])
                 </div>
             </div>
         </div>
+        @endforeach
+    
     
         <!-- Features -->
-        <div class="accordion-item">
+        {{-- <div class="accordion-item">
             <h2 class="accordion-header" id="headingFeatures">
                 <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFeatures" aria-expanded="true" aria-controls="collapseFeatures">
                     Features
@@ -215,7 +215,7 @@
                     </ul>
                 </div>
             </div>
-        </div>
+        </div> --}}
     
         <!-- Services -->
         <div class="accordion-item">
@@ -245,39 +245,74 @@
                 </div>
             </div>
         </div>
-    
-        <!-- Details -->
+        <!-- EPC Rating -->
         <div class="accordion-item">
-            <h2 class="accordion-header" id="headingDetails">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDetails" aria-expanded="true" aria-controls="collapseDetails">
-                    Details
+            <h2 class="accordion-header" id="headingEPC">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEPC" aria-expanded="true" aria-controls="collapseEPC">
+                    EPC Rating
                 </button>
             </h2>
-            <div id="collapseDetails" class="accordion-collapse collapse show" aria-labelledby="headingDetails">
+            <div id="collapseEPC" class="accordion-collapse collapse show" aria-labelledby="headingEPC">
                 <div class="accordion-body">
-                    <strong>Bedrooms:</strong> {{ $bedroom }} <br>
-                    <strong>Bathrooms:</strong> {{ $bathroom }} <br>
-                    <strong>Reception:</strong> {{ $reception }} <br>
-                    <strong>Floor:</strong> {{ $floor }}
+                    <strong>EPC Rating:</strong> {{ $epcRating }}
+                </div>
+            </div>
+            
+            </div>
+        <!-- Ground Rent -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingGroundRent">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGroundRent" aria-expanded="true" aria-controls="collapseGroundRent">
+                    Ground Rent
+                </button>
+            </h2>
+            <div id="collapseGroundRent" class="accordion-collapse collapse show" aria-labelledby="headingGroundRent">
+                <div class="accordion-body">
+                    <strong>Ground Rent:</strong> {{ $groundRent }}
                 </div>
             </div>
         </div>
-    
-        <!-- Accessibility -->
+        <!-- Service Charge -->
         <div class="accordion-item">
-            <h2 class="accordion-header" id="headingAccessibility">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAccessibility" aria-expanded="true" aria-controls="collapseAccessibility">
-                    Accessibility
+            <h2 class="accordion-header" id="headingServiceCharge">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseServiceCharge" aria-expanded="true" aria-controls="collapseServiceCharge">
+                    Service Charge
                 </button>
             </h2>
-            <div id="collapseAccessibility" class="accordion-collapse collapse show" aria-labelledby="headingAccessibility">
+            <div id="collapseServiceCharge" class="accordion-collapse collapse show" aria-labelledby="headingServiceCharge">
                 <div class="accordion-body">
-                    <strong>Parking:</strong> {{ $parking }} <br>
-                    <strong>Balcony:</strong> {{ $balcony }} <br>
-                    <strong>Garden:</strong> {{ $garden }}
+                    <strong>Service Charge:</strong> {{ $serviceCharge }}
                 </div>
             </div>
         </div>
+        <!-- Annual Council Tax -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingAnnualCouncilTax">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAnnualCouncilTax" aria-expanded="true" aria-controls="collapseAnnualCouncilTax">
+                    Annual Council Tax
+                </button>
+            </h2>
+            <div id="collapseAnnualCouncilTax" class="accordion-collapse collapse show" aria-labelledby="headingAnnualCouncilTax">
+                <div class="accordion-body">
+                    <strong>Annual Council Tax:</strong> {{ $annualCouncilTax }}
+                </div>
+            </div>
+        </div>
+        <!-- Council Tax Band -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingCouncilTaxBand">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCouncilTaxBand" aria-expanded="true" aria-controls="collapseCouncilTaxBand">
+                    Council Tax Band
+                </button>
+            </h2>
+            <div id="collapseCouncilTaxBand" class="accordion-collapse collapse show" aria-labelledby="headingCouncilTaxBand">
+                <div class="accordion-body">
+                    <strong>Council Tax Band:</strong> {{ $councilTaxBand }}
+                </div>
+            </div>
+        </div>
+        <!-- Letting Price -->
+
     
     </div>
 
@@ -325,7 +360,7 @@
     {{-- pv_content end  --}}
     {{-- mobile view only end  --}}
 
-    <div class="pvd_other_content border_bottom">
+    {{-- <div class="pvd_other_content border_bottom">
         <div class="row">
             <div class="col-lg-4 col-12">
                 <div class="row">
@@ -353,9 +388,9 @@
 
             </div>
         </div>
-    </div>
+    </div> --}}
     {{-- pvd_other_content end --}}
-    <div class="pvd_features">
+    {{-- <div class="pvd_features">
         <div class="pv_sub_title mb-4">
             Features
         </div>
@@ -376,7 +411,7 @@
                 </ul>
             </div>
         </div>
-    </div>
+    </div> --}}
     {{-- pvd_features end --}}
 </div>
 {{-- pvd_content_wrapper end --}}

@@ -259,21 +259,29 @@
     $(document).on("click", ".editForm", function () {
         let formType = $(this).data("form");
         let propertyId = $(this).data("id");
+        let formTitles = {
+            "availability_pricing": "Edit Availability & Pricing",
+            "property_info": "Edit Property Information",
+            "property_features": "Edit Property Features",
+        };
 
+        let modalTitle = formTitles[formType] || "Edit Details"; // Default title if form type is not found
+
+        $("#largeModal .modal-title").html(modalTitle); // Set dynamic title
         $.ajax({
             url: "{{ route('admin.properties.loadForm') }}", // Route to get form dynamically
             type: "GET",
             data: { form_type: formType, property_id: propertyId },
             success: function (response) {
-                $("#ajaxModal .modal-body").html(response);
-                $("#ajaxModal").modal("show");
+                $("#largeModal .modal-body").html(response.form_html);
+                $("#largeModal").modal("show");
             },
             error: function () {
                 alert("Failed to load form.");
             }
         });
     });
-    $(document).on("submit", "#ajaxModal form", function (e) {
+    $(document).on("submit", "#largeModal form", function (e) {
         e.preventDefault(); 
 
         let form = $(this);
@@ -291,7 +299,7 @@
                     $("#section-" + formType + "-" + propertyId).html(response.updated_html);
 
                     // Close the modal
-                    $("#ajaxModal").modal("hide");
+                    $("#largeModal").modal("hide");
                 } else {
                     alert("Error: " + response.error);
                 }

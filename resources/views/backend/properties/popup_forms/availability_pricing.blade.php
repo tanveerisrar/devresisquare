@@ -1,3 +1,9 @@
+@if(!isset($editMode) || !$editMode)
+<!-- Display View Mode -->
+<strong>Availability:</strong> {{ $property->available_from }} <br>
+<strong>Price:</strong> £{{ $property->price }} <br>
+<strong>Letting Price:</strong> £{{ $property->letting_price }} <br>
+@else
 <form id="availabilityPricingForm">
     @csrf
     <input type="hidden" name="property_id" value="{{ $property->id }}">
@@ -20,3 +26,4 @@
 
     <button type="submit" class="btn btn-success">Save Changes</button>
 </form>
+@endif
