@@ -255,7 +255,179 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="{{ asset('/asset/backend/js/property-offer.js') }}"></script>
 <script>
+    function openImageModal(imageSrc) {
+        $("#previewImage").attr("src", imageSrc); // Set image source
+        $("#imagePreviewModal").modal("show"); // Show modal
+    }
+
+    // Hide modal when close button is clicked
+    $("#closeModalBtn").click(function () {
+        $("#imagePreviewModal").modal("hide");
+    });
+
+    // Hide modal when clicking outside modal content
+    $(document).on("click", function (event) {
+        if (!$(event.target).closest(".modal-content").length) {
+            $("#imagePreviewModal").modal("hide");
+        }
+    });
+
+    // Utility function to initialize Tagify dynamically based on data attributes
+    function initDynamicTagify() {
+    $('.tagify-input').each(function () {
+        let $inputElement = $(this);
+        let values = $inputElement.data('values') || ''; // Pre-selected values
+        let options = $inputElement.data('options') || {}; // Max tags, dropdown options
+        let idValue = $inputElement.data('id-value') || []; // ID-Value pairs
+
+        let data = idValue; // Use the provided ID-Value data
+
+        // Parse the pre-selected values
+        let selectedIds = [];
+        if (typeof values === 'string' && values.includes(',')) {
+            selectedIds = values.split(',').map(id => id.trim());
+        } else if (typeof values === 'string' && (values.startsWith('{') || values.startsWith('['))) {
+            try {
+                selectedIds = JSON.parse(values).map(item => item.trim());
+            } catch (e) {
+                console.error("Error parsing data-values:", e);
+                selectedIds = [];
+            }
+        } else if (values) {
+            selectedIds = [values.trim()];
+        }
+
+        // Initialize Tagify
+        let tagify = new Tagify($inputElement[0], {
+            whitelist: data.map(item => item.name),
+            maxTags: options.maxTags || 5,
+            dropdown: {
+                enabled: options.dropdownEnabled === 1,
+                maxItems: options.maxItems || 10,
+                searchKeys: options.searchKeys || ['name'],
+                closeOnSelect: options.closeOnSelect || false,
+            },
+            pattern: /[\w\s]/,
+        });
+
+        // Populate Tagify with existing selected items
+        let selectedNames = selectedIds.map(id => {
+            let item = data.find(item => item.id == id);
+            return item ? item.name : '';
+        }).filter(name => name);
+
+        tagify.addTags(selectedNames);
+
+        // Update the hidden input field
+        let $hiddenInput = $inputElement.closest('.form-group').find('.hidden-input');
+        $hiddenInput.val(selectedIds.join(','));
+
+        // Handle adding a new tag
+        tagify.on('add', function (e) {
+            let newTag = e.detail.data;
+            let selectedItem = data.find(item => item.name === newTag.value);
+            if (selectedItem) {
+                let selectedIds = tagify.value.map(tag => {
+                    let item = data.find(item => item.name === tag.value);
+                    return item ? item.id : null;
+                });
+                $hiddenInput.val(selectedIds.join(','));
+            }
+        });
+
+        // Handle removing a tag
+        tagify.on('remove', function (e) {
+            let removedTag = e.detail.data;
+            let selectedItem = data.find(item => item.name === removedTag.value);
+            if (selectedItem) {
+                let selectedIds = tagify.value.map(tag => {
+                    let item = data.find(item => item.name === tag.value);
+                    return item ? item.id : null;
+                });
+                $hiddenInput.val(selectedIds.join(','));
+            }
+        });
+    });
+}
+
+    // Open modal and load form via AJAX
+    $(document).on("click", ".editForm", function () {
+        let formType = $(this).data("form");
+        let propertyId = $(this).data("id");
+        let formTitles = {
+            "availability_pricing": "Edit Availability & Pricing",
+            "property_info": "Edit Property Information",
+            "property_features": "Edit Property Features",
+            "property_details": "Edit Property Details",
+            "property_accessibility": "Edit Property Accessibility",
+        };
+
+        let modalTitle = formTitles[formType] || "Edit Details"; // Default title if form type is not found
+
+        $("#largeModal .modal-title").html(modalTitle); // Set dynamic title
+        $.ajax({
+            url: "{{ route('admin.properties.loadForm') }}", // Route to get form dynamically
+            type: "GET",
+            data: { form_type: formType, property_id: propertyId },
+            success: function (response) {
+                $("#largeModal .modal-body").html(response.form_html);
+                $("#largeModal").modal("show");
+
+                // **Trigger the function ONLY for a specific form**
+                if (formType === "property_details") {
+                    AIZ.uploader.previewGenerate();
+                }
+                if (formType === "property_accessibility") {
+                    initDynamicTagify();
+                }
+            },
+            error: function () {
+                alert("Failed to load form.");
+            }
+        });
+    });
+    $(document).on("submit", "#largeModal form", function (e) {
+        e.preventDefault(); 
+
+        let form = $(this);
+        let formData = form.serialize();
+        let formType = form.find('input[name="form_type"]').val(); // Get form type dynamically
+        let propertyId = form.find('input[name="property_id"]').val(); // Get property ID
+
+        $.ajax({
+            url: "{{ route('admin.properties.saveForm') }}", 
+            type: "POST",
+            data: formData,
+            success: function (response) {
+                if (response.success) {
+                    // Dynamically update the relevant accordion section
+                    $("#section-" + formType + "-" + propertyId).html(response.updated_html);
+
+                    // Close the modal
+                    $("#largeModal").modal("hide");
+                } else {
+                    alert("Error: " + response.error);
+                }
+            },
+            error: function () {
+                alert("Something went wrong!");
+            }
+        });
+    });
+    
     $(document).ready(function() {
+        let isExpanded = true; // Initially, all accordions are open
+    
+        $(document).on('click', '#toggleAll', function() {
+            if (isExpanded) {
+                $(".accordion-collapse").collapse('hide'); // Collapse all
+                $(this).text("Expand All");
+            } else {
+                $(".accordion-collapse").collapse('show'); // Expand all
+                $(this).text("Collapse All");
+            }
+            isExpanded = !isExpanded; // Toggle state
+        });
 
         // Step 1: Event listener for clicks on the document for the "Add New Contact" button
         $(document).on('click', '#addContactBtn', function() {
@@ -897,8 +1069,7 @@
         // Function to load tab content dynamically via AJAX
         function loadTabContent(propertyId, tabName) {
             // Correctly format the URL with query parameters instead of placeholders
-            var url = '{{ route('admin.properties.index') }}' + '?property_id=' + propertyId + '&tabname=' +
-                tabName;
+            var url = '{{ route('admin.properties.index') }}' + '?property_id=' + propertyId + '&tabname=' + tabName;
 
             $.ajax({
                 url: url,

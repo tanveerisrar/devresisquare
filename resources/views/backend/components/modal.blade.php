@@ -50,3 +50,18 @@
     </div>
   </div>
 </div>
+
+<!-- Image Preview Modal -->
+<div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-labelledby="imagePreviewModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title">Image Preview</h5>
+              <button type="button" class="btn-close" id="closeModalBtn" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-center">
+              <img id="previewImage" class="img-fluid" src="" alt="Preview Image">
+          </div>
+      </div>
+  </div>
+</div>
