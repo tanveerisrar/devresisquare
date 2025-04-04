@@ -92,8 +92,21 @@ private function getTabContent($tabname, $propertyId, $property)
 {
     switch (strtolower($tabname)) {
         case 'property':
+            
+            // Fetch all station names and school names
+            $allstations = StationName::select('id', 'name')->get();  // Fetch all station names
+            $allschools = SchoolName::select('id', 'name')->get();    // Fetch all school names
+
+            // Get the nearest station IDs and nearest school IDs from the property (these will be comma-separated strings)
+            $stationIds = explode(',', $property->nearest_station);  // Convert to an array
+            $schoolIds = explode(',', $property->nearest_school);    // Convert to an array
+
+            // Fetch the station and school names using the IDs
+            $stations = StationName::whereIn('id', $stationIds)->pluck('name', 'id');
+            $schools = SchoolName::whereIn('id', $schoolIds)->pluck('name', 'id');
+            
             // Pass only the selected property details
-            return view('backend.properties.tabs.property', compact('propertyId', 'tabname', 'property'))->render();
+            return view('backend.properties.tabs.property', compact('propertyId', 'tabname', 'property', 'allstations', 'allschools', 'stations', 'schools'))->render();
         case 'owners':
                 // Fetch the owner groups for the given propertyId, along with related contacts and properties.
                 // $ownerGroups = OwnerGroup::with(['contact', 'property'])
@@ -680,9 +693,31 @@ private function getTabContent($tabname, $propertyId, $property)
         if (!view()->exists($viewPath)) {
             return response()->json(['error' => 'Invalid form type'], 400);
         }
+        
+        // Fetch all stations and schools
+        $allstations = StationName::select('id', 'name')->get();
+        $allschools = SchoolName::select('id', 'name')->get();
     
+        // Get the nearest station and school IDs from the property (comma-separated)
+        $stationIds = explode(',', $property->nearest_station);
+        $schoolIds = explode(',', $property->nearest_school);
+    
+        // Fetch names using IDs
+        $stations = StationName::whereIn('id', $stationIds)->pluck('name', 'id');
+        $schools = SchoolName::whereIn('id', $schoolIds)->pluck('name', 'id');
+    
+        // Render the form with additional data
+        $html = view($viewPath, [
+            'property' => $property,
+            'editMode' => true,
+            'stations' => $stations,
+            'schools' => $schools,
+            'allstations' => $allstations,
+            'allschools' => $allschools
+        ])->render();
+
         // Render the form and return it
-        $html = view($viewPath, ['property' => $property, 'editMode' => true])->render();
+        // $html = view($viewPath, ['property' => $property, 'editMode' => true])->render();
         
         return response()->json(['success' => true, 'form_html' => $html]);
     }
@@ -703,6 +738,21 @@ private function getTabContent($tabname, $propertyId, $property)
                 $data = $request->only(['available_from', 'price', 'letting_price']);
                 break;
             case 'property_info':
+                $data = $request->only(['property_type', 'transaction_type', 'specific_property_type']);
+                break;
+            case 'property_accessibility':
+                $data = $request->only(['property_type', 'transaction_type', 'specific_property_type']);
+                break;
+            case 'property_details':
+                $data = $request->only(['property_type', 'transaction_type', 'specific_property_type']);
+                break;
+            case 'property_features':
+                $data = $request->only(['property_type', 'transaction_type', 'specific_property_type']);
+                break;
+            case 'property_services':
+                $data = $request->only(['property_type', 'transaction_type', 'specific_property_type']);
+                break;
+            case 'property_status':
                 $data = $request->only(['property_type', 'transaction_type', 'specific_property_type']);
                 break;
             default:

@@ -163,87 +163,86 @@
                 $('#smallModal2').modal('hide'); // Hide the modal
             }
         }
+ // Utility function to initialize Tagify dynamically based on data attributes
+ function initDynamicTagify() {
+        const tagifyInputs = document.querySelectorAll('.tagify-input');
+        tagifyInputs.forEach(inputElement => {
+            // const source = inputElement.dataset.source; // 'stations' or 'schools'
+            const values = inputElement.dataset.values; // Pre-selected values (can be IDs, comma-separated, or JSON)
+            const options = JSON.parse(inputElement.dataset.options || '{}'); // Max tags, dropdown options
+            const idValue = JSON.parse(inputElement.dataset.idValue || '[]'); // ID-Value pair (array or JSON)
 
-        // Utility function to initialize Tagify dynamically based on data attributes
-        function initDynamicTagify() {
-            const tagifyInputs = document.querySelectorAll('.tagify-input');
-            tagifyInputs.forEach(inputElement => {
-                // const source = inputElement.dataset.source; // 'stations' or 'schools'
-                const values = inputElement.dataset.values; // Pre-selected values (can be IDs, comma-separated, or JSON)
-                const options = JSON.parse(inputElement.dataset.options || '{}'); // Max tags, dropdown options
-                const idValue = JSON.parse(inputElement.dataset.idValue || '[]'); // ID-Value pair (array or JSON)
+            // Determine the data (station or school)
+            const data = idValue;
+            // const data = (source === 'stations') ? idValue : idValue;
 
-                // Determine the data (station or school)
-                const data = idValue;
-                // const data = (source === 'stations') ? idValue : idValue;
+            // Parse the pre-selected values (can be comma-separated or JSON string)
+            let selectedIds = [];
+            if (values.includes(',')) {
+                selectedIds = values.split(',').map(id => id.trim()); // Comma-separated IDs
+            } else if (values.startsWith('{') || values.startsWith('[')) {
+                // Handle case where it's a JSON string
+                selectedIds = JSON.parse(values).map(item => item.trim());
+            } else {
+                // Handle simple case with a single ID
+                selectedIds = [values.trim()];
+            }
 
-                // Parse the pre-selected values (can be comma-separated or JSON string)
-                let selectedIds = [];
-                if (values.includes(',')) {
-                    selectedIds = values.split(',').map(id => id.trim()); // Comma-separated IDs
-                } else if (values.startsWith('{') || values.startsWith('[')) {
-                    // Handle case where it's a JSON string
-                    selectedIds = JSON.parse(values).map(item => item.trim());
-                } else {
-                    // Handle simple case with a single ID
-                    selectedIds = [values.trim()];
-                }
-
-                // Initialize Tagify with dynamic options
-                const tagify = new Tagify(inputElement, {
-                    whitelist: data.map(item => item.name), // Use the name for the whitelist
-                    maxTags: options.maxTags || 5, // Set the max number of tags
-                    dropdown: {
-                        enabled: options.dropdownEnabled === 1, // Enable dropdown only when typing
-                        maxItems: options.maxItems || 10, // Limit the number of items in the dropdown
-                        searchKeys: options.searchKeys || ['name'], // Search by 'name' in the whitelist
-                        closeOnSelect: options.closeOnSelect || false, // Keep dropdown open after selecting an item
-                    },
-                    pattern: /[\w\s]/, // Regular expression to match word characters and spaces (case-insensitive)
-                    // dropdown: {
-                    //     enabled: options.dropdownEnabled || 0 // Control dropdown display
-                    // }
-                });
-
-                // Populate Tagify with existing selected items based on selectedIds
-                const selectedNames = selectedIds.map(id => {
-                    const item = data.find(item => item.id == id); // Find the name by ID
-                    return item ? item.name : '';  // Return the name or empty string if not found
-                }).filter(name => name);  // Filter out empty names
-
-                tagify.addTags(selectedNames);  // Add the tags to Tagify
-
-                // Set the hidden input value to the selected IDs
-                const hiddenInput = inputElement.closest('.form-group').querySelector('.hidden-input');
-                hiddenInput.value = selectedIds.join(','); // Store IDs as a comma-separated string
-
-                // Handle adding a new tag
-                tagify.on('add', function (e) {
-                    const newTag = e.detail.data;
-                    const selectedItem = data.find(item => item.name === newTag.value);
-                    if (selectedItem) {
-                        const selectedIds = tagify.value.map(tag => {
-                            const item = data.find(item => item.name === tag.value);
-                            return item ? item.id : null;
-                        });
-                        hiddenInput.value = selectedIds.join(',');
-                    }
-                });
-
-                // Handle removing a tag
-                tagify.on('remove', function (e) {
-                    const removedTag = e.detail.data;
-                    const selectedItem = data.find(item => item.name === removedTag.value);
-                    if (selectedItem) {
-                        const selectedIds = tagify.value.map(tag => {
-                            const item = data.find(item => item.name === tag.value);
-                            return item ? item.id : null;
-                        });
-                        hiddenInput.value = selectedIds.join(',');
-                    }
-                });
+            // Initialize Tagify with dynamic options
+            const tagify = new Tagify(inputElement, {
+                whitelist: data.map(item => item.name), // Use the name for the whitelist
+                maxTags: options.maxTags || 5, // Set the max number of tags
+                dropdown: {
+                    enabled: options.dropdownEnabled === 1, // Enable dropdown only when typing
+                    maxItems: options.maxItems || 10, // Limit the number of items in the dropdown
+                    searchKeys: options.searchKeys || ['name'], // Search by 'name' in the whitelist
+                    closeOnSelect: options.closeOnSelect || false, // Keep dropdown open after selecting an item
+                },
+                pattern: /[\w\s]/, // Regular expression to match word characters and spaces (case-insensitive)
+                // dropdown: {
+                //     enabled: options.dropdownEnabled || 0 // Control dropdown display
+                // }
             });
-        }
+
+            // Populate Tagify with existing selected items based on selectedIds
+            const selectedNames = selectedIds.map(id => {
+                const item = data.find(item => item.id == id); // Find the name by ID
+                return item ? item.name : '';  // Return the name or empty string if not found
+            }).filter(name => name);  // Filter out empty names
+
+            tagify.addTags(selectedNames);  // Add the tags to Tagify
+
+            // Set the hidden input value to the selected IDs
+            const hiddenInput = inputElement.closest('.form-group').querySelector('.hidden-input');
+            hiddenInput.value = selectedIds.join(','); // Store IDs as a comma-separated string
+
+            // Handle adding a new tag
+            tagify.on('add', function (e) {
+                const newTag = e.detail.data;
+                const selectedItem = data.find(item => item.name === newTag.value);
+                if (selectedItem) {
+                    const selectedIds = tagify.value.map(tag => {
+                        const item = data.find(item => item.name === tag.value);
+                        return item ? item.id : null;
+                    });
+                    hiddenInput.value = selectedIds.join(',');
+                }
+            });
+
+            // Handle removing a tag
+            tagify.on('remove', function (e) {
+                const removedTag = e.detail.data;
+                const selectedItem = data.find(item => item.name === removedTag.value);
+                if (selectedItem) {
+                    const selectedIds = tagify.value.map(tag => {
+                        const item = data.find(item => item.name === tag.value);
+                        return item ? item.id : null;
+                    });
+                    hiddenInput.value = selectedIds.join(',');
+                }
+            });
+        });
+    }      
         @if ($currentStep == 6)
             // reinitializeTagify();
             initDynamicTagify();

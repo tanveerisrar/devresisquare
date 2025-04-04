@@ -1,88 +1,33 @@
 @php
-    $availableFrom = formatDate($property->available_from) ?? '';
-    $salePrice = $property->price ?? '';
-    $lettingPrice = $property->letting_price ?? '';
-    $groundRent = $property->ground_rent ?? '';
-    $serviceCharge = $property->service_charge ?? '';
-    $annualCouncilTax = $property->annual_council_tax ?? '';
-    $councilTaxBand = $property->council_tax_band ?? '';
-    $estateCharge = $property->estate_charge ?? '';
-    $miscellaneousCharge = $property->miscellaneous_charge ?? '';
-    $localAuthority = $property->local_authority ?? '';
+    $lettingCurrentStatus = $property->letting_current_status ?? '';
+    $salesCurrentStatus = $property->sales_current_status ?? '';
+    $statusDescription = $property->status_description ?? '';
 @endphp
 
 @if(!isset($editMode) || !$editMode)
-    <!-- Marketing Details -->
-    <p class="fw-bold h4 mb-2">Marketing Details</p>
-    <div class="row mb-2">
-        <div class="col"><span class="text-muted">Move-in Date : </span><strong>{{ $availableFrom }}</strong></div>
-    </div>
+    <!-- Display View Mode -->
 
-    @if($propertyType == 'sales' || $propertyType == 'both')<div class="row mb-2">
-        <div class="col"><span class="text-muted">Length of Lease : </span><strong>{{ $lengthOfLease }}</strong></div>
-    </div>
-    @endif
-
-    <div class="row mb-2">
-        <div class="col"><span class="text-muted">Local Authority : </span><strong>{{ $localAuthority }}</strong></div>
-    </div>
-
-    <div class="row mb-2">
-        <div class="col"><span class="text-muted">Tenure : </span>
-            <strong>
-                @switch($property->tenure)
-                    @case('leasehold') Leasehold @break
-                    @case('freehold') Freehold @break
-                    @case('commonhold') Commonhold @break
-                    @case('feudal') Feudal @break
-                    @case('share_of_freehold') Share of Freehold @break
-                    @default N/A
-                @endswitch
-            </strong>
-        </div>
-    </div>
-
-    <!-- Price Section -->
     <div class="mt-md-4 mt-3">
-        <p class="fw-bold h4 mb-2">Price</p>
+        <p class="fw-bold h4 mb-2">Status</p>
 
         <div class="row mb-2">
-            @if($propertyType == 'sales' || $propertyType == 'both')
-            <div class="col-4"><span class="text-muted">Estate Charges : </span><strong>{{getPoundSymbol()}} {{ $estateCharge }}</strong></div>
-            @endif
-            <div class="col-6"><span class="text-muted">Miscellaneous Charge (annual) : </span><strong>{{getPoundSymbol()}} {{ $miscellaneousCharge }}</strong></div>
+            <div class="col-4"><span class="text-muted">Sales Status : </span><strong>{{ $salesCurrentStatus }}</strong>
+            </div>
+            <div class="col-6"><span class="text-muted">Letting Status : </span><strong>{{ $lettingCurrentStatus }}</strong>
+            </div>
         </div>
-    
-        @if($propertyType == 'sales' || $propertyType == 'both')
+
         <div class="row mb-2">
-            <div class="col-4"><span class="text-muted">Ground Rent : </span><strong>{{getPoundSymbol()}} {{ $groundRent }}</strong></div>
-            <div class="col-6"><span class="text-muted">Service Charge (annual) : </span><strong>{{getPoundSymbol()}} {{ $serviceCharge }}</strong></div>
+            <div class="col-4"><span class="text-muted">Status Description :
+                </span><strong>{{ $statusDescription }}</strong></div>
         </div>
-        @endif
-    
-        <div class="row mb-2">
-            <div class="col-4"><span class="text-muted">Sales Price : </span><strong>{{getPoundSymbol()}} {{ $salePrice }}</strong></div>
-            <div class="col-6"><span class="text-muted">Letting Price : </span><strong>{{getPoundSymbol()}} {{ $lettingPrice }}</strong></div>
-        </div>
-    </div>
-    
-        
-    <!-- Council Tax Section -->
-    <div class="mt-md-4 mt-3">
-        <h5 class="fw-bold h4 mb-2">Council Tax</h5>
-        <div class="row mb-2">
-            <div class="col"><span class="text-muted">Annual Council Tax : </span><strong>{{getPoundSymbol()}} {{ $annualCouncilTax }}</strong></div>
-        </div>
-        <div class="row mb-2">
-            <div class="col"><span class="text-muted">Council Tax Band : </span><strong>{{ $councilTaxBand }}</strong></div>
-        </div>  
     </div>
 
 @else
-    <form id="availabilityPricingForm">
+    <form id="propertyStatusForm">
         @csrf
         <input type="hidden" name="property_id" value="{{ $property->id }}">
-        <input type="hidden" name="form_type" value="availability_pricing">
+        <input type="hidden" name="form_type" value="property_status">
 
         <div class="mb-3">
             <label>Availability</label>

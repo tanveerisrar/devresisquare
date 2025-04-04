@@ -11,7 +11,11 @@
 
 
 @else
-    <form id="propertyFeaturesForm">
+    <form id="propertyServiceForm">
+        @csrf
+        <input type="hidden" name="property_id" value="{{ $property->id }}">
+        <input type="hidden" name="form_type" value="property_services">
+
         <div class="form-group">
             <label>Parking</label>
             <div class="rs_radio_btns">
