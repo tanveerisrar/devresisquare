@@ -278,7 +278,7 @@ hr{
 }
 
 a{text-decoration: none; color: var(--primary);}
-a:hover{font-weight: 500;}
+/* a:hover{font-weight: 500;} */
 
 ul{
     list-style: none;
@@ -289,6 +289,12 @@ ul{
 }
 
 .pointer{cursor: pointer;}
+.underline{
+    text-decoration: underline !important;
+    &:hover{
+        text-decoration: underline !important;
+    }
+}
 
 /* form{ width: max-content;} */
 

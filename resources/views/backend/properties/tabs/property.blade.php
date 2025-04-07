@@ -124,7 +124,7 @@ $secondHalf = array_slice($allFeatures, $halfCount);
 <div class="pvd_content_wrapper">
 <!-- Button to Collapse/Expand All -->
 <div class="d-flex justify-content-end mb-3">
-    <button id="toggleAll" class="btn btn-primary">Collapse All</button>
+    <a id="toggleAll" class="pointer underline">Collapse All</a>
 </div>
     
     <div class="accordion" id="propertyAccordion">
@@ -132,11 +132,11 @@ $secondHalf = array_slice($allFeatures, $halfCount);
         @php
         $formSections = [
             ['key' => 'availability_pricing', 'title' => 'Availability & Pricing', 'order' => 1],
-            ['key' => 'property_accessibility', 'title' => 'Accessibility', 'order' => 6],
-            ['key' => 'property_details', 'title' => 'Details', 'order' => 5],
-            ['key' => 'property_features', 'title' => 'Property Features', 'order' => 3],
             ['key' => 'property_info', 'title' => 'Property Information', 'order' => 2],
+            ['key' => 'property_features', 'title' => 'Property Features', 'order' => 3],
             ['key' => 'property_services', 'title' => 'Service', 'order' => 4],
+            ['key' => 'property_details', 'title' => 'Details', 'order' => 5],
+            ['key' => 'property_accessibility', 'title' => 'Accessibility', 'order' => 6],
             // Add more sections with order values as needed
         ];
     
@@ -159,7 +159,7 @@ $secondHalf = array_slice($allFeatures, $halfCount);
                 </button>
             </h2>
             <div id="collapse-{{ $formType }}" class="accordion-collapse collapse show" aria-labelledby="heading-{{ $formType }}">
-                <button class="btn btn-primary float-end editForm" data-form="{{ $formType }}" data-id="{{ $property->id }}">
+                <button class="btn btn_outline_secondary float-end editForm" data-form="{{ $formType }}" data-id="{{ $property->id }}">
                     Edit
                 </button>
                 <div class="accordion-body" id="section-{{ $formType }}-{{ $property->id }}">

@@ -13,71 +13,72 @@
 
 @if(!isset($editMode) || !$editMode)
     <!-- Marketing Details -->
-    <p class="fw-bold h4 mb-2">Marketing Details</p>
-    <div class="row mb-2">
-        <div class="col"><span class="text-muted">Move-in Date : </span><strong>{{ $availableFrom }}</strong></div>
-    </div>
-
-    @if($propertyType == 'sales' || $propertyType == 'both')<div class="row mb-2">
-        <div class="col"><span class="text-muted">Length of Lease : </span><strong>{{ $lengthOfLease }}</strong></div>
-    </div>
-    @endif
-
-    <div class="row mb-2">
-        <div class="col"><span class="text-muted">Local Authority : </span><strong>{{ $localAuthority }}</strong></div>
-    </div>
-
-    <div class="row mb-2">
-        <div class="col"><span class="text-muted">Tenure : </span>
-            <strong>
-                @switch($property->tenure)
-                    @case('leasehold') Leasehold @break
-                    @case('freehold') Freehold @break
-                    @case('commonhold') Commonhold @break
-                    @case('feudal') Feudal @break
-                    @case('share_of_freehold') Share of Freehold @break
-                    @default N/A
-                @endswitch
-            </strong>
-        </div>
-    </div>
-
-    <!-- Price Section -->
-    <div class="mt-md-4 mt-3">
-        <p class="fw-bold h4 mb-2">Price</p>
-
+    <div class="accordion_inner">
+        <p class="accordion_inner_heading">Marketing Details</p>
         <div class="row mb-2">
-            @if($propertyType == 'sales' || $propertyType == 'both')
-            <div class="col-4"><span class="text-muted">Estate Charges : </span><strong>{{getPoundSymbol()}} {{ $estateCharge }}</strong></div>
-            @endif
-            <div class="col-6"><span class="text-muted">Miscellaneous Charge (annual) : </span><strong>{{getPoundSymbol()}} {{ $miscellaneousCharge }}</strong></div>
+            <div class="col"><span class="text-muted">Move-in Date : </span><strong>{{ $availableFrom }}</strong></div>
         </div>
-    
-        @if($propertyType == 'sales' || $propertyType == 'both')
-        <div class="row mb-2">
-            <div class="col-4"><span class="text-muted">Ground Rent : </span><strong>{{getPoundSymbol()}} {{ $groundRent }}</strong></div>
-            <div class="col-6"><span class="text-muted">Service Charge (annual) : </span><strong>{{getPoundSymbol()}} {{ $serviceCharge }}</strong></div>
+
+        @if($propertyType == 'sales' || $propertyType == 'both')<div class="row mb-2">
+            <div class="col"><span class="text-muted">Length of Lease : </span><strong>{{ $lengthOfLease }}</strong></div>
         </div>
         @endif
-    
-        <div class="row mb-2">
-            <div class="col-4"><span class="text-muted">Sales Price : </span><strong>{{getPoundSymbol()}} {{ $salePrice }}</strong></div>
-            <div class="col-6"><span class="text-muted">Letting Price : </span><strong>{{getPoundSymbol()}} {{ $lettingPrice }}</strong></div>
-        </div>
-    </div>
-    
-        
-    <!-- Council Tax Section -->
-    <div class="mt-md-4 mt-3">
-        <h5 class="fw-bold h4 mb-2">Council Tax</h5>
-        <div class="row mb-2">
-            <div class="col"><span class="text-muted">Annual Council Tax : </span><strong>{{getPoundSymbol()}} {{ $annualCouncilTax }}</strong></div>
-        </div>
-        <div class="row mb-2">
-            <div class="col"><span class="text-muted">Council Tax Band : </span><strong>{{ $councilTaxBand }}</strong></div>
-        </div>  
-    </div>
 
+        <div class="row mb-2">
+            <div class="col"><span class="text-muted">Local Authority : </span><strong>{{ $localAuthority }}</strong></div>
+        </div>
+
+        <div class="row mb-2">
+            <div class="col"><span class="text-muted">Tenure : </span>
+                <strong>
+                    @switch($property->tenure)
+                        @case('leasehold') Leasehold @break
+                        @case('freehold') Freehold @break
+                        @case('commonhold') Commonhold @break
+                        @case('feudal') Feudal @break
+                        @case('share_of_freehold') Share of Freehold @break
+                        @default N/A
+                    @endswitch
+                </strong>
+            </div>
+        </div>
+
+        <!-- Price Section -->
+        <div class="mt-md-4 mt-4">
+            <p class="accordion_inner_heading">Price</p>
+
+            <div class="row mb-2">
+                @if($propertyType == 'sales' || $propertyType == 'both')
+                <div class="col-4"><span class="text-muted">Estate Charges : </span><strong>{{getPoundSymbol()}} {{ $estateCharge }}</strong></div>
+                @endif
+                <div class="col-6"><span class="text-muted">Miscellaneous Charge (annual) : </span><strong>{{getPoundSymbol()}} {{ $miscellaneousCharge }}</strong></div>
+            </div>
+        
+            @if($propertyType == 'sales' || $propertyType == 'both')
+            <div class="row mb-2">
+                <div class="col-4"><span class="text-muted">Ground Rent : </span><strong>{{getPoundSymbol()}} {{ $groundRent }}</strong></div>
+                <div class="col-6"><span class="text-muted">Service Charge (annual) : </span><strong>{{getPoundSymbol()}} {{ $serviceCharge }}</strong></div>
+            </div>
+            @endif
+        
+            <div class="row mb-2">
+                <div class="col-4"><span class="text-muted">Sales Price : </span><strong>{{getPoundSymbol()}} {{ $salePrice }}</strong></div>
+                <div class="col-6"><span class="text-muted">Letting Price : </span><strong>{{getPoundSymbol()}} {{ $lettingPrice }}</strong></div>
+            </div>
+        </div>
+        
+            
+        <!-- Council Tax Section -->
+        <div class="mt-md-4 mt-4">
+            <h5 class="accordion_inner_heading">Council Tax</h5>
+            <div class="row mb-2">
+                <div class="col"><span class="text-muted">Annual Council Tax : </span><strong>{{getPoundSymbol()}} {{ $annualCouncilTax }}</strong></div>
+            </div>
+            <div class="row mb-2">
+                <div class="col"><span class="text-muted">Council Tax Band : </span><strong>{{ $councilTaxBand }}</strong></div>
+            </div>  
+        </div>
+    </div>
 @else
     <form id="availabilityPricingForm">
         @csrf

@@ -4,10 +4,12 @@
     $specificPropertyType = $property->specific_property_type ?? '';
 @endphp
 @if(!isset($editMode) || !$editMode)
+<div class="accordion_inner">
     <!-- Display View Mode -->
     <strong>Property Type:</strong> {{ $propertyType }} <br>
     <strong>Transaction Type:</strong> {{ $transactionType }} <br>
     <strong>Specific Property Type:</strong> {{ $specificPropertyType }} <br>
+</div>
 @else
     <form id="propertyInfoForm">
         @csrf
