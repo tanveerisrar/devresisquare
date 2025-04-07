@@ -283,19 +283,46 @@
         let data = idValue; // Use the provided ID-Value data
 
         // Parse the pre-selected values
+        // let selectedIds = [];
+        // if (typeof values === 'string' && values.includes(',')) {
+        //     selectedIds = values.split(',').map(id => id.trim());
+        // } else if (typeof values === 'string' && (values.startsWith('{') || values.startsWith('['))) {
+        //     try {
+        //         selectedIds = JSON.parse(values).map(item => item.trim());
+        //     } catch (e) {
+        //         console.error("Error parsing data-values:", e);
+        //         selectedIds = [];
+        //     }
+        // } else if (values) {
+        //     selectedIds = [values.trim()];
+        // }
         let selectedIds = [];
-        if (typeof values === 'string' && values.includes(',')) {
-            selectedIds = values.split(',').map(id => id.trim());
-        } else if (typeof values === 'string' && (values.startsWith('{') || values.startsWith('['))) {
-            try {
-                selectedIds = JSON.parse(values).map(item => item.trim());
-            } catch (e) {
-                console.error("Error parsing data-values:", e);
-                selectedIds = [];
+
+        if (Array.isArray(values)) {
+            selectedIds = values.map(id => id.toString().trim());
+        } else if (typeof values === 'string') {
+            const trimmed = values.trim();
+
+            if (trimmed.startsWith('[') || trimmed.startsWith('{')) {
+                try {
+                    let parsed = JSON.parse(trimmed);
+                    if (Array.isArray(parsed)) {
+                        selectedIds = parsed.map(id => id.toString().trim());
+                    } else {
+                        selectedIds = [parsed.toString().trim()];
+                    }
+                } catch (e) {
+                    console.error("Error parsing data-values JSON:", e);
+                }
+            } else if (trimmed.includes(',')) {
+                selectedIds = trimmed.split(',').map(id => id.trim());
+            } else if (trimmed) {
+                selectedIds = [trimmed];
             }
-        } else if (values) {
-            selectedIds = [values.trim()];
+        } else if (typeof values === 'number') {
+            selectedIds = [values.toString()];
         }
+
 
         // Initialize Tagify
         let tagify = new Tagify($inputElement[0], {
@@ -360,8 +387,11 @@
             "property_features": "Edit Property Features",
             "property_details": "Edit Property Details",
             "property_accessibility": "Edit Property Accessibility",
+            "property_services": "Edit Property Services",
+            "property_status": "Edit Property Status",
+            "notes": "Edit Important Note",
         };
-
+        
         let modalTitle = formTitles[formType] || "Edit Details"; // Default title if form type is not found
 
         $("#largeModal .modal-title").html(modalTitle); // Set dynamic title
@@ -380,9 +410,14 @@
                 if (formType === "property_accessibility") {
                     initDynamicTagify();
                 }
+                if (formType === "property_details") {
+                    $('.select2').select2();
+                }
             },
-            error: function () {
-                alert("Failed to load form.");
+            error: function (error) {
+                console.error(error);
+                let errorMessage = error.responseJSON?.message || 'An error occurred while saving the compliance record.';
+                AIZ.plugins.notify('danger', errorMessage);
             }
         });
     });
@@ -409,8 +444,10 @@
                     alert("Error: " + response.error);
                 }
             },
-            error: function () {
-                alert("Something went wrong!");
+            error: function (error) {
+                console.error(error);
+                let errorMessage = error.responseJSON?.message || 'An error occurred while saving the form.';
+                AIZ.plugins.notify('danger', errorMessage);
             }
         });
     });

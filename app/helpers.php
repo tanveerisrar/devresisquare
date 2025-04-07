@@ -213,7 +213,7 @@ if (!function_exists('jsonDecodeAndPrint')) {
      * @param  string  $separator  The separator between items when printing (default is a comma)
      * @return string
      */
-    function jsonDecodeAndPrint($json, $separator = ', ')
+/*    function jsonDecodeAndPrint($json, $separator = ', ')
     {
         // Decode the JSON string into an array
         $decoded = json_decode($json, true);
@@ -225,7 +225,35 @@ if (!function_exists('jsonDecodeAndPrint')) {
 
         // Return the values as a string with the given separator
         return implode($separator, $decoded);
-    }
+    }*/
+    
+        /**
+         * Decode a JSON string and return its values as a string.
+         *
+         * @param  mixed  $json  The JSON data, either as a string or an array.
+         * @param  string  $separator  The separator between items when printing (default is a comma)
+         * @return string
+         */
+        function jsonDecodeAndPrint($json, $separator = ', ')
+        {
+            // If $json is already an array, just use it
+            if (is_array($json)) {
+                $decoded = $json;
+            } else {
+                // Decode the JSON string into an array
+                $decoded = json_decode($json, true);
+            }
+    
+            // Check for JSON errors if it's a string
+            if (!is_array($json) && json_last_error() !== JSON_ERROR_NONE) {
+                return '';  // Return error message if decoding fails
+            }
+    
+            // Return the values as a string with the given separator
+            return implode($separator, $decoded);
+        }
+    
+    
 }
 
 if (!function_exists('todayDate')) {
