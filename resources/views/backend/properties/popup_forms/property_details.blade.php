@@ -1,9 +1,11 @@
 @php
     if (isset($property)) {
+        $epcRequired = booleanToYesNo($property->epc_required) ?? '';
         $epcRating = $property->epc_rating ?? '';
-        $isGas = $property->is_gas ?? '';
+        $isGas = booleanToYesNo($property->is_gas) ?? '';
         $gas_safe_acknowledged = $property->gas_safe_acknowledged ?? 0;
     } else {
+        $epcRequired = '';
         $epcRating = '';
         $isGas = '';
         $gas_safe_acknowledged = 0;
@@ -84,18 +86,12 @@
                 value="{{ $gas_safe_acknowledged }}">
 
             <label>Does the property have gas?</label>
-            <div class="rs_radio_btns">
-                <div>
-                    <input type="radio" name="is_gas" id="is_gas_no" value="0" {{ $isGas == '0' ? 'checked' : '' }}
-                        required />
-                    <label for="is_gas_no"> No</label>
-                </div>
-                <div>
-                    <input type="radio" name="is_gas" id="is_gas_yes" value="1" {{ $isGas == '1' ? 'checked' : '' }}
-                        required />
-                    <label for="is_gas_yes"> Yes</label>
-                </div>
-            </div>
+            <div class="radio_bts_square">
+                <input type="radio" name="is_gas" id="is_gas_no" value="1" {{ (isset($property) && $property->is_gas == '1') ? 'checked' : '' }} required />
+                <label for="is_gas_no"> Yes </label>
+                <input type="radio" name="is_gas" id="is_gas_yes" value="0" {{ (isset($property) && $property->is_gas == '0') ? 'checked' : '' }} required />
+                <label for="is_gas_yes"> No </label>
+            </div>            
         </div>
 
         <div class="form-group rs_upload_btn">
@@ -160,6 +156,6 @@
         </div>
 
 
-        <button type="submit" class="btn btn-success">Save Changes</button>
+        <button type="submit" class="btn btn-success mt-3 float-end">Save Changes</button>
     </form>
 @endif
