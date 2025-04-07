@@ -13,8 +13,11 @@
         <div class="row mb-2">
             <div class="col-4"><span class="text-muted">Sales Status : </span><strong>{{ $salesCurrentStatus }}</strong>
             </div>
+            
+        @if(isset($property) && ($property->property_type == 'lettings' || $property->property_type == 'both'))
             <div class="col-6"><span class="text-muted">Letting Status : </span><strong>{{ $lettingCurrentStatus }}</strong>
             </div>
+        @endif
         </div>
 
         <div class="row mb-2">
