@@ -1,6 +1,7 @@
 html,
 body {
     height: 100%;
+    color: var(--gray-800);
 }
 
 body.hide-sidebar:not(.show-sidebar) #menu {
@@ -135,6 +136,7 @@ div.dataTables_wrapper div.dataTables_filter input {
                 padding-inline: unset;
                 font-size: 24px;
                 font-weight: 600;
+                color: var(--gray-900);
                 &:focus{
                     box-shadow: unset;
                 }

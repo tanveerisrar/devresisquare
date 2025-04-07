@@ -159,7 +159,7 @@ $secondHalf = array_slice($allFeatures, $halfCount);
                 </button>
             </h2>
             <div id="collapse-{{ $formType }}" class="accordion-collapse collapse show" aria-labelledby="heading-{{ $formType }}">
-                <button class="btn btn_outline_secondary float-end editForm" data-form="{{ $formType }}" data-id="{{ $property->id }}">
+                <button class="btn btn_outline_secondary mt-2 float-end editForm" data-form="{{ $formType }}" data-id="{{ $property->id }}">
                     Edit
                 </button>
                 <div class="accordion-body" id="section-{{ $formType }}-{{ $property->id }}">
