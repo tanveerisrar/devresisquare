@@ -7,13 +7,16 @@
 <div class="accordion_inner">
     <!-- Display View Mode -->
     <div class="accordion_property_info_item">
-        <strong>Property Type:</strong> {{ $propertyType }}
+        <span class="left_item">Property Type:</span>
+        <span class="right_item"> {{ $propertyType }} </span>
     </div>
     <div class="accordion_property_info_item">
-        <strong>Transaction Type:</strong> {{ $transactionType }} 
+        <span class="left_item">Transaction Type:</span>
+        <span class="right_item"> {{ $transactionType }}  </span>
     </div>
     <div class="accordion_property_info_item">
-        <strong>Specific Property Type:</strong> {{ $specificPropertyType }}
+        <span class="left_item">Specific Property Type:</span> 
+        <span class="right_item">{{ $specificPropertyType }} </span>
     </div>
 </div>
 @else
