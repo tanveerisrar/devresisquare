@@ -117,7 +117,7 @@ $secondHalf = array_slice($allFeatures, $halfCount);
             </div>
         </div> --}}
         
-        <div class="d-flex justify-content-between align-items-center border rounded-4 p-3 mt-3">
+        {{-- <div class="d-flex justify-content-between align-items-center border rounded-4 p-3 mt-3">
             <span class="fw-semibold">Important Note
             <div class="notes-update-ajax" id="section-notes-{{ $property->id }}">
                 @include("backend.properties.popup_forms.notes", ['property' => $property])
@@ -126,9 +126,20 @@ $secondHalf = array_slice($allFeatures, $halfCount);
             <button class="btn btn-outline-danger btn-sm editForm" data-form="{{ 'notes' }}" data-id="{{ $property->id }}">
                 Edit
             </button>
-        </div>
+        </div> --}}
+        
     </div>
     {{-- pv_content end  --}}
+</div>
+<div class="property_note">
+    <span class="fw-semibold">Important Note
+    <div class="notes-update-ajax" id="section-notes-{{ $property->id }}">
+        @include("backend.properties.popup_forms.notes", ['property' => $property])
+    </div>
+    </span>
+    <button class="btn btn-outline-danger btn-sm editForm" data-form="{{ 'notes' }}" data-id="{{ $property->id }}">
+        Edit
+    </button>
 </div>
 <div class="pvd_content_wrapper">
 <!-- Button to Collapse/Expand All -->

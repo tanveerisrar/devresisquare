@@ -1,6 +1,6 @@
 @if(!isset($editMode) || !$editMode)
     <!-- Display View Mode -->
-    <p><strong>Notes:</strong> {{ isset($property) && $property->notes ? $property->notes : 'N/A' }}</p>
+    <p>{{ isset($property) && $property->notes ? $property->notes : '' }}</p>
 @else
     <form id="propertyNotesForm">
         @csrf
