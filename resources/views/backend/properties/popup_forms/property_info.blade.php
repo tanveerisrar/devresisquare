@@ -8,15 +8,15 @@
     <!-- Display View Mode -->
     <div class="accordion_property_info_item">
         <span class="left_item">Property Type:</span>
-        <span class="right_item"> {{ $propertyType }} </span>
+        <span class="right_item capitalize"> {{ $propertyType }} </span>
     </div>
     <div class="accordion_property_info_item">
         <span class="left_item">Transaction Type:</span>
-        <span class="right_item"> {{ $transactionType }}  </span>
+        <span class="right_item capitalize"> {{ $transactionType }}  </span>
     </div>
     <div class="accordion_property_info_item">
         <span class="left_item">Specific Property Type:</span> 
-        <span class="right_item">{{ $specificPropertyType }} </span>
+        <span class="right_item capitalize">{{ $specificPropertyType }} </span>
     </div>
 </div>
 @else
