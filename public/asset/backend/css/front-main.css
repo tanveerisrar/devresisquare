@@ -269,6 +269,24 @@ form{
   }
 .rounded_check_btn{
 
+    input[type=checkbox]+label {
+        color: var(--black);
+        background-color: var(--gray-300);
+        border: 1px solid var(--gray-300);
+    }
+    
+    input[type=checkbox]:checked+label{
+        color: var(--secondary-color);
+        border: 1px solid var(--secondary-color);
+    }
+
+    .checkbox_btn{
+        padding: 3px 12px;
+        border-radius: 100px;
+    }
+  }
+.rounded_radio_btn{
+
     input[type=checkbox]+label, input[type=radio]+label {
         color: var(--black);
         background-color: var(--gray-300);
@@ -279,12 +297,11 @@ form{
         color: var(--secondary-color);
         border: 1px solid var(--secondary-color);
     }
-    
     .checkbox_btn{
         padding: 3px 12px;
         border-radius: 100px;
     }
-  }
+}
   .check_btn_wrapper{
     display: flex;
     flex-wrap: wrap;

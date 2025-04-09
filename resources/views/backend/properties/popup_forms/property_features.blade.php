@@ -101,7 +101,7 @@ $other = jsonDecodeAndPrint($property->other) ?? '';
         <input type="hidden" name="form_type" value="property_features" />
 
         <div class="feature_edit_form">
-            <div class="rounded_check_btn">
+            <div class="rounded_radio_btn">
                     <div class="form-group ">
                         <div class="accordion_inner_heading mb-2">Furniture</div>
                             @foreach(['Furnished' => 'Furnished', 'Unfurnished' => 'Unfurnished', 'Flexible' => 'Flexible'] as $key => $value)
@@ -228,9 +228,9 @@ $other = jsonDecodeAndPrint($property->other) ?? '';
                                     <label class="checkbox_btn" for="other_{{ $key }}">{{ $value }}</label>
                                 </div>
                                 @endforeach
-                        </div>{{-- check_btn_wrapper end --}}
-                    </div>{{-- form-group end --}}
-
+                            </div>{{-- check_btn_wrapper end --}}
+                        </div>{{-- form-group end --}}
+                    </div>
                     <div class="form-group">
                         <div class="accordion_inner_heading mt-4 mb-2">Bedrooms</div>
                             <div class="radio_bts_square">
@@ -468,9 +468,6 @@ $other = jsonDecodeAndPrint($property->other) ?? '';
 
 
 
-
-
-            </div> 
         </div>
     </form>
 
