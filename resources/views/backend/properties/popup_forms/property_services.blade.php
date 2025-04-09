@@ -1,13 +1,26 @@
 @if(!isset($editMode) || !$editMode)
     <!-- Display View Mode -->
-    <strong>Parking:</strong> {{ $property->parking == '1' ? 'Yes' : 'No' }} <br>
-    @if($property->parking == '1' && !empty($property->parking_location))
-        <strong>Parking Location:</strong> {{ $property->parking_location }} <br>
-    @endif
-    <strong>Service:</strong> {{ $property->service ?? 'N/A' }} <br>
-    @if(isset($property) && $property->property_type == 'lettings' || $property->property_type == 'both')
-        <strong>Pets Allow?:</strong> {{ $petsAllowed }} <br>
-    @endif
+    <div class="accordion_inner">
+        <div class="accordion_services_item">
+            <div>
+                <span class="left_item">Parking:</span> 
+                {{ $property->parking == '1' ? 'Yes' : 'No' }}
+            </div>
+            <div>
+                @if($property->parking == '1' && !empty($property->parking_location))
+                <span class="left_item">Parking Location:</span> {{ $property->parking_location }}
+                @endif
+            </div>
+            <div>
+                <span class="left_item">Service:</span> {{ $property->service ?? 'N/A' }}
+            </div>
+            <div>
+                @if(isset($property) && $property->property_type == 'lettings' || $property->property_type == 'both')
+                <span class="left_item">Pets Allow?:</span> {{ $petsAllowed }}
+                @endif
+            </div>
+        </div>
+    </div>
 
 
 @else
@@ -27,13 +40,17 @@
             </div>
         </div>
 
-        <div class="form-group" id="parking_location_group" style="display: none;">
-            <label for="parking_location">Parking Location</label>
-            <input type="text" name="parking_location" class="form-control"
-                value="{{ $property->parking_location ?? '' }}" />
-            @error('parking_location')
-                <div class="text-danger">{{ $message }}</div>
-            @enderror
+        <div class="row">
+            <div class="col-lg-6 col-12">
+                <div class="form-group" id="parking_location_group" style="display: none;">
+                    <label for="parking_location">Parking Location</label>
+                    <input type="text" name="parking_location" class="form-control"
+                        value="{{ $property->parking_location ?? '' }}" />
+                    @error('parking_location')
+                        <div class="text-danger">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
         </div>
 
         <div class="form-group">
