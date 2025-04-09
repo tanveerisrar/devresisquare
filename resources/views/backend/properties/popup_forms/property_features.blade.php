@@ -202,35 +202,34 @@ $other = jsonDecodeAndPrint($property->other) ?? '';
 
                     <div class="form-group">
                         <div class="accordion_inner_heading mt-4 mb-2">Other</div>
-                            <div class="check_btn_wrapper">
-                                @foreach ([
-                                    'Roof Garden' => 'Roof Garden',
-                                    'Business Centre' => 'Business Centre',
-                                    'Concierge' => 'Concierge',
-                                    'Lift' => 'Lift',
-                                    'Pets Allowed' => 'Pets Allowed',
-                                    'Pets Allowed With Licence' => 'Pets Allowed With Licence',
-                                    'TV' => 'TV',
-                                    'Fireplace' => 'Fireplace',
-                                    'Wood flooring' => 'Wood flooring',
-                                    'Double glazing' => 'Double glazing',
-                                    'Not suitable for wheelchair users' => 'Not suitable for wheelchair users',
-                                    'Gym' => 'Gym',
-                                    'None' => 'None',
-                                ] as $key => $value)
-                                @php
-                                    // Decode the other field if it's a JSON string.
-                                    $other = isset($property) && is_string($property->other) ? json_decode($property->other, true) : [];
-                                @endphp
-                                <div class="form-check">
-                                    <input class="hidden" type="checkbox" name="other[]" value="{{ $key }}"
-                                        id="other_{{ $key }}" {{ in_array($key, $other) ? 'checked' : '' }}>
-                                    <label class="checkbox_btn" for="other_{{ $key }}">{{ $value }}</label>
-                                </div>
-                                @endforeach
-                            </div>{{-- check_btn_wrapper end --}}
-                        </div>{{-- form-group end --}}
-                    </div>
+                        <div class="check_btn_wrapper">
+                            @foreach ([
+                                'Roof Garden' => 'Roof Garden',
+                                'Business Centre' => 'Business Centre',
+                                'Concierge' => 'Concierge',
+                                'Lift' => 'Lift',
+                                'Pets Allowed' => 'Pets Allowed',
+                                'Pets Allowed With Licence' => 'Pets Allowed With Licence',
+                                'TV' => 'TV',
+                                'Fireplace' => 'Fireplace',
+                                'Wood flooring' => 'Wood flooring',
+                                'Double glazing' => 'Double glazing',
+                                'Not suitable for wheelchair users' => 'Not suitable for wheelchair users',
+                                'Gym' => 'Gym',
+                                'None' => 'None',
+                            ] as $key => $value)
+                            @php
+                                // Decode the other field if it's a JSON string.
+                                $other = isset($property) && is_string($property->other) ? json_decode($property->other, true) : [];
+                            @endphp
+                            <div class="form-check">
+                                <input class="hidden" type="checkbox" name="other[]" value="{{ $key }}"
+                                    id="other_{{ $key }}" {{ in_array($key, $other) ? 'checked' : '' }}>
+                                <label class="checkbox_btn" for="other_{{ $key }}">{{ $value }}</label>
+                            </div>
+                            @endforeach
+                        </div>{{-- check_btn_wrapper end --}}
+                    </div>{{-- form-group end --}}
                 </div>
                     <div class="form-group">
                         <div class="accordion_inner_heading mt-4 mb-2">Bedrooms</div>
@@ -467,6 +466,9 @@ $other = jsonDecodeAndPrint($property->other) ?? '';
                     
                     <button type="submit" class="btn btn-success mt-3 float-end">Save Changes</button>
 
+
+
+        </div>
     </form>
 
 <script>
