@@ -153,6 +153,19 @@
     .min_width-3 { min-width: 1rem; }
     .min_width-4 { min-width: 1.5rem; }
     .min_width-5 { min-width: 2rem; }
+
+
+
+    .grid-auto-fit{ 
+        --grid-min-col-size: 12.5rem; /* 200px; */
+    
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(var(--grid-min-col-size), 100%), 1fr) );
+        grid-gap: 1.5rem; /* 24px; */
+    }
+
+
+
 body{
     font-family: 'Poppins', Arial, Helvetica, sans-serif;
 }

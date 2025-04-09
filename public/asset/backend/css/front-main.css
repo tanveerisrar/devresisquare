@@ -217,6 +217,14 @@ div.dataTables_wrapper div.dataTables_filter input {
     }
 }
 
+form{
+    .price_edit_form{
+        .grid-auto-fit{
+           --grid-min-col-size: 16rem; /* 256px; */
+        }
+    }
+}
+
 /* ========================================
           Components
 ==========================================*/
