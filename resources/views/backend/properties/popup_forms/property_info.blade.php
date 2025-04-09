@@ -6,9 +6,15 @@
 @if(!isset($editMode) || !$editMode)
 <div class="accordion_inner">
     <!-- Display View Mode -->
-    <strong>Property Type:</strong> {{ $propertyType }} <br>
-    <strong>Transaction Type:</strong> {{ $transactionType }} <br>
-    <strong>Specific Property Type:</strong> {{ $specificPropertyType }} <br>
+    <div class="accordion_property_info_item">
+        <strong>Property Type:</strong> {{ $propertyType }}
+    </div>
+    <div class="accordion_property_info_item">
+        <strong>Transaction Type:</strong> {{ $transactionType }} 
+    </div>
+    <div class="accordion_property_info_item">
+        <strong>Specific Property Type:</strong> {{ $specificPropertyType }}
+    </div>
 </div>
 @else
     <form id="propertyInfoForm">
