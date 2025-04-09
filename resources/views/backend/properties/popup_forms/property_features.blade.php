@@ -8,126 +8,129 @@ $other = jsonDecodeAndPrint($property->other) ?? '';
 @if (!isset($editMode) || !$editMode)
     <!-- Display View Mode -->
 
-<div class="accordion_inner">
-    <div class="accordion_features_wrapper">
-        <div class="accordion_features_item">
-            <div  class="accordion_features_label">
-                <div class="accordion_inner_heading">Furniture</div> 
+    <div class="accordion_inner">
+        <div class="accordion_features_wrapper">
+            <div class="accordion_features_item">
+                <div  class="accordion_features_label">
+                    <div class="accordion_inner_heading">Furniture</div> 
+                </div>
+                <div  class="accordion_features_content">
+                    {{ $furniture ?: 'N/A' }}
+                </div>
             </div>
-            <div  class="accordion_features_content">
-                {{ $furniture ?: 'N/A' }}
+            <div class="accordion_features_item">
+                <div  class="accordion_features_label">
+                    <div class="accordion_inner_heading">Kitchen</div> 
+                </div>
+                <div  class="accordion_features_content">
+                    {{ $kitchen ?: 'N/A' }}
+                </div>
+            </div>
+            <div class="accordion_features_item">
+                <div  class="accordion_features_label">
+                    <div class="accordion_inner_heading">Heating and Cooling</div> 
+                </div>
+                <div  class="accordion_features_content">
+                    {{ $heatingCooling ?: 'N/A' }}
+                </div>
+            </div>
+            <div class="accordion_features_item">
+                <div  class="accordion_features_label">
+                    <div class="accordion_inner_heading">Safety</div> 
+                </div>
+                {{ $safety ?: 'N/A' }}
+            </div>
+            <div class="accordion_features_item">
+                <div  class="accordion_features_label">
+                    <div class="accordion_inner_heading">Other</div> 
+                <div  class="accordion_features_content">
+                    {{ $other ?: 'N/A' }}
+                </div>
             </div>
         </div>
-        <div class="accordion_features_item">
-            <div  class="accordion_features_label">
-                <div class="accordion_inner_heading">Kitchen</div> 
-            </div>
-            <div  class="accordion_features_content">
-                {{ $kitchen ?: 'N/A' }}
+        
+        <!-- Display View Mode -->
+        <div class=" ">
+            <div class="accordion_inner_heading mb-2">Rooms </div>
+            <div class="accordion_features_rooms">
+                <div class="accordion_features_item rooms">
+                    <span class="gray-950 fw-400"> {{ $property->bedroom }} </span> <sapn class="gray-500"> Bedrooms </sapn>
+                </div>
+                <div class="accordion_features_item rooms">
+                    <span class="gray-950 fw-400">{{ $property->bathroom }}  </span> <sapn class="gray-500"> Bathrooms </sapn>
+                </div>
+                <div class="accordion_features_item rooms">
+                    <span class="gray-950 fw-400"> {{ $property->reception }}</span> <sapn class="gray-500"> Reception Rooms </sapn>
+                </div>
+                <div class="accordion_features_item rooms">
+                    <span class="gray-950 fw-400 capitalize">{{ $property->floor }}</span> <sapn class="gray-500"> Floor </sapn>
+                </div>
             </div>
         </div>
-        <div class="accordion_features_item">
-            <div  class="accordion_features_label">
-                <div class="accordion_inner_heading">Heating and Cooling</div> 
-            </div>
-            <div  class="accordion_features_content">
-                {{ $heatingCooling ?: 'N/A' }}
+        
+        
+        <div class=" ">
+            <div class="accordion_inner_heading mb-2">Balcony</div>
+            <div class="accordion_features_item balcony">
+                <div><span class="gray-500">Balcony:</span> <span class="gray-950 fw-400">{{ $property->balcony == '1' ? 'Yes' : 'No' }}</span></div>
+                <div><span class="gray-500">Garden: </span><span class="gray-950 fw-400"> {{ $property->garden == '1' ? 'Yes' : 'No' }}</span></div>
+                <div><span class="gray-500">Aspects:</span><span class="gray-950 fw-400"> {{ $property->aspects ?? 'N/A' }}</span></div>
             </div>
         </div>
-        <div class="accordion_features_item">
-            <div  class="accordion_features_label">
-                <div class="accordion_inner_heading">Safety</div> 
+        <div class=" ">
+            <div class="accordion_inner_heading mb-2">Rent</div>
+            <div class="accordion_features_item">
+                <div><span class="gray-500">Collecting Rent: </span> <span class="gray-950 fw-400">{{ $property->collecting_rent == '1' ? 'Yes' : 'No' }}</span></div>
             </div>
-            {{ $safety ?: 'N/A' }}
         </div>
-        <div class="accordion_features_item">
-            <div  class="accordion_features_label">
-                <div class="accordion_inner_heading">Other</div> 
-            <div  class="accordion_features_content">
-                {{ $other ?: 'N/A' }}
+        <div class=" ">
+            <div class="accordion_inner_heading mb-2">Area</div>
+            <div class="accordion_features_item area">
+                <div><span class="gray-500">Square Feet: </span> <span class="gray-950 fw-400">{{ $property->square_feet ? $property->square_feet . ' sqft' : 'N/A' }}</span></div>
+                <div><span class="gray-500">Square Meter:</span> <span class="gray-950 fw-400"> {{ $property->square_meter ? $property->square_meter . ' sqm' : 'N/A' }}</span></div>
             </div>
+        </div>
         </div>
     </div>
-    
-    <!-- Display View Mode -->
-    <div class=" ">
-        <div class="accordion_inner_heading mb-2">Rooms </div>
-        <div class="accordion_features_rooms">
-            <div class="accordion_features_item rooms">
-                <span class="gray-950 fw-400"> {{ $property->bedroom }} </span> <sapn class="gray-500"> Bedrooms </sapn>
-            </div>
-            <div class="accordion_features_item rooms">
-                <span class="gray-950 fw-400">{{ $property->bathroom }}  </span> <sapn class="gray-500"> Bathrooms </sapn>
-            </div>
-            <div class="accordion_features_item rooms">
-                <span class="gray-950 fw-400"> {{ $property->reception }}</span> <sapn class="gray-500"> Reception Rooms </sapn>
-            </div>
-            <div class="accordion_features_item rooms">
-                <span class="gray-950 fw-400 capitalize">{{ $property->floor }}</span> <sapn class="gray-500"> Floor </sapn>
-            </div>
-        </div>
-    </div>
-    
-    
-    <div class=" ">
-        <div class="accordion_inner_heading mb-2">Balcony</div>
-        <div class="accordion_features_item balcony">
-            <div><span class="gray-500">Balcony:</span> <span class="gray-950 fw-400">{{ $property->balcony == '1' ? 'Yes' : 'No' }}</span></div>
-            <div><span class="gray-500">Garden: </span><span class="gray-950 fw-400"> {{ $property->garden == '1' ? 'Yes' : 'No' }}</span></div>
-            <div><span class="gray-500">Aspects:</span><span class="gray-950 fw-400"> {{ $property->aspects ?? 'N/A' }}</span></div>
-        </div>
-    </div>
-    <div class=" ">
-        <div class="accordion_inner_heading mb-2">Rent</div>
-        <div class="accordion_features_item">
-            <div><span class="gray-500">Collecting Rent: </span> <span class="gray-950 fw-400">{{ $property->collecting_rent == '1' ? 'Yes' : 'No' }}</span></div>
-        </div>
-    </div>
-    <div class=" ">
-        <div class="accordion_inner_heading mb-2">Area</div>
-        <div class="accordion_features_item area">
-            <div><span class="gray-500">Square Feet: </span> <span class="gray-950 fw-400">{{ $property->square_feet ? $property->square_feet . ' sqft' : 'N/A' }}</span></div>
-            <div><span class="gray-500">Square Meter:</span> <span class="gray-950 fw-400"> {{ $property->square_meter ? $property->square_meter . ' sqm' : 'N/A' }}</span></div>
-        </div>
-    </div>
-</div>
-    
-@else
-<!-- Form Input Mode -->
-<form id="propertyFeaturesForm">
-    @csrf
-    <input type="hidden" name="property_id" value="{{ $property->id }}">
-    <input type="hidden" name="form_type" value="property_features">
 
-<div class="form-group">
-    <label>Furniture</label>
-    @foreach(['Furnished' => 'Furnished', 'Unfurnished' => 'Unfurnished', 'Flexible' => 'Flexible'] as $key => $value)
-        @php
-            // Decode the furniture field if it's a JSON string.
-            $furniture = isset($property) && is_string($property->furniture) ? json_decode($property->furniture, true) : [];
-        @endphp    
-        <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="furniture[]" value="{{ $key }}" id="furniture_{{ $key }}" 
-                {{ in_array($key, $furniture) ? 'checked' : '' }}>
-            <label class="form-check-label" for="furniture_{{ $key }}">{{ $value }}</label>
+@else
+    <!-- Form Input Mode -->
+    <form id="propertyFeaturesForm">
+        @csrf
+        <input type="hidden" name="property_id" value="{{ $property->id }}" />
+        <input type="hidden" name="form_type" value="property_features" />
+        
+        <div class="form-group">
+            <label>Furniture</label>
+            @foreach(['Furnished' => 'Furnished', 'Unfurnished' => 'Unfurnished', 'Flexible' => 'Flexible'] as $key => $value)
+                @php
+                    // Decode the furniture field if it's a JSON string.
+                    $furniture = isset($property) && is_string($property->furniture) ? json_decode($property->furniture, true) : [];
+                @endphp  
+            @endforeach  
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="furniture[]" value="{{ $key }}" id="furniture_{{ $key }}" 
+                    {{ in_array($key, $furniture) ? 'checked' : '' }}>
+                <label class="form-check-label" for="furniture_{{ $key }}">{{ $value }}</label>
+            </div>
         </div>
 
         <div class="form-group">
             <label>Kitchen</label>
             @foreach ([
-        'Undercounter refrigerator without freezer' => 'Undercounter refrigerator without freezer',
-        'Dishwasher' => 'Dishwasher',
-        'Gas oven' => 'Gas oven',
-        'Gas hob' => 'Gas hob',
-        'Washing machine' => 'Washing machine',
-        'Dryer' => 'Dryer',
-        'Electric hob' => 'Electric hob',
-        'Electric oven' => 'Electric oven',
-        'Washer' => 'Washer',
-        'Washer Dryer' => 'Washer Dryer',
-        'Undercounter refrigerator with freezer' => 'Undercounter refrigerator with freezer',
-        'Tall refrigerator with freezer' => 'Tall refrigerator with freezer',
-    ] as $key => $value)
+                'Undercounter refrigerator without freezer' => 'Undercounter refrigerator without freezer',
+                'Dishwasher' => 'Dishwasher',
+                'Gas oven' => 'Gas oven',
+                'Gas hob' => 'Gas hob',
+                'Washing machine' => 'Washing machine',
+                'Dryer' => 'Dryer',
+                'Electric hob' => 'Electric hob',
+                'Electric oven' => 'Electric oven',
+                'Washer' => 'Washer',
+                'Washer Dryer' => 'Washer Dryer',
+                'Undercounter refrigerator with freezer' => 'Undercounter refrigerator with freezer',
+                'Tall refrigerator with freezer' => 'Tall refrigerator with freezer',
+            ] as $key => $value)
                 @php
                     // Decode the kitchen field if it's a JSON string.
                     $kitchen =
@@ -144,20 +147,20 @@ $other = jsonDecodeAndPrint($property->other) ?? '';
         <div class="form-group">
             <label>Heating and Cooling</label>
             @foreach ([
-        'Air conditioning' => 'Air conditioning',
-        'Underfloor heating' => 'Underfloor heating',
-        'Electric' => 'Electric',
-        'Gas' => 'Gas',
-        'Central heating' => 'Central heating',
-        'Comfort cooling' => 'Comfort cooling',
-        'Portable heater' => 'Portable heater',
-    ] as $key => $value)
-                @php
-                    // Decode the heating_cooling field if it's a JSON string.
-                    $heatingCooling =
-                        isset($property) && is_string($property->heating_cooling)
-                            ? json_decode($property->heating_cooling, true)
-                            : [];
+                'Air conditioning' => 'Air conditioning',
+                'Underfloor heating' => 'Underfloor heating',
+                'Electric' => 'Electric',
+                'Gas' => 'Gas',
+                'Central heating' => 'Central heating',
+                'Comfort cooling' => 'Comfort cooling',
+                'Portable heater' => 'Portable heater',
+            ] as $key => $value)
+            @php
+                // Decode the heating_cooling field if it's a JSON string.
+                $heatingCooling =
+                    isset($property) && is_string($property->heating_cooling)
+                        ? json_decode($property->heating_cooling, true)
+                        : [];
                 @endphp
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="heating_cooling[]"
@@ -172,12 +175,12 @@ $other = jsonDecodeAndPrint($property->other) ?? '';
         <div class="form-group">
             <label>Safety</label>
             @foreach ([
-        'External CCTV Intruder alarm system' => 'External CCTV Intruder alarm system',
-        'Smoke alarm' => 'Smoke alarm (Legal requirement)',
-        'Carbon monoxide detector' => 'Carbon monoxide detector',
-        'Window locks' => 'Window locks',
-        'Security key lock' => 'Security key lock',
-    ] as $key => $value)
+                'External CCTV Intruder alarm system' => 'External CCTV Intruder alarm system',
+                'Smoke alarm' => 'Smoke alarm (Legal requirement)',
+                'Carbon monoxide detector' => 'Carbon monoxide detector',
+                'Window locks' => 'Window locks',
+                'Security key lock' => 'Security key lock',
+            ] as $key => $value)
                 @php
                     // Decode the safety field if it's a JSON string.
                     $safety =
@@ -194,20 +197,20 @@ $other = jsonDecodeAndPrint($property->other) ?? '';
         <div class="form-group">
             <label>Other</label>
             @foreach ([
-        'Roof Garden' => 'Roof Garden',
-        'Business Centre' => 'Business Centre',
-        'Concierge' => 'Concierge',
-        'Lift' => 'Lift',
-        'Pets Allowed' => 'Pets Allowed',
-        'Pets Allowed With Licence' => 'Pets Allowed With Licence',
-        'TV' => 'TV',
-        'Fireplace' => 'Fireplace',
-        'Wood flooring' => 'Wood flooring',
-        'Double glazing' => 'Double glazing',
-        'Not suitable for wheelchair users' => 'Not suitable for wheelchair users',
-        'Gym' => 'Gym',
-        'None' => 'None',
-    ] as $key => $value)
+                'Roof Garden' => 'Roof Garden',
+                'Business Centre' => 'Business Centre',
+                'Concierge' => 'Concierge',
+                'Lift' => 'Lift',
+                'Pets Allowed' => 'Pets Allowed',
+                'Pets Allowed With Licence' => 'Pets Allowed With Licence',
+                'TV' => 'TV',
+                'Fireplace' => 'Fireplace',
+                'Wood flooring' => 'Wood flooring',
+                'Double glazing' => 'Double glazing',
+                'Not suitable for wheelchair users' => 'Not suitable for wheelchair users',
+                'Gym' => 'Gym',
+                'None' => 'None',
+            ] as $key => $value)
                 @php
                     // Decode the other field if it's a JSON string.
                     $other = isset($property) && is_string($property->other) ? json_decode($property->other, true) : [];
@@ -452,25 +455,27 @@ $other = jsonDecodeAndPrint($property->other) ?? '';
         </div>
         
         <button type="submit" class="btn btn-success mt-3 float-end">Save Changes</button>
-    </form>
+</form>
 
-    <script>
-        // Event listener for the Square Feet input
-        document.querySelector('input[name="square_feet"]').addEventListener('input', function() {
-            var squareFeet = parseFloat(this.value);
-            if (!isNaN(squareFeet)) {
-                var squareMeter = squareFeet * 0.09290303997; // Conversion factor from square feet to square meters
-                document.querySelector('input[name="square_meter"]').value = squareMeter.toFixed(4);
-            }
-        });
+<script>
+    // Event listener for the Square Feet input
+    document.querySelector('input[name="square_feet"]').addEventListener('input', function() {
+        var squareFeet = parseFloat(this.value);
+        if (!isNaN(squareFeet)) {
+            var squareMeter = squareFeet * 0.09290303997; // Conversion factor from square feet to square meters
+            document.querySelector('input[name="square_meter"]').value = squareMeter.toFixed(4);
+        }
+    });
 
-        // Event listener for the Square Meter input
-        document.querySelector('input[name="square_meter"]').addEventListener('input', function() {
-            var squareMeter = parseFloat(this.value);
-            if (!isNaN(squareMeter)) {
-                var squareFeet = squareMeter * 10.7639104167; // Conversion factor from square meters to square feet
-                document.querySelector('input[name="square_feet"]').value = squareFeet.toFixed(4);
-            }
-        });
-    </script>
+    // Event listener for the Square Meter input
+    document.querySelector('input[name="square_meter"]').addEventListener('input', function() {
+        var squareMeter = parseFloat(this.value);
+        if (!isNaN(squareMeter)) {
+            var squareFeet = squareMeter * 10.7639104167; // Conversion factor from square meters to square feet
+            document.querySelector('input[name="square_feet"]').value = squareFeet.toFixed(4);
+        }
+    });
+</script>
+
+    
 @endif
