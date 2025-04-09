@@ -13,8 +13,11 @@
         <div class="row mb-2">
             <div class="col-4"><span class="text-muted">Sales Status : </span><strong>{{ $salesCurrentStatus }}</strong>
             </div>
+            
+        @if(isset($property) && ($property->property_type == 'lettings' || $property->property_type == 'both'))
             <div class="col-6"><span class="text-muted">Letting Status : </span><strong>{{ $lettingCurrentStatus }}</strong>
             </div>
+        @endif
         </div>
 
         <div class="row mb-2">
@@ -29,146 +32,53 @@
         <input type="hidden" name="property_id" value="{{ $property->id }}">
         <input type="hidden" name="form_type" value="property_status">
 
-        <div class="mb-3">
-            <label>Availability</label>
-            <input type="date" name="available_from" class="form-control" value="{{ $property->available_from }}">
-        </div>
-
-        <!-- Listing Sale Price Input (Show only if type is sales or both) -->
-        @if($propertyType == 'sales' || $propertyType == 'both')
+        @if(isset($property) && ($property->property_type == 'sales' || $property->property_type == 'both'))
             <div class="form-group">
-                <label for="lprice">Listing Sale Price</label>
-                <div class="price_input_wrapper">
-                    <div class="pound_sign">{{ getPoundSymbol() }}</div>
-                    <input type="text" name="price" id="price" class="form-control" value="{{ $propertyPrice }}">
-                </div>
-            </div>
-        @endif
-
-        <!-- Letting Price Input (Show only if type is letting or both) -->
-        @if($propertyType == 'lettings' || $propertyType == 'both')
-            <div class="form-group">
-                <label for="letting_price">Letting Price</label>
-                <div class="price_input_wrapper">
-                    <div class="pound_sign">{{ getPoundSymbol() }}</div>
-                    <input type="text" name="letting_price" id="letting_price" class="form-control" value="{{ $lettingPrice }}">
-                </div>
-            </div>
-        @endif
-        @if($propertyType == 'sales' || $propertyType == 'both')
-            <div class="form-group">
-                <label for="ground_rent">Ground Rent (annual)</label>
-                <div class="price_input_wrapper">
-                    <div class="pound_sign">{{ getPoundSymbol() }}</div>
-                    <input type="text" name="ground_rent" id="ground_rent" class="form-control" value="{{ $groundRent }}">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="service_charge">Service Charge (annual)</label>
-                <div class="price_input_wrapper">
-                    <div class="pound_sign">{{ getPoundSymbol() }}</div>
-                    <input type="text" name="service_charge" id="service_charge" class="form-control"
-                        value="{{ $serviceCharge }}">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="estate_charge">Estate Charge (annual)</label>
-                <div class="price_input_wrapper">
-                    <div class="pound_sign">{{ getPoundSymbol() }}</div>
-                    <input type="text" name="estate_charge" id="estate_charge" class="form-control" value="{{ $estateCharge }}">
-                </div>
-            </div>
-
-            {{-- <div class="form-group">
-                <label for="estate_charges[amount]">Estate Charge</label>
-                <div class="price_input_wrapper">
-                    <div class="pound_sign">{{ getPoundSymbol() }}</div>
-                    <input required type="text" name="estate_charges[amount]" id="estate_charges" class="form-control"
-                        value="{{ old('estate_charges.amount', $property->estateCharge->amount ?? '') }}">
-                </div>
-                @error('estate_charges.amount')
-                <div class="text-danger">{{ $message }}</div>
+                <label for="sales_current_status">Sales Status</label>
+                <select name="sales_current_status" id="sales_current_status" class="form-control" required>
+                    <option value="" disabled {{ (isset($property) && $property->sales_current_status == '') ? 'selected' : ''  }}>Select a Status</option>
+                    <option value="for sale" {{ (isset($property) && $property->sales_current_status == 'for sale') ? 'selected' : '' }}>For Sale</option>
+                    <option value="on hold" {{ (isset($property) && $property->sales_current_status == 'on hold') ? 'selected' : '' }}>On Hold</option>
+                    <option value="under offer" {{ (isset($property) && $property->sales_current_status == 'under offer') ? 'selected' : '' }}>Under Offer</option>
+                    <option value="sold" {{ (isset($property) && $property->sales_current_status == 'sold') ? 'selected' : '' }}>Sold</option>
+                    <option value="sold STC" {{ (isset($property) && $property->sales_current_status == 'sold STC') ? 'selected' : '' }}>Sold STC</option>
+                    <option value="sold by other" {{ (isset($property) && $property->sales_current_status == 'sold by other') ? 'selected' : '' }}>Sold By Other</option>
+                    <option value="exchanged" {{ (isset($property) && $property->sales_current_status == 'exchanged') ? 'selected' : '' }}>Exchanged</option>
+                    <option value="available" {{ (isset($property) && $property->sales_current_status == 'available') ? 'selected' : '' }}>Available</option>
+                    <option value="let agreed" {{ (isset($property) && $property->sales_current_status == 'let agreed') ? 'selected' : '' }}>Let Agreed</option>
+                </select>
+                @error('sales_current_status')
+                    <div class="text-danger">{{ $message }}</div>
                 @enderror
-            </div> --}}
-
+            </div>
         @endif
 
-        <div class="form-group">
-            <label for="annual_council_tax">Annual Council Tax (annual)</label>
-            <div class="price_input_wrapper">
-                <div class="pound_sign">{{ getPoundSymbol() }}</div>
-                <input type="text" name="annual_council_tax" id="annual_council_tax" class="form-control"
-                    value="{{ $annualCouncilTax }}">
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label for="miscellaneous_charge">Miscellaneous Charge (annual)</label>
-            <div class="price_input_wrapper">
-                <div class="pound_sign">{{ getPoundSymbol() }}</div>
-                <input type="text" name="miscellaneous_charge" id="miscellaneous_charge" class="form-control"
-                    value="{{ $miscellaneousCharge }}">
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label for="council_tax_band">Council Tax Band</label>
-            <select name="council_tax_band" id="council_tax_band" class="form-control">
-                <option value="" disabled selected>Select a band</option>
-                <option value="A" {{ old('council_tax_band', $councilTaxBand) == 'A' ? 'selected' : '' }}>A</option>
-                <option value="B" {{ old('council_tax_band', $councilTaxBand) == 'B' ? 'selected' : '' }}>B</option>
-                <option value="C" {{ old('council_tax_band', $councilTaxBand) == 'C' ? 'selected' : '' }}>C</option>
-                <option value="D" {{ old('council_tax_band', $councilTaxBand) == 'D' ? 'selected' : '' }}>D</option>
-                <option value="E" {{ old('council_tax_band', $councilTaxBand) == 'E' ? 'selected' : '' }}>E</option>
-                <option value="F" {{ old('council_tax_band', $councilTaxBand) == 'F' ? 'selected' : '' }}>F</option>
-                <option value="G" {{ old('council_tax_band', $councilTaxBand) == 'G' ? 'selected' : '' }}>G</option>
-                <option value="H" {{ old('council_tax_band', $councilTaxBand) == 'H' ? 'selected' : '' }}>H</option>
-            </select>
-        </div>
-
-
-        <div class="form-group">
-            <label for="local_authority">Local Authority</label>
-            <input type="text" name="local_authority" id="local_authority" class="form-control"
-                value="{{ $localAuthority }}">
-        </div>
-
-        <div class="form-group">
-            <label for="tenure">Tenure</label>
-            <select name="tenure" id="tenure" class="form-control">
-                <option value="leasehold" {{ isset($property) && $property->tenure == 'leasehold' ? 'selected' : '' }}>
-                    Leasehold</option>
-                <option value="freehold" {{ isset($property) && $property->tenure == 'freehold' ? 'selected' : '' }}>Freehold
-                </option>
-                <option value="commonhold" {{ isset($property) && $property->tenure == 'commonhold' ? 'selected' : '' }}>
-                    Commonhold</option>
-                <option value="feudal" {{ isset($property) && $property->tenure == 'feudal' ? 'selected' : '' }}>Feudal
-                </option>
-                <option value="share_of_freehold" {{ isset($property) && $property->tenure == 'share_of_freehold' ? 'selected' : '' }}>Share of Freehold</option>
-            </select>
-
-        </div>
-
-        @if($propertyType == 'sales' || $propertyType == 'both')
+        @if(isset($property) && ($property->property_type == 'lettings' || $property->property_type == 'both'))
             <div class="form-group">
-                <label for="length_of_lease">Length of Lease (in year)</label>
-                <input type="text" name="length_of_lease" id="length_of_lease" class="form-control"
-                    value="{{ $lengthOfLease }}">
+                <label for="letting_current_status">Letting Status</label>
+                <select name="letting_current_status" id="letting_current_status" class="form-control" required>
+                    <option value="" disabled {{ (isset($property) && $property->letting_current_status == '') ? 'selected' : ''  }}>Select a Status</option>
+                    <option value="not available" {{ (isset($property) && $property->letting_current_status == 'not available') ? 'selected' : '' }}>Not Available</option>
+                    <option value="available" {{ (isset($property) && $property->letting_current_status == 'available') ? 'selected' : '' }}>Available</option>
+                    <option value="let agreed" {{ (isset($property) && $property->letting_current_status == 'let agreed') ? 'selected' : '' }}>Let Agreed</option>
+                    <option value="let by other" {{ (isset($property) && $property->letting_current_status == 'let by other') ? 'selected' : '' }}>Let By Other</option>
+                </select>
+                @error('letting_current_status')
+                    <div class="text-danger">{{ $message }}</div>
+                @enderror
             </div>
         @endif
 
-        <div class="mb-3">
-            <label>Sale Price (£)</label>
-            <input type="text" name="price" class="form-control" value="{{ $property->price }}">
+        <div class="form-group">
+            <label for="status_description">Description</label>
+            <textarea name="status_description" id="status_description" rows="6"
+                class="form-control">{{ isset($property) && $property->status_description ? $property->status_description : '' }}</textarea>
+                <div class="input_tag">0/5000 words</div>
+            @error('status_description')
+                <div class="text-danger">{{ $message }}</div>
+            @enderror
         </div>
 
-        <div class="mb-3">
-            <label>Letting Price (£)</label>
-            <input type="text" name="letting_price" class="form-control" value="{{ $property->letting_price }}">
-        </div>
-
-        <button type="submit" class="btn btn-success">Save Changes</button>
+        <button type="submit" class="btn btn-success mt-3 float-end">Save Changes</button>
     </form>
 @endif

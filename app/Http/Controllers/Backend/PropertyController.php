@@ -187,7 +187,7 @@ private function getTabContent($tabname, $propertyId, $property)
         // case 'work offer':
         //     return view('backend.properties.tabs.work_offer', compact('propertyId'))->render();
         case 'notes':
-            return view('backend.properties.tabs.notes', compact('propertyId'))->render();
+            return view('backend.properties.tabs.notes', compact('propertyId', 'property'))->render();
         default:
             return 'Tab content not found';
     }
@@ -693,28 +693,21 @@ private function getTabContent($tabname, $propertyId, $property)
         if (!view()->exists($viewPath)) {
             return response()->json(['error' => 'Invalid form type'], 400);
         }
-        
-        // Fetch all stations and schools
-        $allstations = StationName::select('id', 'name')->get();
-        $allschools = SchoolName::select('id', 'name')->get();
+
+        $extraData = []; // <-- This prevents undefined variable errors
+        $extraData = $this->getFormTypeExtras($formType, $property);
     
-        // Get the nearest station and school IDs from the property (comma-separated)
-        $stationIds = explode(',', $property->nearest_station);
-        $schoolIds = explode(',', $property->nearest_school);
-    
-        // Fetch names using IDs
-        $stations = StationName::whereIn('id', $stationIds)->pluck('name', 'id');
-        $schools = SchoolName::whereIn('id', $schoolIds)->pluck('name', 'id');
-    
+        $html = view($viewPath, array_merge(['property' => $property],['editMode' => true], $extraData))->render();
+
         // Render the form with additional data
-        $html = view($viewPath, [
-            'property' => $property,
-            'editMode' => true,
-            'stations' => $stations,
-            'schools' => $schools,
-            'allstations' => $allstations,
-            'allschools' => $allschools
-        ])->render();
+        // $html = view($viewPath, [
+        //     'property' => $property,
+        //     'editMode' => true,
+        //     'stations' => $stations,
+        //     'schools' => $schools,
+        //     'allstations' => $allstations,
+        //     'allschools' => $allschools
+        // ])->render();
 
         // Render the form and return it
         // $html = view($viewPath, ['property' => $property, 'editMode' => true])->render();
@@ -732,31 +725,52 @@ private function getTabContent($tabname, $propertyId, $property)
             return response()->json(['error' => 'Property not found'], 404);
         }
 
+        $extraData = []; // <-- This prevents undefined variable errors
+
         // Save the form data based on the form type
         switch ($formType) {
             case 'availability_pricing':
-                $data = $request->only(['available_from', 'price', 'letting_price']);
+                $data = $request->only([
+                    'available_from', 'local_authority', 'tenure', 'length_of_lease', 'estate_charge', 'ground_rent', 'service_charge', 'miscellaneous_charge', 'price', 'letting_price', 'annual_council_tax', 'council_tax_band'
+                ]);
                 break;
             case 'property_info':
-                $data = $request->only(['property_type', 'transaction_type', 'specific_property_type']);
+                $data = $request->only([
+                    'property_type', 'transaction_type', 'specific_property_type'
+                ]);
                 break;
             case 'property_accessibility':
-                $data = $request->only(['property_type', 'transaction_type', 'specific_property_type']);
+                $data = $request->only([
+                    'access_arrangement', 'key_highlights', 'nearest_station', 'nearest_school', 'nearest_religious_places', 'useful_information'
+                ]);
+                // $extraData = $this->getFormTypeExtras($formType, $property);
                 break;
             case 'property_details':
-                $data = $request->only(['property_type', 'transaction_type', 'specific_property_type']);
+                $data = $request->only([
+                    'epc_required', 'epc_rating', 'gas_safe_acknowledged', 'is_gas', 'photos', 'floor_plan', 'view_360', 'market_on']);
                 break;
             case 'property_features':
-                $data = $request->only(['property_type', 'transaction_type', 'specific_property_type']);
+                $data = $request->only([
+                    'furniture', 'kitchen', 'heating_cooling', 'safety', 'other', 'bedroom', 'bathroom', 'reception', 'floor', 'balcony', 'garden', 'aspects', 'collecting_rent', 'square_feet', 'square_meter'
+                ]);
                 break;
             case 'property_services':
-                $data = $request->only(['property_type', 'transaction_type', 'specific_property_type']);
+                $data = $request->only([
+                    'parking', 'parking_location', 'service', 'pets_allow'
+                ]);
                 break;
             case 'property_status':
-                $data = $request->only(['property_type', 'transaction_type', 'specific_property_type']);
+                $data = $request->only([
+                    'sales_current_status', 'letting_current_status', 'status_description'
+                ]);
+                break;
+            case 'notes':
+                $data = $request->only([
+                    'notes'
+                ]);
                 break;
             default:
-                return response()->json(['error' => 'Invalid form type'], 400);
+                return response()->json(['message' => 'Invalid form type'], 400);
         }
 
         // Handle different form types dynamically
@@ -771,8 +785,12 @@ private function getTabContent($tabname, $propertyId, $property)
     
         $property->update($data);
     
+        // 🛠️ Fix: Re-fetch related data like school/station names
+        $extraData = $this->getFormTypeExtras($formType, $property);
+
         // Render updated section
-        $updatedView = view("backend.properties.popup_forms.$formType", compact('property'))->render();
+        $updatedView = view("backend.properties.popup_forms.$formType", array_merge(['property' => $property], $extraData))->render();
+        // $updatedView = view("backend.properties.popup_forms.$formType", compact('property'))->render();
     
         return response()->json([
             'success' => 'Form updated successfully', 
@@ -780,7 +798,27 @@ private function getTabContent($tabname, $propertyId, $property)
         ]);
     }
     
-    
+    private function getFormTypeExtras($formType, $property)
+    {
+        if ($formType === 'property_accessibility') {
+            // Fetch all stations and schools
+            $allstations = StationName::select('id', 'name')->get();
+            $allschools = SchoolName::select('id', 'name')->get();
+        
+            // Get the nearest station and school IDs from the property (comma-separated)
+            $stationIds = explode(',', $property->nearest_station);
+            $schoolIds = explode(',', $property->nearest_school);
+        
+            // Fetch names using IDs
+            $stations = StationName::whereIn('id', $stationIds)->pluck('name', 'id');
+            $schools = SchoolName::whereIn('id', $schoolIds)->pluck('name', 'id');
+
+            return compact('allstations', 'allschools', 'stations', 'schools');
+        }
+
+        return [];
+    }
+
 
     // // Method to load the tab content for a specific property and tab
     // public function showTabContent($property_id, $tabname)

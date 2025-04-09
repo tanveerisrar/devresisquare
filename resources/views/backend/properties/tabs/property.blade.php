@@ -100,9 +100,9 @@ $secondHalf = array_slice($allFeatures, $halfCount);
 
     <div class="pv_content">
 
-        <div class="pvc_ref_id">Ref: {{$propRefNo}}</div>
+        <div class="pvc_ref_id"> <strong> Property Ref: {{$propRefNo}} </strong></div>
         <div class="pvc_poperty_name">{{ $address }}</div>
-        <div class="rs_property_icons">
+        {{-- <div class="rs_property_icons">
             <div class="bed_icon rs_tooltip" data-label="Bedroom">
                 <img src=" {{ asset('asset/images/svg/icons/bed.svg') }} " alt="bedroom"> {{$bedroom}}
             </div>
@@ -115,9 +115,18 @@ $secondHalf = array_slice($allFeatures, $halfCount);
             <div class="living_icon rs_tooltip" data-label="Sofa">
                 <img src=" {{ asset('asset/images/svg/icons/sofa.svg') }} " alt="sofa"> {{ $reception }}
             </div>
-        </div>
+        </div> --}}
         
-
+        <div class="d-flex justify-content-between align-items-center border rounded-4 p-3 mt-3">
+            <span class="fw-semibold">Important Note
+            <div class="notes-update-ajax" id="section-notes-{{ $property->id }}">
+                @include("backend.properties.popup_forms.notes", ['property' => $property])
+            </div>
+            </span>
+            <button class="btn btn-outline-danger btn-sm editForm" data-form="{{ 'notes' }}" data-id="{{ $property->id }}">
+                Edit
+            </button>
+        </div>
     </div>
     {{-- pv_content end  --}}
 </div>
@@ -135,8 +144,7 @@ $secondHalf = array_slice($allFeatures, $halfCount);
             ['key' => 'property_info', 'title' => 'Property Information', 'order' => 2],
             ['key' => 'property_features', 'title' => 'Property Features', 'order' => 3],
             ['key' => 'property_services', 'title' => 'Service', 'order' => 4],
-            ['key' => 'property_details', 'title' => 'Details', 'order' => 5],
-            ['key' => 'property_accessibility', 'title' => 'Accessibility', 'order' => 6],
+            ['key' => 'property_status', 'title' => 'Status', 'order' => 7],
             // Add more sections with order values as needed
         ];
     
