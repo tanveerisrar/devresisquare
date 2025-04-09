@@ -1,67 +1,110 @@
 @if(!isset($editMode) || !$editMode)
 <!-- Display View Mode -->
 
-<strong>Furniture:</strong> 
-@if(isset($property->furniture) && is_string($property->furniture))
-    {{ implode(', ', json_decode($property->furniture, true)) ?: 'N/A' }}
-@else
-    N/A
-@endif
-<br>
-
-<strong>Kitchen:</strong> 
-@if(isset($property->kitchen) && is_string($property->kitchen))
-    {{ implode(', ', json_decode($property->kitchen, true)) ?: 'N/A' }}
-@else
-    N/A
-@endif
-<br>
-
-<strong>Heating and Cooling:</strong> 
-@if(isset($property->heating_cooling) && is_string($property->heating_cooling))
-    {{ implode(', ', json_decode($property->heating_cooling, true)) ?: 'N/A' }}
-@else
-    N/A
-@endif
-<br>
-
-<strong>Safety:</strong> 
-@if(isset($property->safety) && is_string($property->safety))
-    {{ implode(', ', json_decode($property->safety, true)) ?: 'N/A' }}
-@else
-    N/A
-@endif
-<br>
-
-<strong>Other:</strong> 
-@if(isset($property->other) && is_string($property->other))
-    {{ implode(', ', json_decode($property->other, true)) ?: 'N/A' }}
-@else
-    N/A
-@endif
-<br>
-
-<!-- Display View Mode -->
-<strong>Bedrooms:</strong> {{ $bedroom }} <br>
-<strong>Bathrooms:</strong> {{ $bathroom }} <br>
-<strong>Reception Rooms :</strong> {{ $reception }} <br>
-<strong>Floor:</strong> {{ $floor }}
-
-
-<div class="d-flex gap-3">
-    <p><strong>Balcony:</strong> {{ $property->balcony == '1' ? 'Yes' : 'No' }}</p>
-    <p><strong>Garden:</strong> {{ $property->garden == '1' ? 'Yes' : 'No' }}</p>
-    <p><strong>Aspects:</strong> {{ $property->aspects ?? 'N/A' }}</p>
+<div class="accordion_inner">
+    <div class="accordion_features_wrapper">
+        <div class="accordion_features_item">
+            <div  class="accordion_features_label">
+                <div class="accordion_inner_heading">Furniture</div> 
+            </div>
+            <div  class="accordion_features_content">
+                @if(isset($property->furniture) && is_string($property->furniture))
+                    {{ implode(', ', json_decode($property->furniture, true)) ?: 'N/A' }}
+                @else
+                    N/A
+                @endif
+            </div>
+        </div>
+        <div class="accordion_features_item">
+            <div  class="accordion_features_label">
+                <div class="accordion_inner_heading">Kitchen</div> 
+            </div>
+            <div  class="accordion_features_content">
+                @if(isset($property->kitchen) && is_string($property->kitchen))
+                    {{ implode(', ', json_decode($property->kitchen, true)) ?: 'N/A' }}
+                @else
+                    N/A
+                @endif
+            </div>
+        </div>
+        <div class="accordion_features_item">
+            <div  class="accordion_features_label">
+                <div class="accordion_inner_heading">Heating and Cooling</div> 
+            </div>
+            <div  class="accordion_features_content">
+                @if(isset($property->heating_cooling) && is_string($property->heating_cooling))
+                    {{ implode(', ', json_decode($property->heating_cooling, true)) ?: 'N/A' }}
+                @else
+                    N/A
+                @endif
+            </div>
+        </div>
+        <div class="accordion_features_item">
+            <div  class="accordion_features_label">
+                <div class="accordion_inner_heading">Safety</div> 
+            </div>
+            @if(isset($property->safety) && is_string($property->safety))
+                {{ implode(', ', json_decode($property->safety, true)) ?: 'N/A' }}
+            @else
+                N/A
+            @endif
+        </div>
+        <div class="accordion_features_item">
+            <div  class="accordion_features_label">
+                <div class="accordion_inner_heading">Other</div> 
+            <div  class="accordion_features_content">
+                @if(isset($property->other) && is_string($property->other))
+                    {{ implode(', ', json_decode($property->other, true)) ?: 'N/A' }}
+                @else
+                    N/A
+                @endif
+            </div>
+        </div>
+    </div>
+    
+    <!-- Display View Mode -->
+    <div class=" ">
+        <div class="accordion_inner_heading mb-2">Rooms </div>
+        <div class="accordion_features_rooms">
+            <div class="accordion_features_item rooms">
+                <span class="gray-950 fw-400">{{ $bedroom }}</span> <sapn class="gray-500"> Bedrooms </sapn>
+            </div>
+            <div class="accordion_features_item rooms">
+                <span class="gray-950 fw-400">{{ $bathroom }} </span> <sapn class="gray-500"> Bathrooms </sapn>
+            </div>
+            <div class="accordion_features_item rooms">
+                <span class="gray-950 fw-400"> {{ $reception }}</span> <sapn class="gray-500"> Reception Rooms </sapn>
+            </div>
+            <div class="accordion_features_item rooms">
+                <span class="gray-950 fw-400 capitalize">{{ $floor }}</span> <sapn class="gray-500"> Floor </sapn>
+            </div>
+        </div>
+    </div>
+    
+    
+    <div class=" ">
+        <div class="accordion_inner_heading mb-2">Balcony</div>
+        <div class="accordion_features_item balcony">
+            <div><span class="gray-500">Balcony:</span> <span class="gray-950 fw-400">{{ $property->balcony == '1' ? 'Yes' : 'No' }}</span></div>
+            <div><span class="gray-500">Garden: </span><span class="gray-950 fw-400"> {{ $property->garden == '1' ? 'Yes' : 'No' }}</span></div>
+            <div><span class="gray-500">Aspects:</span><span class="gray-950 fw-400"> {{ $property->aspects ?? 'N/A' }}</span></div>
+        </div>
+    </div>
+    <div class=" ">
+        <div class="accordion_inner_heading mb-2">Rent</div>
+        <div class="accordion_features_item">
+            <div><span class="gray-500">Collecting Rent: </span> <span class="gray-950 fw-400">{{ $property->collecting_rent == '1' ? 'Yes' : 'No' }}</span></div>
+        </div>
+    </div>
+    <div class=" ">
+        <div class="accordion_inner_heading mb-2">Area</div>
+        <div class="accordion_features_item area">
+            <div><span class="gray-500">Square Feet: </span> <span class="gray-950 fw-400">{{ $property->square_feet ? $property->square_feet . ' sqft' : 'N/A' }}</span></div>
+            <div><span class="gray-500">Square Meter:</span> <span class="gray-950 fw-400"> {{ $property->square_meter ? $property->square_meter . ' sqm' : 'N/A' }}</span></div>
+        </div>
+    </div>
 </div>
-
-<p><strong>Collecting Rent:</strong> {{ $property->collecting_rent == '1' ? 'Yes' : 'No' }}</p>
-
-<strong>Area:</strong>
-<div class="d-flex gap-3">
-    <p><strong>Square Feet:</strong> {{ $property->square_feet ? $property->square_feet . ' sqft' : 'N/A' }}</p>
-    <p><strong>Square Meter:</strong> {{ $property->square_meter ? $property->square_meter . ' sqm' : 'N/A' }}</p>
-</div>
-
+    
 @else
 <!-- Form Input Mode -->
 <form id="propertyFeaturesForm">

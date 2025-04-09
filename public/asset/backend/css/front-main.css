@@ -147,6 +147,7 @@ div.dataTables_wrapper div.dataTables_filter input {
         }
         .accordion-body{
             padding-inline: unset;
+            font-weight: 400;
             .accordion_inner{
                 .accordion_inner_heading{
                     font-size: 20px;
@@ -160,6 +161,45 @@ div.dataTables_wrapper div.dataTables_filter input {
                         min-width: 200px;
                     }
                 }
+                .accordion_features_wrapper{
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1.75rem;
+                    .accordion_features_rooms{
+                        display: flex;
+                        flex-direction: row;
+                        gap: 24px;
+                        flex-wrap: wrap;
+                        .accordion_features_item{
+                            display: flex;
+                            flex-direction: column;
+                            gap: .75rem;
+                            &.rooms{
+                                display: flex;
+                                flex-direction: row;
+                                gap: 8px;
+                            }
+                        }
+                    }
+                    .accordion_features_item{
+                        display: flex;
+                        flex-direction: column;
+                        gap: .75rem;
+                        
+                        &.balcony{
+                            display: flex;
+                            flex-direction: row;
+                            gap: 24px;
+                        }
+                        &.area{
+                            display: flex;
+                            flex-direction: row;
+                            gap: 24px;
+                        }
+                    }
+                    
+                }
+                
             }
         }
     }

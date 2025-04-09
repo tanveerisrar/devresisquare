@@ -106,6 +106,30 @@
     .secondary-800{ color: var(--secondary-800)}
     .secondary-900{ color: var(--secondary-900)}
 
+    /* Gray Shades */
+    .gray-50{  color: var(--gray-50)}
+    .gray-100{ color: var(--gray-100)}
+    .gray-200{ color: var(--gray-200)}
+    .gray-300{ color: var(--gray-300)}
+    .gray-400{ color: var(--gray-400)}
+    .gray-500{ color: var(--gray-500)}
+    .gray-600{ color: var(--gray-600)}
+    .gray-700{ color: var(--gray-700)}
+    .gray-800{ color: var(--gray-800)}
+    .gray-900{ color: var(--gray-900)}
+    .gray-950{ color: var(--gray-950)}
+
+    /* Font Weight Utilities */
+    .fw-100 { font-weight: 100; }
+    .fw-200 { font-weight: 200; }
+    .fw-300 { font-weight: 300; }
+    .fw-400 { font-weight: 400; }
+    .fw-500 { font-weight: 500; }
+    .fw-600 { font-weight: 600; }
+    .fw-700 { font-weight: 700; }
+    .fw-800 { font-weight: 800; }
+    .fw-900 { font-weight: 900; }
+
     .primary-color{ color: var(--primary-color);}
     .primary-color-dark{ color: var(--primary-color-dark-600);}
     .primary-color-light{ color: var(--primary-color-light-400);}
@@ -308,6 +332,7 @@ ul{
         text-decoration: underline !important;
     }
 }
+.capitalize{text-transform: capitalize;}
 
 /* form{ width: max-content;} */
 
