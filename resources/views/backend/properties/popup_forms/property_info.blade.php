@@ -28,7 +28,7 @@
         <div class="info_edit_form">
             <div class="form-group pt_wrapper">
                 <div class="accordion_inner_heading mb-2">Proeperty Type</div>
-                <div class="rounded_check_btn">
+                <div class="rounded_radio_btn">
                     <div class="rs_radio_btns">
                         <div>
                             <input class="hidden" type="radio" name="property_type" id="property_type_sales" value="sales" {{ (isset($property) && $propertyType == 'sales') ? 'checked' : '' }} required />
@@ -48,7 +48,7 @@
 
             <div class="form-group">
                 <div class="accordion_inner_heading mb-2">Transaction Type</div>
-                <div class="rounded_check_btn">
+                <div class="rounded_radio_btn">
                     <div class="rs_radio_btns">
                         <div>
                             <input class="hidden" type="radio" name="transaction_type" id="transaction_type_residential" value="residential" {{ (isset($property) && $transactionType == 'residential') ? 'checked' : '' }} required />
@@ -67,7 +67,7 @@
 
             <div class="form-group">
                 <div class="accordion_inner_heading mb-2">Specific Property Type </div>
-                <div class="rounded_check_btn">
+                <div class="rounded_radio_btn">
                     <div class="rs_radio_btns">
                         <div>
                             <input class="hidden" type="radio" name="specific_property_type" id="specific_property_type_appartment"
