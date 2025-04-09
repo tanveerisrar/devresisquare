@@ -287,13 +287,13 @@ form{
   }
 .rounded_radio_btn{
 
-    input[type=checkbox]+label, input[type=radio]+label {
+    input[type=checkbox]+label{
         color: var(--black);
         background-color: var(--gray-300);
         border: 1px solid var(--gray-300);
     }
     
-    input[type=checkbox]:checked+label, input[type=radio]:checked+label {
+    input[type=checkbox]:checked+label{
         color: var(--secondary-color);
         border: 1px solid var(--secondary-color);
     }
