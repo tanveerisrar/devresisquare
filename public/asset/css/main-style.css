@@ -147,8 +147,12 @@
     .secondary-bg-dark{ background-color: var(--secondary-bg-dark);}
     .secondary-bg-light{ background-color: var(--secondary-bg-light); }
 
-
-
+    .min_width-0 { min-width: 0; }
+    .min_width-1 { min-width: 0.25rem; }
+    .min_width-2 { min-width: 0.5rem; }
+    .min_width-3 { min-width: 1rem; }
+    .min_width-4 { min-width: 1.5rem; }
+    .min_width-5 { min-width: 2rem; }
 body{
     font-family: 'Poppins', Arial, Helvetica, sans-serif;
 }
