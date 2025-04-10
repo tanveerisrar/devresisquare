@@ -108,7 +108,7 @@
 @else
     <form id="availabilityPricingForm">
         @csrf
-        <input type="hidden" name="property_id" value="{{ $property->id }}">
+        <input type="hidden" name="repair_id" value="{{ $repairIssue->id }}">
         <input type="hidden" name="form_type" value="availability_pricing">
 
         <div class="mb-3">

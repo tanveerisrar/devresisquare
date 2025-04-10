@@ -43,7 +43,7 @@ $other = jsonDecodeAndPrint($property->other) ?? '';
     <!-- Form Input Mode -->
     <form id="propertyFeaturesForm">
         @csrf
-        <input type="hidden" name="property_id" value="{{ $property->id }}">
+        <input type="hidden" name="repair_id" value="{{ $repairIssue->id }}">
         <input type="hidden" name="form_type" value="property_features">
 
         <div class="form-group">

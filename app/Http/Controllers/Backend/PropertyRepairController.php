@@ -651,40 +651,40 @@ class PropertyRepairController
 
     public function loadForm(Request $request)
     {
-        $repair = RepairIssue::find($request->repair_id);
+        $repairIssue = RepairIssue::with([
+            'property',
+            'repairCategory',
+            'repairPhotos',
+            'repairAssignments',
+            'repairIssuePropertyManagers',
+            'repairIssueContractorAssignments',
+            'repairHistories',
+            'repairIssueContacts',
+            'finalContractor',
+            'tenant',
+            'workOrder',
+            'invoice'
+        ])->find($request->repair_id);
+
         $formType = $request->form_type;
 
-        if (!$repair) {
+        if (!$repairIssue) {
             return response()->json(['error' => 'repair not found'], 404);
         }
 
         $viewPath = "backend.repair.popup_forms.$formType";
 
-        // Check if the form view exists
         if (!view()->exists($viewPath)) {
             return response()->json(['error' => 'Invalid form type'], 400);
         }
+        $property = $repairIssue->property;
+        $extraData = $this->getFormTypeExtras($formType, $repairIssue);
 
-        $extraData = [];  // <-- This prevents undefined variable errors
-        $extraData = $this->getFormTypeExtras($formType, $repair);
-
-        $html = view($viewPath, array_merge(['repair' => $repair], ['editMode' => true], $extraData))->render();
-
-        // Render the form with additional data
-        // $html = view($viewPath, [
-        //     'repair' => $repair,
-        //     'editMode' => true,
-        //     'stations' => $stations,
-        //     'schools' => $schools,
-        //     'allstations' => $allstations,
-        //     'allschools' => $allschools
-        // ])->render();
-
-        // Render the form and return it
-        // $html = view($viewPath, ['repair' => $repair, 'editMode' => true])->render();
+        $html = view($viewPath, array_merge(['repairIssue' => $repairIssue], ['property' => $property], ['editMode' => true], $extraData))->render();
 
         return response()->json(['success' => true, 'form_html' => $html]);
     }
+
 
     public function saveForm(Request $request)
     {

@@ -236,6 +236,9 @@ Route::middleware('auth')->group(function () {
                 Route::get('/get-repair-categories', 'getCategories')->name('get.repair.categories');
                 Route::get('/selected-property/tenants', 'getPropertyTenants')->name('get.property_repairs.tenants');
                 Route::get('/repair/{repair}/workorder-invoice', 'workOrderInvoice')->name('repair.workorder.invoice');
+
+                Route::get('/load-form', 'loadForm')->name('property_repairs.loadForm');
+                Route::post('/save-form', 'saveForm')->name('property_repairs.saveForm');
             });
         });
 

@@ -29,7 +29,7 @@
 @else
     <form id="propertyStatusForm">
         @csrf
-        <input type="hidden" name="property_id" value="{{ $property->id }}">
+        <input type="hidden" name="repair_id" value="{{ $repairIssue->id }}">
         <input type="hidden" name="form_type" value="property_status">
 
         @if(isset($property) && ($property->property_type == 'sales' || $property->property_type == 'both'))

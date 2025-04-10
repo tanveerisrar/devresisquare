@@ -11,7 +11,7 @@
 @else
     <form id="propertyInfoForm">
         @csrf
-        <input type="hidden" name="property_id" value="{{ $property->id }}">
+        <input type="hidden" name="repair_id" value="{{ $repairIssue->id }}">
         <input type="hidden" name="form_type" value="property_info">
 
         <div class="form-group pt_wrapper">

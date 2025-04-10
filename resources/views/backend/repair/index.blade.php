@@ -88,8 +88,94 @@
 @section('page.scripts')
     <script>
         let lastLoadedUrl = null; // Track the last detail URL
+        // Open modal and load form via AJAX
+        $(document).on("click", ".editForm", function () {
+            let formType = $(this).data("form");
+            let repairId = $(this).data("id");
+            let formTitles = {
+                "availability_pricing": "Edit Availability & Pricing",
+                "property_info": "Edit Property Information",
+                "property_features": "Edit Property Features",
+                "property_details": "Edit Property Details",
+                "property_accessibility": "Edit Property Accessibility",
+                "property_services": "Edit Property Services",
+                "property_status": "Edit Property Status",
+                "notes": "Edit Important Note",
+            };
+            
+            let modalTitle = formTitles[formType] || "Edit Details"; // Default title if form type is not found
 
+            $("#largeModal .modal-title").html(modalTitle); // Set dynamic title
+            $.ajax({
+                url: "{{ route('admin.property_repairs.loadForm') }}", // Route to get form dynamically
+                type: "GET",
+                data: { form_type: formType, repair_id: repairId },
+                success: function (response) {
+                    $("#largeModal .modal-body").html(response.form_html);
+                    $("#largeModal").modal("show");
+
+                    // **Trigger the function ONLY for a specific form**
+                    if (formType === "property_details") {
+                        AIZ.uploader.previewGenerate();
+                    }
+                    if (formType === "property_accessibility") {
+                        initDynamicTagify();
+                    }
+                    if (formType === "property_details") {
+                        $('.select2').select2();
+                    }
+                },
+                error: function (error) {
+                    console.error(error);
+                    let errorMessage = error.responseJSON?.message || 'An error occurred while saving the compliance record.';
+                    AIZ.plugins.notify('danger', errorMessage);
+                }
+            });
+        });
+        $(document).on("submit", "#largeModal form", function (e) {
+            e.preventDefault(); 
+
+            let form = $(this);
+            let formData = form.serialize();
+            let formType = form.find('input[name="form_type"]').val(); // Get form type dynamically
+            let repairId = form.find('input[name="repair_id"]').val(); // Get property ID
+
+            $.ajax({
+                url: "{{ route('admin.property_repairs.saveForm') }}", 
+                type: "POST",
+                data: formData,
+                success: function (response) {
+                    if (response.success) {
+                        // Dynamically update the relevant accordion section
+                        $("#section-" + formType + "-" + repairId).html(response.updated_html);
+
+                        // Close the modal
+                        $("#largeModal").modal("hide");
+                    } else {
+                        alert("Error: " + response.error);
+                    }
+                },
+                error: function (error) {
+                    console.error(error);
+                    let errorMessage = error.responseJSON?.message || 'An error occurred while saving the form.';
+                    AIZ.plugins.notify('danger', errorMessage);
+                }
+            });
+        });
         $(document).ready(function () {
+            let isExpanded = true; // Initially, all accordions are open
+    
+            $(document).on('click', '#toggleAll', function() {
+                if (isExpanded) {
+                    $(".accordion-collapse").collapse('hide'); // Collapse all
+                    $(this).text("Expand All");
+                } else {
+                    $(".accordion-collapse").collapse('show'); // Expand all
+                    $(this).text("Collapse All");
+                }
+                isExpanded = !isExpanded; // Toggle state
+            });
+            
             const $toggleBtn = $('#toggle-detail-pane');
 
             function showDetailPane() {
