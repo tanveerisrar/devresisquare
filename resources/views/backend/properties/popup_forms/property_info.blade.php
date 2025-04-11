@@ -1,10 +1,12 @@
 @php
+    $frunishingType = $property->frunishing_type ?? '';
     $propertyType = $property->property_type ?? '';
     $transactionType = $property->transaction_type ?? '';
     $specificPropertyType = $property->specific_property_type ?? '';
 @endphp
 @if(!isset($editMode) || !$editMode)
     <!-- Display View Mode -->
+    <strong>Frunishing Type:</strong> {{ $frunishingType }} <br>
     <strong>Property Type:</strong> {{ $propertyType }} <br>
     <strong>Transaction Type:</strong> {{ $transactionType }} <br>
     <strong>Specific Property Type:</strong> {{ $specificPropertyType }} <br>

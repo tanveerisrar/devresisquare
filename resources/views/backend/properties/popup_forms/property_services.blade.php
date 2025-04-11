@@ -1,3 +1,6 @@
+@php
+$petsAllowed = booleanToYesNo($property->pets_allow) ?? '';
+@endphp
 @if(!isset($editMode) || !$editMode)
     <!-- Display View Mode -->
     <strong>Parking:</strong> {{ $property->parking == '1' ? 'Yes' : 'No' }} <br>
@@ -6,7 +9,7 @@
     @endif
     <strong>Service:</strong> {{ $property->service ?? 'N/A' }} <br>
     @if(isset($property) && $property->property_type == 'lettings' || $property->property_type == 'both')
-        <strong>Pets Allow?:</strong> {{ $petsAllowed }} <br>
+        <strong>Pets Allow? </strong> {{ $petsAllowed }} <br>
     @endif
 
 

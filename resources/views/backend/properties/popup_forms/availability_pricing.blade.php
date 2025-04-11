@@ -68,27 +68,31 @@
 
         <div class="row mb-2">
             @if ($propertyType == 'sales' || $propertyType == 'both')
-                <div class="col-4"><span class="text-muted">Estate Charges : </span><strong>{{ getPoundSymbol() }}
+                <div class="col-4"><span class="text-muted">Estate Charges {{ getPoundSymbol() }} : </span><strong>
                         {{ $estateCharge }}</strong></div>
             @endif
-            <div class="col-6"><span class="text-muted">Miscellaneous Charge (annual) :
-                </span><strong>{{ getPoundSymbol() }} {{ $miscellaneousCharge }}</strong></div>
+            <div class="col-6"><span class="text-muted">Miscellaneous Charge (annual) {{ getPoundSymbol() }} :
+                </span><strong>{{ $miscellaneousCharge }}</strong></div>
         </div>
 
         @if ($propertyType == 'sales' || $propertyType == 'both')
             <div class="row mb-2">
-                <div class="col-4"><span class="text-muted">Ground Rent : </span><strong>{{ getPoundSymbol() }}
+                <div class="col-4"><span class="text-muted">Ground Rent {{ getPoundSymbol() }} : </span><strong>
                         {{ $groundRent }}</strong></div>
-                <div class="col-6"><span class="text-muted">Service Charge (annual) :
-                    </span><strong>{{ getPoundSymbol() }} {{ $serviceCharge }}</strong></div>
+                <div class="col-6"><span class="text-muted">Service Charge (annual) {{ getPoundSymbol() }} :
+                    </span><strong>{{ $serviceCharge }}</strong></div>
             </div>
         @endif
 
         <div class="row mb-2">
-            <div class="col-4"><span class="text-muted">Sales Price : </span><strong>{{ getPoundSymbol() }}
-                    {{ $salePrice }}</strong></div>
-            <div class="col-6"><span class="text-muted">Letting Price : </span><strong>{{ getPoundSymbol() }}
+            @if ($propertyType == 'sales' || $propertyType == 'both')
+            <div class="col-4"><span class="text-muted">Sales Price {{ getPoundSymbol() }} : </span><strong>
+                {{ $salePrice }}</strong></div>
+                @endif
+            @if ($propertyType == 'letting' || $propertyType == 'both')
+            <div class="col-6"><span class="text-muted">Letting Price {{ getPoundSymbol() }} : </span><strong>
                     {{ $lettingPrice }}</strong></div>
+            @endif
         </div>
     </div>
 
@@ -97,7 +101,7 @@
     <div class="mt-md-4 mt-3">
         <h5 class="fw-bold h4 mb-2">Council Tax</h5>
         <div class="row mb-2">
-            <div class="col"><span class="text-muted">Annual Council Tax : </span><strong>{{ getPoundSymbol() }}
+            <div class="col"><span class="text-muted">Annual Council Tax {{ getPoundSymbol() }}: </span><strong>
                     {{ $annualCouncilTax }}</strong></div>
         </div>
         <div class="row mb-2">

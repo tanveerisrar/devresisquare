@@ -28,6 +28,8 @@
                 alt="Property Photo" 
                 onclick="openImageModal('{{ uploaded_asset(trim($photo_id)) }}')">
         @endforeach
+    @else
+        <p><strong>Property Photos: </strong>N/A</p>
     @endif
 
     @if ($property->floor_plan)
@@ -38,6 +40,8 @@
                 alt="Floor Plan" 
                 onclick="openImageModal('{{ uploaded_asset(trim($floor_plan_id)) }}')">
         @endforeach
+    @else
+        <p><strong>Floor Plans: </strong>N/A</p>
     @endif
 
     @if ($property->view_360)
@@ -48,10 +52,14 @@
                 alt="360 View" 
                 onclick="openImageModal('{{ uploaded_asset(trim($view_360_id)) }}')">
         @endforeach
+    @else
+        <p><strong>360° Views: </strong>N/A</p>
     @endif
     @if ($property->market_on)
         <h6>Market On</h6>
         <p>{{ implode(', ', $property->market_on) }}</p>
+    @else
+        <p><strong>Market On: </strong>N/A</p>
     @endif
     
 @else

@@ -19,6 +19,7 @@ return new class extends Migration {
             $table->string('city')->nullable();
             $table->string('country')->nullable();
             $table->string('postcode')->nullable();
+            $table->string('frunishing_type')->nullable();
             $table->string('property_type')->nullable();
             $table->string('transaction_type')->nullable();
             $table->string('specific_property_type')->nullable();
