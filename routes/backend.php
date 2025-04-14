@@ -174,7 +174,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/{id}', 'show')->name('show');  // Show individual tenancy
             Route::get('/{id}/edit', 'edit')->name('edit');  // Show edit form
             Route::post('/{id}/update', 'update')->name('update');  // Update tenancy
-            Route::delete('/{id}/delete', 'destroy')->name('delete');  // Delete tenancy
+            Route::post('/{id}/delete', 'destroy')->name('delete');  // Delete tenancy
         });
 
         // Keeping this route separate since it follows a different URL structure

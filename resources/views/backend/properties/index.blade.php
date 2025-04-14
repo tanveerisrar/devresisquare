@@ -143,12 +143,14 @@
                         link="{{ route('admin.properties.quick') }}"
                         iconName='journal-plus'
                     />
+                    @if ($property)                    
                     <x-backend.forms.mobile_button
                         class=''
                         name='Edit Property'
                         link="{{ route('admin.properties.edit', ['id' => $property->id]) }}"
                         iconName='pencil-square'
                     />
+                    @endif
                 </div>
             </div>
         </div>
@@ -165,6 +167,10 @@
             color: #ff4500;
             cursor: pointer;
             text-decoration: underline;
+        }
+
+        .modal-backdrop.modal-stack {
+            opacity: 0.3 !important;
         }
     </style>
 
@@ -255,6 +261,54 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="{{ asset('/asset/backend/js/property-offer.js') }}"></script>
 <script>
+    function handleGasSafeModal() {
+        // Check initially on page load
+        if ($('#gas_safe_acknowledged').val() !== '1' && $('#is_gas_no').is(':checked')) {
+            // If "No" is selected and gas acknowledgment is not 1, show the modal
+            $('#smallModal2').modal('show');
+        }
+
+        // Event delegation for changes to the radio buttons
+        $(document).on('change', 'input[name="is_gas"]', function () {
+            const selected = $('input[name="is_gas"]:checked').val(); // Get the value of the selected radio
+
+            if (selected === '1') { // Gas = Yes
+                console.log('Gas = Yes selected');
+                if ($('#gas_safe_acknowledged').val() !== '1') {
+                    $('#smallModal2').modal('show');
+                }
+            } else if (selected === '0') { // Gas = No
+                console.log('Gas = No selected');
+                $('#gas_safe_acknowledged').val('0'); // Reset acknowledgment if "No" is selected
+            }
+        });
+
+        // Confirm Acknowledgement
+        $(document).on('click', '#confirm_gas', function (event) {
+            event.preventDefault();
+            $('#gas_safe_acknowledged').val('1'); // Set acknowledgment
+            $('#smallModal2').modal('hide'); // Hide the modal
+        });
+
+        // Cancel button click
+        $(document).on('click', '#cancel_gas', function (event) {
+            event.preventDefault();    
+            // Set the "No" radio button for "is_gas"
+            $('#is_gas_no').prop('checked', true); // Select the "No" option
+            // Reset the hidden input value
+            $('#gas_safe_acknowledged').val('0'); // Reset the acknowledgment to 0
+            $('#smallModal2').modal('hide'); // Hide the modal
+        });
+    }
+
+    // Global close button function
+    function closeModal() {
+        $('#smallModal2').modal('hide'); // Close the modal
+    }
+
+    // Call the handler
+    handleGasSafeModal();
+
     function openImageModal(imageSrc) {
         $("#previewImage").attr("src", imageSrc); // Set image source
         $("#imagePreviewModal").modal("show"); // Show modal
@@ -971,6 +1025,19 @@
         }).appendTo('body').fadeIn().delay(3000).fadeOut();
     }
 
+    document.addEventListener('show.bs.modal', function (event) {
+        const zIndex = 1040 + (10 * document.querySelectorAll('.modal.show').length);
+        const modal = event.target;
+
+        modal.style.zIndex = zIndex;
+        setTimeout(function () {
+            const backdrop = document.querySelectorAll('.modal-backdrop:not(.modal-stack)');
+            backdrop.forEach(function (el) {
+                el.style.zIndex = zIndex - 1;
+                el.classList.add('modal-stack');
+            });
+        }, 0);
+    });
 
 
 

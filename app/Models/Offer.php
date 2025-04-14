@@ -42,4 +42,13 @@ class Offer extends Model
     {
         return $this->hasMany(Tenancy::class);
     }
+
+    public static function rejectOtherOffers($propertyId, $acceptedOfferId)
+    {
+        Offer::where('property_id', $propertyId)
+            ->where('id', '!=', $acceptedOfferId)
+            ->where('status', '!=', 'Rejected')
+            ->update(['status' => 'Rejected']);
+    }
+
 }

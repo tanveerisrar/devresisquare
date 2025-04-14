@@ -48,7 +48,7 @@
                         <tbody>
                             @foreach($filteredTenancies as $tenancy)
                                 <tr>
-                                    <td>{{ $tenancy->id }}</td>
+                                    <td>{{ $loop->iteration }}</td>
                                     <td>{{ $tenancy->status }}</td>
                                     <td>{{ $tenancy->sub_status }}</td>
                                     <td>{{ $tenancy->rent }}</td>

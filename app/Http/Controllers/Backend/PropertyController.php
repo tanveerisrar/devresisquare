@@ -34,6 +34,10 @@ class PropertyController
     // Check if the property_id is provided, otherwise, select the first property or handle it gracefully
     $property = $propertyId ? Property::findOrFail($propertyId) : $properties->first(); // Use the first property if none is selected
 
+    if (!$property) {
+        return redirect()->route('admin.properties.quick')->with('error', 'Property not found');
+    }
+
     // Get tabs for properties (you can customize the tabs as per your needs)
     $tabs = [
         ['name' => 'Property'],

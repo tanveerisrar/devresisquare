@@ -239,6 +239,10 @@ class OfferController
 
         // Check if the status is 'Accepted'
         if ($offer->status === 'Accepted') {
+
+            // Call the helper function to reject other offers
+            Offer::rejectOtherOffers($offer->property_id, $offer->id);
+
             // Decode tenant details from JSON
             $tenantDetails = json_decode($offer->tenant_details, true);
 

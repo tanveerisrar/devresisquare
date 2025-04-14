@@ -21,40 +21,50 @@
     </div>
 
     @if ($property->photos)
-        <h6>Property Photos</h6>
+    <h6>Property Photos</h6>
+    <div class="d-flex flex-wrap gap-3">
         @foreach (explode(',', $property->photos) as $photo_id)
-            <img class="mb-2 d-block preview-img" role="button" title="Preview" width="100"
+            <img class="preview-img border rounded shadow-sm" role="button" title="Preview" 
+                width="150" height="auto"
                 src="{{ uploaded_asset(trim($photo_id)) }}" 
                 alt="Property Photo" 
                 onclick="openImageModal('{{ uploaded_asset(trim($photo_id)) }}')">
         @endforeach
-    @else
-        <p><strong>Property Photos: </strong>N/A</p>
-    @endif
+    </div>
+@else
+    <p><strong>Property Photos: </strong>N/A</p>
+@endif
 
-    @if ($property->floor_plan)
-        <h6>Floor Plans</h6>
+@if ($property->floor_plan)
+    <h6>Floor Plans</h6>
+    <div class="d-flex flex-wrap gap-3">
         @foreach (explode(',', $property->floor_plan) as $floor_plan_id)
-            <img class="mb-2 d-block preview-img" role="button" title="Preview" width="100"
+            <img class="preview-img border rounded shadow-sm" role="button" title="Preview" 
+                width="150" height="auto"
                 src="{{ uploaded_asset(trim($floor_plan_id)) }}" 
                 alt="Floor Plan" 
                 onclick="openImageModal('{{ uploaded_asset(trim($floor_plan_id)) }}')">
         @endforeach
-    @else
-        <p><strong>Floor Plans: </strong>N/A</p>
-    @endif
+    </div>
+@else
+    <p><strong>Floor Plans: </strong>N/A</p>
+@endif
 
-    @if ($property->view_360)
-        <h6>360° Views</h6>
+@if ($property->view_360)
+    <h6>360° Views</h6>
+    <div class="d-flex flex-wrap gap-3">
         @foreach (explode(',', $property->view_360) as $view_360_id)
-            <img class="mb-2 d-block preview-img" role="button" title="Preview" width="100"
+            <img class="preview-img border rounded shadow-sm" role="button" title="Preview" 
+                width="150" height="auto"
                 src="{{ uploaded_asset(trim($view_360_id)) }}" 
                 alt="360 View" 
                 onclick="openImageModal('{{ uploaded_asset(trim($view_360_id)) }}')">
         @endforeach
-    @else
-        <p><strong>360° Views: </strong>N/A</p>
-    @endif
+    </div>
+@else
+    <p><strong>360° Views: </strong>N/A</p>
+@endif
+
     @if ($property->market_on)
         <h6>Market On</h6>
         <p>{{ implode(', ', $property->market_on) }}</p>
@@ -95,10 +105,10 @@
 
             <label>Does the property have gas?</label>
             <div class="radio_bts_square">
-                <input type="radio" name="is_gas" id="is_gas_no" value="1" {{ (isset($property) && $property->is_gas == '1') ? 'checked' : '' }} required />
-                <label for="is_gas_no"> Yes </label>
-                <input type="radio" name="is_gas" id="is_gas_yes" value="0" {{ (isset($property) && $property->is_gas == '0') ? 'checked' : '' }} required />
-                <label for="is_gas_yes"> No </label>
+                <input type="radio" name="is_gas" id="is_gas_yes" value="1" {{ (isset($property) && $property->is_gas == '1') ? 'checked' : '' }} required />
+                <label for="is_gas_yes"> Yes </label>
+                <input type="radio" name="is_gas" id="is_gas_no" value="0" {{ (isset($property) && $property->is_gas == '0') ? 'checked' : '' }} required />
+                <label for="is_gas_no"> No </label>
             </div>            
         </div>
 
