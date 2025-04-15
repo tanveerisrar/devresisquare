@@ -1,51 +1,15 @@
 @if(!isset($editMode) || !$editMode)
     <!-- Display View Mode -->
-
-    <div class="rs_sub_title">Access Arrangement:</div>
-    <p>{{ isset($property) && $property->access_arrangement ? $property->access_arrangement : 'N/A' }}</p>
-
-    <div class="rs_sub_title">Key Highlights:</div>
-    <p>{{ isset($property) && $property->key_highlights ? $property->key_highlights : 'N/A' }}</p>
-    
-    <div class="rs_sub_title">Nearest Station:</div>
-    <p>
-        @if($stations->isNotEmpty())
-            {{ implode(', ', $stations->toArray()) }}
+    <div class="my-3 px-2">    
+        @if ($repairIssue->final_contractor_id && $repairIssue->finalContractor)
+            <p><strong>Name:</strong> {{ $repairIssue->finalContractor->full_name }}</p>
+            <p><strong>Email:</strong> {{ $repairIssue->finalContractor->email }}</p>
+            <p><strong>Phone:</strong> {{ $repairIssue->finalContractor->phone }}</p>
         @else
-            N/A
+            <p>No final contractor selected.</p>
         @endif
-    </p>
-
-    <div class="rs_sub_title">Nearest School:</div>
-    <p>
-        @if($schools->isNotEmpty())
-            {{ implode(', ', $schools->toArray()) }}
-        @else
-            N/A
-        @endif
-    </p>
-
-    <div class="rs_sub_title">Nearest Religious Places (Distance in KM):</div>
-    @php
-    $religiousPlacesView = $property->nearest_religious_places;
-
-    if (is_string($religiousPlacesView)) {
-        $religiousPlacesView = json_decode($religiousPlacesView, true);
-    } elseif (is_object($religiousPlacesView)) {
-        $religiousPlacesView = (array) $religiousPlacesView;
-    }
-
-    $religiousPlacesView = $religiousPlacesView ?? ['masjid' => 'N/A', 'church' => 'N/A', 'mandir' => 'N/A'];
+    </div>
     
-    @endphp
-    <p><strong>Masjid:</strong> {{ $religiousPlacesView['masjid'] ?? 'N/A' }} km</p>
-    <p><strong>Church:</strong> {{ $religiousPlacesView['church'] ?? 'N/A' }} km</p>
-    <p><strong>Mandir:</strong> {{ $religiousPlacesView['mandir'] ?? 'N/A' }} km</p>
-
-
-    <div class="rs_sub_title">Useful Information:</div>
-    <p>{{ isset($property) && $property->useful_information ? $property->useful_information : 'N/A' }}</p>
-   
 
 @else
     <form id="propertyAccessiblityForm">

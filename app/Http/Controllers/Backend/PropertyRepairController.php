@@ -109,8 +109,25 @@ class PropertyRepairController
 
     public function index(Request $request)
     {
-        $query = RepairIssue::query();
+        // $query = RepairIssue::query();
 
+        // Eager load all defined relationships
+        $query = RepairIssue::with([
+            'property',
+            'repairAssignments',
+            'repairHistories',
+            'repairIssueContacts',
+            'repairPhotos',
+            'repairCategory',
+            'repairIssuePropertyManagers',
+            'repairIssueContractorAssignments',
+            'finalContractor',
+            'tenant',
+            'workOrder',
+            'invoice',
+        ]);
+        $categories = RepairCategory::all();
+        $maxLevel = RepairCategory::max('level');
         // Apply search filter
         if ($request->has('search')) {
             $search = $request->search;
@@ -136,6 +153,12 @@ class PropertyRepairController
             return view('backend.repair.list.cards', compact('repairIssues'))->render();
         }
 
+        // Auto load the first repair issue if not an AJAX request and there is at least one issue
+        $firstRepairIssue = null;
+        if (!$request->ajax() && $repairIssues->count() > 0) {
+            $firstRepairIssue = $repairIssues->first();
+        }
+
         // if ($request->ajax()) {
         //     return view('backend.repair.index', [
         //         'repairIssues' => $repairIssues,
@@ -146,6 +169,9 @@ class PropertyRepairController
         return view('backend.repair.index', [
             'repairIssues' => $repairIssues,
             'entity' => 'repair',
+            'firstRepairIssue' => $firstRepairIssue,
+            'categories' => $categories,
+            'maxLevel' => $maxLevel,
         ]);
         // return view('backend.repair.index', compact('repairIssues'));
     }
@@ -167,15 +193,18 @@ class PropertyRepairController
             'repairHistories',
             'repairIssueContacts',
             'repairPhotos',
-            'property'  // Eager load the related property
+            'property',  // Eager load the related property
+            'invoice',
         ])->findOrFail($id);
-
+        $categories = RepairCategory::all();
+        // Get the maximum level in the table
+        $maxLevel = RepairCategory::max('level');
         // Return partial HTML if request is AJAX (from jQuery)
         if ($request->ajax()) {
-            return view('backend.repair.detail.show', compact('repairIssue'));
+            return view('backend.repair.detail.show', compact('repairIssue','categories','maxLevel'));
         }
 
-        return view('backend.repair.view_raise_issue', compact('repairIssue'));
+        return view('backend.repair.view_raise_issue', compact('repairIssue','categories','maxLevel'));
     }
 
     /*
@@ -665,7 +694,10 @@ class PropertyRepairController
             'workOrder',
             'invoice'
         ])->find($request->repair_id);
-
+        // Load additional data for the form:
+        $categories = RepairCategory::all();  // or get only the top-level categories for step2
+        // Get the maximum level in the table
+        $maxLevel = RepairCategory::max('level');
         $formType = $request->form_type;
 
         if (!$repairIssue) {
@@ -679,7 +711,11 @@ class PropertyRepairController
         }
         $property = $repairIssue->property;
         $extraData = $this->getFormTypeExtras($formType, $repairIssue);
-
+        // Merge the additional form data into the extra data array
+        $extraData = array_merge($extraData, [
+            'categories' => $categories,
+            'maxLevel'   => $maxLevel,
+        ]);
         $html = view($viewPath, array_merge(['repairIssue' => $repairIssue], ['property' => $property], ['editMode' => true], $extraData))->render();
 
         return response()->json(['success' => true, 'form_html' => $html]);

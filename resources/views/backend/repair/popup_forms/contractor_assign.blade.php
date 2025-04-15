@@ -1,44 +1,47 @@
-@php
-$furniture = jsonDecodeAndPrint($property->furniture) ?? '';
-$kitchen = jsonDecodeAndPrint($property->kitchen) ?? '';
-$heatingCooling = jsonDecodeAndPrint($property->heating_cooling) ?? '';
-$safety = jsonDecodeAndPrint($property->safety) ?? '';
-$other = jsonDecodeAndPrint($property->other) ?? '';
-@endphp
 @if (!isset($editMode) || !$editMode)
     <!-- Display View Mode -->
-
+    <div class="mb-3">    
+        @if($repairIssue->repairIssueContractorAssignments->count())
+            <div class="d-flex flex-column gap-3">
+                @foreach($repairIssue->repairIssueContractorAssignments as $index => $assignment)
+                    <div class="border p-3 rounded">
+                        <p class="mb-1 fs-6">
+                            <span class="fw-semibold text-primary">#{{ $index + 1 }}</span>
+                        </p>
+                        <div class="row mb-2">
+                            <div class="col-sm-3 fw-bold">Contractor</div>
+                            <div class="col-sm-9">{{ $assignment->contractor->full_name ?? 'N/A' }}</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-sm-3 fw-bold">Cost Price</div>
+                            <div class="col-sm-9">{{ $assignment->cost_price }}</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-sm-3 fw-bold">Preferred Availability</div>
+                            <div class="col-sm-9">{{ $assignment->contractor_preferred_availability }}</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-sm-3 fw-bold">Status</div>
+                            <div class="col-sm-9">{{ $assignment->status }}</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3 fw-bold">Quote Document</div>
+                            <div class="col-sm-9">
+                                @if($assignment->quote_attachment)
+                                    <a href="{{ uploaded_asset($assignment->quote_attachment) }}" target="_blank">View File</a>
+                                @else
+                                    N/A
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @else
+            <p>No contractor assignments available.</p>
+        @endif
+    </div>
     
-    <strong>Furniture:</strong> {{ $furniture ?: 'N/A' }}<br>
-
-    <strong>Kitchen:</strong> {{ $kitchen ?: 'N/A' }}<br>
-
-    <strong>Heating and Cooling:</strong> {{ $heatingCooling ?: 'N/A' }}<br>
-
-    <strong>Safety:</strong> {{ $safety ?: 'N/A' }}<br>
-
-    <strong>Other:</strong> {{ $other ?: 'N/A' }}<br>
-
-    <!-- Display View Mode -->
-    <strong>Bedrooms:</strong> {{ $property->bedroom }} <br>
-    <strong>Bathrooms:</strong> {{ $property->bathroom }} <br>
-    <strong>Reception Rooms :</strong> {{ $property->reception }} <br>
-    <strong>Floor:</strong> {{ $property->floor }}
-
-
-    <div class="d-flex gap-3">
-        <p><strong>Balcony:</strong> {{ $property->balcony == '1' ? 'Yes' : 'No' }}</p>
-        <p><strong>Garden:</strong> {{ $property->garden == '1' ? 'Yes' : 'No' }}</p>
-        <p><strong>Aspects:</strong> {{ $property->aspects ?? 'N/A' }}</p>
-    </div>
-
-    <p><strong>Collecting Rent:</strong> {{ $property->collecting_rent == '1' ? 'Yes' : 'No' }}</p>
-
-    <strong>Area:</strong>
-    <div class="d-flex gap-3">
-        <p><strong>Square Feet:</strong> {{ $property->square_feet ? $property->square_feet . ' sqft' : 'N/A' }}</p>
-        <p><strong>Square Meter:</strong> {{ $property->square_meter ? $property->square_meter . ' sqm' : 'N/A' }}</p>
-    </div>
 @else
     <!-- Form Input Mode -->
     <form id="propertyFeaturesForm">

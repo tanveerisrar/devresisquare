@@ -255,22 +255,6 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="{{ asset('/asset/backend/js/property-offer.js') }}"></script>
 <script>
-    function openImageModal(imageSrc) {
-        $("#previewImage").attr("src", imageSrc); // Set image source
-        $("#imagePreviewModal").modal("show"); // Show modal
-    }
-
-    // Hide modal when close button is clicked
-    $("#closeModalBtn").click(function () {
-        $("#imagePreviewModal").modal("hide");
-    });
-
-    // Hide modal when clicking outside modal content
-    $(document).on("click", function (event) {
-        if (!$(event.target).closest(".modal-content").length) {
-            $("#imagePreviewModal").modal("hide");
-        }
-    });
 
     // Utility function to initialize Tagify dynamically based on data attributes
     function initDynamicTagify() {

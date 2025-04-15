@@ -1,30 +1,135 @@
 @php
-    $lettingCurrentStatus = $property->letting_current_status ?? '';
-    $salesCurrentStatus = $property->sales_current_status ?? '';
-    $statusDescription = $property->status_description ?? '';
+    $propertyId = $repairIssue->property_id;
+    $quoteAttachment = $repairIssue->workOrder->quote_attachment ?? null;
 @endphp
-
 @if(!isset($editMode) || !$editMode)
     <!-- Display View Mode -->
+    @if ($repairIssue->workOrder)
+        <div class="row">
+            <div class="col-6">
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <h5>Work Order #{{ $repairIssue->workOrder->works_order_no }} Details</h5>
+                    </div>
 
-    <div class="mt-md-4 mt-3">
-        <p class="fw-bold h4 mb-2">Status</p>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold">Assign Status</label>
+                        <p>{{ $repairIssue->workOrder->job_status ?? '-' }}</p>
+                    </div>
 
-        <div class="row mb-2">
-            <div class="col-4"><span class="text-muted">Sales Status : </span><strong>{{ $salesCurrentStatus }}</strong>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold">Job Type</label>
+                        <p>{{ $repairIssue->workOrder->jobType->name ?? '-' }}</p>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold">Job Sub Type</label>
+                        <p>{{ $repairIssue->workOrder->jobSubType->name ?? '-' }}</p>
+                    </div>
+                </div>
             </div>
-            
-        @if(isset($property) && ($property->property_type == 'lettings' || $property->property_type == 'both'))
-            <div class="col-6"><span class="text-muted">Letting Status : </span><strong>{{ $lettingCurrentStatus }}</strong>
+
+            <div class="col-6">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Tentative Start Date</label>
+                        <p>{{ $repairIssue->workOrder->tentative_start_date ?? '-' }}</p>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Tentative End Date</label>
+                        <p>{{ $repairIssue->workOrder->tentative_end_date ?? '-' }}</p>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold">Booked Date</label>
+                        <p>{{ $repairIssue->workOrder->booked_date ?? '-' }}</p>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold">Work Order Status</label>
+                        <p>{{ $repairIssue->workOrder->status ?? '-' }}</p>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold">Charge To</label>
+                        <p>{{ $repairIssue->workOrder->invoice_to ?? '-' }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr>
+
+        <h4 class="mt-4">Job Scope</h4>
+
+        <table class="table table-bordered">
+            <thead class="table-secondary">
+                <tr>
+                    <th>Job Title</th>
+                    <th>Description</th>
+                    <th>Unit Price</th>
+                    <th>Quantity</th>
+                    <th>Tax Type</th>
+                    <th>Tax Rate (%)</th>
+                    <th>Tax Amount</th>
+                    <th>Total Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($repairIssue->workOrder->items ?? [] as $item)
+                    <tr>
+                        <td>{{ $item->title }}</td>
+                        <td>{{ $item->description }}</td>
+                        <td>${{ number_format($item->unit_price, 2) }}</td>
+                        <td>{{ $item->quantity }}</td>
+                        <td>{{ $item->taxRate->name ?? '-' }}</td>
+                        <td>{{ $item->tax_rate ?? 0 }}</td>
+                        <td>${{ number_format(($item->unit_price * $item->quantity * $item->tax_rate) / 100, 2) }}</td>
+                        <td>${{ number_format(($item->unit_price * $item->quantity) + (($item->unit_price * $item->quantity * $item->tax_rate) / 100), 2) }}
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+            <tfoot>
+                @php
+                    $subtotal = $repairIssue->workOrder->items->sum(fn($item) => $item->unit_price * $item->quantity);
+                    $taxTotal = $repairIssue->workOrder->items->sum(fn($item) => ($item->unit_price * $item->quantity * $item->tax_rate) / 100);
+                    $grandTotal = $subtotal + $taxTotal;
+                @endphp
+                <tr>
+                    <td colspan="7" class="text-end fw-bold">Subtotal:</td>
+                    <td>${{ number_format($subtotal, 2) }}</td>
+                </tr>
+                <tr>
+                    <td colspan="7" class="text-end fw-bold">Tax Total:</td>
+                    <td>${{ number_format($taxTotal, 2) }}</td>
+                </tr>
+                <tr>
+                    <td colspan="7" class="text-end fw-bold">Grand Total:</td>
+                    <td>${{ number_format($grandTotal, 2) }}</td>
+                </tr>
+            </tfoot>
+        </table>
+
+        @if ($quoteAttachment)
+            <div class="mb-3">
+                <label class="form-label fw-bold">Quote Attachment</label><br>
+                <x-attachment-viewer file-url="{{ uploaded_asset($quoteAttachment) }}" title="View Quote Attachment"
+                    button-class="btn btn-success" icon-class="fa-solid fa-eye" modal-size="modal-xl" modal-scrollable="false"
+                    background-color="#f8f9fa" border-radius="12px" close-button-class="btn-close-dark" downloadable="true" />
             </div>
         @endif
-        </div>
 
-        <div class="row mb-2">
-            <div class="col-4"><span class="text-muted">Status Description :
-                </span><strong>{{ $statusDescription }}</strong></div>
+        <div class="mb-3">
+            <label class="form-label fw-bold">Notes</label>
+            <p>{{ $repairIssue->workOrder->extra_notes ?? '-' }}</p>
         </div>
-    </div>
+    @else
+        <div class="alert alert-warning">
+            No work order found for this repair issue.
+        </div>
+    @endif
 
 @else
     <form id="propertyStatusForm">
@@ -36,11 +141,13 @@
             <div class="form-group">
                 <label for="sales_current_status">Sales Status</label>
                 <select name="sales_current_status" id="sales_current_status" class="form-control" required>
-                    <option value="" disabled {{ (isset($property) && $property->sales_current_status == '') ? 'selected' : ''  }}>Select a Status</option>
+                    <option value="" disabled {{ (isset($property) && $property->sales_current_status == '') ? 'selected' : ''  }}>
+                        Select a Status</option>
                     <option value="for sale" {{ (isset($property) && $property->sales_current_status == 'for sale') ? 'selected' : '' }}>For Sale</option>
                     <option value="on hold" {{ (isset($property) && $property->sales_current_status == 'on hold') ? 'selected' : '' }}>On Hold</option>
                     <option value="under offer" {{ (isset($property) && $property->sales_current_status == 'under offer') ? 'selected' : '' }}>Under Offer</option>
-                    <option value="sold" {{ (isset($property) && $property->sales_current_status == 'sold') ? 'selected' : '' }}>Sold</option>
+                    <option value="sold" {{ (isset($property) && $property->sales_current_status == 'sold') ? 'selected' : '' }}>
+                        Sold</option>
                     <option value="sold STC" {{ (isset($property) && $property->sales_current_status == 'sold STC') ? 'selected' : '' }}>Sold STC</option>
                     <option value="sold by other" {{ (isset($property) && $property->sales_current_status == 'sold by other') ? 'selected' : '' }}>Sold By Other</option>
                     <option value="exchanged" {{ (isset($property) && $property->sales_current_status == 'exchanged') ? 'selected' : '' }}>Exchanged</option>
@@ -73,7 +180,7 @@
             <label for="status_description">Description</label>
             <textarea name="status_description" id="status_description" rows="6"
                 class="form-control">{{ isset($property) && $property->status_description ? $property->status_description : '' }}</textarea>
-                <div class="input_tag">0/5000 words</div>
+            <div class="input_tag">0/5000 words</div>
             @error('status_description')
                 <div class="text-danger">{{ $message }}</div>
             @enderror

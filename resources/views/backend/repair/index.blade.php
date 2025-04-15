@@ -76,13 +76,24 @@
                 <i class="fas fa-chevron-left"></i> Hide Detail
             </button>
             @include('backend.repair.list.filter')
-            @include('backend.repair.list.cards', ['repairIssues' => $repairIssues])
+            @include('backend.repair.list.cards', [
+                'repairIssues' => $repairIssues,
+                'selectedRepairId' => isset($firstRepairIssue) ? $firstRepairIssue->id : null
+            ])
+
         </div>
         <!-- Right: Detail -->
         <div class="col-md-7" id="detail-pane">
-            <div class="alert alert-info">Select a repair item to view details.</div>
+            @if(isset($firstRepairIssue))
+                @include('backend.repair.detail.show', ['repairIssue' => $firstRepairIssue])
+            @else
+                <div class="alert alert-info">Select a repair item to view details.</div>
+            @endif
         </div>
+        
     </div>
+    <!-- Include the Modal Component -->
+    @include('backend.components.modal')
 @endsection
 
 @section('page.scripts')
@@ -162,7 +173,7 @@
                 }
             });
         });
-        $(document).ready(function () {
+        // $(document).ready(function () {
             let isExpanded = true; // Initially, all accordions are open
     
             $(document).on('click', '#toggleAll', function() {
@@ -253,6 +264,9 @@
                     $detailPane.html(`<div class="alert alert-danger fade-in">Failed to load detail.</div>`);
                 });
             };
-        });
+
+        // });
+
+        
     </script>
 @endsection

@@ -33,9 +33,15 @@
     </div>
 </div> --}}
 
-@props(['repair'])
+@props(['repair', 'selectedRepairId' => null])
 
-<tr class="align-middle repair-row" data-url="{{ route('admin.property_repairs.show', $repair->id) }}" onclick="loadRepairDetailByUrl(this)" style="cursor:pointer;">
+@php
+    $selectedRepairId = $selectedRepairId ?? null;
+    $isSelected = ($repair->id == $selectedRepairId);
+@endphp
+
+
+<tr class="align-middle repair-row {{ $isSelected ? 'selected' : '' }}" data-url="{{ route('admin.property_repairs.show', $repair->id) }}" onclick="loadRepairDetailByUrl(this)" style="cursor:pointer;">
     <!-- Property -->
     <td>{{ getPropertyDetails($repair->property_id, ['prop_name', 'line_1', 'city', 'country']) }}</td>
 

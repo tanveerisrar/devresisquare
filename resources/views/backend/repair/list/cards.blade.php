@@ -11,7 +11,7 @@
         </thead>
         <tbody>
             @foreach ($repairIssues as $item)
-                <x-backend.repair-card :repair="$item" />
+                <x-backend.repair-card :repair="$item" :selectedRepairId="$selectedRepairId" />
             @endforeach
         </tbody>
     </table>

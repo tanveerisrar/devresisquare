@@ -1,110 +1,30 @@
-@php
-    $propertyType = $property->property_type ?? '';
-    $availableFrom = formatDate($property->available_from) ?? '';
-    $salePrice = $property->price ?? '';
-    $lettingPrice = $property->letting_price ?? '';
-    $groundRent = $property->ground_rent ?? '';
-    $serviceCharge = $property->service_charge ?? '';
-    $annualCouncilTax = $property->annual_council_tax ?? '';
-    $councilTaxBand = $property->council_tax_band ?? '';
-    $estateCharge = $property->estate_charge ?? '';
-    $miscellaneousCharge = $property->miscellaneous_charge ?? '';
-    $localAuthority = $property->local_authority ?? '';
-    $lengthOfLease = $property->length_of_lease ?? '';
-@endphp
-
 @if (!isset($editMode) || !$editMode)
-    <!-- Marketing Details -->
-    <p class="fw-bold h4 mb-2">Marketing Details</p>
-    <div class="row mb-2">
-        <div class="col"><span class="text-muted">Move-in Date : </span><strong>{{ $availableFrom }}</strong></div>
-    </div>
+    <!-- Display View -->
+    <h5 class="fw-bold fs-4 my-3 pt-2">Property Manager Assignments</h5>
 
-    @if ($propertyType == 'sales' || $propertyType == 'both')
-        <div class="row mb-2">
-            <div class="col"><span class="text-muted">Length of Lease : </span><strong>{{ $lengthOfLease }}</strong>
+    @if($repairIssue->repairIssuePropertyManagers->count())
+        @foreach($repairIssue->repairIssuePropertyManagers as $index => $assignment)
+            <div class="mb-3 p-3 bg-light rounded border">
+                <p class="mb-1 fs-6">
+                    <span class="fw-semibold text-primary">#{{ $index + 1 }}</span>
+                </p>
+                <p class="mb-1 fs-6">
+                    <span class="fw-semibold">Manager:</span>
+                    {{ $assignment->propertyManager->full_name ?? 'N/A' }}
+                </p>
+                <p class="mb-1 fs-6 text-muted">
+                    {{ $assignment->propertyManager->email ?? 'N/A' }}
+                </p>
+                <p class="mb-0 fs-6">
+                    <span class="fw-semibold">Assigned At:</span>
+                    {{ \Carbon\Carbon::parse($assignment->assigned_at)->format('d M Y, H:i') }}
+                </p>
             </div>
-        </div>
+        @endforeach
+    @else
+        <p class="text-muted fs-6">No property manager assignments available.</p>
     @endif
 
-    <div class="row mb-2">
-        <div class="col"><span class="text-muted">Local Authority : </span><strong>{{ $localAuthority }}</strong></div>
-    </div>
-
-    <div class="row mb-2">
-        <div class="col"><span class="text-muted">Tenure : </span>
-            <strong>
-                @switch($property->tenure)
-                    @case('leasehold')
-                        Leasehold
-                    @break
-
-                    @case('freehold')
-                        Freehold
-                    @break
-
-                    @case('commonhold')
-                        Commonhold
-                    @break
-
-                    @case('feudal')
-                        Feudal
-                    @break
-
-                    @case('share_of_freehold')
-                        Share of Freehold
-                    @break
-
-                    @default
-                        N/A
-                @endswitch
-            </strong>
-        </div>
-    </div>
-
-    <!-- Price Section -->
-    <div class="mt-md-4 mt-3">
-        <p class="fw-bold h4 mb-2">Price</p>
-
-        <div class="row mb-2">
-            @if ($propertyType == 'sales' || $propertyType == 'both')
-                <div class="col-4"><span class="text-muted">Estate Charges : </span><strong>{{ getPoundSymbol() }}
-                        {{ $estateCharge }}</strong></div>
-            @endif
-            <div class="col-6"><span class="text-muted">Miscellaneous Charge (annual) :
-                </span><strong>{{ getPoundSymbol() }} {{ $miscellaneousCharge }}</strong></div>
-        </div>
-
-        @if ($propertyType == 'sales' || $propertyType == 'both')
-            <div class="row mb-2">
-                <div class="col-4"><span class="text-muted">Ground Rent : </span><strong>{{ getPoundSymbol() }}
-                        {{ $groundRent }}</strong></div>
-                <div class="col-6"><span class="text-muted">Service Charge (annual) :
-                    </span><strong>{{ getPoundSymbol() }} {{ $serviceCharge }}</strong></div>
-            </div>
-        @endif
-
-        <div class="row mb-2">
-            <div class="col-4"><span class="text-muted">Sales Price : </span><strong>{{ getPoundSymbol() }}
-                    {{ $salePrice }}</strong></div>
-            <div class="col-6"><span class="text-muted">Letting Price : </span><strong>{{ getPoundSymbol() }}
-                    {{ $lettingPrice }}</strong></div>
-        </div>
-    </div>
-
-
-    <!-- Council Tax Section -->
-    <div class="mt-md-4 mt-3">
-        <h5 class="fw-bold h4 mb-2">Council Tax</h5>
-        <div class="row mb-2">
-            <div class="col"><span class="text-muted">Annual Council Tax : </span><strong>{{ getPoundSymbol() }}
-                    {{ $annualCouncilTax }}</strong></div>
-        </div>
-        <div class="row mb-2">
-            <div class="col"><span class="text-muted">Council Tax Band :
-                </span><strong>{{ $councilTaxBand }}</strong></div>
-        </div>
-    </div>
 @else
     <form id="availabilityPricingForm">
         @csrf
@@ -113,7 +33,7 @@
 
         <div class="mb-3">
             <label>Availability</label>
-            <input type="date" name="available_from" class="form-control" value="{{ $property->available_from }}">
+            <input type="date" name="available_from" class="form-control" value="{{ $repairIssue->property->available_from }}">
         </div>
         <div class="form-group">
             <label for="local_authority">Local Authority</label>
@@ -124,19 +44,19 @@
         <div class="form-group">
             <label for="tenure">Tenure</label>
             <select name="tenure" id="tenure" class="form-control">
-                <option value="leasehold" {{ isset($property) && $property->tenure == 'leasehold' ? 'selected' : '' }}>
+                <option value="leasehold" {{ isset($repairIssue->property) && $repairIssue->property->tenure == 'leasehold' ? 'selected' : '' }}>
                     Leasehold</option>
-                <option value="freehold" {{ isset($property) && $property->tenure == 'freehold' ? 'selected' : '' }}>
+                <option value="freehold" {{ isset($repairIssue->property) && $repairIssue->property->tenure == 'freehold' ? 'selected' : '' }}>
                     Freehold
                 </option>
                 <option value="commonhold"
-                    {{ isset($property) && $property->tenure == 'commonhold' ? 'selected' : '' }}>
+                    {{ isset($repairIssue->property) && $repairIssue->property->tenure == 'commonhold' ? 'selected' : '' }}>
                     Commonhold</option>
-                <option value="feudal" {{ isset($property) && $property->tenure == 'feudal' ? 'selected' : '' }}>
+                <option value="feudal" {{ isset($repairIssue->property) && $repairIssue->property->tenure == 'feudal' ? 'selected' : '' }}>
                     Feudal
                 </option>
                 <option value="share_of_freehold"
-                    {{ isset($property) && $property->tenure == 'share_of_freehold' ? 'selected' : '' }}>Share of
+                    {{ isset($repairIssue->property) && $repairIssue->property->tenure == 'share_of_freehold' ? 'selected' : '' }}>Share of
                     Freehold</option>
             </select>
 

@@ -1,13 +1,23 @@
-@php
-    $propertyType = $property->property_type ?? '';
-    $transactionType = $property->transaction_type ?? '';
-    $specificPropertyType = $property->specific_property_type ?? '';
-@endphp
 @if(!isset($editMode) || !$editMode)
     <!-- Display View Mode -->
-    <strong>Property Type:</strong> {{ $propertyType }} <br>
-    <strong>Transaction Type:</strong> {{ $transactionType }} <br>
-    <strong>Specific Property Type:</strong> {{ $specificPropertyType }} <br>
+    <div class="mb-3">
+        <h5>Repair History</h5>
+    
+        @if($repairIssue->repairHistories->count())
+            <ul>
+                @foreach($repairIssue->repairHistories as $history)
+                    <li>
+                        <strong>{{ $history->action }}:</strong>
+                        Changed from <em>{{ $history->previous_status }}</em> to <em>{{ $history->new_status }}</em><br>
+                        <small>{{ \Carbon\Carbon::parse($history->created_at)->format('d M Y, H:i') }}</small>
+                    </li>
+                @endforeach
+            </ul>
+        @else
+            <p>No history recorded.</p>
+        @endif
+    </div>
+    
 @else
     <form id="propertyInfoForm">
         @csrf
