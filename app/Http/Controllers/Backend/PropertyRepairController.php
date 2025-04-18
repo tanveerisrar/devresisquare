@@ -128,6 +128,13 @@ class PropertyRepairController
         ]);
         $categories = RepairCategory::all();
         $maxLevel = RepairCategory::max('level');
+        $propertyManagers = Contact::whereHas('category', callback: function ($query) {
+        $query->where('id', 2);
+        })->get();
+        $contractors = Contact::whereHas('category', callback: function ($query) {
+            $query->where('name', 'Contractor');
+        })->get();
+        $jobTypes = JobType::getHierarchy();
         // Apply search filter
         if ($request->has('search')) {
             $search = $request->search;
@@ -155,8 +162,12 @@ class PropertyRepairController
 
         // Auto load the first repair issue if not an AJAX request and there is at least one issue
         $firstRepairIssue = null;
+        $assignedManagers = null;
+        $contractorAssignments = null;
         if (!$request->ajax() && $repairIssues->count() > 0) {
             $firstRepairIssue = $repairIssues->first();
+            $assignedManagers = RepairIssuePropertyManager::where('repair_issue_id', $firstRepairIssue->id)->pluck('property_manager_id')->toArray();
+            $contractorAssignments = RepairIssueContractorAssignment::where('repair_issue_id', $firstRepairIssue->id)->get();
         }
 
         // if ($request->ajax()) {
@@ -165,14 +176,26 @@ class PropertyRepairController
         //         'entity' => 'repair',
         //     ])->render();
         // }
-
         return view('backend.repair.index', [
             'repairIssues' => $repairIssues,
             'entity' => 'repair',
             'firstRepairIssue' => $firstRepairIssue,
             'categories' => $categories,
             'maxLevel' => $maxLevel,
+            'propertyManagers' => $propertyManagers,
+            'assignedManagers' => $assignedManagers,
+            'contractorAssignments' => $contractorAssignments,
+            'contractors' => $contractors,
+            'jobTypes' => $jobTypes,
         ]);
+
+        // return view('backend.repair.index', [
+        //     'repairIssues' => $repairIssues,
+        //     'entity' => 'repair',
+        //     'firstRepairIssue' => $firstRepairIssue,
+        //     'categories' => $categories,
+        //     'maxLevel' => $maxLevel,
+        // ]);
         // return view('backend.repair.index', compact('repairIssues'));
     }
 
@@ -197,14 +220,41 @@ class PropertyRepairController
             'invoice',
         ])->findOrFail($id);
         $categories = RepairCategory::all();
-        // Get the maximum level in the table
         $maxLevel = RepairCategory::max('level');
+        $propertyManagers = Contact::whereHas('category', callback: function ($query) {
+        $query->where('id', 2);
+        })->get();
+        $assignedManagers = RepairIssuePropertyManager::where('repair_issue_id', $id)->pluck('property_manager_id')->toArray();
+        $contractorAssignments = RepairIssueContractorAssignment::where('repair_issue_id', $id)->get();
+        $contractors = Contact::whereHas('category', callback: function ($query) {
+            $query->where('name', 'Contractor');
+        })->get();
+        $jobTypes = JobType::getHierarchy();
+
         // Return partial HTML if request is AJAX (from jQuery)
         if ($request->ajax()) {
-            return view('backend.repair.detail.show', compact('repairIssue','categories','maxLevel'));
+            return view('backend.repair.detail.show', data: compact(
+                'repairIssue',
+                'categories',
+                'maxLevel',
+                'propertyManagers',
+                'assignedManagers',
+                'contractorAssignments',
+                'contractors',
+                'jobTypes',
+            ));
         }
 
-        return view('backend.repair.view_raise_issue', compact('repairIssue','categories','maxLevel'));
+        return view('backend.repair.view_raise_issue', data: compact(
+            'repairIssue',
+            'categories',
+            'maxLevel',
+            'propertyManagers',
+            'assignedManagers',
+            'contractorAssignments',
+            'contractors',
+            'jobTypes',
+        ));
     }
 
     /*

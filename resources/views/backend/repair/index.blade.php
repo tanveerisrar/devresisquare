@@ -95,8 +95,10 @@
     <!-- Include the Modal Component -->
     @include('backend.components.modal')
 @endsection
-
+{{-- Include the partial to push Select2 assets into the stacks --}}
+@include('backend.partials.assets.select2')
 @section('page.scripts')
+
     <script>
         let lastLoadedUrl = null; // Track the last detail URL
         // Open modal and load form via AJAX
@@ -124,9 +126,9 @@
                 success: function (response) {
                     $("#largeModal .modal-body").html(response.form_html);
                     $("#largeModal").modal("show");
-
+                    PropertySelector.init();
                     // **Trigger the function ONLY for a specific form**
-                    if (formType === "property_details") {
+                    if (formType === "property_issue_details") {
                         AIZ.uploader.previewGenerate();
                     }
                     if (formType === "property_accessibility") {
@@ -269,4 +271,8 @@
 
         
     </script>
+
+
+
+@stack('extra.scripts')
 @endsection
