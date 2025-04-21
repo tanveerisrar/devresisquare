@@ -69,7 +69,9 @@
             </div>
         </div>
 
-
-        <button type="submit" class="btn btn-success mt-3 float-end">Save Changes</button>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeModel();" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-success">Save Changes</button>
+        </div>
     </form>
 @endif

@@ -954,7 +954,7 @@ class PropertyRepairController
         $extraData = $this->getFormTypeExtras($formType, $repairIssue);
 
         // Render updated section
-        $updatedView = view("backend.repair.popup_forms.$formType", array_merge(['repair' => $repairIssue], $extraData))->render();
+        $updatedView = view("backend.repair.popup_forms.$formType", array_merge(['repairIssue' => $repairIssue], $extraData))->render();
         // $updatedView = view("backend.repair.popup_forms.$formType", compact('repair'))->render();
 
         return response()->json([

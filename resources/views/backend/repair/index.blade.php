@@ -118,15 +118,16 @@
             
             let modalTitle = formTitles[formType] || "Edit Details"; // Default title if form type is not found
 
-            $("#largeModal .modal-title").html(modalTitle); // Set dynamic title
+            $("#largeModalScrollable .modal-title").html(modalTitle); // Set dynamic title
             $.ajax({
                 url: "{{ route('admin.property_repairs.loadForm') }}", // Route to get form dynamically
                 type: "GET",
                 data: { form_type: formType, repair_id: repairId },
                 success: function (response) {
-                    $("#largeModal .modal-body").html(response.form_html);
-                    $("#largeModal").modal("show");
+                    $("#largeModalScrollable .modal-body").html(response.form_html);
+                    $("#largeModalScrollable").modal("show");
                     PropertySelector.init();
+                    RepairForm.init();
                     // **Trigger the function ONLY for a specific form**
                     if (formType === "property_issue_details") {
                         AIZ.uploader.previewGenerate();
@@ -145,7 +146,7 @@
                 }
             });
         });
-        $(document).on("submit", "#largeModal form", function (e) {
+        $(document).on("submit", "#largeModalScrollable form", function (e) {
             e.preventDefault(); 
 
             let form = $(this);
@@ -163,7 +164,7 @@
                         $("#section-" + formType + "-" + repairId).html(response.updated_html);
 
                         // Close the modal
-                        $("#largeModal").modal("hide");
+                        $("#largeModalScrollable").modal("hide");
                     } else {
                         alert("Error: " + response.error);
                     }

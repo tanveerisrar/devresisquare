@@ -13,6 +13,21 @@
   </div>
 </div>
 
+<!-- Modal -->
+<div class="modal fade" id="largeModalScrollable" tabindex="-1" aria-labelledby="largeModalScrollable-label" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="largeModalScrollable-label">Loading...</h5>
+        <a type="button" class="btn-close" onclick="closeModel();" data-bs-dismiss="modal" aria-label="Close"></a>
+      </div>
+      <div class="modal-body">
+        Loading...
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal fade" id="smallModal" tabindex="-1" aria-labelledby="smallModal-label" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
   <div class="modal-dialog modal-md">
     <div class="modal-content">
