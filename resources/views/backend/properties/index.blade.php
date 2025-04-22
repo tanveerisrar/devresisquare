@@ -1082,13 +1082,13 @@
                 $('.tab-tenancy-group-btn').addClass('d-none'); // Hide the button for other tabs
             }
                 // Update the "Edit Property" button dynamically if property ID exists
-            if (propertyId) {
-                var editButtonLink = '{{ route('admin.properties.edit', ['id' => ':id']) }}'.replace(':id', propertyId);
-                $('.pvdh_btns_wrapper .edit-property-btn').removeClass('d-none').attr('href', editButtonLink);
-                    // console.log(editButtonLink);
-            } else {
-                $('.pvdh_btns_wrapper .edit-property-btn').addClass('d-none'); // Hide the button if no property ID
-            }
+            // if (propertyId) {
+            //     var editButtonLink = '{{ route('admin.properties.edit', ['id' => ':id']) }}'.replace(':id', propertyId);
+            //     $('.pvdh_btns_wrapper .edit-property-btn').removeClass('d-none').attr('href', editButtonLink);
+            //         // console.log(editButtonLink);
+            // } else {
+            //     $('.pvdh_btns_wrapper .edit-property-btn').addClass('d-none'); // Hide the button if no property ID
+            // }
 
         }
 
