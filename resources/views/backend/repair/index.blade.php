@@ -102,7 +102,7 @@
     <script>
         let lastLoadedUrl = null; // Track the last detail URL
         // Open modal and load form via AJAX
-        $(document).on("click", ".editForm", function () {
+        /*$(document).on("click", ".editForm", function () {
             let formType = $(this).data("form");
             let repairId = $(this).data("id");
             let formTitles = {
@@ -175,7 +175,7 @@
                     AIZ.plugins.notify('danger', errorMessage);
                 }
             });
-        });
+        });*/
         // $(document).ready(function () {
             let isExpanded = true; // Initially, all accordions are open
     
