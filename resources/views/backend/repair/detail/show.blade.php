@@ -1,11 +1,14 @@
 <!-- Button to Collapse/Expand All -->
 <div class="d-flex justify-content-end gap-3 mb-3">
-    <a href="{{ route('admin.property_repairs.edit', $repairIssue->id) }}" class="btn btn-warning">
+    <a href="{{ route('admin.property_repairs.edit', $repairIssue->id) }}" class="btn btn-outline-danger btn-sm">
         <i class="fas fa-edit"></i> Edit
     </a>
-    <a class="btn btn-primary"
+
+    <a class="btn btn-outline-primary btn-sm"
         href="{{ route('admin.repair.workorder.invoice', $repairIssue->id) }}">{{ $repairIssue->workOrder ? 'Edit Work Order & Invoice' : 'Create Work Order & Invoice' }}</a>
-    <button id="toggleAll" class="btn btn-primary">Collapse All</button>
+    <div class="d-flex justify-content-end mb-3">
+        <a id="toggleAll" class="pointer underline">Collapse All</a>
+    </div>
 </div>
 
 <div class="accordion" id="propertyAccordion">
