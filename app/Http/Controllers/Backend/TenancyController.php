@@ -86,6 +86,13 @@ class TenancyController
         $validated['rolling_contract'] = $request->has('rolling_contract') ? true : false;
         $validated['renewal_exempt'] = $request->has('renewal_exempt') ? true : false;
 
+        // If the new tenancy is Active, archive any current active tenancy for the same property.
+        if ($validated['status'] === 'Active') {
+            Tenancy::where('property_id', $validated['property_id'])
+                ->where('status', 'Active')
+                ->update(['status' => 'Archived']);
+        }
+        
         // Create a new tenancy
         $tenancy = Tenancy::create($validated);
 
@@ -258,6 +265,6 @@ class TenancyController
         $tenancy = Tenancy::findOrFail($id);
         $tenancy->delete();
 
-        return redirect()->route('tenancies.index')->with('success', 'Tenancy deleted successfully!');
+        return redirect()->route('admin.tenancies.index')->with('success', 'Tenancy deleted successfully!');
     }
 }

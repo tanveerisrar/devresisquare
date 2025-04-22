@@ -86,24 +86,45 @@
         </div>
 
         <div class="form-group">
-            <div class="rs_sub_title">Nearest Religious Places (Distance in KM)</div>
+            <div class="rs_sub_title mb-2">Nearest Religious Places (Distance in KM)</div>
             @php
-                // If nearest_religious_places is not null, decode the JSON and use it; otherwise, use empty values
                 $religiousPlaces =
                     isset($property) && $property->nearest_religious_places
                         ? json_decode($property->nearest_religious_places)
-                        : ['masjid' => '', 'church' => '', 'mandir' => ''];
+                        : (object)['masjid' => '', 'church' => '', 'mandir' => ''];
             @endphp
-            <input type="number" pattern="[0-9]" class="form-control mt-2" inputmode="numeric"
-                name="nearest_religious_places[masjid]" value="{{ $religiousPlaces->masjid ?? '' }}"
-                placeholder="Masjid" required>
-            <input type="number" pattern="[0-9]" class="form-control mt-2" inputmode="numeric"
-                name="nearest_religious_places[church]" value="{{ $religiousPlaces->church ?? '' }}"
-                placeholder="Church" required>
-            <input type="number" pattern="[0-9]" class="form-control mt-2" inputmode="numeric"
-                name="nearest_religious_places[mandir]" value="{{ $religiousPlaces->mandir ?? '' }}"
-                placeholder="Mandir" required>
+        
+            <div class="input-group mb-3">
+                <span class="input-group-text"><i class="fas fa-mosque"></i></span>
+                <div class="form-floating">
+                    <input type="number" class="form-control" id="floatingMasjid" inputmode="numeric"
+                        name="nearest_religious_places[masjid]" value="{{ $religiousPlaces->masjid ?? '' }}"
+                        placeholder="Mosque(Masjid)" required>
+                    <label for="floatingMasjid">Mosque(Masjid)</label>
+                </div>
+            </div>
+        
+            <div class="input-group mb-3">
+                <span class="input-group-text"><i class="fas fa-church"></i></span>
+                <div class="form-floating">
+                    <input type="number" class="form-control" id="floatingChurch" inputmode="numeric"
+                        name="nearest_religious_places[church]" value="{{ $religiousPlaces->church ?? '' }}"
+                        placeholder="Church" required>
+                    <label for="floatingChurch">Church(Girja Ghar)</label>
+                </div>
+            </div>
+        
+            <div class="input-group mb-3">
+                <span class="input-group-text"><i class="fa-solid fa-gopuram"></i></span> <!-- Use fa-hindu-temple if available -->
+                <div class="form-floating">
+                    <input type="number" class="form-control" id="floatingMandir" inputmode="numeric"
+                        name="nearest_religious_places[mandir]" value="{{ $religiousPlaces->mandir ?? '' }}"
+                        placeholder="Temple(Mandir)" required>
+                    <label for="floatingMandir">Temple(Mandir)</label>
+                </div>
+            </div>
         </div>
+        
 
         <div class="form-group">
             <label for="useful_information">Useful Information</label>

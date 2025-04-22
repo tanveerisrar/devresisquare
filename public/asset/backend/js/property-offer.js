@@ -79,7 +79,7 @@
                         <div class="form-group">
                             <label for="tenantPhone_${tenant.id}" class="form-label">Phone</label>
                             <input type="text" class="form-control" id="tenantPhone_${tenant.id}"
-                                name="tenantPhone_${tenant.id}" placeholder="1234567890" value="${tenant.phone || ''}" required>
+                                name="tenantPhone_${tenant.id}" placeholder="1234567890" value="${tenant.phone || ''}" pattern="\d+" inputmode="numeric" title="Please enter only numbers" required>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -113,8 +113,8 @@
                             <label for="guarantee_${tenant.id}" class="form-label">Guarantee Required</label>
                             <select class="form-select" id="guarantee_${tenant.id}"
                                 name="guarantee_${tenant.id}" required>
-                                <option ${tenant.guarantee === '0' ? 'selected' : ''}>No</option>
-                                <option ${tenant.guarantee === '1' ? 'selected' : ''}>Yes</option>
+                                    <option value="0" ${tenant.guarantee === '0' ? 'selected' : ''}>No</option>
+                                    <option value="1" ${tenant.guarantee === '1' ? 'selected' : ''}>Yes</option>
                             </select>
                         </div>
                     </div>
@@ -123,8 +123,8 @@
                             <label for="previouslyRented_${tenant.id}" class="form-label">Previously Rented</label>
                             <select class="form-select" id="previouslyRented_${tenant.id}"
                                 name="previouslyRented_${tenant.id}" required>
-                                <option ${tenant.previouslyRented === '0' ? 'selected' : ''}>No</option>
-                                <option ${tenant.previouslyRented === '1' ? 'selected' : ''}>Yes</option>
+                                    <option value="0" ${tenant.previouslyRented === '0' ? 'selected' : ''}>No</option>
+                                    <option value="1" ${tenant.previouslyRented === '1' ? 'selected' : ''}>Yes</option>
                             </select>
                         </div>
                     </div>
@@ -133,8 +133,8 @@
                             <label for="poorCredit_${tenant.id}" class="form-label">Poor Credit History</label>
                             <select class="form-select" id="poorCredit_${tenant.id}"
                                 name="poorCredit_${tenant.id}" required>
-                                <option ${tenant.poorCredit === '0' ? 'selected' : ''}>No</option>
-                                <option ${tenant.poorCredit === '1' ? 'selected' : ''}>Yes</option>
+                                    <option value="0" ${tenant.poorCredit === '0' ? 'selected' : ''}>No</option>
+                                    <option value="1" ${tenant.poorCredit === '1' ? 'selected' : ''}>Yes</option>
                             </select>
                         </div>
                     </div>
@@ -303,16 +303,20 @@
                 processData: false, // Don't process the data
                 contentType: false, // Don't set content type (important for FormData)
                 success: function (response) {
-                    console.log('Form submitted successfully');
-                    alert('Form Submitted Successfully!');
+                    // console.log('Form submitted successfully');
+                    AIZ.plugins.notify('success', response.message);
+                    // alert('Form Submitted Successfully!');
                     console.log('Response:', response);
                     // Optionally clear the form and close the modal here
                     clearForm();
                     $('#addOfferModal').modal('hide');  // Close modal (if using Bootstrap modal)
+                    location.reload(); // Reload the page to reflect changes
                 },
                 error: function (xhr, status, error) {
+                    let errorMessage = error.responseJSON?.message || 'Error Generating Invoice';
+                    AIZ.plugins.notify('danger', errorMessage);
                     // Handle error (e.g., display an error message)
-                    alert('An error occurred. Please try again later.');
+                    // alert('An error occurred. Please try again later.');
                     console.error('AJAX Error:', error);
                 }
             });

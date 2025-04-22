@@ -1,4 +1,5 @@
 @php
+    $frunishingType = $property->frunishing_type ?? '';
     $propertyType = $property->property_type ?? '';
     $transactionType = $property->transaction_type ?? '';
     $specificPropertyType = $property->specific_property_type ?? '';
@@ -6,6 +7,10 @@
 @if(!isset($editMode) || !$editMode)
 <div class="accordion_inner">
     <!-- Display View Mode -->
+    <div class="accordion_property_info_item">
+        <span class="left_item">Frunishing Type:</span>
+        <span class="right_item capitalize"> {{ $frunishingType }} </span>
+    </div>
     <div class="accordion_property_info_item">
         <span class="left_item">Property Type:</span>
         <span class="right_item capitalize"> {{ $propertyType }} </span>

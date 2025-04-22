@@ -36,10 +36,10 @@
                         <div class="rc_title">Garden</div>
                         <div class="radio_bts_square">
                             <input required type="radio" class="garden-radio" name="garden" id="garden1"
-                                value="yes" {{ (isset($property) && $property->garden == 'yes') ? 'checked' : '' }} />
+                                value="1" {{ (isset($property) && $property->garden == '1') ? 'checked' : '' }} />
                             <label for="garden1"> Yes </label>
                             <input required type="radio" class="garden-radio" name="garden" id="garden2"
-                                value="no" {{ (isset($property) && $property->garden == 'no') ? 'checked' : '' }} />
+                                value="0" {{ (isset($property) && $property->garden == '0') ? 'checked' : '' }} />
                             <label for="garden2"> No </label>
                         </div>
                     </div>
@@ -47,10 +47,10 @@
                         <div class="rc_title">Balcony</div>
                         <div class="">
                             <input required type="radio" class="balcony-radio" name="balcony" id="balcony1"
-                                value="yes" {{ (isset($property) && $property->balcony == 'yes') ? 'checked' : '' }} />
+                                value="1" {{ (isset($property) && $property->balcony == '1') ? 'checked' : '' }} />
                             <label for="balcony1"> Yes </label>
                             <input required type="radio" class="balcony-radio" name="balcony" id="balcony2"
-                                value="no" {{ (isset($property) && $property->balcony == 'no') ? 'checked' : '' }} />
+                                value="0" {{ (isset($property) && $property->balcony == '0') ? 'checked' : '' }} />
                             <label for="balcony2"> No </label>
                         </div>
                     </div>

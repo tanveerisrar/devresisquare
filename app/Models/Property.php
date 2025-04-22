@@ -20,6 +20,7 @@ class Property extends Model
         'city',
         'country',
         'postcode',
+        'frunishing_type',
         'property_type',
         'transaction_type',
         'specific_property_type',

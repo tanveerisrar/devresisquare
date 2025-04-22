@@ -143,12 +143,14 @@
                         link="{{ route('admin.properties.quick') }}"
                         iconName='journal-plus'
                     />
+                    @if ($property)                    
                     <x-backend.forms.mobile_button
                         class=''
                         name='Edit Property'
                         link="{{ route('admin.properties.edit', ['id' => $property->id]) }}"
                         iconName='pencil-square'
                     />
+                    @endif
                 </div>
             </div>
         </div>
@@ -165,6 +167,10 @@
             color: #ff4500;
             cursor: pointer;
             text-decoration: underline;
+        }
+
+        .modal-backdrop.modal-stack {
+            opacity: 0.3 !important;
         }
     </style>
 
@@ -255,6 +261,54 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="{{ asset('/asset/backend/js/property-offer.js') }}"></script>
 <script>
+    function handleGasSafeModal() {
+        // Check initially on page load
+        if ($('#gas_safe_acknowledged').val() !== '1' && $('#is_gas_no').is(':checked')) {
+            // If "No" is selected and gas acknowledgment is not 1, show the modal
+            $('#smallModal2').modal('show');
+        }
+
+        // Event delegation for changes to the radio buttons
+        $(document).on('change', 'input[name="is_gas"]', function () {
+            const selected = $('input[name="is_gas"]:checked').val(); // Get the value of the selected radio
+
+            if (selected === '1') { // Gas = Yes
+                console.log('Gas = Yes selected');
+                if ($('#gas_safe_acknowledged').val() !== '1') {
+                    $('#smallModal2').modal('show');
+                }
+            } else if (selected === '0') { // Gas = No
+                console.log('Gas = No selected');
+                $('#gas_safe_acknowledged').val('0'); // Reset acknowledgment if "No" is selected
+            }
+        });
+
+        // Confirm Acknowledgement
+        $(document).on('click', '#confirm_gas', function (event) {
+            event.preventDefault();
+            $('#gas_safe_acknowledged').val('1'); // Set acknowledgment
+            $('#smallModal2').modal('hide'); // Hide the modal
+        });
+
+        // Cancel button click
+        $(document).on('click', '#cancel_gas', function (event) {
+            event.preventDefault();    
+            // Set the "No" radio button for "is_gas"
+            $('#is_gas_no').prop('checked', true); // Select the "No" option
+            // Reset the hidden input value
+            $('#gas_safe_acknowledged').val('0'); // Reset the acknowledgment to 0
+            $('#smallModal2').modal('hide'); // Hide the modal
+        });
+    }
+
+    // Global close button function
+    function closeModal() {
+        $('#smallModal2').modal('hide'); // Close the modal
+    }
+
+    // Call the handler
+    handleGasSafeModal();
+
     function openImageModal(imageSrc) {
         $("#previewImage").attr("src", imageSrc); // Set image source
         $("#imagePreviewModal").modal("show"); // Show modal
@@ -971,6 +1025,19 @@
         }).appendTo('body').fadeIn().delay(3000).fadeOut();
     }
 
+    document.addEventListener('show.bs.modal', function (event) {
+        const zIndex = 1040 + (10 * document.querySelectorAll('.modal.show').length);
+        const modal = event.target;
+
+        modal.style.zIndex = zIndex;
+        setTimeout(function () {
+            const backdrop = document.querySelectorAll('.modal-backdrop:not(.modal-stack)');
+            backdrop.forEach(function (el) {
+                el.style.zIndex = zIndex - 1;
+                el.classList.add('modal-stack');
+            });
+        }, 0);
+    });
 
 
 
@@ -1015,13 +1082,13 @@
                 $('.tab-tenancy-group-btn').addClass('d-none'); // Hide the button for other tabs
             }
                 // Update the "Edit Property" button dynamically if property ID exists
-            if (propertyId) {
-                var editButtonLink = '{{ route('admin.properties.edit', ['id' => ':id']) }}'.replace(':id', propertyId);
-                $('.pvdh_btns_wrapper .edit-property-btn').removeClass('d-none').attr('href', editButtonLink);
-                    // console.log(editButtonLink);
-            } else {
-                $('.pvdh_btns_wrapper .edit-property-btn').addClass('d-none'); // Hide the button if no property ID
-            }
+            // if (propertyId) {
+            //     var editButtonLink = '{{ route('admin.properties.edit', ['id' => ':id']) }}'.replace(':id', propertyId);
+            //     $('.pvdh_btns_wrapper .edit-property-btn').removeClass('d-none').attr('href', editButtonLink);
+            //         // console.log(editButtonLink);
+            // } else {
+            //     $('.pvdh_btns_wrapper .edit-property-btn').addClass('d-none'); // Hide the button if no property ID
+            // }
 
         }
 
@@ -1127,173 +1194,17 @@
             });
         }
 
+        $(document).on('change', '#pets_allow', function () {
+            // Set the value to 1 if checked, otherwise set to 0
+            this.value = this.checked ? 1 : 0;
+        });
+
+        // Trigger change once on page load to set initial value
+        // $(function() {
+        //     $('#pets_allow').trigger('change');
+        // });
 
     });
-
-
-    // $(document).ready(function() {
-    //     // Function to load tab content dynamically via AJAX
-    //     function loadTabContent(propertyId, tabName) {
-    //         // Get the URL dynamically using Blade's route helper
-    //         var url =
-    //             '{{-- route('admin.properties.tabcontent', ['property_id' => ':property_id', 'tabname' => ':tabname']) --}}';
-    //         url = url.replace(':property_id', propertyId).replace(':tabname', tabName); // Replace placeholders
-
-    //         // Send the AJAX request
-    //         $.ajax({
-    //             url: url, // The URL to send the request to
-    //             type: 'GET', // Use GET request to fetch content
-    //             dataType: 'json', // Expect HTML response
-    //             success: function(response) {
-    //                 // Inject the response HTML into the tab content area
-    //                 $('.pv_content_detail').html(response.content);
-    //                 // Update the URL to reflect the selected property and tab (without reloading)
-    //                 window.history.pushState(null, null, url);
-    //             },
-    //             error: function(xhr, status, error) {
-    //                 console.error('Error loading tab content:', error);
-    //                 // Optionally, handle the error by showing a message or fallback content
-    //             }
-    //         });
-    //     }
-
-    //     // Click event for property cards (left side)
-    //     $(document).on('click', '.property-card', function() {
-    //         // Get the property ID from the clicked property card
-    //         var propertyId = $(this).data(
-    //         'property-id'); // Ensure 'data-property-id' exists on the property card
-
-    //         // Mark the clicked property card as 'current' and remove the 'current' class from others
-    //         $('.property-card').removeClass('current');
-    //         $(this).addClass('current');
-
-    //         // Get the active tab's name (right side)
-    //         var tabName = $('.tab-link.active').data(
-    //         'tab-name'); // Ensure 'data-tab-name' exists on the tab link
-    //         console.log('clicked property card');
-    //         // Call the function to load the content dynamically
-    //         loadTabContent(propertyId, tabName);
-    //     });
-
-    //     // Click event for tabs (right side)
-    //     $(document).on('click', '.tab-link', function(e) {
-    //         e.preventDefault(); // Prevent default link behavior
-
-    //         // Get the tab name from the clicked tab
-    //         var tabName = $(this).data('tab-name'); // Ensure 'data-tab-name' exists on the tab link
-
-    //         // Get the property ID from the currently selected property card (left side)
-    //         var propertyId = $('.property-card.current').data(
-    //         'property-id'); // Ensure 'data-property-id' exists on the property card
-
-    //         // Mark the clicked tab as 'active' and remove the 'active' class from others
-    //         $('.tab-link').removeClass('active');
-    //         $(this).addClass('active');
-    //         console.log('clicked tab');
-    //         // Call the function to load the content dynamically
-    //         loadTabContent(propertyId, tabName);
-    //     });
-
-    //     // Simulate the first tab and first property card selection on page load
-    //     function simulateTabClickAndPropertyCard() {
-    //         var firstPropertyCard = $('.property-card').first(); // Get the first property card
-    //         var firstTab = $('.tab-link').first(); // Get the first tab
-
-    //         // Get the propertyId and tabName from the first property card and tab
-    //         var propertyId = firstPropertyCard.data('property-id');
-    //         var tabName = firstTab.data('tab-name');
-    //         console.log(propertyId);
-    //         console.log(tabName);
-    //         // Trigger the AJAX load
-    //         if (propertyId && tabName) {
-    //             loadTabContent(propertyId, tabName);
-    //             firstPropertyCard.addClass('current'); // Add 'current' class to the first property card
-    //             firstTab.addClass('active'); // Add 'active' class to the first tab
-    //         }
-    //     }
-
-    //     // Call the simulateTabClickAndPropertyCard function on document ready
-    //     simulateTabClickAndPropertyCard();
-    // });
-
-    // $(document).ready(function() {
-    //     // Function to load tab content dynamically via AJAX
-    //     function loadTabContent(propertyId, tabName) {
-    //         // Get the URL dynamically using Blade's route helper
-    //         var url = '{{-- route('admin.properties.tabcontent', ['property_id' => ':property_id', 'tabname' => ':tabname']) --}}';
-    //         url = url.replace(':property_id', propertyId).replace(':tabname', tabName); // Replace placeholders
-
-    //         // Send the AJAX request
-    //         $.ajax({
-    //             url: url,  // The URL to send the request to
-    //             type: 'GET',  // Use GET request to fetch content
-    //             dataType: 'html',  // Expect HTML response
-    //             success: function(response) {
-    //                 // Inject the response HTML into the tab content area
-    //                 $('.pv_content_detail').html(response);
-    //             },
-    //             error: function(xhr, status, error) {
-    //                 console.error('Error loading tab content:', error);
-    //                 // Optionally, handle the error by showing a message or fallback content
-    //             }
-    //         });
-    //     }
-
-    //     // Click event for property cards (left side)
-    //     $(document).on('click', '.property-card', function() {
-    //         // Get the property ID from the clicked property card
-    //         var propertyId = $(this).data('property-id');  // Ensure 'data-property-id' exists on the property card
-
-    //         // Mark the clicked property card as 'current' and remove the 'current' class from others
-    //         $('.property-card').removeClass('current');
-    //         $(this).addClass('current');
-
-    //         // Get the active tab's name (right side)
-    //         var tabName = $('.tab-link.active').data('tab-name');  // Ensure 'data-tab-name' exists on the tab link
-
-    //         // Call the function to load the content dynamically
-    //         loadTabContent(propertyId, tabName);
-    //     });
-
-    //     // Click event for tabs (right side)
-    //     $(document).on('click', '.tab-link', function(e) {
-    //         e.preventDefault();  // Prevent default link behavior
-
-    //         // Get the tab name from the clicked tab
-    //         var tabName = $(this).data('tab-name');  // Ensure 'data-tab-name' exists on the tab link
-
-    //         // Get the property ID from the currently selected property card (left side)
-    //         var propertyId = $('.property-card.current').data('property-id');  // Ensure 'data-property-id' exists on the property card
-
-    //         // Mark the clicked tab as 'active' and remove the 'active' class from others
-    //         $('.tab-link').removeClass('active');
-    //         $(this).addClass('active');
-
-    //         // Call the function to load the content dynamically
-    //         loadTabContent(propertyId, tabName);
-    //     });
-
-    //     // Simulate the first tab and first property card selection on page load
-    //     function simulateTabClickAndPropertyCard() {
-    //         var firstPropertyCard = $('.property-card').first();  // Get the first property card
-    //         var firstTab = $('.tab-link').first();  // Get the first tab
-
-    //         // Get the propertyId and tabName from the first property card and tab
-    //         var propertyId = firstPropertyCard.data('property-id');
-    //         var tabName = firstTab.data('tab-name');
-    //         console.log(propertyId);
-    //         console.log(tabName);
-    //         // Trigger the AJAX load
-    //         if (propertyId && tabName) {
-    //             loadTabContent(propertyId, tabName);
-    //             firstPropertyCard.addClass('current');  // Add 'current' class to the first property card
-    //             firstTab.addClass('active');  // Add 'active' class to the first tab
-    //         }
-    //     }
-
-    //     // Call the simulateTabClickAndPropertyCard function on document ready
-    //     simulateTabClickAndPropertyCard();
-    // });
 </script>
 
 <script>

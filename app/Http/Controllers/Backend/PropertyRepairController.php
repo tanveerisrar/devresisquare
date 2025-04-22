@@ -132,7 +132,18 @@ class PropertyRepairController
 
         $repairIssues = $query->paginate(10);
 
-        return view('backend.repair.index', compact('repairIssues'));
+        if ($request->ajax()) {
+            return view('backend.repair.index', [
+                'repairIssues' => $repairIssues,
+                'entity' => 'repair',
+            ])->render();
+        }
+
+        return view('backend.repair.index', [
+            'repairIssues' => $repairIssues,
+            'entity' => 'repair',
+        ]);
+        // return view('backend.repair.index', compact('repairIssues'));
     }
 
 
@@ -144,6 +155,25 @@ class PropertyRepairController
     }*/
 
     // Show a single repair issue
+    public function show(Request $request, $id)
+{
+        // Load the repair issue with relationships if needed
+        $repairIssue = RepairIssue::with([
+            'repairAssignments',
+            'repairHistories',
+            'repairIssueContacts',
+            'repairPhotos',
+            'property' // Eager load the related property
+        ])->findOrFail($id);
+            
+        // Return partial HTML if request is AJAX (from jQuery)
+        if ($request->ajax()) {
+            return view('backend.repair.detail.show', compact('repairIssue'));
+        }
+
+        return view('backend.repair.view_raise_issue', compact('repairIssue'));
+    }
+    /*
     public function show($id)
 {
         // Load the repair issue with relationships if needed
@@ -156,7 +186,7 @@ class PropertyRepairController
         ])->findOrFail($id);
         return view('backend.repair.view_raise_issue', compact('repairIssue'));
     }
-
+*/
     // Show the form for editing a repair issue
     // public function edit($id)
     // {

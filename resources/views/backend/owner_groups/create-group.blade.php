@@ -79,7 +79,7 @@
     initSelect2('.select2');
 
     // Form submission validation
-    $('form').on('submit', function(e) {
+    $('#mainForm form').on('submit', function(e) {
         if ($('input[name="is_main"]:checked').length === 0) {
             e.preventDefault(); // Prevent form submission
             alert('Please select a main contact.'); // Show alert message

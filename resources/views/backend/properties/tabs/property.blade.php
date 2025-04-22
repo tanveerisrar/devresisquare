@@ -186,26 +186,7 @@ $secondHalf = array_slice($allFeatures, $halfCount);
                 </div>
             </div>
         </div>
-    @endforeach
-
-        <!-- Features -->
-        {{-- <div class="accordion-item">
-            <h2 class="accordion-header" id="headingFeatures">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFeatures" aria-expanded="true" aria-controls="collapseFeatures">
-                    Features
-                </button>
-            </h2>
-            <div id="collapseFeatures" class="accordion-collapse collapse show" aria-labelledby="headingFeatures">
-                <div class="accordion-body">
-                    <ul>
-                        @foreach($allFeatures as $feature)
-                            <li>{{ $feature }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            </div>
-        </div> --}}
-        
+    @endforeach        
     </div>
 
     {{-- mobile view only start  --}}

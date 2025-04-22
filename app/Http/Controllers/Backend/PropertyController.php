@@ -20,35 +20,13 @@ use Illuminate\Support\Facades\Log;
 
 class PropertyController
 {
-    // public function index(Request $request)
-    // {
-    //     $properties = Property::all(); // Fetch all properties
-    //     // Get property ID and tabname from the query parameters
-    //     $propertyId = $request->query('property_id');
-    //     $tabName = $request->query('tabname', 'property'); // Default to 'property' if no tab is specified
-
-    //     // Get tabs for properties
-    //     $tabs = [
-    //         ['name' => 'Property'],
-    //         ['name' => 'Owners'],
-    //         ['name' => 'Offers'],
-    //         ['name' => 'Complience'],
-    //         ['name' => 'Tenancy'],
-    //         ['name' => 'APS'],
-    //         ['name' => 'Media'],
-    //         ['name' => 'Teams'],
-    //         ['name' => 'Contractor'],
-    //         ['name' => 'Work Offer'],
-    //         ['name' => 'Note']
-    //     ];
-
-    //     return view('backend.properties.index', compact('properties', 'tabs', 'propertyId', 'tabName'));
-    // }
     public function index(Request $request)
 {
     // Fetch all properties
-    $properties = Property::all();
-
+    // $properties = Property::all();
+    // Fetch all properties in descending order
+    $properties = Property::orderBy('id', 'desc')->get();
+    
     // Get property_id and tabname from query parameters
     $propertyId = $request->query('property_id');
     $tabName = $request->query('tabname', 'property'); // Default to 'property' if no tab is specified
@@ -56,8 +34,11 @@ class PropertyController
     // Check if the property_id is provided, otherwise, select the first property or handle it gracefully
     $property = $propertyId ? Property::findOrFail($propertyId) : $properties->first(); // Use the first property if none is selected
 
-    // Get tabs for properties (you can customize the tabs as per your needs)
+    if (!$property) {
+        return redirect()->route('admin.properties.quick')->with('error', 'Property not found');
+    }
 
+    // Get tabs for properties (you can customize the tabs as per your needs)
     $tabs = [
         ['name' => 'Property'],
         ['name' => 'Owners'],
@@ -72,8 +53,6 @@ class PropertyController
         // ['name' => 'Work Offer'],
         ['name' => 'Notes']
     ];
-
-
 
     // Retrieve the content for the selected tab and property
     $content = $this->getTabContent($tabName, $propertyId, $property); // Dynamically get content for the tab and property

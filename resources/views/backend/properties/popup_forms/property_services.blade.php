@@ -1,3 +1,6 @@
+@php
+$petsAllowed = booleanToYesNo($property->pets_allow) ?? '';
+@endphp
 @if(!isset($editMode) || !$editMode)
     <!-- Display View Mode -->
     <div class="accordion_inner">
