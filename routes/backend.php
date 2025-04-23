@@ -1,29 +1,30 @@
 <?php
 // routes/backend.php
 
-use App\Http\Controllers\Backend\AuthenticateController;
-use App\Http\Controllers\Backend\BranchController;
-use App\Http\Controllers\Backend\BusinessSettingsController;
-use App\Http\Controllers\Backend\ComplianceController;
-use App\Http\Controllers\Backend\ContactCategoryController;
-use App\Http\Controllers\Backend\ContactController;
-use App\Http\Controllers\Backend\DashboardController;
-use App\Http\Controllers\Backend\DesignationController;
-use App\Http\Controllers\Backend\EstateChargeController;
-use App\Http\Controllers\Backend\EstateChargeItemController;
-use App\Http\Controllers\Backend\InvoiceController;
-use App\Http\Controllers\Backend\JobTypeController;
-use App\Http\Controllers\Backend\OfferController;
-use App\Http\Controllers\Backend\OwnerGroupController;
-use App\Http\Controllers\Backend\PropertyController;
-use App\Http\Controllers\Backend\PropertyRepairController;
-use App\Http\Controllers\Backend\TenancyController;
-use App\Http\Controllers\Backend\TenancySubStatusController;
-use App\Http\Controllers\Backend\TenancyTypeController;
-use App\Http\Controllers\Backend\WebsiteController;
-use App\Http\Controllers\Backend\WorkOrderController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Backend\EventController;
+use App\Http\Controllers\Backend\OfferController;
+use App\Http\Controllers\Backend\BranchController;
+use App\Http\Controllers\Backend\ContactController;
+use App\Http\Controllers\Backend\InvoiceController;
+use App\Http\Controllers\Backend\JobTypeController;
+use App\Http\Controllers\Backend\TenancyController;
+use App\Http\Controllers\Backend\WebsiteController;
+use App\Http\Controllers\Backend\PropertyController;
+use App\Http\Controllers\Backend\DashboardController;
+use App\Http\Controllers\Backend\WorkOrderController;
+use App\Http\Controllers\Backend\ComplianceController;
+use App\Http\Controllers\Backend\OwnerGroupController;
+use App\Http\Controllers\Backend\DesignationController;
+use App\Http\Controllers\Backend\TenancyTypeController;
+use App\Http\Controllers\Backend\AuthenticateController;
+use App\Http\Controllers\Backend\EstateChargeController;
+use App\Http\Controllers\Backend\PropertyRepairController;
+use App\Http\Controllers\Backend\ContactCategoryController;
+use App\Http\Controllers\Backend\BusinessSettingsController;
+use App\Http\Controllers\Backend\EstateChargeItemController;
+use App\Http\Controllers\Backend\TenancySubStatusController;
 
 // Login Routes
 Route::get('/login', [AuthenticateController::class, 'index'])->name('backend.login');
@@ -277,6 +278,19 @@ Route::middleware('auth')->group(function () {
                 Route::get('/edit/{invoice}', 'edit')->name('invoices.edit');
                 Route::put('/update/{invoice}', 'update')->name('invoices.update');
             });
+        });
+    });
+
+    Route::group(['prefix' => 'calendar', 'as' => 'backend.events.'], function () {
+        Route::controller(EventController::class)->group(function () {
+            Route::get('/events', 'index')->name('index');
+            Route::get('/events/create', 'create')->name('create');
+            Route::post('/events/store', 'store')->name('store');
+            Route::get('/events/{event}', 'show')->name('show');
+            Route::get('/events/edit/{event}', 'edit')->name('edit');
+            Route::get('/api/subtypes/{typeId}', 'subtypes')->name('subtypes');
+            Route::put('/events/update/{event}', 'update')->name('update');
+            Route::delete('/events/delete/{event}', 'destroy')->name('destroy');
         });
     });
 

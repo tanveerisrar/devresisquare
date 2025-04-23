@@ -20,6 +20,8 @@
         </tbody>
     </table>
 </div>
+    {{-- Calendar --}}
+    @include('backend.partials.calendar')
 @endsection
 
 @section('page.scripts')
