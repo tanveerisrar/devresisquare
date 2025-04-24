@@ -260,7 +260,7 @@ propertyId="{{ $property['id'] }}"
             <span id="addTenantButton" class="add-tenant-btn hidden" onclick="addTenant()">Add More Tenant</span>
         </div>
         <!-- Modal Footer Navigation -->
-        <div class="modal-footer">
+        <div class="modal-footer px-0">
             <button type="button" class="btn btn_outline_secondary btn-sm" data-bs-dismiss="modal" aria-label="Close">Cancel</button>
             <button id="backButton" type="button" class="btn btn_secondary btn-md hidden">Back</button>
             <button id="nextButton" type="button" class="btn btn_secondary btn-md ">Next</button>

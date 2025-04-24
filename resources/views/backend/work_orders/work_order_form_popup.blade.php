@@ -141,7 +141,7 @@
                                     <td><input type="text" class="form-control tax-amount" readonly></td>                   
                                     <td><input type="text" class="form-control total-price" readonly></td>
                                     <td>
-                                        <button type="button" class="btn btn-success add-item">Add More</button>
+                                        <button type="button" class="btn btn_secondary add-item">Add More</button>
                                     </td>
                                 </tr>
                             @else
@@ -166,7 +166,7 @@
                                     <td><input type="text" class="form-control total-price" readonly></td>
                                     <td>
                                         @if($loop->last)
-                                            <button type="button" class="btn btn-success add-item">Add More</button>
+                                            <button type="button" class="btn btn_secondary add-item">Add More</button>
                                         @else
                                             <button type="button" class="btn btn-danger remove-item">Remove</button>
                                         @endif
@@ -191,13 +191,22 @@
                         </tfoot>
                     </table>
 
-                    <button type="button" class="btn btn-primary" id="add-item">Add Item</button>
-                    
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-success">Save Work Order</button>
-                        <button type="button" class="btn btn-info" id="generateInvoiceBtn">Generate Invoice</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn_secondary" id="add-item">Add Item</button>
+
+                    <div class="modal-footer px-0">
+                        <div class="row">
+                            <div class="col-auto">
+                                <button type="submit" class="btn btn_secondary">Save Work Order</button>
+                            </div>
+                            <div class="col-auto">
+                                <button type="button" class="btn btn_outline_secondary" id="generateInvoiceBtn">Generate Invoice</button>
+                            </div>
+                            <div class="col-auto px-0">
+                                <button type="button" class="btn btn_outline_secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
                     </div>
+                    
                 </form>
             </div>
         </div>

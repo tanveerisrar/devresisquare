@@ -21,33 +21,33 @@
             </a>
             <ul class="nav-second-level collapse list-unstyled {{ request()->routeIs('admin.properties.index') || request()->routeIs('admin.properties.quick') || request()->routeIs('admin.properties.create') ? 'show' : '' }}"
                 id="propertiesSubmenu">
-                <li class="sidebar-sub-list-item">
+                <li class="sidebar-sub-list-item py-0 mb-0">
                     <a class="{{ request()->routeIs('admin.properties.index') ? 'active' : '' }}"
                         href="{{ route('admin.properties.index') }}">
                         <img src="{{ asset('asset/images/svg/properties-view.svg') }}" alt="properties-view">
                         View Properties
                     </a>
                 </li>
-                <!-- <li class="sidebar-sub-list-item">
+                <!-- <li class="sidebar-sub-list-item py-0 mb-0">
                     <a class="{{ request()->routeIs('admin.properties.create') ? 'active' : '' }}"
                         href="{{ route('admin.properties.create') }}">Quick Add Property</a>
                 </li> -->
-                <li class="sidebar-sub-list-item">
+                <li class="sidebar-sub-list-item py-0 mb-0">
                     <a class="{{ request()->routeIs('admin.properties.quick') ? 'active' : '' }}"
                         href="{{ route('admin.properties.quick') }}">
                         <img src="{{ asset('asset/images/svg/properties-add.svg') }}" alt="properties-add">
                         Add Property
                     </a>
                 </li>
-                <!-- <li class="sidebar-sub-list-item">
+                <!-- <li class="sidebar-sub-list-item py-0 mb-0">
                     <a class="{{ request()->routeIs('admin.properties.quick') ? 'active' : '' }}"
                         href="{{ route('admin.properties.quick') }}">Quick Add Property</a>
                 </li> -->
-                <!-- <li class="sidebar-sub-list-item">
+                <!-- <li class="sidebar-sub-list-item py-0 mb-0">
                     <a class="{{ request()->routeIs('admin.properties.create') && request()->query('stepform') ? 'active' : '' }}"
                         href="{{ route('admin.properties.create') }}?stepform">Add Property</a>
                 </li> -->
-                <li class="sidebar-sub-list-item">
+                <li class="sidebar-sub-list-item py-0 mb-0">
                     <a class="{{ request()->routeIs('admin.properties.soft_deleted') ? 'active' : '' }}"
                         href="{{ route('admin.properties.soft_deleted') }}">
                         <img src="{{ asset('asset/images/svg/trash.svg') }}" alt="trash">
@@ -66,32 +66,32 @@
             </a>
             <ul class="nav-second-level collapse list-unstyled {{ request()->routeIs('admin.contacts.index') || request()->routeIs('contacts.create') ? 'show' : '' }}"
                 id="contactsSubmenu">
-                <li class="sidebar-sub-list-item">
+                <li class="sidebar-sub-list-item py-0 mb-0">
                     <a href="{{ route('admin.contacts.index') }}"
                         class="{{ request()->routeIs('admin.contacts.index') && !request()->has('category') ? 'active' : '' }}">
                         All
                     </a>
                 </li>
-                <li class="sidebar-sub-list-item">
+                <li class="sidebar-sub-list-item py-0 mb-0">
                     <a href="{{ route('admin.contacts.index', ['category' => 1]) }}"
                         class="{{ request()->category == 1 ? 'active' : '' }}">
                         <img src="{{ asset('asset/images/svg/owners.svg') }}" alt="owners">
                         Owners
                     </a>
                 </li>
-                <li class="sidebar-sub-list-item">
+                <li class="sidebar-sub-list-item py-0 mb-0">
                     <a href="{{ route('admin.contacts.index', ['category' => 2]) }}"
                         class="{{ request()->category == 2 ? 'active' : '' }}">
                         Property Managers
                     </a>
                 </li>
-                <li class="sidebar-sub-list-item">
+                <li class="sidebar-sub-list-item py-0 mb-0">
                     <a href="{{ route('admin.contacts.index', ['category' => 3]) }}"
                         class="{{ request()->category == 3 ? 'active' : '' }}">
                         Tenants
                     </a>
                 </li>
-                <li class="sidebar-sub-list-item">
+                <li class="sidebar-sub-list-item py-0 mb-0">
                     <a href="{{ route('admin.contacts.index', ['category' => 4]) }}"
                         class="{{ request()->category == 4 ? 'active' : '' }}">
                         Landlords
@@ -112,7 +112,7 @@
             <ul class="nav-second-level collapse list-unstyled {{ request()->routeIs('contact-categories.index') || request()->routeIs('admin.branches.index') || request()->routeIs('admin.designations.index') || request()->routeIs('admin.tenancy_types.index') || request()->routeIs('admin.tenancy_types.create') || request()->routeIs('admin.tenancy_sub_statuses.index') || request()->routeIs('admin.tenancy_sub_statuses.create') ? 'show' : '' }}"
                 id="masterManageSubmenu">
 
-                <li class="sidebar-list-item">
+                <li class="sidebar-list-item submenu_wrapper ">
                     <a class="{{ request()->routeIs('contact-categories.index') ? 'active' : '' }}"
                         href="{{ route('contact-categories.index') }}">
                         <img src="{{ asset('asset/images/svg/contacts.svg') }}" alt="contacts">
@@ -120,7 +120,7 @@
                     </a>
                 </li>
 
-                <li class="sidebar-list-item">
+                <li class="sidebar-list-item submenu_wrapper">
                     <a class="{{ request()->routeIs('admin.branches.index') ? 'active' : '' }}"
                         href="{{ route('admin.branches.index') }}">
                         <img src="{{ asset('asset/images/svg/contacts.svg') }}" alt="branches">
@@ -128,7 +128,7 @@
                     </a>
                 </li>
 
-                <li class="sidebar-list-item">
+                <li class="sidebar-list-item submenu_wrapper">
                     <a class="{{ request()->routeIs('admin.designations.index') ? 'active' : '' }}"
                         href="{{ route('admin.designations.index') }}">
                         <img src="{{ asset('asset/images/svg/contacts.svg') }}" alt="branches">
@@ -137,7 +137,7 @@
                 </li>
 
                 <!-- Tenancy Types Section -->
-                <li class="sidebar-sub-list-item submenu_wrapper">
+                <li class="sidebar-sub-list-item py-0 mb-0 submenu_wrapper">
                     <a href="#tenancyTypesSubmenu" data-bs-toggle="collapse"
                         aria-expanded="{{ request()->routeIs('admin.tenancy_types.index') || request()->routeIs('admin.tenancy_types.create') ? 'true' : 'false' }}"
                         class="dropdown-toggle {{ request()->routeIs('admin.tenancy_types.index') || request()->routeIs('admin.tenancy_types.create') ? 'active' : '' }}">
@@ -164,7 +164,7 @@
                 </li>
 
                 <!-- Tenancy Sub Status Section -->
-                <li class="sidebar-sub-list-item submenu_wrapper">
+                <li class="sidebar-sub-list-item py-0 mb-0 submenu_wrapper">
                     <a href="#tenancySubStatusSubmenu" data-bs-toggle="collapse"
                         aria-expanded="{{ request()->routeIs('admin.tenancy_sub_statuses.index') || request()->routeIs('admin.tenancy_sub_statuses.create') ? 'true' : 'false' }}"
                         class="dropdown-toggle {{ request()->routeIs('admin.tenancy_sub_statuses.index') || request()->routeIs('admin.tenancy_sub_statuses.create') ? 'active' : '' }}">
@@ -192,42 +192,43 @@
             </ul>
         </li>
 
-        <li class="sidebar-list-item">
+        <li class="sidebar-list-item submenu_wrapper">
             <a href="#">
                 <img src="{{ asset('asset/images/svg/dashboard.svg') }}" alt="tenancies">
                 Tenancies
             </a>
         </li>
 
-        <li class="sidebar-list-item">
+        <li class="sidebar-list-item submenu_wrapper">
             <a href="#">
                 <img src="{{ asset('asset/images/svg/documents.svg') }}" alt="documents">
                 Documents
             </a>
         </li>
         <hr>
-        <li class="sidebar-list-item">
+        <li class="sidebar-list-item submenu_wrapper">
             <a href="#">
                 <img src="{{ asset('asset/images/svg/users.svg') }}" alt="users">
                 Users
             </a>
         </li>
-        <li class="sidebar-list-item">
+        <li class="sidebar-list-item submenu_wrapper">
             <a href="#">
                 <img src="{{ asset('asset/images/svg/settings.svg') }}" alt="settings">
                 Settings
             </a>
         </li>
-        <li class="sidebar-list-item">
+        <li class="sidebar-list-item submenu_wrapper">
             <a href="#">
                 <img src="{{ asset('asset/images/svg/report.svg') }}" alt="report">
                 Reports
             </a>
         </li>
-        <li class="sidebar-list-item">
+        <li class="sidebar-list-item submenu_wrapper">
             <form action="{{ route('logout') }}" method="POST">
                 @csrf
-                <button type="submit" class="btn btn-link logout_btn">
+                <a href="#">
+                <button type="submit" class="logout_btn border-0 background-none">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                         class="bi bi-box-arrow-right" viewBox="0 0 16 16">
                         <path fill-rule="evenodd"
@@ -236,6 +237,7 @@
                             d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z" />
                     </svg>
                     Logout</button>
+                    </a>
             </form>
         </li>
     </ul>

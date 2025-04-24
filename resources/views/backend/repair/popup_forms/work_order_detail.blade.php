@@ -116,7 +116,7 @@
             <div class="mb-3">
                 <label class="form-label fw-bold">Quote Attachment</label><br>
                 <x-attachment-viewer file-url="{{ uploaded_asset($quoteAttachment) }}" title="View Quote Attachment"
-                    button-class="btn btn-success" icon-class="fa-solid fa-eye" modal-size="modal-xl" modal-scrollable="false"
+                    button-class="btn btn_secondary" icon-class="fa-solid fa-eye" modal-size="modal-xl" modal-scrollable="false"
                     background-color="#f8f9fa" border-radius="12px" close-button-class="btn-close-dark" downloadable="true" />
             </div>
         @endif
@@ -186,6 +186,6 @@
             @enderror
         </div>
 
-        <button type="submit" class="btn btn-success mt-3 float-end">Save Changes</button>
+        <button type="submit" class="btn btn_secondary mt-3 float-end">Save Changes</button>
     </form>
 @endif

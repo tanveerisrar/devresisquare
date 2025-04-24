@@ -45,7 +45,7 @@
                     @else
                         <p>Cannot preview this file type.</p>
                         @if ($downloadable)
-                            <a href="{{ $fileUrl }}" download class="btn btn-secondary">Download File</a>
+                            <a href="{{ $fileUrl }}" download class="btn btn_secondary">Download File</a>
                         @endif
                     @endif
                 </div>
@@ -53,13 +53,13 @@
                 {{-- Footer with Buttons --}}
                 <div class="modal-footer">
                     {{-- View in New Tab --}}
-                    <a href="{{ $fileUrl }}" target="_blank" class="btn btn-info">
+                    <a href="{{ $fileUrl }}" target="_blank" class="btn btn_outline_secondary">
                         <i class="me-2 fa-solid fa-arrow-up-right-from-square"></i> View in New Tab
                     </a>
 
                     {{-- Download Button (If Enabled) --}}
                     @if ($downloadable)
-                        <a href="{{ $fileUrl }}" download class="btn btn-primary">
+                        <a href="{{ $fileUrl }}" download class="btn btn_secondary">
                             <i class="me-2 fa-solid fa-download"></i> Download
                         </a>
                     @endif

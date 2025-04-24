@@ -162,7 +162,7 @@
                             <td><input type="text" class="form-control total-price_invoice" readonly></td>
                             <td>
                                 @if ($loop->last)
-                                    <button type="button" class="btn btn-success add-invoice-item"><i
+                                    <button type="button" class="btn btn_secondary add-invoice-item"><i
                                             class="fa-solid fa-plus"></i></button>
                                 @else
                                     <button type="button" class="btn btn-danger remove-invoice-item"><i
@@ -200,7 +200,7 @@
 
         <!-- Submit Button -->
         <div class="submit-btn mt-2 mt-md-4">
-            <button type="submit" class="float-end btn btn-success">Update Invoice</button>
+            <button type="submit" class="float-end btn btn_secondary">Update Invoice</button>
         </div>
     </div>
 </form>

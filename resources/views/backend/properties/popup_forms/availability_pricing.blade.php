@@ -74,12 +74,12 @@
                 @if ($propertyType == 'sales' || $propertyType == 'both')
                     <div class="col-4">
                         <span class="left_item">Estate Charges : </span>
-                        <span class="right_item">{{ getPoundSymbol() }} {{ $estateCharge }}</span>
+                        <span class="right_item">{{ $estateCharge ?  getPoundSymbol() : '' }} {{ $estateCharge }}</span>
                     </div>
                 @endif
                 <div class="col-6">
                     <span class="left_item">Miscellaneous Charge (annual) : </span>
-                    <span class="right_item">{{ getPoundSymbol() }} {{ $miscellaneousCharge }}</span>
+                    <span class="right_item">{{ $miscellaneousCharge ? getPoundSymbol() :'' }} {{ $miscellaneousCharge }}</span>
                 </div>
             </div>
 
@@ -87,11 +87,11 @@
                 <div class="row mb-2">
                     <div class="col-4">
                         <span class="left_item">Ground Rent : </span>
-                        <span class="right_item">{{ getPoundSymbol() }} {{ $groundRent }}</span>
+                        <span class="right_item">{{ $groundRent ? getPoundSymbol() : '' }} {{ $groundRent }}</span>
                     </div>
                     <div class="col-6">
                         <span class="left_item">Service Charge (annual) :</span>
-                        <span class="right_item">{{ getPoundSymbol() }} {{ $serviceCharge }}</span>
+                        <span class="right_item">{{ $serviceCharge ? getPoundSymbol() : '' }} {{ $serviceCharge }}</span>
                     </div>
                 </div>
             @endif
@@ -99,11 +99,11 @@
             <div class="row mb-2">
                 <div class="col-4">
                     <span class="left_item">Sales Price : </span>
-                    <span class="right_item">{{ getPoundSymbol() }} {{ $salePrice }}</span>
+                    <span class="right_item">{{ $salePrice ? getPoundSymbol() : '' }} {{ $salePrice }}</span>
                 </div>
                 <div class="col-6">
                     <span class="left_item">Letting Price : </span>
-                    <span class="right_item">{{ getPoundSymbol() }} {{ $lettingPrice }}</span>
+                    <span class="right_item">{{  $lettingPrice ? getPoundSymbol() : '' }} {{ $lettingPrice }}</span>
                 </div>
             </div>
         </div>
@@ -115,7 +115,7 @@
             <div class="row mb-2">
                 <div class="col">
                     <span class="left_item">Annual Council Tax : </span>
-                    <span class="right_item">{{ getPoundSymbol() }}{{ $annualCouncilTax }}</span></div>
+                    <span class="right_item">{{ $annualCouncilTax ? getPoundSymbol() : '' }}{{ $annualCouncilTax }}</span></div>
             </div>
             <div class="row mb-2">
                 <div class="col">
@@ -262,7 +262,7 @@
                     </select>
                 </div>
             </div>
-            <button type="submit" class="btn btn-success mt-3 float-end">Save Changes</button>
+            <button type="submit" class="btn btn_secondary mt-3 float-end">Save Changes</button>
         </div>
     </form>
 
