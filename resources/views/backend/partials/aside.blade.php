@@ -112,7 +112,7 @@
             <ul class="nav-second-level collapse list-unstyled {{ request()->routeIs('contact-categories.index') || request()->routeIs('admin.branches.index') || request()->routeIs('admin.designations.index') || request()->routeIs('admin.tenancy_types.index') || request()->routeIs('admin.tenancy_types.create') || request()->routeIs('admin.tenancy_sub_statuses.index') || request()->routeIs('admin.tenancy_sub_statuses.create') ? 'show' : '' }}"
                 id="masterManageSubmenu">
 
-                <li class="sidebar-list-item">
+                <li class="sidebar-list-item submenu_wrapper ">
                     <a class="{{ request()->routeIs('contact-categories.index') ? 'active' : '' }}"
                         href="{{ route('contact-categories.index') }}">
                         <img src="{{ asset('asset/images/svg/contacts.svg') }}" alt="contacts">
@@ -120,7 +120,7 @@
                     </a>
                 </li>
 
-                <li class="sidebar-list-item">
+                <li class="sidebar-list-item submenu_wrapper">
                     <a class="{{ request()->routeIs('admin.branches.index') ? 'active' : '' }}"
                         href="{{ route('admin.branches.index') }}">
                         <img src="{{ asset('asset/images/svg/contacts.svg') }}" alt="branches">
@@ -128,7 +128,7 @@
                     </a>
                 </li>
 
-                <li class="sidebar-list-item">
+                <li class="sidebar-list-item submenu_wrapper">
                     <a class="{{ request()->routeIs('admin.designations.index') ? 'active' : '' }}"
                         href="{{ route('admin.designations.index') }}">
                         <img src="{{ asset('asset/images/svg/contacts.svg') }}" alt="branches">
@@ -192,39 +192,39 @@
             </ul>
         </li>
 
-        <li class="sidebar-list-item">
+        <li class="sidebar-list-item submenu_wrapper">
             <a href="#">
                 <img src="{{ asset('asset/images/svg/dashboard.svg') }}" alt="tenancies">
                 Tenancies
             </a>
         </li>
 
-        <li class="sidebar-list-item">
+        <li class="sidebar-list-item submenu_wrapper">
             <a href="#">
                 <img src="{{ asset('asset/images/svg/documents.svg') }}" alt="documents">
                 Documents
             </a>
         </li>
         <hr>
-        <li class="sidebar-list-item">
+        <li class="sidebar-list-item submenu_wrapper">
             <a href="#">
                 <img src="{{ asset('asset/images/svg/users.svg') }}" alt="users">
                 Users
             </a>
         </li>
-        <li class="sidebar-list-item">
+        <li class="sidebar-list-item submenu_wrapper">
             <a href="#">
                 <img src="{{ asset('asset/images/svg/settings.svg') }}" alt="settings">
                 Settings
             </a>
         </li>
-        <li class="sidebar-list-item">
+        <li class="sidebar-list-item submenu_wrapper">
             <a href="#">
                 <img src="{{ asset('asset/images/svg/report.svg') }}" alt="report">
                 Reports
             </a>
         </li>
-        <li class="sidebar-list-item">
+        <li class="sidebar-list-item submenu_wrapper">
             <form action="{{ route('logout') }}" method="POST">
                 @csrf
                 <button type="submit" class="btn btn-link logout_btn">

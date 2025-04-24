@@ -1,6 +1,6 @@
 <aside id="menu" class="sidebar bg-light sidebar">
     <ul class="list-unstyled components">
-        <li class="sidebar-list-item">
+        <li class="sidebar-list-item submenu_wrapper">
             <a class="{{ request()->routeIs('backend.dashboard') ? 'active' : '' }}"
                 href="{{ route('backend.dashboard') }}">
                 <i class="fa-solid fa-tachometer-alt"></i> Dashboard
@@ -76,7 +76,7 @@
             </ul>
         </li>
 
-        <li class="sidebar-list-item">
+        <li class="sidebar-list-item submenu_wrapper">
             <a href="#">
                 <i class="fa-solid fa-home"></i> Tenancies
             </a>
@@ -166,7 +166,7 @@
             </ul>
         </li>
     
-        <li class="sidebar-list-item">
+        <li class="sidebar-list-item submenu_wrapper">
             <a href="#">
                 <i class="fa-solid fa-file-alt"></i> Documents
             </a>
@@ -239,21 +239,21 @@
             ], 'show') }}"
                 id="masterManageSubmenu">
         
-                <li class="sidebar-list-item">
+                <li class="sidebar-list-item submenu_wrapper">
                     <a class="{{ areActiveRoutes(['contact-categories.index']) }}"
                        href="{{ route('contact-categories.index') }}">
                         <i class="fa-solid fa-tags"></i> Categories
                     </a>
                 </li>
         
-                <li class="sidebar-list-item">
+                <li class="sidebar-list-item submenu_wrapper">
                     <a class="{{ areActiveRoutes(['admin.branches.index']) }}"
                        href="{{ route('admin.branches.index') }}">
                         <i class="fa-solid fa-sitemap"></i> Branches
                     </a>
                 </li>
         
-                <li class="sidebar-list-item">
+                <li class="sidebar-list-item submenu_wrapper">
                     <a class="{{ areActiveRoutes(['admin.designations.index']) }}"
                        href="{{ route('admin.designations.index') }}">
                         <i class="fa-solid fa-user-tag"></i> Designation
@@ -328,22 +328,22 @@
             </ul>
         </li>
         
-        <li class="sidebar-list-item">
+        <li class="sidebar-list-item submenu_wrapper">
             <a href="#">
                 <i class="fa-solid fa-users"></i> Users
             </a>
         </li>
-        <li class="sidebar-list-item">
+        <li class="sidebar-list-item submenu_wrapper">
             <a href="#">
                 <i class="fa-solid fa-cogs"></i> Settings
             </a>
         </li>
-        <li class="sidebar-list-item">
+        <li class="sidebar-list-item submenu_wrapper">
             <a href="#">
                 <i class="fa-solid fa-chart-bar"></i> Reports
             </a>
         </li>
-        <li class="sidebar-list-item">
+        <li class="sidebar-list-item submenu_wrapper">
             <form action="{{ route('logout') }}" method="POST">
                 @csrf
                 <button type="submit" class="btn btn-link logout_btn">
