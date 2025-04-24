@@ -92,11 +92,14 @@
             Letting Price: 
             <span>
                 @if(isset($lettingPrice) && $lettingPrice)
-                    £{{ $lettingPrice }}
+                    £{{ $lettingPrice }} 
+                    <br>
+                    <small>Weekly: £{{ $weeklyLettingPrice }}</small>
                 @else
                     N/A
                 @endif
             </span>
-        </div>        
+        </div>
+              
     </div>
 </div>

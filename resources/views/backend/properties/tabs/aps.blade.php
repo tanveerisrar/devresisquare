@@ -10,8 +10,8 @@
             <li><strong>Ground Rent:</strong> {{ getPoundSymbol() . $property->ground_rent ?? '' }}</li>
             <li><strong>Service Charge:</strong> {{ getPoundSymbol() . $property->service_charge ?? '' }}</li>
             <li><strong>Estate Charge:</strong> {{ getPoundSymbol() . $property->estate_charge ?? '' }}</li>
-            <li><strong>Area Square Feet:</strong> {{ $property->square_feet ?? '' }}</li>
-            <li><strong>Area Square Meter:</strong> {{ $property->square_meter ?? '' }}</li>
+            <li><strong>Area Square Feet:</strong> {{ isset($property->square_feet) ? number_format($property->square_feet, 2) : '' }}</li>
+            <li><strong>Area Square Meter:</strong> {{ isset($property->square_meter) ? number_format($property->square_meter, 2) : '' }}</li>            
             <li><strong>Parking:</strong> {{ $property->parking == 1 ? 'Yes' : 'No' }}</li>
             @if ($property->parking == 1)
                 <li><strong>Parking Location:</strong> {{ $property->parking_location ?? '' }}</li>
