@@ -21,33 +21,33 @@
             </a>
             <ul class="nav-second-level collapse list-unstyled {{ request()->routeIs('admin.properties.index') || request()->routeIs('admin.properties.quick') || request()->routeIs('admin.properties.create') ? 'show' : '' }}"
                 id="propertiesSubmenu">
-                <li class="sidebar-sub-list-item">
+                <li class="sidebar-sub-list-item py-0 mb-0">
                     <a class="{{ request()->routeIs('admin.properties.index') ? 'active' : '' }}"
                         href="{{ route('admin.properties.index') }}">
                         <img src="{{ asset('asset/images/svg/properties-view.svg') }}" alt="properties-view">
                         View Properties
                     </a>
                 </li>
-                <!-- <li class="sidebar-sub-list-item">
+                <!-- <li class="sidebar-sub-list-item py-0 mb-0">
                     <a class="{{ request()->routeIs('admin.properties.create') ? 'active' : '' }}"
                         href="{{ route('admin.properties.create') }}">Quick Add Property</a>
                 </li> -->
-                <li class="sidebar-sub-list-item">
+                <li class="sidebar-sub-list-item py-0 mb-0">
                     <a class="{{ request()->routeIs('admin.properties.quick') ? 'active' : '' }}"
                         href="{{ route('admin.properties.quick') }}">
                         <img src="{{ asset('asset/images/svg/properties-add.svg') }}" alt="properties-add">
                         Add Property
                     </a>
                 </li>
-                <!-- <li class="sidebar-sub-list-item">
+                <!-- <li class="sidebar-sub-list-item py-0 mb-0">
                     <a class="{{ request()->routeIs('admin.properties.quick') ? 'active' : '' }}"
                         href="{{ route('admin.properties.quick') }}">Quick Add Property</a>
                 </li> -->
-                <!-- <li class="sidebar-sub-list-item">
+                <!-- <li class="sidebar-sub-list-item py-0 mb-0">
                     <a class="{{ request()->routeIs('admin.properties.create') && request()->query('stepform') ? 'active' : '' }}"
                         href="{{ route('admin.properties.create') }}?stepform">Add Property</a>
                 </li> -->
-                <li class="sidebar-sub-list-item">
+                <li class="sidebar-sub-list-item py-0 mb-0">
                     <a class="{{ request()->routeIs('admin.properties.soft_deleted') ? 'active' : '' }}"
                         href="{{ route('admin.properties.soft_deleted') }}">
                         <img src="{{ asset('asset/images/svg/trash.svg') }}" alt="trash">
@@ -66,32 +66,32 @@
             </a>
             <ul class="nav-second-level collapse list-unstyled {{ request()->routeIs('admin.contacts.index') || request()->routeIs('contacts.create') ? 'show' : '' }}"
                 id="contactsSubmenu">
-                <li class="sidebar-sub-list-item">
+                <li class="sidebar-sub-list-item py-0 mb-0">
                     <a href="{{ route('admin.contacts.index') }}"
                         class="{{ request()->routeIs('admin.contacts.index') && !request()->has('category') ? 'active' : '' }}">
                         All
                     </a>
                 </li>
-                <li class="sidebar-sub-list-item">
+                <li class="sidebar-sub-list-item py-0 mb-0">
                     <a href="{{ route('admin.contacts.index', ['category' => 1]) }}"
                         class="{{ request()->category == 1 ? 'active' : '' }}">
                         <img src="{{ asset('asset/images/svg/owners.svg') }}" alt="owners">
                         Owners
                     </a>
                 </li>
-                <li class="sidebar-sub-list-item">
+                <li class="sidebar-sub-list-item py-0 mb-0">
                     <a href="{{ route('admin.contacts.index', ['category' => 2]) }}"
                         class="{{ request()->category == 2 ? 'active' : '' }}">
                         Property Managers
                     </a>
                 </li>
-                <li class="sidebar-sub-list-item">
+                <li class="sidebar-sub-list-item py-0 mb-0">
                     <a href="{{ route('admin.contacts.index', ['category' => 3]) }}"
                         class="{{ request()->category == 3 ? 'active' : '' }}">
                         Tenants
                     </a>
                 </li>
-                <li class="sidebar-sub-list-item">
+                <li class="sidebar-sub-list-item py-0 mb-0">
                     <a href="{{ route('admin.contacts.index', ['category' => 4]) }}"
                         class="{{ request()->category == 4 ? 'active' : '' }}">
                         Landlords
@@ -137,7 +137,7 @@
                 </li>
 
                 <!-- Tenancy Types Section -->
-                <li class="sidebar-sub-list-item submenu_wrapper">
+                <li class="sidebar-sub-list-item py-0 mb-0 submenu_wrapper">
                     <a href="#tenancyTypesSubmenu" data-bs-toggle="collapse"
                         aria-expanded="{{ request()->routeIs('admin.tenancy_types.index') || request()->routeIs('admin.tenancy_types.create') ? 'true' : 'false' }}"
                         class="dropdown-toggle {{ request()->routeIs('admin.tenancy_types.index') || request()->routeIs('admin.tenancy_types.create') ? 'active' : '' }}">
@@ -164,7 +164,7 @@
                 </li>
 
                 <!-- Tenancy Sub Status Section -->
-                <li class="sidebar-sub-list-item submenu_wrapper">
+                <li class="sidebar-sub-list-item py-0 mb-0 submenu_wrapper">
                     <a href="#tenancySubStatusSubmenu" data-bs-toggle="collapse"
                         aria-expanded="{{ request()->routeIs('admin.tenancy_sub_statuses.index') || request()->routeIs('admin.tenancy_sub_statuses.create') ? 'true' : 'false' }}"
                         class="dropdown-toggle {{ request()->routeIs('admin.tenancy_sub_statuses.index') || request()->routeIs('admin.tenancy_sub_statuses.create') ? 'active' : '' }}">
