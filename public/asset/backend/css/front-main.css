@@ -311,7 +311,7 @@ form{
   .modal {
     .modal-content{
         padding: 32px;
-        height: 600px;
+        height: 700px;
         overflow: hidden;
         .modal-body{
             overflow-y: auto;
