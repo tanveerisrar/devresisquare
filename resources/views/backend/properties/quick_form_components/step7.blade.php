@@ -25,11 +25,19 @@
                         <div class="rc_title">Parking</div>
                         <div class="radio_bts_square">
                             <input required type="radio" class="parking-radio" name="parking" id="parking1"
-                                value="yes" {{ (isset($property) && $property->parking == 'yes') ? 'checked' : '' }} />
+                                value="1" {{ (isset($property) && $property->parking == '1') ? 'checked' : '' }} />
                             <label for="parking1"> Yes </label>
                             <input required type="radio" class="parking-radio" name="parking" id="parking2"
-                                value="no" {{ (isset($property) && $property->parking == 'no') ? 'checked' : '' }} />
+                                value="0" {{ (isset($property) && $property->parking == '0') ? 'checked' : '' }} />
                             <label for="parking2"> No </label>
+                        </div>
+                        <div class="form-group" id="parking_location_group" style="display: none;">
+                            <label for="parking_location">Parking Location</label>
+                            <input type="text" name="parking_location" class="form-control parking-location"
+                                value="{{ $property->parking_location ?? '' }}" />
+                            @error('parking_location')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
                     <div class="">
@@ -45,7 +53,7 @@
                     </div>
                     <div class="">
                         <div class="rc_title">Balcony</div>
-                        <div class="">
+                        <div class="radio_bts_square">
                             <input required type="radio" class="balcony-radio" name="balcony" id="balcony1"
                                 value="1" {{ (isset($property) && $property->balcony == '1') ? 'checked' : '' }} />
                             <label for="balcony1"> Yes </label>
@@ -65,3 +73,30 @@
         </div>
     </div>
 </div>
+<script>
+    function initializeParkingRadios() {
+        // Declare the variable for radio buttons if it's not already declared
+        let parkingRadios = document.querySelectorAll('input[name="parking"]');
+        const parkingLocationGroup = document.getElementById('parking_location_group');
+
+        // Add event listener to handle changes
+        parkingRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                // Show or hide the parking location group based on the selected value
+                parkingLocationGroup.style.display = (radio.value === '1') ? 'block' : 'none';
+            });
+        });
+
+        // Check if any radio button is already selected, and show the field accordingly
+        const selectedRadio = Array.from(parkingRadios).find(radio => radio.checked);
+        if (selectedRadio && selectedRadio.value === '1') {
+            parkingLocationGroup.style.display = 'block'; // Show the field if selected value is '1'
+        } else {
+            parkingLocationGroup.style.display = 'none';  // Hide the field if '0' or none selected
+        }
+    }
+
+    // Call the function to initialize
+    initializeParkingRadios();
+
+</script>

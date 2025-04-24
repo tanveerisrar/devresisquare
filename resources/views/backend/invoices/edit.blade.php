@@ -103,7 +103,7 @@
         </div>
 
         <!-- Submit Button -->
-        <button type="submit" class="btn btn-success">Update Invoice</button>
+        <button type="submit" class="btn btn_secondary">Update Invoice</button>
         <a href="{{ route('admin.invoices.index') }}" class="btn btn-secondary">Cancel</a>
     </form>
 </div>

@@ -969,6 +969,7 @@ private function getTabContent($tabname, $propertyId, $property)
             case 7:
                 return [
                     'parking' => 'required|string',
+                    'parking_location' => 'nullable',
                     'garden' => 'required|string',
                     'balcony' => 'required|string',
                 ];

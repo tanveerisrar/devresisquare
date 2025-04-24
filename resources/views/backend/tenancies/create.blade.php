@@ -197,7 +197,7 @@
                 </div>
             </div>
         </div>
-        <button type="submit" class="float-end mt-3 btn btn-secondary">Save</button>
+        <button type="submit" class="float-end mt-3 btn btn_secondary">Save</button>
     </form>
 </div>
 

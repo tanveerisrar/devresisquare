@@ -69,8 +69,14 @@
             <label for="contact_phone" class="form-label">Phone</label>
             <input type="text" class="form-control" id="contact_phone" name="phone" required>
         </div>
-        <button type="submit" class="btn btn-primary">Save Contact</button>
-        <button type="button" class="btn btn-secondary" id="backToMainForm">Back</button>
+        <div class="row">
+            <div class="col-auto">
+                <button type="submit" class="btn btn_secondary">Save Contact</button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn_outline_secondary" id="backToMainForm">Back</button>
+            </div>
+        </div>
     </form>
 </div>
 

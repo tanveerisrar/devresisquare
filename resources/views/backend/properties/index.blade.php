@@ -37,11 +37,29 @@
                     <div class="pv_card_wrapper">
                         {{-- Dev Note: if select property from list add class 'current' to property card --}}
                         @foreach ($properties as $property)
-                            <x-backend.property-card class="property-card" propertyName="{{ $property['prop_name'] }}{{$property['line_1'] ? ', ' : ''}}{{ $property['line_1'] }}{{$property['line_2'] ? ', ' : ''}}{{ $property['line_2'] }}{{$property['city'] ? ', ' : ''}}{{$property['city']}}"
-                                bed="{{ $property['bedroom'] }}" bath="{{ $property['bathroom'] }}"
-                                floor="{{ $property['floor'] }}" living="{{ $property['reception'] }}" {{-- living="{{$property['living']}}" --}}
-                                type="{{ $property['property_type'] }}" available="{{ $property['available_from'] }}"
-                                price="{{ $property['price'] }}" cardStyle="" propertyId="{{ $property['id'] }}" />
+                            @php
+                                $addressParts = array_filter([
+                                    $property['prop_name'],
+                                    $property['line_1'],
+                                    $property['line_2'],
+                                    $property['city']
+                                ]);
+                                $fullAddress = implode(', ', $addressParts);
+                            @endphp
+                                <x-backend.property-card 
+                                class="property-card" 
+                                propertyName="{{ $fullAddress }}" 
+                                bed="{{ $property['bedroom'] }}" 
+                                bath="{{ $property['bathroom'] }}" 
+                                floor="{{ $property['floor'] }}" 
+                                living="{{ $property['reception'] }}" 
+                                type="{{ $property['property_type'] }}" 
+                                available="{{ $property['available_from'] }}" 
+                                price="{{ $property['price'] }}" 
+                                lettingPrice="{{ $property['letting_price'] ?? '' }}" 
+                                cardStyle="" 
+                                propertyId="{{ $property['id'] }}" 
+                                />
                         @endforeach
 
                     </div>
@@ -241,7 +259,7 @@
             <span id="addTenantButton" class="add-tenant-btn hidden" onclick="addTenant()">Add More Tenant</span>
         </div>
         <!-- Modal Footer Navigation -->
-        <div class="modal-footer">
+        <div class="modal-footer px-0">
             <button type="button" class="btn btn_outline_secondary btn-sm" data-bs-dismiss="modal" aria-label="Close">Cancel</button>
             <button id="backButton" type="button" class="btn btn_secondary btn-md hidden">Back</button>
             <button id="nextButton" type="button" class="btn btn_secondary btn-md ">Next</button>

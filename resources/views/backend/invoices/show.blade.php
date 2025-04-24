@@ -14,7 +14,7 @@
             <i class="me-2 fa-solid fa-pen-to-square"></i> Edit
         </a>
 
-        <a href="{{ route('admin.invoices.download', $invoice->id) }}" class="btn btn-success">
+        <a href="{{ route('admin.invoices.download', $invoice->id) }}" class="btn btn_secondary">
             <i class="me-2 fa-regular fa-file-pdf"></i> Download PDF
         </a>        
     </div>

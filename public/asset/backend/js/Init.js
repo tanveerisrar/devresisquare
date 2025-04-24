@@ -206,3 +206,20 @@ function initTrumbowyg(target) {
 function destroyTrumbowyg(target) {
     $(target).trumbowyg("destroy");
 }
+
+function openImageModal(imageSrc) {
+    $("#previewImage").attr("src", imageSrc); // Set image source
+    $("#imagePreviewModal").modal("show"); // Show modal
+}
+
+// Hide modal when close button is clicked
+$("#closeModalBtn").click(function () {
+    $("#imagePreviewModal").modal("hide");
+});
+
+// Hide modal when clicking outside modal content
+$(document).on("click", function (event) {
+    if (!$(event.target).closest(".modal-content").length) {
+        $("#imagePreviewModal").modal("hide");
+    }
+});

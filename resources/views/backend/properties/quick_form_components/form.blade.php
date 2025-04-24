@@ -266,9 +266,13 @@ $(document).ready(function() {
         const parkingSelected = $('input[name="parking"]:checked').val();
         const gardenSelected = $('input[name="garden"]:checked').val();
         const balconySelected = $('input[name="balcony"]:checked').val();
+        const parkingLocation = $('.parking-location').val();
+
+        // Condition: If parking is selected as "Yes", parking_location must not be empty
+        const isParkingValid = (parkingSelected === '1') ? !!parkingLocation : true;
 
         // If both parkings and balcony Rooms are selected, submit the form
-        if (parkingSelected && gardenSelected && balconySelected) {
+        if (parkingSelected && isParkingValid && gardenSelected && balconySelected) {
             const currentStep13 = $('.next-step').data('current-step');
             const targetStep14 = $('.next-step').data('next-step');
 
@@ -278,6 +282,7 @@ $(document).ready(function() {
     $(document).on('click', '.parking-radio', checkSelectionsAndSubmit);
     $(document).on('click', '.garden-radio', checkSelectionsAndSubmit);
     $(document).on('click', '.balcony-radio', checkSelectionsAndSubmit);
+    $(document).on('input', '.parking-location', checkSelectionsAndSubmit);
 
     /* Quick Step 8 */
     function checkStep8AndSubmit() {
