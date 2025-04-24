@@ -69,12 +69,12 @@
             </div>
         </div>
 
-        <div class="modal-footer">
+        <div class="modal-footer px-0">
             <div class="row">
                 <div class="col-auto">
                     <button type="button" class="btn btn_outline_secondary" onclick="closeModel();" data-bs-dismiss="modal">Close</button>
                 </div>
-                <div class="col-auto">
+                <div class="col-auto px-0">
                     <button type="submit" class="btn btn_secondary">Save Changes</button>
                 </div>
             </div>

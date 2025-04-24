@@ -193,7 +193,7 @@
 
                     <button type="button" class="btn btn_secondary" id="add-item">Add Item</button>
 
-                    <div class="modal-footer">
+                    <div class="modal-footer px-0">
                         <div class="row">
                             <div class="col-auto">
                                 <button type="submit" class="btn btn_secondary">Save Work Order</button>
@@ -201,7 +201,7 @@
                             <div class="col-auto">
                                 <button type="button" class="btn btn_outline_secondary" id="generateInvoiceBtn">Generate Invoice</button>
                             </div>
-                            <div class="col-auto">
+                            <div class="col-auto px-0">
                                 <button type="button" class="btn btn_outline_secondary" data-bs-dismiss="modal">Close</button>
                             </div>
                         </div>

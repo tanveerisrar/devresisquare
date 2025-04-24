@@ -86,12 +86,12 @@
             <div class="modal-body" id="complianceModalBody">
                 <!-- Dynamic form content will be loaded here via Ajax -->
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer px-0">
                 <div class="row">
                     <div class="col-auto">
                         <button type="submit" form="" class="btn btn_secondary" id="submitComplianceForm">Save</button>
                     </div>
-                    <div class="col-auto">
+                    <div class="col-auto px-0">
                         <button type="button" class="btn btn_outline_secondary" data-bs-dismiss="modal">Close</button>
                     </div>
                 </div>
@@ -112,12 +112,12 @@
             <div class="modal-body">
                 Are you sure you want to delete this compliance record?
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer px-0">
                 <div class="row">
                     <div class="col-auto">
                         <button type="button" class="btn btn_outline_secondary" data-bs-dismiss="modal">Cancel</button>
                     </div>
-                    <div class="col-auto">
+                    <div class="col-auto px-0">
                         <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
                     </div>
                 </div>
