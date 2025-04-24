@@ -34,13 +34,17 @@ $petsAllowed = booleanToYesNo($property->pets_allow) ?? '';
 
         <div class="form-group">
             <label>Parking</label>
-            <div class="rs_radio_btns">
-                <label><input type="radio" name="parking" value="0" {{ (isset($property) && $property->parking == '0') ? 'checked' : '' }} required /> No</label>
-                <label><input type="radio" name="parking" value="1" {{ (isset($property) && $property->parking == '1') ? 'checked' : '' }} required /> Yes</label>
-                @error('parking')
-                    <div class="text-danger">{{ $message }}</div>
-                @enderror
+            <div class="radio_bts_square">
+                <input required type="radio" class="parking-radio" name="parking" id="parking1" value="0"
+                    {{ (isset($property) && $property->parking == '0') ? 'checked' : '' }} />
+                <label for="parking1"> No </label>
+                <input required type="radio" class="parking-radio" name="parking" id="parking2" value="1"
+                    {{ (isset($property) && $property->parking == '1') ? 'checked' : '' }} />
+                <label for="parking2"> Yes </label>
             </div>
+            @error('parking')
+                <div class="text-danger">{{ $message }}</div>
+            @enderror
         </div>
 
         <div class="row">

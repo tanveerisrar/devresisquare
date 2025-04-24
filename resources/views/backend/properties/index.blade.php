@@ -46,11 +46,21 @@
                                 ]);
                                 $fullAddress = implode(', ', $addressParts);
                             @endphp
-                            <x-backend.property-card class="property-card" propertyName="{{ $fullAddress }}"
-                                bed="{{ $property['bedroom'] }}" bath="{{ $property['bathroom'] }}"
-                                floor="{{ $property['floor'] }}" living="{{ $property['reception'] }}" {{-- living="{{$property['living']}}" --}}
-                                type="{{ $property['property_type'] }}" available="{{ $property['available_from'] }}"
-                                price="{{ $property['price'] }}" cardStyle="" propertyId="{{ $property['id'] }}" />
+<x-backend.property-card 
+class="property-card" 
+propertyName="{{ $fullAddress }}" 
+bed="{{ $property['bedroom'] }}" 
+bath="{{ $property['bathroom'] }}" 
+floor="{{ $property['floor'] }}" 
+living="{{ $property['reception'] }}" 
+type="{{ $property['property_type'] }}" 
+available="{{ $property['available_from'] }}" 
+price="{{ $property['price'] }}" 
+lettingPrice="{{ $property['letting_price'] ?? '' }}" 
+cardStyle="" 
+propertyId="{{ $property['id'] }}" 
+/>
+
                         @endforeach
 
                     </div>
