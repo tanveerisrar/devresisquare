@@ -1057,7 +1057,7 @@ input[type="radio"]:checked+label::before {
         }
 
         .pv_image{
-            width: 14rem;
+            min-width: 14rem;
             height: 10rem;
             overflow: hidden;
             border-radius: 6px;
