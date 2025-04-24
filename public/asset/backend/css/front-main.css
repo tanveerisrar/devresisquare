@@ -311,6 +311,11 @@ form{
   .modal {
     .modal-content{
         padding: 32px;
+        height: 600px;
+        overflow: hidden;
+        .modal-body{
+            overflow-y: auto;
+        }
     }
   }
 /* ========================================
