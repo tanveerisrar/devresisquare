@@ -100,7 +100,7 @@
                                     <!-- Actions -->
                                     <td>
                                         @if(!$contact->is_main)
-                                        <button class="btn btn-sm btn-success" onclick="setAsMain({{ $contact->id }}, {{ $ownerGroup->id }})">
+                                        <button class="btn btn-sm btn_secondary" onclick="setAsMain({{ $contact->id }}, {{ $ownerGroup->id }})">
                                             Set as Main
                                         </button>
                                         @endif

@@ -12,6 +12,6 @@
             <textarea name="notes" id="notes" rows="6" placeholder="Notes" class="form-control">{{ isset($property) && $property->notes ? $property->notes : '' }}</textarea>
         </div>
 
-        <button type="submit" class="btn btn-success mt-3 float-end">Save Changes</button>
+        <button type="submit" class="btn btn_secondary mt-3 float-end">Save Changes</button>
     </form>
 @endif

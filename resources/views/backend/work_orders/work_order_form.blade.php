@@ -160,7 +160,7 @@
                         <td><input type="text" class="form-control tax-amount" readonly></td>
                         <td><input type="text" class="form-control total-price" readonly></td>
                         <td>
-                            <button type="button" class="btn btn-success add-workorder-item"><i
+                            <button type="button" class="btn btn_secondary add-workorder-item"><i
                                     class="fa-solid fa-plus"></i></button>
                         </td>
                     </tr>
@@ -195,7 +195,7 @@
                             <td><input type="text" class="form-control total-price" readonly></td>
                             <td>
                                 @if ($loop->last)
-                                    <button type="button" class="btn btn-success add-workorder-item"><i
+                                    <button type="button" class="btn btn_secondary add-workorder-item"><i
                                             class="fa-solid fa-plus"></i></button>
                                 @else
                                     <button type="button" class="btn btn-danger remove-item"><i
@@ -241,7 +241,7 @@
             <x-attachment-viewer 
                 file-url="{{ uploaded_asset($quoteAttachment) }}" 
                 title="View Quote Attachment"
-                button-class="btn btn-success"
+                button-class="btn btn_secondary"
                 icon-class="fa-solid fa-eye"
                 modal-size="modal-xl"
                 modal-scrollable="false"
@@ -254,7 +254,7 @@
             {{-- <x-attachment-viewer 
             file-url="{{ uploaded_asset($quoteAttachment) }}" 
             title="View Quote Attachment"
-            button-class="btn btn-success"
+            button-class="btn btn_secondary"
             icon-class="bi bi-eye"
             modal-size="modal-xl"
             modal-scrollable="true"
@@ -276,7 +276,7 @@
     <div id="invoice-message" class="mt-2"></div>
     <div class="d-flex gap-3 float-end">
         <!-- Save Work Order Button -->
-        <button type="submit" class="btn btn-success">Save Work Order</button>
+        <button type="submit" class="btn btn_secondary">Save Work Order</button>
     
         <!-- Generate Work Order PDF Button -->
         <span class="d-inline-block" data-bs-toggle="tooltip" title="{{ !$workorder ? 'Create Work Order first' : '' }}">
@@ -300,7 +300,7 @@
               
         
     {{-- <div class="d-flex gap-3 float-end">
-        <button type="submit" class="btn btn-success">Save Work Order</button>
+        <button type="submit" class="btn btn_secondary">Save Work Order</button>
         <button type="button" class="btn btn-info" onclick="window.location.href='{{ route('admin.workorder.generate.invoice', $workorder->id ?? 0) }}'">Generate Work Order PDF </button>
         <button id="generateInvoiceBtn" data-workorder-id="{{ $workorder->id ?? '' }}" class="btn btn-primary" {{ $workorder->invoice ? 'disabled' : '' }}> {{ $workorder->invoice ? 'Invoice Generated' : 'Generate Invoice' }} </button>
     </div> --}}

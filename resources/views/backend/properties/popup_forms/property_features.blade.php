@@ -464,7 +464,7 @@ $other = jsonDecodeAndPrint($property->other) ?? '';
                         </div>{{-- grid-auto-fit end --}}
                     </div>{{-- form-group end --}}
                     
-                    <button type="submit" class="btn btn-success mt-3 float-end">Save Changes</button>
+                    <button type="submit" class="btn btn_secondary mt-3 float-end">Save Changes</button>
 
 
 

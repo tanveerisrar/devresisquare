@@ -75,7 +75,7 @@
                 value="{{ isset($property) && $property->useful_information ? $property->useful_information : '' }}"
                 required>
         </div>
-        <button type="submit" class="btn btn-success mt-3 float-end">Save Changes</button>
+        <button type="submit" class="btn btn_secondary mt-3 float-end">Save Changes</button>
     </form>
 
 

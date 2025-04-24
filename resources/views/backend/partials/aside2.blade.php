@@ -1,6 +1,6 @@
 <aside id="menu" class="sidebar bg-light sidebar">
     <ul class="list-unstyled components">
-        <li class="sidebar-list-item">
+        <li class="sidebar-list-item submenu_wrapper">
             <a class="{{ request()->routeIs('backend.dashboard') ? 'active' : '' }}"
                 href="{{ route('backend.dashboard') }}">
                 <i class="fa-solid fa-tachometer-alt"></i> Dashboard
@@ -14,19 +14,19 @@
             </a>
             <ul class="nav-second-level collapse list-unstyled {{ request()->routeIs('admin.properties.index') || request()->routeIs('admin.properties.quick') || request()->routeIs('admin.properties.soft_deleted') || request()->routeIs('admin.properties.create') ? 'show' : '' }}"
                 id="propertiesSubmenu">
-                <li class="sidebar-sub-list-item">
+                <li class="sidebar-sub-list-item py-0 mb-0">
                     <a class="{{ request()->routeIs('admin.properties.index') ? 'active' : '' }}"
                         href="{{ route('admin.properties.index') }}">
                         <i class="fa-solid fa-eye"></i> View Properties
                     </a>
                 </li>
-                <li class="sidebar-sub-list-item">
+                <li class="sidebar-sub-list-item py-0 mb-0">
                     <a class="{{ request()->routeIs('admin.properties.quick') ? 'active' : '' }}"
                         href="{{ route('admin.properties.quick') }}">
                         <i class="fa-solid fa-plus"></i> Add Property
                     </a>
                 </li>
-                <li class="sidebar-sub-list-item">
+                <li class="sidebar-sub-list-item py-0 mb-0">
                     <a class="{{ request()->routeIs('admin.properties.soft_deleted') ? 'active' : '' }}"
                         href="{{ route('admin.properties.soft_deleted') }}">
                         <i class="fa-solid fa-trash"></i> Deleted Properties
@@ -43,31 +43,31 @@
             </a>
             <ul class="nav-second-level collapse list-unstyled {{ request()->routeIs('admin.contacts.index') || request()->routeIs('contacts.create') ? 'show' : '' }}"
                 id="contactsSubmenu">
-                <li class="sidebar-sub-list-item">
+                <li class="sidebar-sub-list-item py-0 mb-0">
                     <a href="{{ route('admin.contacts.index') }}"
                         class="{{ request()->routeIs('admin.contacts.index') && !request()->has('category') ? 'active' : '' }}">
                         <i class="fa-solid fa-user"></i> All
                     </a>
                 </li>
-                <li class="sidebar-sub-list-item">
+                <li class="sidebar-sub-list-item py-0 mb-0">
                     <a href="{{ route('admin.contacts.index', ['category' => 1]) }}"
                         class="{{ request()->category == 1 ? 'active' : '' }}">
                         <i class="fa-solid fa-user"></i> Owners
                     </a>
                 </li>
-                <li class="sidebar-sub-list-item">
+                <li class="sidebar-sub-list-item py-0 mb-0">
                     <a href="{{ route('admin.contacts.index', ['category' => 2]) }}"
                         class="{{ request()->category == 2 ? 'active' : '' }}">
                         <i class="fa-solid fa-user"></i> Property Managers
                     </a>
                 </li>
-                <li class="sidebar-sub-list-item">
+                <li class="sidebar-sub-list-item py-0 mb-0">
                     <a href="{{ route('admin.contacts.index', ['category' => 3]) }}"
                         class="{{ request()->category == 3 ? 'active' : '' }}">
                         <i class="fa-solid fa-user"></i> Tenants
                     </a>
                 </li>
-                <li class="sidebar-sub-list-item">
+                <li class="sidebar-sub-list-item py-0 mb-0">
                     <a href="{{ route('admin.contacts.index', ['category' => 4]) }}"
                         class="{{ request()->category == 4 ? 'active' : '' }}">
                         <i class="fa-solid fa-user"></i> Landlords
@@ -76,7 +76,7 @@
             </ul>
         </li>
 
-        <li class="sidebar-list-item">
+        <li class="sidebar-list-item submenu_wrapper">
             <a href="#">
                 <i class="fa-solid fa-home"></i> Tenancies
             </a>
@@ -91,7 +91,7 @@
             <ul class="nav-second-level collapse list-unstyled {{ request()->routeIs('admin.property_repairs.*') ? 'show' : '' }}"
                 id="repairSubmenu">
                 <!-- Raise Repair Issue -->
-                <li class="sidebar-sub-list-item">
+                <li class="sidebar-sub-list-item py-0 mb-0">
                     <a class="{{ request()->routeIs('admin.property_repairs.create') || request()->routeIs('admin.property_repairs.edit') ? 'active' : '' }}"
                         href="{{ route('admin.property_repairs.create') }}">
                         <i class="fa-solid fa-plus"></i> Raise Repair Issue
@@ -99,7 +99,7 @@
                 </li>
 
                 <!-- Repair Issues Section -->
-                <li class="sidebar-sub-list-item submenu_wrapper">
+                <li class="sidebar-sub-list-item py-0 mb-0 submenu_wrapper">
                     <a href="#repairIssuesSubmenu" data-bs-toggle="collapse"
                         aria-expanded="{{ request()->routeIs('admin.property_repairs.index') ? 'true' : 'false' }}"
                         class="dropdown-toggle {{ request()->routeIs('admin.property_repairs.index') || request()->routeIs('admin.property_repairs.show') ? 'active' : '' }}">
@@ -166,7 +166,7 @@
             </ul>
         </li>
     
-        <li class="sidebar-list-item">
+        <li class="sidebar-list-item submenu_wrapper">
             <a href="#">
                 <i class="fa-solid fa-file-alt"></i> Documents
             </a>
@@ -184,17 +184,17 @@
             </a>
             <ul class="aiz-side-nav-list level-2 collapse {{ areActiveRoutes(['website.footer', 'website.header', 'website.appearance'], 'show') }}"
                 id="websiteSetupSubmenu">
-                <li class="sidebar-sub-list-item">
+                <li class="sidebar-sub-list-item py-0 mb-0">
                     <a href="{{ route('website.header') }}" class="aiz-side-nav-link {{ areActiveRoutes(['website.header']) }}">
                         <span class="aiz-side-nav-text">Header</span>
                     </a>
                 </li>
-                <li class="sidebar-sub-list-item">
+                <li class="sidebar-sub-list-item py-0 mb-0">
                     <a href="{{ route('website.footer') }}" class="aiz-side-nav-link {{ areActiveRoutes(['website.footer']) }}">
                         <span class="aiz-side-nav-text">Footer</span>
                     </a>
                 </li>
-                <li class="sidebar-sub-list-item">
+                <li class="sidebar-sub-list-item py-0 mb-0">
                     <a href="{{ route('website.appearance') }}" class="aiz-side-nav-link {{ areActiveRoutes(['website.appearance']) }}">
                         <span class="aiz-side-nav-text">Appearance</span>
                     </a>
@@ -239,21 +239,21 @@
             ], 'show') }}"
                 id="masterManageSubmenu">
         
-                <li class="sidebar-list-item">
+                <li class="sidebar-list-item submenu_wrapper">
                     <a class="{{ areActiveRoutes(['contact-categories.index']) }}"
                        href="{{ route('contact-categories.index') }}">
                         <i class="fa-solid fa-tags"></i> Categories
                     </a>
                 </li>
         
-                <li class="sidebar-list-item">
+                <li class="sidebar-list-item submenu_wrapper">
                     <a class="{{ areActiveRoutes(['admin.branches.index']) }}"
                        href="{{ route('admin.branches.index') }}">
                         <i class="fa-solid fa-sitemap"></i> Branches
                     </a>
                 </li>
         
-                <li class="sidebar-list-item">
+                <li class="sidebar-list-item submenu_wrapper">
                     <a class="{{ areActiveRoutes(['admin.designations.index']) }}"
                        href="{{ route('admin.designations.index') }}">
                         <i class="fa-solid fa-user-tag"></i> Designation
@@ -261,7 +261,7 @@
                 </li>
         
                 <!-- Tenancy Types Section -->
-                <li class="sidebar-sub-list-item submenu_wrapper">
+                <li class="sidebar-sub-list-item py-0 mb-0 submenu_wrapper">
                     <a href="#tenancyTypesSubmenu" data-bs-toggle="collapse"
                        aria-expanded="{{ areActiveRoutes(['admin.tenancy_types.index', 'admin.tenancy_types.create'], 'true') }}"
                        class="dropdown-toggle {{ areActiveRoutes(['admin.tenancy_types.index', 'admin.tenancy_types.create']) }}">
@@ -285,7 +285,7 @@
                 </li>
         
                 <!-- Tenancy Sub Status Section -->
-                <li class="sidebar-sub-list-item submenu_wrapper">
+                <li class="sidebar-sub-list-item py-0 mb-0 submenu_wrapper">
                     <a href="#tenancySubStatusSubmenu" data-bs-toggle="collapse"
                        aria-expanded="{{ areActiveRoutes(['admin.tenancy_sub_statuses.index', 'admin.tenancy_sub_statuses.create'], 'true') }}"
                        class="dropdown-toggle {{ areActiveRoutes(['admin.tenancy_sub_statuses.index', 'admin.tenancy_sub_statuses.create']) }}">
@@ -309,7 +309,7 @@
                 </li>
         
                 <!-- Job Types Section -->
-                <li class="sidebar-sub-list-item submenu_wrapper">
+                <li class="sidebar-sub-list-item py-0 mb-0 submenu_wrapper">
                     <a href="#jobTypesSubmenu" data-bs-toggle="collapse"
                        aria-expanded="{{ areActiveRoutes(['admin.job_types.index', 'admin.job_types.create'], 'true') }}"
                        class="dropdown-toggle {{ areActiveRoutes(['admin.job_types.index', 'admin.job_types.create']) }}">
@@ -328,27 +328,29 @@
             </ul>
         </li>
         
-        <li class="sidebar-list-item">
+        <li class="sidebar-list-item submenu_wrapper">
             <a href="#">
                 <i class="fa-solid fa-users"></i> Users
             </a>
         </li>
-        <li class="sidebar-list-item">
+        <li class="sidebar-list-item submenu_wrapper">
             <a href="#">
                 <i class="fa-solid fa-cogs"></i> Settings
             </a>
         </li>
-        <li class="sidebar-list-item">
+        <li class="sidebar-list-item submenu_wrapper">
             <a href="#">
                 <i class="fa-solid fa-chart-bar"></i> Reports
             </a>
         </li>
-        <li class="sidebar-list-item">
+        <li class="sidebar-list-item submenu_wrapper">
             <form action="{{ route('logout') }}" method="POST">
                 @csrf
-                <button type="submit" class="btn btn-link logout_btn">
+                <a href="#">
+                <button type="submit" class="logout_btn border-0 background-none">
                     <i class="fa-solid fa-sign-out-alt"></i> Logout
                 </button>
+                </a>
             </form>
         </li>
     </ul>

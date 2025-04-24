@@ -425,7 +425,7 @@
                         <td><input type="text" class="form-control tax-amount" readonly></td>                   
                         <td><input type="text" class="form-control total-price" readonly></td>
                         <td>
-                            <button type="button" class="btn btn-success add-workorder-item"><i class="fa-solid fa-plus"></i></button>
+                            <button type="button" class="btn btn_secondary add-workorder-item"><i class="fa-solid fa-plus"></i></button>
                         </td>
                     </tr>
                 `;
@@ -440,7 +440,7 @@
                 calculateworkorderTotals(); // Recalculate totals
 
                 // Change the previous row's Add button to Remove
-                $('#workorder-items tr').eq(index - 1).find('.add-workorder-item').removeClass('btn-success add-workorder-item').addClass('btn-danger remove-item').html('<i class="fa-solid fa-minus"></i>');
+                $('#workorder-items tr').eq(index - 1).find('.add-workorder-item').removeClass('btn_secondary add-workorder-item').addClass('btn-danger remove-item').html('<i class="fa-solid fa-minus"></i>');
             });
 
             // Remove Item Row
@@ -450,10 +450,10 @@
 
                 // If only one row left, make sure it has "Add More" instead of "Remove"
                 if ($('#workorder-items tr').length === 1) {
-                    $('#workorder-items tr').eq(0).find('.remove-item').removeClass('btn-danger remove-item').addClass('btn-success add-workorder-item').html('<i class="fa-solid fa-plus"></i>');
+                    $('#workorder-items tr').eq(0).find('.remove-item').removeClass('btn-danger remove-item').addClass('btn_secondary add-workorder-item').html('<i class="fa-solid fa-plus"></i>');
                 } else {
                     // Ensure last row always has Add More button
-                    $('#workorder-items tr').last().find('td:last').html('<button type="button" class="btn btn-success add-workorder-item"><i class="fa-solid fa-plus"></i></button>');
+                    $('#workorder-items tr').last().find('td:last').html('<button type="button" class="btn btn_secondary add-workorder-item"><i class="fa-solid fa-plus"></i></button>');
                 }
             });
 
@@ -519,7 +519,7 @@
                         <td><input type="text" class="form-control tax-amount_invoice" readonly></td>
                         <td><input type="text" class="form-control total-price_invoice" readonly></td>
                         <td>
-                            <button type="button" class="btn btn-success add-invoice-item"><i class="fa-solid fa-plus"></i></button>
+                            <button type="button" class="btn btn_secondary add-invoice-item"><i class="fa-solid fa-plus"></i></button>
                         </td>
                     </tr>
                 `;
@@ -534,7 +534,7 @@
 
                 
                 // Change the previous row's Add button to Remove
-                $('#invoice-items tr').eq(index - 1).find('.add-invoice-item').removeClass('btn-success add-invoice-item').addClass('btn-danger remove-item').html('<i class="fa-solid fa-minus"></i>');
+                $('#invoice-items tr').eq(index - 1).find('.add-invoice-item').removeClass('btn_secondary add-invoice-item').addClass('btn-danger remove-item').html('<i class="fa-solid fa-minus"></i>');
 
             });
 
@@ -545,10 +545,10 @@
 
                 // If only one row left, make sure it has "Add More" instead of "Remove"
                 if ($('#invoice-items tr').length === 1) {
-                    $('#invoice-items tr').eq(0).find('.remove-invoice-item').removeClass('btn-danger remove-invoice-item').addClass('btn-success add-invoice-item').html('<i class="fa-solid fa-plus"></i>');
+                    $('#invoice-items tr').eq(0).find('.remove-invoice-item').removeClass('btn-danger remove-invoice-item').addClass('btn_secondary add-invoice-item').html('<i class="fa-solid fa-plus"></i>');
                 } else {
                     // Ensure last row always has Add More button
-                    $('#invoice-items tr').last().find('td:last').html('<button type="button" class="btn btn-success add-invoice-item"><i class="fa-solid fa-plus"></i></button>');
+                    $('#invoice-items tr').last().find('td:last').html('<button type="button" class="btn btn_secondary add-invoice-item"><i class="fa-solid fa-plus"></i></button>');
                 }
             });
 

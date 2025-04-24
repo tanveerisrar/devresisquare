@@ -10,21 +10,26 @@
         <div class="mt-md-4 mt-3">
             <div class="accordion_inner_heading mb-2">Status </div>
 
-            <div class="row mb-2">
-                <div class="col-4"><span class="left_item">Sales Status : </span>
-                    <span class="right_item">{{ $salesCurrentStatus }}</span>
+            <div class="row mb-3">
+                <div class="col">
+                    <div class="left_item">Sales Status : </div>
+                    <div class="right_item">{{ $salesCurrentStatus }}</div>
                 </div>
                 
             @if(isset($property) && ($property->property_type == 'lettings' || $property->property_type == 'both'))
-                <div class="col-6"><span class="left_item">Letting Status : </span>
-                    <span class="right_item">{{ $lettingCurrentStatus }}</span>
+            <div class="row mb-3">
+                <div class="col-6">
+                    <div class="left_item">Letting Status : </div>
+                    <div class="right_item">{{ $lettingCurrentStatus }}</div>
                 </div>
+            </div>
             @endif
             </div>
 
-            <div class="row mb-2">
-                <div class="col-12"><span class="left_item">Status Description :</span>
-                    <span class="right_item">{{ $statusDescription }}</span></div>
+            <div class="row mb-3">
+                <div class="col">
+                    <div class="left_item">Status Description :</div>
+                    <div class="right_item">{{ $statusDescription }}</div></div>
             </div>
         </div>
     </div>
@@ -86,6 +91,6 @@
             @enderror
         </div>
 
-        <button type="submit" class="btn btn-success mt-3 float-end">Save Changes</button>
+        <button type="submit" class="btn btn_secondary mt-3 float-end">Save Changes</button>
     </form>
 @endif
