@@ -37,7 +37,16 @@
                     <div class="pv_card_wrapper">
                         {{-- Dev Note: if select property from list add class 'current' to property card --}}
                         @foreach ($properties as $property)
-                            <x-backend.property-card class="property-card" propertyName="{{ $property['prop_name'] }}{{$property['line_1'] ? ', ' : ''}}{{ $property['line_1'] }}{{$property['line_2'] ? ', ' : ''}}{{ $property['line_2'] }}{{$property['city'] ? ', ' : ''}}{{$property['city']}}"
+                            @php
+                                $addressParts = array_filter([
+                                    $property['prop_name'],
+                                    $property['line_1'],
+                                    $property['line_2'],
+                                    $property['city']
+                                ]);
+                                $fullAddress = implode(', ', $addressParts);
+                            @endphp
+                            <x-backend.property-card class="property-card" propertyName="{{ $fullAddress }}"
                                 bed="{{ $property['bedroom'] }}" bath="{{ $property['bathroom'] }}"
                                 floor="{{ $property['floor'] }}" living="{{ $property['reception'] }}" {{-- living="{{$property['living']}}" --}}
                                 type="{{ $property['property_type'] }}" available="{{ $property['available_from'] }}"
