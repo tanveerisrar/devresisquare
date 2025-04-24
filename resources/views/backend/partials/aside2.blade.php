@@ -346,9 +346,11 @@
         <li class="sidebar-list-item submenu_wrapper">
             <form action="{{ route('logout') }}" method="POST">
                 @csrf
-                <button type="submit" class="btn btn-link logout_btn">
+                <a href="#">
+                <button type="submit" class="logout_btn border-0 background-none">
                     <i class="fa-solid fa-sign-out-alt"></i> Logout
                 </button>
+                </a>
             </form>
         </li>
     </ul>
