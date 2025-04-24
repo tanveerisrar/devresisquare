@@ -141,7 +141,7 @@
                                     <td><input type="text" class="form-control tax-amount" readonly></td>                   
                                     <td><input type="text" class="form-control total-price" readonly></td>
                                     <td>
-                                        <button type="button" class="btn btn-success add-item">Add More</button>
+                                        <button type="button" class="btn btn_secondary add-item">Add More</button>
                                     </td>
                                 </tr>
                             @else
@@ -166,7 +166,7 @@
                                     <td><input type="text" class="form-control total-price" readonly></td>
                                     <td>
                                         @if($loop->last)
-                                            <button type="button" class="btn btn-success add-item">Add More</button>
+                                            <button type="button" class="btn btn_secondary add-item">Add More</button>
                                         @else
                                             <button type="button" class="btn btn-danger remove-item">Remove</button>
                                         @endif

@@ -262,7 +262,7 @@
                     </select>
                 </div>
             </div>
-            <button type="submit" class="btn btn-success mt-3 float-end">Save Changes</button>
+            <button type="submit" class="btn btn_secondary mt-3 float-end">Save Changes</button>
         </div>
     </form>
 

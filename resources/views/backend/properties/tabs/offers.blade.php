@@ -125,7 +125,7 @@
                 <div class="d-flex justify-content-between">
                     <div class="d-flex gap-3">
                         @if ($offer->status !== 'Accepted' && $offer->status !== 'Rejected')
-                            <button class="btn btn-success btn-sm status-btn" data-id="{{ $offer->id }}" data-status="Accepted">Accept Offer</button>
+                            <button class="btn btn_secondary btn-sm status-btn" data-id="{{ $offer->id }}" data-status="Accepted">Accept Offer</button>
                             <button class="btn btn-danger btn-sm status-btn" data-id="{{ $offer->id }}" data-status="Rejected">Reject Offer</button>
                         @endif
                     </div>
