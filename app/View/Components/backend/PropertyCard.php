@@ -11,6 +11,11 @@ class PropertyCard extends Component
 
     public $class, $propertyName, $bed, $bath, $floor, $living, $price, $lettingPrice, $type, $available, $cardStyle, $propertyId;
 
+    /**
+     * Create a new component instance.
+     *
+     * @return void
+     */
     public function __construct($class=null, $propertyName, $bed, $bath, $floor, $living, $price, $lettingPrice = null, $type, $available, $cardStyle='horizontal', $propertyId) {
          $this->class = $class;
          $this->propertyName = $propertyName;
