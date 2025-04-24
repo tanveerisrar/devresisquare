@@ -88,15 +88,15 @@
                 @endif
             </span>
         </div>
-        <div class="pvc_letting_price">
+        <div class="pvc_price">
             Letting Price: 
             <span>
-                @if($lettingPrice)
+                @if(isset($lettingPrice) && $lettingPrice)
                     £{{ $lettingPrice }}
                 @else
                     N/A
                 @endif
             </span>
-        </div>
+        </div>        
     </div>
 </div>
