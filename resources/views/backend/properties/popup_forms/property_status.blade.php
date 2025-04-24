@@ -23,7 +23,7 @@
             </div>
 
             <div class="row mb-2">
-                <div class="col-4"><span class="left_item">Status Description :</span>
+                <div class="col-12"><span class="left_item">Status Description :</span>
                     <span class="right_item">{{ $statusDescription }}</span></div>
             </div>
         </div>
