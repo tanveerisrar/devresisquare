@@ -304,8 +304,14 @@
             </div>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" onclick="closeModel();" data-bs-dismiss="modal">Close</button>
-            <button type="submit" class="btn btn-success">Save Changes</button>
+            <div class="row">
+                <div class="col-auto">
+                    <button type="button" class="btn btn_outline_secondary" onclick="closeModel();" data-bs-dismiss="modal">Close</button>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn_secondary">Save Changes</button>
+                </div>
+            </div>
         </div>
     </form>
 @endif

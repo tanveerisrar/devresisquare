@@ -191,13 +191,22 @@
                         </tfoot>
                     </table>
 
-                    <button type="button" class="btn btn-primary" id="add-item">Add Item</button>
-                    
+                    <button type="button" class="btn btn_secondary" id="add-item">Add Item</button>
+
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-success">Save Work Order</button>
-                        <button type="button" class="btn btn-info" id="generateInvoiceBtn">Generate Invoice</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <div class="row">
+                            <div class="col-auto">
+                                <button type="submit" class="btn btn_secondary">Save Work Order</button>
+                            </div>
+                            <div class="col-auto">
+                                <button type="button" class="btn btn_outline_secondary" id="generateInvoiceBtn">Generate Invoice</button>
+                            </div>
+                            <div class="col-auto">
+                                <button type="button" class="btn btn_outline_secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
                     </div>
+                    
                 </form>
             </div>
         </div>

@@ -87,8 +87,15 @@
                 <!-- Dynamic form content will be loaded here via Ajax -->
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="submit" form="" class="btn btn-primary" id="submitComplianceForm">Save</button>
+                <div class="row">
+                    <div class="col-auto">
+                        <button type="submit" form="" class="btn btn_secondary" id="submitComplianceForm">Save</button>
+                    </div>
+                    <div class="col-auto">
+                        <button type="button" class="btn btn_outline_secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+                
             </div>
         </div>
     </div>
@@ -106,8 +113,15 @@
                 Are you sure you want to delete this compliance record?
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+                <div class="row">
+                    <div class="col-auto">
+                        <button type="button" class="btn btn_outline_secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                    <div class="col-auto">
+                        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+                    </div>
+                </div>
+                
             </div>
         </div>
     </div>
