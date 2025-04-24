@@ -15,7 +15,7 @@
             @foreach ($photos_ids as $photo_id)
                 <div class="col-6 col-md-4 col-lg-3 mb-3">
                     <div class="card">
-                        <img src="{{ uploaded_asset($photo_id) }}" class="card-img-top" alt="photo">
+                        <img src="{{ uploaded_asset($photo_id) }}" class="card-img-top" alt="photo" onclick="openImageModal('{{ uploaded_asset(trim($photo_id)) }}')">
                     </div>
                 </div>
             @endforeach
@@ -32,7 +32,7 @@
             @foreach ($floor_plan_ids as $photo_id)
                 <div class="col-6 col-md-4 col-lg-3 mb-3">
                     <div class="card">
-                        <img src="{{ uploaded_asset($photo_id) }}" class="card-img-top" alt="floor plan">
+                        <img src="{{ uploaded_asset($photo_id) }}" class="card-img-top" alt="floor plan" onclick="openImageModal('{{ uploaded_asset(trim($photo_id)) }}')">
                     </div>
                 </div>
             @endforeach
@@ -49,7 +49,7 @@
             @foreach ($view_360_ids as $photo_id)
                 <div class="col-6 col-md-4 col-lg-3 mb-3">
                     <div class="card">
-                        <img src="{{ uploaded_asset($photo_id) }}" class="card-img-top" alt="360 view">
+                        <img src="{{ uploaded_asset($photo_id) }}" class="card-img-top" alt="360 view" onclick="openImageModal('{{ uploaded_asset(trim($photo_id)) }}')">
                     </div>
                 </div>
             @endforeach
