@@ -5,6 +5,28 @@
 @endphp
 
 @if(!isset($editMode) || !$editMode)
+<style>
+.propertyStatusDescription {
+  position: relative;
+  line-height: 1.5;            /* make sure you know your line-height */
+  max-height: calc(1.5em * 5);  /* clamp to 5 lines */
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.propertyStatusDescription.expanded {
+  max-height: none;
+}
+
+.view-more {
+  display: block;
+  margin-top: 0.5em;
+  color: #007bff;
+  cursor: pointer;
+  user-select: none;
+}
+
+</style>
     <!-- Display View Mode -->
     <div class="accordion_inner">
         <div class="mt-md-4 mt-3">
@@ -29,11 +51,40 @@
             <div class="row mb-3">
                 <div class="col">
                     <div class="left_item">Status Description :</div>
-                    <div class="right_item">{{ $statusDescription }}</div></div>
+                    <div class="propertyStatusDescription right_item">{{ $statusDescription }}</div>
+                </div>
             </div>
         </div>
     </div>
-
+    <script>
+        $(function(){
+          // target all elements with this class [ $ is not a function error from here]
+          $('.propertyStatusDescription').each(function(){
+            var $desc = $(this),
+                lineHeight = parseFloat($desc.css('line-height')),
+                maxHeight = lineHeight * 5;
+        
+            // only proceed if there's overflow beyond 5 lines
+            if ($desc.length && $desc[0].scrollHeight > maxHeight) {
+              // append the view‐more link
+              var $link = $('<span class="view-more">View more</span>');
+              $desc.after($link);
+        
+              // toggle on click
+              $link.on('click', function(){
+                if ($desc.hasClass('expanded')) {
+                  $desc.removeClass('expanded');
+                  $link.text('View more');
+                } else {
+                  $desc.addClass('expanded');
+                  $link.text('View less');
+                }
+              });
+            }
+          });
+        });
+        </script>
+    
 @else
     <form id="propertyStatusForm">
         @csrf
