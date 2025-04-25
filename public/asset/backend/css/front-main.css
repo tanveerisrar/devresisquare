@@ -254,6 +254,7 @@ form{
         .rs_radio_btns{
             display: flex;
             gap: 16px;
+            flex-wrap: wrap;
         }
     }
 }
@@ -311,7 +312,8 @@ form{
   .modal {
     .modal-content{
         padding: 32px;
-        height: 700px;
+        /* height: 700px; */
+        max-height: 85vh;
         overflow: hidden;
         .modal-body{
             overflow-y: auto;
