@@ -115,7 +115,7 @@
         <div class="form-group rs_upload_btn">
             <h5 class="sub_title mt-4">Photos <small>(Living Room, Reception, Bed Room, Bath Room, Garden, Hallway, Exterior - Cover Image)</small></h5>
             <div class="media_wrapper">
-                <div class="input-group" data-toggle="aizuploader" data-type="image" data-multiple="true">
+                <div class="input-group" data-toggle="aizuploader" data-type="image" data-multiple="true" data-max-files="15">
                     <label class="col-form-label" for="photos">Photos</label>
                     <div class="d-none input-group-prepend">
                         <div class="input-group-text bg-soft-secondary font-weight-medium">Browse</div>
@@ -131,7 +131,7 @@
         <div class="form-group rs_upload_btn">
             <h5 class="sub_title mt-4">Floor Plan</h5>
             <div class="media_wrapper">
-                <div class="input-group" data-toggle="aizuploader" data-type="image" data-multiple="true">
+                <div class="input-group" data-toggle="aizuploader" data-type="image" data-multiple="true" data-max-files="15">
                     <label for="floor_plan">Upload Floor Plan Photos</label>
                     <div class="d-none input-group-prepend">
                         <div class="input-group-text bg-soft-secondary font-weight-medium">Browse</div>
@@ -147,7 +147,7 @@
         <div class="form-group rs_upload_btn">
             <h5 class="sub_title mt-4">View 360</h5>
             <div class="media_wrapper">
-                <div class="input-group" data-toggle="aizuploader" data-type="image" data-multiple="true">
+                <div class="input-group" data-toggle="aizuploader" data-type="image" data-multiple="true" data-max-files="15">
                     <label for="view_360">Upload 360 View Photos</label>
                     <div class="d-none input-group-prepend">
                         <div class="input-group-text bg-soft-secondary font-weight-medium">Browse</div>

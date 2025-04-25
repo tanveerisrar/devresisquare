@@ -131,6 +131,13 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                 var elem = $(this);
                 elem.on("click", function (e) {
                     var value = $(this).data("value");
+                    // if it's not already selected, and we're at the max, block it
+                    if (!AIZ.uploader.data.selectedFiles.includes(value)
+                        && AIZ.uploader.data.selectedFiles.length >= AIZ.uploader.data.maxFiles) {
+                    alert("You can only select up to " + AIZ.uploader.data.maxFiles + " files.");
+                    return;
+                    }
+
                     var valueObject =
                         AIZ.uploader.data.allFiles[
                             AIZ.uploader.data.allFiles.findIndex(
@@ -680,6 +687,10 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
             // $("body").append('<div class="aiz-uploader-backdrop"></div>');
 
             var elem = $(elem);
+            
+            // read the HTML attribute; if not present, fall back to no‐limit
+            AIZ.uploader.data.maxFiles = parseInt(elem.data('max-files')) || Infinity;
+            
             var multiple = multiple;
             var type = type;
             var oldSelectedFiles = selectd;
