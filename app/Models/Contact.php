@@ -58,9 +58,40 @@ class Contact extends Model
     {
         return $this->hasMany(TenantMember::class, 'contact_id');
     }
-    
+
     // protected $casts = [
     //     'selected_properties' => 'array', // Automatically casts JSON to an array
     // ];
 
+    // whenever first_name is set, rebuild full_name
+    public function setFirstNameAttribute($value)
+    {
+        $this->attributes['first_name'] = $value;
+        $this->rebuildFullName();
+    }
+
+    // same for middle name
+    public function setMiddleNameAttribute($value)
+    {
+        $this->attributes['middle_name'] = $value;
+        $this->rebuildFullName();
+    }
+
+    // and last name
+    public function setLastNameAttribute($value)
+    {
+        $this->attributes['last_name'] = $value;
+        $this->rebuildFullName();
+    }
+
+    // helper to trim and set full_name
+    protected function rebuildFullName()
+    {
+        $parts = [
+            $this->attributes['first_name'] ?? '',
+            $this->attributes['middle_name'] ?? '',
+            $this->attributes['last_name'] ?? '',
+        ];
+        $this->attributes['full_name'] = trim(implode(' ', array_filter($parts)));
+    }
 }

@@ -25,7 +25,7 @@
 
                     {{-- Image Preview --}}
                     @if(in_array(strtolower($fileExtension), ['jpg', 'jpeg', 'png', 'gif', 'webp']))
-                        <img src="{{ $fileUrl }}" class="img-fluid" alt="Attachment">
+                        <img src="{{ $fileUrl }}" class="img-fluid w-100"  style="height: auto !important;" alt="Attachment">
                     
                     {{-- PDF Preview (Google Docs Viewer) --}}
                     @elseif(strtolower($fileExtension) == 'pdf')

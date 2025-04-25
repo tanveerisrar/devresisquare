@@ -166,8 +166,41 @@ $secondHalf = array_slice($allFeatures, $halfCount);
             return $a['order'] <=> $b['order'];
         });
     @endphp
-    
-    @foreach($formSections as $section)
+    @foreach($formSections as $index => $section)
+        @php
+            $formType = $section['key'];
+            $title = $section['title'];
+            $isFirst = $index === 0;
+        @endphp
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="heading-{{ $formType }}">
+                <button 
+                    class="accordion-button {{ $isFirst ? '' : 'collapsed' }}" 
+                    type="button" 
+                    data-bs-toggle="collapse" 
+                    data-bs-target="#collapse-{{ $formType }}" 
+                    aria-expanded="{{ $isFirst ? 'true' : 'false' }}" 
+                    aria-controls="collapse-{{ $formType }}">
+                    {{ $title }}
+                </button>
+            </h2>
+            <div 
+                id="collapse-{{ $formType }}" 
+                class="accordion-collapse collapse {{ $isFirst ? 'show' : '' }}" 
+                aria-labelledby="heading-{{ $formType }}">
+                
+                <button class="btn btn_outline_secondary mt-2 float-end editForm" data-form="{{ $formType }}" data-id="{{ $property->id }}">
+                    Edit
+                </button>
+                <div class="accordion-body" id="section-{{ $formType }}-{{ $property->id }}">
+                    @include("backend.properties.popup_forms.$formType", ['property' => $property])
+                </div>
+            </div>
+        </div>
+    @endforeach
+
+    {{-- @foreach($formSections as $section)
         @php
             $formType = $section['key'];
             $title = $section['title'];
@@ -188,7 +221,7 @@ $secondHalf = array_slice($allFeatures, $halfCount);
                 </div>
             </div>
         </div>
-    @endforeach        
+    @endforeach         --}}
     </div>
 
     {{-- mobile view only start  --}}

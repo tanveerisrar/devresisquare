@@ -57,11 +57,35 @@
                                 <td class="img_thumb">
                                     @if ($photo_ids)
                                         @foreach ($photo_ids as $photo_id)
-                                            <img class="mb-2" width="100" src="{{ uploaded_asset($photo_id) }}" alt="image">
+                                        @php
+                                            $url     = uploaded_asset($photo_id);
+                                            $ext     = strtolower(pathinfo($url, PATHINFO_EXTENSION));
+                                            $isImage = in_array($ext, ['jpg','jpeg','png','gif','svg','webp']);
+                                        @endphp
+                                        @if($isImage)
+                                        <a href="{{ $url }}" target="_blank" class="d-inline-block mb-2">
+                                            <img src="{{ $url }}" alt="Preview" class="img-fluid rounded" width="100">
+                                        </a>
+                                        @else
+                                            {{-- Non-image file: show FontAwesome icon + filename --}}
+                                            <a href="{{ $url }}" target="_blank" class="d-inline-flex align-items-center mb-2 text-decoration-none">
+                                                <i class="fas fa-file-alt fa-2x me-2"></i>
+                                                <span class="text-truncate" style="max-width:100px;">
+                                                    {{ basename(parse_url($url, PHP_URL_PATH)) }}
+                                                </span>
+                                            </a>
+                                        @endif
+                                            {!! attachmentViewer(
+                                                $url,
+                                                'View',
+                                                'btn btn-outline-secondary btn-sm',
+                                                'lg'
+                                            ) !!}
                                         @endforeach
                                     @endif
                                 </td>
                                 <td>
+
                                     <button class="btn btn-sm btn-warning" onclick="openComplianceModal({{ $type->id }}, {{ $record->id }})">Edit</button>
                                     <button class="btn btn-sm btn-danger" onclick="confirmDelete({{ $record->id }})">Delete</button>
                                 </td>

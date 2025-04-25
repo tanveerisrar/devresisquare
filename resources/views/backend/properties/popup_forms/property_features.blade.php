@@ -86,8 +86,19 @@ $other = jsonDecodeAndPrint($property->other) ?? '';
         <div class=" ">
             <div class="accordion_inner_heading mb-2">Area</div>
             <div class="accordion_features_item area">
-                <div><span class="gray-500">Square Feet: </span> <span class="gray-950 fw-400">{{ $property->square_feet ? $property->square_feet . ' sqft' : 'N/A' }}</span></div>
-                <div><span class="gray-500">Square Meter:</span> <span class="gray-950 fw-400"> {{ $property->square_meter ? $property->square_meter . ' sqm' : 'N/A' }}</span></div>
+                <div>
+                    <span class="gray-500">Square Feet: </span>
+                    <span class="gray-950 fw-400">
+                        {{ isset($property->square_feet) ? number_format($property->square_feet, 2) . ' sqft' : 'N/A' }}
+                    </span>
+                </div>
+                
+                <div>
+                    <span class="gray-500">Square Meter:</span>
+                    <span class="gray-950 fw-400">
+                        {{ isset($property->square_meter) ? number_format($property->square_meter, 2) . ' sqm' : 'N/A' }}
+                    </span>
+                </div>                
             </div>
         </div>
         </div>
@@ -446,7 +457,7 @@ $other = jsonDecodeAndPrint($property->other) ?? '';
                             <div class="form-group">
                                 <label>Square Feet</label>
                                 <input type="number" name="square_feet" step="0.0001" class="form-control" placeholder="Square Feet"
-                                    value="{{ isset($property) && $property->square_feet != '' ? $property->square_feet : '' }}"
+                                    value="{{ isset($property) && $property->square_feet != '' ? number_format($property->square_feet, 2, '.', '') : '' }}"
                                     required>
                                 @error('square_feet')
                                     <div class="text-danger">{{ $message }}</div>
@@ -455,7 +466,7 @@ $other = jsonDecodeAndPrint($property->other) ?? '';
                             <div class="form-group">
                                 <label>Square Meter</label>
                                 <input type="number" name="square_meter" step="0.0001" class="form-control" placeholder="Square Meter"
-                                    value="{{ isset($property) && $property->square_meter != '' ? $property->square_meter : '' }}"
+                                    value="{{ isset($property) && $property->square_meter != '' ? number_format($property->square_meter, 2, '.', '') : '' }}"
                                     required>
                                 @error('square_meter')
                                     <div class="text-danger">{{ $message }}</div>
@@ -477,7 +488,7 @@ $other = jsonDecodeAndPrint($property->other) ?? '';
         var squareFeet = parseFloat(this.value);
         if (!isNaN(squareFeet)) {
             var squareMeter = squareFeet * 0.09290303997; // Conversion factor from square feet to square meters
-            document.querySelector('input[name="square_meter"]').value = squareMeter.toFixed(4);
+            document.querySelector('input[name="square_meter"]').value = squareMeter.toFixed(2);
         }
     });
 
@@ -486,7 +497,7 @@ $other = jsonDecodeAndPrint($property->other) ?? '';
         var squareMeter = parseFloat(this.value);
         if (!isNaN(squareMeter)) {
             var squareFeet = squareMeter * 10.7639104167; // Conversion factor from square meters to square feet
-            document.querySelector('input[name="square_feet"]').value = squareFeet.toFixed(4);
+            document.querySelector('input[name="square_feet"]').value = squareFeet.toFixed(2);
         }
     });
 </script>

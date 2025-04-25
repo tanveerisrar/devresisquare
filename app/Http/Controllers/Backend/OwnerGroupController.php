@@ -27,14 +27,18 @@ class OwnerGroupController
      */
     public function create()
     {
-        $contacts = Contact::all();
+        // $contacts = Contact::all();
+        // Fetch contacts where category_id is 1
+        $contacts = Contact::where('category_id', 1)->get();
         $properties = Property::all();
         return view('backend.owner_groups.create', compact('contacts', 'properties'));
     }
 
     public function createGroup()
     {
-        $contacts = Contact::all();
+        // $contacts = Contact::all();
+        // Fetch contacts where category_id is 1
+        $contacts = Contact::where('category_id', 1)->get();
         $properties = Property::all();
         return view('backend.owner_groups.create-group', compact('contacts', 'properties'));
     }

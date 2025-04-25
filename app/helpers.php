@@ -754,7 +754,7 @@ if (!function_exists('attachmentViewer')) {
 
         // Check file type and render accordingly
         if (in_array(strtolower($fileExtension), $imageExtensions)) {
-            $modal .= '<img src="' . $fileUrl . '" class="img-fluid" alt="Attachment">';
+            $modal .= '<img src="' . $fileUrl . '" class="img-fluid w-100"  style="height: auto !important;" alt="Attachment">';
         } elseif (in_array(strtolower($fileExtension), $pdfExtensions)) {
             $modal .= '<iframe src="' . $fileUrl . '" width="100%" height="500px" style="border: none;"></iframe>';
         } else {
