@@ -131,7 +131,7 @@
         <div class="form-group rs_upload_btn">
             <h5 class="sub_title mt-4">Floor Plan</h5>
             <div class="media_wrapper">
-                <div class="input-group" data-toggle="aizuploader" data-type="image" data-multiple="true" data-max-files="15">
+                <div class="input-group" data-toggle="aizuploader" data-type="image" data-multiple="true" data-max-files="1">
                     <label for="floor_plan">Upload Floor Plan Photos</label>
                     <div class="d-none input-group-prepend">
                         <div class="input-group-text bg-soft-secondary font-weight-medium">Browse</div>
