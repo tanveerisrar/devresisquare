@@ -163,8 +163,8 @@
         <div class="row">
             <div class="col">
                 <div class="mb-3">
-                    <label for="depositService" class="form-label">Deposit Held By</label>
-                    <select class="form-select" id="depositService" name="deposit_held_by">
+                    <label for="deposit_held_by" class="form-label">Deposit Held By</label>
+                    <select class="form-select" id="deposit_held_by" name="deposit_held_by">
                         <option value="landlord_holding">Landlord Holding</option>
                         <option value="deposit_protection_service">Deposit Protection Service</option>
                         <option value="deposit_replacement_scheme">Deposit Replacement Scheme</option>
@@ -180,6 +180,27 @@
                         <option value="number_of_scheme_or_number_of_reference">Name of the scheme Reference | Number of Scheme</option>
                     </select>
                 </div>
+
+                <div class="mb-3 d-none" id="tds_dps_numberField">
+                    <label for="tds_dps_number" class="form-label">TDS / DPS Reference Number</label>
+                    <input type="text" class="form-control" id="tds_dps_number" name="tds_dps_number" />
+                </div>
+
+                <div class="mb-3 d-none" id="referenceNumberSchemeField">
+                    <label for="referenceNumber" class="form-label">Reference Number</label>
+                    <input type="text" class="form-control" id="referenceNumber" name="reference_number" />
+                </div>
+            
+                <div class="mb-3 d-none" id="depositSchemeDropdown">
+                    <label for="depositScheme" class="form-label">Deposit Scheme</label>
+                    <select class="form-select" id="depositScheme" name="deposit_scheme">
+                        <option value="">-- Select a scheme --</option>
+                        <option value="dps">Deposit Protection Service</option>
+                        <option value="tds">Tenancy Deposit Scheme</option>
+                        <option value="drs">Deposit Replacement Scheme</option>
+                    </select>
+                </div>
+
             </div>
         </div>
         <div class="row">
@@ -233,7 +254,31 @@
             alert('Please select a main contact.'); // Show alert message
         }
     });
+    $(document).on('change', '#depositService', function () {
+        const selected = $(this).val();
 
+        if (selected === 'number_of_scheme_or_number_of_reference') {
+            $('#referenceNumberSchemeField').removeClass('d-none');
+            $('#referenceNumber').attr('required', true);
+
+            $('#depositSchemeDropdown').removeClass('d-none');
+            $('#depositScheme').attr('required', true);
+
+            $('#tds_dps_numberField').addClass('d-none');
+            $('#tds_dps_number').removeAttr('required');
+        } else if (selected === 'tds_dps_number') {
+            // Hide and un-require the other fields
+            $('#referenceNumberSchemeField').addClass('d-none');
+            $('#referenceNumber').removeAttr('required');
+
+            $('#depositSchemeDropdown').addClass('d-none');
+            $('#depositScheme').removeAttr('required');
+
+            // Show and require the TDS/DPS reference number
+            $('#tds_dps_numberField').removeClass('d-none');
+            $('#tds_dps_number').attr('required', true);
+        }
+    });
     // document.addEventListener('DOMContentLoaded', function () {
     // Function to initialize the popup form logic
     // function initializeForm() {
@@ -380,6 +425,9 @@
 
         // Initial calculation if values are already filled
         calculateMoveOutDate();
+            
+        // Trigger change event on page load to auto-populate based on current selection
+        $('#depositService').trigger('change');
     }
 
     // Initialize the form only once the content is fully loaded

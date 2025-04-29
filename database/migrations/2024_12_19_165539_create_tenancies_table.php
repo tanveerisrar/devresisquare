@@ -28,6 +28,9 @@ return new class extends Migration
             $table->integer('deposit_number')->nullable();
             $table->string('deposit_held_by')->nullable();
             $table->string('deposit_service')->nullable();
+            $table->string('tds_dps_number')->nullable();
+            $table->string('reference_number')->nullable();
+            $table->string('deposit_scheme')->nullable();
             $table->boolean('periodic')->default(false);
             $table->boolean('rolling_contract')->default(false);
             $table->boolean('renewal_exempt')->default(false);

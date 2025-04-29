@@ -42,7 +42,9 @@
                                     $property['prop_name'],
                                     $property['line_1'],
                                     $property['line_2'],
-                                    $property['city']
+                                    $property['city'],
+                                    $property['country'],
+                                    $property['postcode'],
                                 ]);
                                 $fullAddress = implode(', ', $addressParts);
                             @endphp
