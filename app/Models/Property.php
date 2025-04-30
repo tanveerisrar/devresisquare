@@ -19,6 +19,7 @@ class Property extends Model
         'line_2',
         'city',
         'country',
+        'county',
         'postcode',
         'frunishing_type',
         'property_type',
@@ -113,5 +114,10 @@ class Property extends Model
     public function complianceRecords()
     {
         return $this->hasMany(ComplianceRecord::class);
+    }
+
+    public function countryRelation()
+    {
+        return $this->belongsTo(Country::class, 'country');
     }
 }

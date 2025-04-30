@@ -60,16 +60,18 @@ return $breadcrumb[$step] ?? 'Unknown Step';
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-12 render_blade">
-            @include('backend.properties.quick_form_components.step' . session('current_step', 1))
+            @include('backend.properties.quick_form_components.step' . session('current_step', 1), ['countries' => $countries])
             <!-- Default to step 1 -->
         </div>
     </div>
 </div>
 
+@include('backend.partials.assets.select2')
 
 @section('page.scripts')
 <script>
 $(document).ready(function() {
+    initSelect2('.select2');
     // General function to handle sending form data and navigating steps
     function handleStepChange(currentStep, targetStep, previous = null) {
         // Check if navigating to a previous step
@@ -199,13 +201,27 @@ $(document).ready(function() {
     });
 
     // Handle Next and Previous button clicks
-    $(document).on('click', '.propertyType', function(e) {
-        e.preventDefault();
-        const currentStep3 = $('.next-step').data('current-step');
-        const targetStep4 = $('.next-step').data('next-step');
+    // $(document).on('click', '.propertyType', function(e) {
+    //     e.preventDefault();
+    //     const currentStep3 = $('.next-step').data('current-step');
+    //     const targetStep4 = $('.next-step').data('next-step');
 
-        handleStepChange(currentStep3, targetStep4);
+    //     handleStepChange(currentStep3, targetStep4);
+    // });
+
+    $(document).on('change', 'input[name="specific_property_type"], input[name="property_type"]', function () {
+        const hasSpecificType = $('input[name="specific_property_type"]:checked').length > 0;
+        const hasPropertyType = $('input[name="property_type"]:checked').length > 0;
+
+        if (hasSpecificType && hasPropertyType) {
+            const currentStep = $('.next-step').data('current-step');
+            const nextStep = $('.next-step').data('next-step');
+
+            handleStepChange(currentStep, nextStep);
+        }
     });
+
+
     // // Function to check if both Bedrooms and Reception Rooms have been selected
     // function checkSelectionsAndSubmit() {
     //     const bedroomSelected = $('input[name="bedroom"]:checked').val();

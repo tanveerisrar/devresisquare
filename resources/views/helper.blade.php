@@ -298,6 +298,7 @@
                                     type="Appartment"
                                     available="02/05/2025"
                                     price="6542"
+                                    lettingPrice="200"
                                     cardStyle=""
                                     propertyId="1"
                                 />
@@ -333,8 +334,10 @@
                                     type="Appartment"
                                     available="02/05/2025"
                                     price="6542"
+                                    lettingPrice="200" 
                                     cardStyle="vertical"
                                     propertyId="1"
+
                                 />
                             </div>
                             <blockquote>

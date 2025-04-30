@@ -97,9 +97,20 @@ $secondHalf = array_slice($allFeatures, $halfCount);
     {{-- <div class="pv_image">
         <img src="{{ asset('/asset/images/temp-property.webp') }}" alt="property">
     </div> --}}
-
+    
     <div class="pv_content">
 
+        @if (isset($property) && isset($property->id))
+        {{-- @php
+        var_dump($property->id);
+        @endphp --}}
+            <!-- Delete Button -->
+            <button type="button" class="float-end btn btn-danger btn-sm d-flex align-items-center gap-1"
+            onclick="confirmModal('{{ url(route('admin.properties.delete', $property->id)) }}', responseHandler)">
+            <i class="mdi mdi-delete" title="Delete"></i>
+            Delete
+            </button>
+        @endif
         <div class="pvc_ref_id"> <strong> Property Ref: {{$propRefNo}} </strong></div>
         <div class="pvc_poperty_name">{{ $address }}</div>
         {{-- <div class="rs_property_icons">
@@ -131,6 +142,7 @@ $secondHalf = array_slice($allFeatures, $halfCount);
     </div>
     {{-- pv_content end  --}}
 </div>
+
 <div class="property_note">
     <span class="fw-semibold">Important Note
     <div class="notes-update-ajax" id="section-notes-{{ $property->id }}">

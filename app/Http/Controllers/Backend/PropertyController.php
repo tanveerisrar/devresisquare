@@ -2,21 +2,22 @@
 
 namespace App\Http\Controllers\Backend;
 
-use Illuminate\Http\Request;
+use App\Models\User;
+use App\Models\Offer;
+use App\Models\Branch;
+use App\Models\Country;
+use App\Models\Tenancy;
 use App\Models\Property;
 use App\Models\OwnerGroup;
-use App\Models\StationName;
 use App\Models\SchoolName;
-use App\Models\User;
 use App\Models\Designation;
-use App\Models\Branch;
-use App\Models\PropertyResponsibility;
-use App\Models\Offer;
-use App\Models\Tenancy;
+use App\Models\StationName;
+use Illuminate\Http\Request;
 use App\Models\ComplianceType;
 // use App\Models\EstateCharge;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use App\Models\PropertyResponsibility;
 
 class PropertyController
 {
@@ -27,15 +28,34 @@ class PropertyController
     // Fetch all properties in descending order
     $properties = Property::orderBy('id', 'desc')->get();
     
+    // Redirect to 'quick' if there are no properties
+    if ($properties->isEmpty()) {
+        flash("You don't have any properties yet!")->error();
+        return redirect()->route('admin.properties.quick');
+    }
+
     // Get property_id and tabname from query parameters
     $propertyId = $request->query('property_id');
     $tabName = $request->query('tabname', 'property'); // Default to 'property' if no tab is specified
 
     // Check if the property_id is provided, otherwise, select the first property or handle it gracefully
-    $property = $propertyId ? Property::findOrFail($propertyId) : $properties->first(); // Use the first property if none is selected
+    // $property = $propertyId ? Property::findOrFail($propertyId) : $properties->first(); // Use the first property if none is selected
+    $property = $propertyId ? Property::find($propertyId) : null; // Use null if no property is selected
 
     if (!$property) {
-        return redirect()->route('admin.properties.quick')->with('error', 'Property not found');
+        // Get the first property that is NOT soft-deleted
+        $firstProperty = Property::withoutTrashed()->orderBy('id', 'desc')->first();
+
+        if (!$firstProperty) {
+            flash("You don't have any properties yet!")->error();
+            return redirect()->route('admin.properties.quick');
+        }
+
+        $propertyId = $firstProperty->id;
+        $property = $firstProperty;
+
+        // flash("The selected property does not exist or has been deleted. Showing another one instead.")->error();
+
     }
 
     // Get tabs for properties (you can customize the tabs as per your needs)
@@ -182,7 +202,8 @@ private function getTabContent($tabname, $propertyId, $property)
     // show quick form
     public function quick()
     {
-        return view('backend.properties.quick'); // Return the create property view
+        $countries = Country::orderBy('name')->get();
+        return view('backend.properties.quick', compact('countries')); // Return the create property view
     }
     public function store(Request $request)
     {
@@ -454,10 +475,10 @@ private function getTabContent($tabname, $propertyId, $property)
 
         // Get the total number of steps dynamically
         $totalSteps = $this->getTotalQuickSteps();
-
+        $countries = Country::where('status', 1)->orderBy('name')->get();
         // Check if the step is valid
         if ($step > 0 && $step <= $totalSteps) {
-            return view('backend.properties.quick_form_components.step' . $step, compact('property')); // Return the corresponding Blade view
+            return view('backend.properties.quick_form_components.step' . $step, compact('property','countries')); // Return the corresponding Blade view
         } else {
             // Return a view with an error message if the step is invalid
             return view('backend.properties.quick_form_components.error', ['message' => 'Invalid step.']);
@@ -935,7 +956,9 @@ private function getTabContent($tabname, $propertyId, $property)
                     'line_1' => 'required|string|max:255',
                     'line_2' => 'nullable|string|max:255',
                     'city' => 'required|string|max:100',
-                    'country' => 'required|string|max:100',
+                    // 'country' => 'required|string|max:100',
+                    'country' => 'required|exists:countries,id',
+                    'county' => 'required|string|max:50',
                     'postcode' => 'required|string|max:20',
                 ];
             case 2:
@@ -946,6 +969,7 @@ private function getTabContent($tabname, $propertyId, $property)
                     // 'country' => 'required|string|max:100',
                     // 'postcode' => 'required|string|max:20',
                     'specific_property_type' => 'required|string',
+                    'property_type' => 'required|string',
                 ];
             case 3:
                 return [
@@ -975,7 +999,8 @@ private function getTabContent($tabname, $propertyId, $property)
                 ];
             case 8:
                 return [
-                    'letting_price' => 'required|numeric',
+                    'price' => 'numeric',
+                    'letting_price' => 'numeric',
                     'management' => 'required|string',
                 ];
 

@@ -17,7 +17,10 @@ return new class extends Migration {
             $table->string('line_1')->nullable();
             $table->string('line_2')->nullable();
             $table->string('city')->nullable();
-            $table->string('country')->nullable();
+            // $table->string('country')->nullable();
+            $table->unsignedBigInteger('country')->nullable(); // Create the column
+            $table->foreign('country')->references('id')->on('countries')->onDelete('set null'); // Define the foreign key constraint
+            $table->string('county', 155)->nullable();
             $table->string('postcode')->nullable();
             $table->string('frunishing_type')->nullable();
             $table->string('property_type')->nullable();

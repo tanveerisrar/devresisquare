@@ -1,5 +1,9 @@
 <!-- resources/views/backend/properties/quick_form_components/step2.blade.php -->
-@php $currentStep = 1 ; @endphp
+@php $currentStep = 1 ; 
+// echo '<pre>';
+// var_dump($countries[0]['name']);
+// echo '</pre>';
+@endphp
 <div class="container-fluid mt-4 quick_add_property">
     <div class="row">
         <div class="col-md-6 col-12 left_col">
@@ -46,14 +50,43 @@
                                         <div class="text-danger">{{ $message }}</div>
                                     @enderror
                                 </div>
+                                <div class="form-group col-12">
+                                    <label for="country">Country</label>
+                                    <select required name="country" id="country" class="form-control select2">
+                                        <option value="">Select a country</option>
+                                        @foreach ($countries as $country)
+                                        <option value="{{ $country->id }}"
+                                            @if(isset($property) && $property->country == $country->id)
+                                                selected
+                                            @elseif((!isset($property) || empty($property->country)) && $country->code == 'GB')
+                                                selected
+                                            @endif
+                                        >
+                                            {{ $country->name }}
+                                        </option>                                        
+                                        @endforeach
+                                    </select>
+                                
+                                    @error('country')
+                                        <div class="text-danger">{{ $message }}</div>
+                                    @enderror
+                                </div>                                
                                 <div class="form-group col-lg-7 col-12">
+                                    <label for="county">County</label>
+                                    <input required type="text" name="county" id="county" class="form-control"
+                                        value="{{ (isset($property) && $property->county) ? $property->county : '' }}">
+                                    @error('county')
+                                        <div class="text-danger">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                {{-- <div class="form-group col-lg-7 col-12">
                                     <label for="country">Country</label>
                                     <input required type="text" name="country" id="country" class="form-control"
                                         value="{{ (isset($property) && $property->country) ? $property->country : '' }}">
                                     @error('country')
                                         <div class="text-danger">{{ $message }}</div>
                                     @enderror
-                                </div>
+                                </div> --}}
                                 <div class="form-group col-lg-5 col-12">
                                     <label for="postcode">Postcode</label>
                                     <input required type="text" name="postcode" id="postcode" class="form-control"
@@ -74,3 +107,6 @@
         </div>
     </div>
 </div>
+<script>
+    initSelect2('.select2');
+</script>

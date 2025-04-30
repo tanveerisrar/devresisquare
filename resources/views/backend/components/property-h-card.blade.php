@@ -77,7 +77,7 @@
                 </div>
             </div>
         </div>
-
+        @if($type == 'sales' || $type == 'both')
         <div class="pvc_price">
             Price: 
             <span>
@@ -88,6 +88,8 @@
                 @endif
             </span>
         </div>
+        @endif
+        @if($type == 'lettings' || $type == 'both')
         <div class="pvc_price">
             Letting Price: 
             <span>
@@ -100,6 +102,6 @@
                 @endif
             </span>
         </div>
-              
+        @endif
     </div>
 </div>

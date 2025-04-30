@@ -329,7 +329,7 @@ $other = jsonDecodeAndPrint($property->other) ?? '';
                         <div class="accordion_inner_heading mt-4 mb-2">Floor </div>
                         <div class="row">
                             <div class="col-lg-6 col-12">
-                                <select name="floor" class="form-control" required>
+                                <select name="floor" class="form-control">
                                     <option value="" disabled
                                         {{ isset($property) && $property->floor == '' ? 'selected' : '' }}>Select a floor
                                     </option>

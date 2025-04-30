@@ -1,4 +1,9 @@
-@php $currentStep = 8 ; @endphp
+@php 
+$propertyType = $property->property_type ?? ''; 
+$currentStep = 8 ;
+$salePrice = $property->price ?? '';
+$lettingPrice = $property->letting_price ?? '';
+@endphp
 <!-- resources/views/backend/properties/quick_form_components/step8.blade.php -->
 <div class="container-fluid mt-4 quick_add_property">
     <div class="row">
@@ -8,8 +13,9 @@
                     <i class="bi bi-currency-pound"></i>
                 </div>
                 <div class="left_title">
-                    Property <span class="secondary-color">Price</span> and <br/>
-                    <span class="secondary-color">Availability</span>
+                    Property <span class="secondary-color">Price</span> 
+                    {{-- and <br/>
+                    <span class="secondary-color">Availability</span> --}}
                 </div>
             </div>
         </div>
@@ -22,7 +28,35 @@
                 <div data-step-name="Property Address" data-step-number="{{$currentStep}}"></div>
                 <input type="hidden" name="step" value="{{$currentStep}}">{{-- note IMP to redirect thank you page rather than next step--}}
                 <div class="right_content_wrapper">
-                    <div class="">
+                    
+                    @if ($propertyType == 'sales' || $propertyType == 'both')
+                        <div class="form-group mb-3">
+                            <div class="rc_title">Listing Sale Price</div>
+                            <div class="price_input_wrapper">
+                                <div class="pound_sign">{{ getPoundSymbol() }}</div>
+                                <input type="text" name="price" id="price" class="form-control"
+                                    value="{{ $salePrice }}">
+                            </div>
+                        </div>
+                    @endif
+                    <!-- Letting Price Input (Show only if type is letting or both) -->
+                    @if ($propertyType == 'lettings' || $propertyType == 'both')
+                        <div class="form-group">
+                            <div class="rc_title">Letting Price</div>
+                            <x-backend.forms.input
+                                class="prince_input"
+                                inputOpt="input_price"
+                                inputType="number"
+                                rightIcon="Per Month"
+                                inputName="letting_price"
+                                isLabel={{False}}
+                                label="Price"
+                                isDate={{False}}
+                            />
+                        </div>
+                    @endif
+                    
+                    {{-- <div class="">
                         <div class="rc_title">Price</div>
                         <x-backend.forms.input
                             class="prince_input"
@@ -34,7 +68,7 @@
                             label="Price"
                             isDate={{False}}
                          />
-                    </div>
+                    </div> --}}
                     {{-- <div class="">
                         <div class="rc_title">Tenancy Start Date</div>
                         <x-backend.input-comp

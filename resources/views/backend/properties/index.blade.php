@@ -121,7 +121,6 @@
                                         <span class="icon_btn"></span>
                                     </a>
 
-
                             {{-- @if (isset($property) && isset($propertyId)) --}}
                                 {{-- <x-backend.outline-link-button class="" name="Edit Property"
                                     link="{{ route('admin.properties.edit', ['id' => $property->id]) }}" onClick="" /> --}}
@@ -277,6 +276,17 @@
 @endsection
 
 @section('page.scripts')
+@if (isset($propertyId) && isset($property) && $propertyId != $property->id)
+{{-- @php
+var_dump($propertyId);
+@endphp --}}
+<script>
+    const url = new URL(window.location.href);
+    url.searchParams.set('property_id', '{{ $propertyId }}');
+    history.replaceState(null, '', url.toString());
+</script>
+@endif
+
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="{{ asset('/asset/backend/js/property-offer.js') }}"></script>
