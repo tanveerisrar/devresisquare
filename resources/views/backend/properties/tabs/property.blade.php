@@ -49,7 +49,8 @@ $aspects = $property->aspects ?? '';
 $currentStatus = $property->current_status ?? '';
 $lettingCurrentStatus = $property->letting_current_status ?? '';
 $salesCurrentStatus = $property->sales_current_status ?? '';
-$statusDescription = $property->status_description ?? '';
+$salesStatusDescription = $property->sales_status_description ?? '';
+$lettingStatusDescription = $property->letting_status_description ?? '';
 $availableFrom = formatDate($property->available_from) ?? '';
 $marketOn = $property->market_on ?? '';
 $features = $property->features ?? '';
@@ -153,6 +154,17 @@ $secondHalf = array_slice($allFeatures, $halfCount);
         Edit
     </button>
 </div>
+<div class="property_note">
+    <span class="fw-semibold">
+    <div class="property_status-update-ajax" id="section-property_status-{{ $property->id }}">
+        @include("backend.properties.popup_forms.property_status", ['property' => $property])
+    </div>
+    </span>
+    <button class="btn btn-outline-danger btn-sm editForm" data-form="{{ 'property_status' }}" data-id="{{ $property->id }}">
+        Edit
+    </button>
+</div>
+
 <div class="pvd_content_wrapper">
 <!-- Button to Collapse/Expand All -->
 <div class="d-flex justify-content-end mb-3">
@@ -169,7 +181,7 @@ $secondHalf = array_slice($allFeatures, $halfCount);
             ['key' => 'property_features', 'title' => 'Property Features', 'order' => 3],
             ['key' => 'property_info', 'title' => 'Property Information', 'order' => 2],
             ['key' => 'property_services', 'title' => 'Service', 'order' => 4],
-            ['key' => 'property_status', 'title' => 'Status', 'order' => 7],
+            // ['key' => 'property_status', 'title' => 'Status', 'order' => 7],
             // Add more sections with order values as needed
         ];
     

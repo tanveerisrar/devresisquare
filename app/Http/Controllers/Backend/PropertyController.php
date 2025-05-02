@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Models\User;
+use App\Models\Notes;
 use App\Models\Offer;
 use App\Models\Branch;
 use App\Models\Country;
@@ -12,9 +13,10 @@ use App\Models\OwnerGroup;
 use App\Models\SchoolName;
 use App\Models\Designation;
 use App\Models\StationName;
+use App\Models\EstateCharge;
+// use App\Models\EstateCharge;
 use Illuminate\Http\Request;
 use App\Models\ComplianceType;
-// use App\Models\EstateCharge;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Models\PropertyResponsibility;
@@ -186,7 +188,16 @@ private function getTabContent($tabname, $propertyId, $property)
         // case 'work offer':
         //     return view('backend.properties.tabs.work_offer', compact('propertyId'))->render();
         case 'notes':
-            return view('backend.properties.tabs.notes', compact('propertyId', 'property'))->render();
+            // Fetch the notes related to the specific property by property ID
+            $notes = Notes::where('property_id', $propertyId)->get();
+                
+            // Ensure it's an empty collection if no notes are found
+            if ($notes->isEmpty()) {
+                $notes = collect();  // Make sure it's an empty collection, not null
+            }
+        
+            // Return the view and pass the notes data (null or the notes collection)
+            return view('backend.properties.tabs.notes', compact('propertyId', 'property', 'notes'))->render();        
         default:
             return 'Tab content not found';
     }
@@ -761,10 +772,14 @@ private function getTabContent($tabname, $propertyId, $property)
                 break;
             case 'property_status':
                 $data = $request->only([
-                    'sales_current_status', 'letting_current_status', 'status_description'
+                    'sales_current_status', 'letting_current_status', 'sales_status_description','letting_status_description'
                 ]);
                 break;
             case 'notes':
+                $data = $request->only([
+                    'imp_notes'
+                ]);
+            case 'notes_tab':
                 $data = $request->only([
                     'notes'
                 ]);
@@ -1048,7 +1063,8 @@ private function getTabContent($tabname, $propertyId, $property)
                     'sales_current_status' => 'required_if:property_type,sales, both|string',
                     'letting_current_status' => 'required_if:property_type,lettings, both|string',
                     'pets_allow' => 'required',
-                    'status_description' => 'nullable|string',
+                    'sales_status_description' => 'nullable|string',
+                    'letting_status_description' => 'nullable|string',
                     'available_from' => 'required|date',
                     'market_on' => 'required',
                     // 'market_on' => 'required|array',
