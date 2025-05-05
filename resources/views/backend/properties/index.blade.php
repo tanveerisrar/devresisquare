@@ -19,6 +19,11 @@
                                 />
                             </div>
                             <div class="pv_btn">
+                                <a href="{{ route('admin.properties.quick') }}" class="btn mt-2 btn-sm btn-outline-danger">
+                                    Add Property
+                                </a>
+                            </div>
+                            {{-- <div class="pv_btn">
                                 <x-backend.forms.button
                                     class=''
                                     name='Add Property'
@@ -29,7 +34,7 @@
                                     link="{{ route('admin.properties.quick') }}"
                                     onClick='onClick()'
                                 />
-                            </div>
+                            </div> --}}
                         </div>
 
                     </div>
@@ -105,19 +110,19 @@
                                     /> --}}
 
                                     <!-- Modal Trigger Button -->
-                                    <a type="button" class="tab-offers-btn btn btn_secondary btn-sm d-none" data-bs-toggle="modal" data-bs-target="#addOfferModal">
+                                    <a type="button" class="tab-offers-btn btn btn-sm btn-outline-danger btn-sm d-none" data-bs-toggle="modal" data-bs-target="#addOfferModal">
                                         Add Offer
                                     </a>
                                     {{-- <a data-url="{{ route('admin.owner-groups.create') }}" class="popup-tab-owners-create btn btn_secondary btn-sm tab-owners-btn d-none">
                                         <span>Add Owner</span>
                                         <span class="icon_btn"></span>
                                     </a> --}}
-                                    <a data-url="{{ route('admin.owner-groups.create_group') }}" class="popup-tab-owner-group-create btn btn_secondary btn-sm tab-owners-group-btn d-none">
+                                    <a data-url="{{ route('admin.owner-groups.create_group') }}" class="popup-tab-owner-group-create btn btn-sm btn-outline-danger btn-sm tab-owners-group-btn d-none">
                                         <span>Add Owner Group</span>
                                         <span class="icon_btn"></span>
                                     </a>
-                                    <a data-url="{{ route('admin.tenancies.create') }}" class="popup-tab-tenancy-create btn btn_secondary btn-sm tab-tenancy-group-btn d-none">
-                                        <span>Add Tenacy</span>
+                                    <a data-url="{{ route('admin.tenancies.create') }}" class="popup-tab-tenancy-create btn btn-sm btn-outline-danger tab-tenancy-group-btn d-none">
+                                        <span>Add Tenancy</span>
                                         <span class="icon_btn"></span>
                                     </a>
 
@@ -192,7 +197,6 @@
             opacity: 0.3 !important;
         }
     </style>
-
 <!-- property offer add Modal -->
 <div class="modal fade" id="addOfferModal" tabindex="-1" aria-labelledby="addOfferModal-label" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-md">
@@ -274,7 +278,17 @@
     <!-- Include the Modal Component -->
     @include('backend.components.modal')
 @endsection
+@push('styles')
+<link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-bs5.min.css" rel="stylesheet">
 
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+@endpush
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-bs5.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="{{ asset('/asset/backend/js/property-offer.js') }}"></script>
+@endpush
 @section('page.scripts')
 @if (isset($propertyId) && isset($property) && $propertyId != $property->id)
 {{-- @php
@@ -287,10 +301,36 @@ var_dump($propertyId);
 </script>
 @endif
 
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script src="{{ asset('/asset/backend/js/property-offer.js') }}"></script>
 <script>
+    function uploadImageToServer(file, editor) {
+        let formData = new FormData();
+        formData.append("file", file);
+
+        $.ajax({
+            url: "{{ route('notes.upload_image') }}",
+            method: "POST",
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (data) {
+                if (data.url) {
+                    editor.summernote('insertImage', data.url);
+                }
+            },
+            error: function (err) {
+                console.error("Upload failed:", err.responseText);
+                alert("Image upload failed.");
+            }
+        });
+    }
+
+    var responseHandler = function(response) {
+        location.reload();
+    }
+
     function handleGasSafeModal() {
         // Check initially on page load
         if ($('#gas_safe_acknowledged').val() !== '1' && $('#is_gas_no').is(':checked')) {
@@ -462,9 +502,10 @@ var_dump($propertyId);
 }
 
     // Open modal and load form via AJAX
-    $(document).on("click", ".editForm", function () {
+    $(document).on('click', '.editForm, .addForm', function() {
         let formType = $(this).data("form");
         let propertyId = $(this).data("id");
+        let noteId     = $(this).data('note-id') || '';
         let formTitles = {
             "availability_pricing": "Edit Availability & Pricing",
             "property_info": "Edit Property Information",
@@ -474,6 +515,7 @@ var_dump($propertyId);
             "property_services": "Edit Property Services",
             "property_status": "Edit Property Status",
             "notes": "Edit Important Note",
+            notes_tab: noteId ? 'Edit Note' : 'Add Note',
         };
         
         let modalTitle = formTitles[formType] || "Edit Details"; // Default title if form type is not found
@@ -482,7 +524,7 @@ var_dump($propertyId);
         $.ajax({
             url: "{{ route('admin.properties.loadForm') }}", // Route to get form dynamically
             type: "GET",
-            data: { form_type: formType, property_id: propertyId },
+            data: { form_type: formType, property_id: propertyId, note_id: noteId },
             success: function (response) {
                 $("#largeModal .modal-body").html(response.form_html);
                 $("#largeModal").modal("show");
@@ -490,12 +532,16 @@ var_dump($propertyId);
                 // **Trigger the function ONLY for a specific form**
                 if (formType === "property_details") {
                     AIZ.uploader.previewGenerate();
+                    $('.select2').select2();
                 }
                 if (formType === "property_accessibility") {
                     initDynamicTagify();
                 }
-                if (formType === "property_details") {
+                if (formType === "availability_pricing") {
                     $('.select2').select2();
+                }
+                if (formType === "notes_tab") {
+                    AIZ.plugins.textEditor();
                 }
             },
             error: function (error) {
@@ -514,7 +560,7 @@ var_dump($propertyId);
         let propertyId = form.find('input[name="property_id"]').val(); // Get property ID
 
         $.ajax({
-            url: "{{ route('admin.properties.saveForm') }}", 
+            url: "{{ route('admin.properties.saveForm') }}",
             type: "POST",
             data: formData,
             success: function (response) {
@@ -524,6 +570,7 @@ var_dump($propertyId);
 
                     // Close the modal
                     $("#largeModal").modal("hide");
+                    AIZ.plugins.notify('success', response.message);
                 } else {
                     alert("Error: " + response.error);
                 }
@@ -536,6 +583,17 @@ var_dump($propertyId);
         });
     });
     
+    // “View” button handler
+    $(document).on('click', '.viewNote', function(){
+        const type    = $(this).data('type');
+        const content = $(this).data('content');
+
+        $("#largeModal .modal-title").html(type);
+        $("#largeModal .modal-body").html(content);
+        $("#largeModal").modal("show");
+    });
+
+
     $(document).ready(function() {
         let isExpanded = true; // Initially, all accordions are open
     

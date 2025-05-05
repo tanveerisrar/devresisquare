@@ -954,13 +954,37 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                 format = (typeof format == 'undefined') ? false : format;
 
                 $this.summernote({
+                    codeviewFilter: false,
+                    codeviewIframeFilter: false,
                     toolbar: buttons,
                     placeholder: placeholder,
                     height: minHeight,
                     callbacks: {
-                        onImageUpload: function (data) {
-                            data.pop();
+                        onImageUpload: function (files) {
+                            let editor = $(this); // the active editor
+                            for (let i = 0; i < files.length; i++) {
+                                uploadImageToServer(files[i], editor);
+                            }
+                            // for (let i = 0; i < files.length; i++) {
+                            //     let reader = new FileReader();
+                            //     reader.onload = (e) => {
+                            //         $(this).summernote('insertImage', e.target.result, 'image');
+                            //     };
+                            //     reader.readAsDataURL(files[i]); // Read image as Base64
+                            // }
                         },
+                        
+                        // onImageUpload: function (data) {
+                            // data.pop();
+                            
+                            // for (let i = 0; i < files.length; i++) {
+                            //     let reader = new FileReader();
+                            //     reader.onloadend = function () {
+                            //         $('.aiz-text-editor').summernote('insertImage', reader.result, 'image');
+                            //     };
+                            //     reader.readAsDataURL(files[i]);
+                            // }
+                        // },
                         onPaste: function (e) {
                             if(format){
                                 var bufferText = ((e.originalEvent || e).clipboardData || window.clipboardData).getData('Text');

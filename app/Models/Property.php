@@ -127,4 +127,13 @@ class Property extends Model
     {
         return $this->hasMany(Notes::class);
     }
+
+    /**
+     * The local authority this property belongs to.
+     */
+    public function localAuthority()
+    {
+        // assuming your properties table has local_authority FK
+        return $this->belongsTo(LocalAuthority::class, 'local_authority');
+    }
 }

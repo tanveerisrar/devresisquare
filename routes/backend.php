@@ -24,6 +24,7 @@ use App\Http\Controllers\Backend\WebsiteController;
 use App\Http\Controllers\Backend\WorkOrderController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Models\Upload;
 
 // Login Routes
 Route::get('/login', [AuthenticateController::class, 'index'])->name('backend.login');
@@ -93,6 +94,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/load-form', 'loadForm')->name('loadForm');
             Route::post('/save-form', 'saveForm')->name('saveForm');
 
+            Route::post('/note/delete/{id}',  'deleteNote')->name('note.delete');
         });
 
         // Designation
@@ -293,4 +295,13 @@ Route::middleware('auth')->group(function () {
     Route::controller(BusinessSettingsController::class)->group(function () {
         Route::post('/business-settings/update', 'update')->name('business_settings.update');
     });
+
+    Route::post('/upload-note-image', function (Request $request) {
+        if ($request->hasFile('file')) {
+            $upload = Upload::storeFile($request->file('file'));
+            return response()->json(['url' => asset('storage/' . $upload->file_name)]);
+        }
+        return response()->json(['error' => 'No file uploaded'], 400);
+    })->name('notes.upload_image');
+    
 });

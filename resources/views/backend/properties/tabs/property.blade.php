@@ -106,7 +106,7 @@ $secondHalf = array_slice($allFeatures, $halfCount);
         var_dump($property->id);
         @endphp --}}
             <!-- Delete Button -->
-            <button type="button" class="float-end btn btn-danger btn-sm d-flex align-items-center gap-1"
+            <button type="button" class="float-end btn btn-sm btn-outline-danger"
             onclick="confirmModal('{{ url(route('admin.properties.delete', $property->id)) }}', responseHandler)">
             <i class="mdi mdi-delete" title="Delete"></i>
             Delete

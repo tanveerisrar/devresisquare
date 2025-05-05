@@ -17,6 +17,7 @@ use App\Models\EstateCharge;
 // use App\Models\EstateCharge;
 use Illuminate\Http\Request;
 use App\Models\ComplianceType;
+use App\Models\LocalAuthority;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Models\PropertyResponsibility;
@@ -706,8 +707,12 @@ private function getTabContent($tabname, $propertyId, $property)
         }
 
         $extraData = []; // <-- This prevents undefined variable errors
-        $extraData = $this->getFormTypeExtras($formType, $property);
-    
+        $extraData = $this->getFormTypeExtras($formType, $property, $request->note_id ?? null);
+        // ** NEW: if we have a note_id, fetch that note and pass it in **
+        // if ($formType === 'notes_tab' && $request->filled('note_id')) {
+        //     $note = $property->notes()->findOrFail($request->note_id);
+        //     $extraData['note'] = $note;
+        // }
         $html = view($viewPath, array_merge(['property' => $property],['editMode' => true], $extraData))->render();
 
         // Render the form with additional data
@@ -780,9 +785,31 @@ private function getTabContent($tabname, $propertyId, $property)
                     'imp_notes'
                 ]);
             case 'notes_tab':
-                $data = $request->only([
-                    'notes'
+                // $data = $request->only([
+                //     'notes'
+                // ]);
+                // Validate
+                $data = $request->validate([
+                    'type'    => 'required|string',
+                    'content' => 'required|string',
+                    'note_id' => 'nullable|exists:notes,id',
                 ]);
+
+                if ($data['note_id']) {
+                    // Update existing
+                    $note = Notes::where('property_id', $property->id)
+                                ->findOrFail($data['note_id']);
+                    $note->update([
+                        'type'    => $data['type'],
+                        'content' => $data['content'],
+                    ]);
+                } else {
+                    // Create new
+                    $note = $property->notes()->create([
+                        'type'    => $data['type'],
+                        'content' => $data['content'],
+                    ]);
+                }
                 break;
             default:
                 return response()->json(['message' => 'Invalid form type'], 400);
@@ -809,11 +836,13 @@ private function getTabContent($tabname, $propertyId, $property)
     
         return response()->json([
             'success' => 'Form updated successfully', 
-            'updated_html' => $updatedView
+            'updated_html' => $updatedView,
+            'status' => true,
+            'message'  => 'Updated successfully',
         ]);
     }
     
-    private function getFormTypeExtras($formType, $property)
+    private function getFormTypeExtras($formType, $property, $noteId = null)
     {
         if ($formType === 'property_accessibility') {
             // Fetch all stations and schools
@@ -829,9 +858,46 @@ private function getTabContent($tabname, $propertyId, $property)
             $schools = SchoolName::whereIn('id', $schoolIds)->pluck('name', 'id');
 
             return compact('allstations', 'allschools', 'stations', 'schools');
-        }
+        }elseif ($formType === 'availability_pricing') {
+            // $authorities = LocalAuthority::with('group')
+            // ->get()
+            // ->mapWithKeys(function($auth){
+            //     return [$auth->id => $auth->display_name];
+            // });
+            // return compact('authorities');
+            $groups = \App\Models\LocalAuthorityGroup::with(['authorities' => function($q){
+                $q->orderBy('name');
+            }])->orderBy('name')->get();
+            return compact('groups');
+        }elseif ($formType === 'notes_tab') {
+            // 1) full list for view mode
+            $notes = $property->notes()
+                              ->orderBy('created_at','desc')
+                              ->get();
+
+            // 2) single note when editing
+            $note = null;
+            if ($noteId) {
+                $note = $property->notes()
+                                 ->findOrFail($noteId);
+            }
+
+            return compact('notes', 'note');
+        } 
 
         return [];
+    }
+
+    public function deleteNote($id)
+    {
+        $note = Notes::findOrFail($id);
+        $note->delete();
+        $response = [
+            'status' => true,
+            'message' => 'Note deleted successfully!',
+        ];
+        return response()->json($response);
+        // return response()->json(['success' => true, 'message' => 'Note deleted successfully.']);
     }
 
 
