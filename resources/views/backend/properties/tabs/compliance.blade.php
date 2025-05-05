@@ -57,37 +57,46 @@
                                 <td class="img_thumb">
                                     @if ($photo_ids)
                                         @foreach ($photo_ids as $photo_id)
-                                        @php
-                                            $url     = uploaded_asset($photo_id);
-                                            $ext     = strtolower(pathinfo($url, PATHINFO_EXTENSION));
-                                            $isImage = in_array($ext, ['jpg','jpeg','png','gif','svg','webp']);
-                                        @endphp
-                                        @if($isImage)
-                                        <a href="{{ $url }}" target="_blank" class="d-inline-block mb-2">
-                                            <img src="{{ $url }}" alt="Preview" class="img-fluid rounded" width="100">
-                                        </a>
-                                        @else
-                                            {{-- Non-image file: show FontAwesome icon + filename --}}
-                                            <a href="{{ $url }}" target="_blank" class="d-inline-flex align-items-center mb-2 text-decoration-none">
-                                                <i class="fas fa-file-alt fa-2x me-2"></i>
-                                                <span class="text-truncate" style="max-width:100px;">
-                                                    {{ basename(parse_url($url, PHP_URL_PATH)) }}
-                                                </span>
-                                            </a>
-                                        @endif
-                                            {!! attachmentViewer(
-                                                $url,
-                                                'View',
-                                                'btn btn-outline-secondary btn-sm',
-                                                'lg'
-                                            ) !!}
+                                            @php
+                                                $url     = uploaded_asset($photo_id);
+                                                $ext     = strtolower(pathinfo($url, PATHINFO_EXTENSION));
+                                                $isImage = in_array($ext, ['jpg','jpeg','png','gif','svg','webp']);
+                                            @endphp
+                                            <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap" style="gap: 10px;">
+                                                @if($isImage)
+                                                    <a href="{{ $url }}" target="_blank" class="d-inline-flex align-items-center text-decoration-none">
+                                                        <i class="fas fa-image fa-lg me-2 text-black"></i>
+                                                    </a>
+                                                @else
+                                                    <a href="{{ $url }}" target="_blank" class="d-inline-flex align-items-center text-decoration-none">
+                                                        <i class="fas fa-file-alt fa-lg me-2 text-black"></i>
+                                                        {{-- <span class="text-truncate" style="max-width: 120px;">
+                                                            {{ basename(parse_url($url, PHP_URL_PATH)) }}
+                                                        </span> --}}
+                                                    </a>
+                                                @endif
+                                
+                                                {{-- View Button --}}
+                                                {!! attachmentViewer(
+                                                    $url,
+                                                    'View',
+                                                    'btn btn-outline-secondary btn-sm',
+                                                    'lg'
+                                                ) !!}
+                                            </div>
                                         @endforeach
                                     @endif
                                 </td>
+                                
                                 <td>
-
-                                    <button class="btn btn-sm btn-warning" onclick="openComplianceModal({{ $type->id }}, {{ $record->id }})">Edit</button>
-                                    <button class="btn btn-sm btn-danger" onclick="confirmDelete({{ $record->id }})">Delete</button>
+                                    <div class="d-flex justify-content-end">
+                                        <button class="btn btn-sm btn-outline-warning editNote editForm me-1" title="Edit Compliance" onclick="openComplianceModal({{ $type->id }}, {{ $record->id }})">
+                                            <i class="bi bi-pencil">Edit</i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger me-1" title="Delete Compliance" onclick="confirmDelete({{ $record->id }})">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </button>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach

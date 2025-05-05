@@ -9,7 +9,8 @@
     $councilTaxBand = $property->council_tax_band ?? '';
     $estateCharge = $property->estate_charge ?? '';
     $miscellaneousCharge = $property->miscellaneous_charge ?? '';
-    $localAuthority = $property->local_authority ?? '';
+    // $localAuthority = $property->local_authority ?? '';
+    $localAuthority = $property->localAuthority->display_name ?? 'N/A';
     $lengthOfLease = $property->length_of_lease ?? '';
 @endphp
 
@@ -124,6 +125,22 @@
             </div>
         </div>
     </div>
+    <style>
+        .select2-container,
+        .select2-container--bootstrap-5 .select2-selection,
+        .select2-container--default .select2-selection {
+          width: 100% !important;
+        }
+        .select2-container--bootstrap-5 .select2-selection {
+          height: calc(1.5em + .75rem + 2px);
+          padding: .375rem .75rem;
+          font-size: 1rem;
+          line-height: 1.5;
+        }
+        .select2-results__group {
+          font-weight: 600;
+        }
+        </style>
 @else
     <form id="availabilityPricingForm">
         @csrf
@@ -137,10 +154,35 @@
                     <input type="date" name="available_from" class="form-control" value="{{ $property->available_from }}">
                 </div>
                 <div class="form-group">
+                    <label for="local_authority_id">Local Authority</label>
+                    <div class="row">
+                        <div class="col-12">
+                            <select name="local_authority" id="local_authority" class="select2 form-control">
+                            {{-- <select name="local_authority_id" id="local_authority_id" class="select2 form-control"> --}}
+                                <option value="">-- select one --</option>
+                                @foreach($groups as $group)
+                                    <optgroup label="{{ $group->name }}">
+                                        @foreach($group->authorities as $auth)
+                                            <option
+                                                value="{{ $auth->id }}"
+                                                {{ old('local_authority_id', $property->local_authority) == $auth->id ? 'selected' : '' }}
+                                            >
+                                                {{ $auth->display_name }}
+                                            </option>
+                                        @endforeach
+                                    </optgroup>
+                                @endforeach
+                        
+                            </select>
+                        </div>
+                    </div>                 
+                </div>
+                               
+                {{-- <div class="form-group">
                     <label for="local_authority">Local Authority</label>
                     <input type="text" name="local_authority" id="local_authority" class="form-control"
                         value="{{ $localAuthority }}">
-                </div>
+                </div> --}}
                 <div class="form-group">
                     <label for="tenure">Tenure</label>
                     <select name="tenure" id="tenure" class="form-control">

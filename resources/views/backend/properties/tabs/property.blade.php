@@ -49,7 +49,8 @@ $aspects = $property->aspects ?? '';
 $currentStatus = $property->current_status ?? '';
 $lettingCurrentStatus = $property->letting_current_status ?? '';
 $salesCurrentStatus = $property->sales_current_status ?? '';
-$statusDescription = $property->status_description ?? '';
+$salesStatusDescription = $property->sales_status_description ?? '';
+$lettingStatusDescription = $property->letting_status_description ?? '';
 $availableFrom = formatDate($property->available_from) ?? '';
 $marketOn = $property->market_on ?? '';
 $features = $property->features ?? '';
@@ -97,9 +98,20 @@ $secondHalf = array_slice($allFeatures, $halfCount);
     {{-- <div class="pv_image">
         <img src="{{ asset('/asset/images/temp-property.webp') }}" alt="property">
     </div> --}}
-
+    
     <div class="pv_content">
 
+        @if (isset($property) && isset($property->id))
+        {{-- @php
+        var_dump($property->id);
+        @endphp --}}
+            <!-- Delete Button -->
+            <button type="button" class="float-end btn btn-sm btn-outline-danger"
+            onclick="confirmModal('{{ url(route('admin.properties.delete', $property->id)) }}', responseHandler)">
+            <i class="mdi mdi-delete" title="Delete"></i>
+            Delete
+            </button>
+        @endif
         <div class="pvc_ref_id"> <strong> Property Ref: {{$propRefNo}} </strong></div>
         <div class="pvc_poperty_name">{{ $address }}</div>
         {{-- <div class="rs_property_icons">
@@ -131,6 +143,7 @@ $secondHalf = array_slice($allFeatures, $halfCount);
     </div>
     {{-- pv_content end  --}}
 </div>
+
 <div class="property_note">
     <span class="fw-semibold">Important Note
     <div class="notes-update-ajax" id="section-notes-{{ $property->id }}">
@@ -141,6 +154,17 @@ $secondHalf = array_slice($allFeatures, $halfCount);
         Edit
     </button>
 </div>
+<div class="property_note">
+    <span class="fw-semibold">
+    <div class="property_status-update-ajax" id="section-property_status-{{ $property->id }}">
+        @include("backend.properties.popup_forms.property_status", ['property' => $property])
+    </div>
+    </span>
+    <button class="btn btn-outline-danger btn-sm editForm" data-form="{{ 'property_status' }}" data-id="{{ $property->id }}">
+        Edit
+    </button>
+</div>
+
 <div class="pvd_content_wrapper">
 <!-- Button to Collapse/Expand All -->
 <div class="d-flex justify-content-end mb-3">
@@ -157,7 +181,7 @@ $secondHalf = array_slice($allFeatures, $halfCount);
             ['key' => 'property_features', 'title' => 'Property Features', 'order' => 3],
             ['key' => 'property_info', 'title' => 'Property Information', 'order' => 2],
             ['key' => 'property_services', 'title' => 'Service', 'order' => 4],
-            ['key' => 'property_status', 'title' => 'Status', 'order' => 7],
+            // ['key' => 'property_status', 'title' => 'Status', 'order' => 7],
             // Add more sections with order values as needed
         ];
     

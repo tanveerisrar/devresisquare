@@ -130,10 +130,11 @@ function ajaxSubmit(e, form, callBackFunction) {
                 $(btn).css("pointer-events", "inherit");
 
                 if (response.status) {
-                    Command: toastr["success"](
-                        response.notification,
-                        "Success"
-                    );
+                    // Command: toastr["success"](
+                    //     response.notification,
+                    //     "Success"
+                    // );
+                    AIZ.plugins.notify('success', response.message);
                     callBackFunction(response);
                 } else {
                     if (typeof response.notification === "object") {

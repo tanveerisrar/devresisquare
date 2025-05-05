@@ -49,8 +49,14 @@
 
                 <!-- Action -->
                 <td>
-                    <button data-url="{{ route('admin.owner-groups.edit', $ownerGroup->id) }}" class="popup-tab-owner-group-edit btn btn-sm btn-warning" >Edit</button>
-                    <button class="btn btn-sm btn-danger action-icon" onclick="confirmModal('{{ route('admin.owner-groups.delete_group', $ownerGroup->id) }}', responseHandler)">Delete</button>
+                    <div class="d-flex justify-content-end">
+                        <button class="btn btn-sm btn-outline-warning editNote editForm me-1" title="Edit Owner Group" data-url="{{ route('admin.owner-groups.edit', $ownerGroup->id) }}">
+                            <i class="bi bi-pencil">Edit</i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger me-1" title="Delete Owner Group" onclick="confirmModal('{{ route('admin.owner-groups.delete_group', $ownerGroup->id) }}', responseHandler)">
+                        <i class="bi bi-trash"></i> Delete
+                    </button>
+                    </div>
                 </td>
             </tr>
 

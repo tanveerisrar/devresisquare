@@ -229,6 +229,15 @@ div.dataTables_wrapper div.dataTables_filter input {
     align-items: center;
     justify-content: space-between;
 }
+.property_status{
+    border: 1px solid var(--gray-300);
+    padding: 16px;
+    border-radius: 12px;
+    display: flex
+;
+    align-items: center;
+    justify-content: space-between;
+}
 
 form{
     .price_edit_form{

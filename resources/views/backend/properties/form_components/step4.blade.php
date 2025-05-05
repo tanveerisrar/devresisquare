@@ -52,11 +52,21 @@
                 @endif
 
                 <div class="form-group">
-                    <label for="status_description">Description</label>
-                    <textarea name="status_description" id="status_description" rows="6"
-                        class="form-control">{{ isset($property) && $property->status_description ? $property->status_description : '' }}</textarea>
+                    <label for="sales_status_description">Description</label>
+                    <textarea name="sales_status_description" id="sales_status_description" rows="6"
+                        class="form-control">{{ isset($property) && $property->sales_status_description ? $property->sales_status_description : '' }}</textarea>
                         <div class="input_tag">0/5000 words</div>
-                    @error('status_description')
+                    @error('sales_status_description')
+                        <div class="text-danger">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="letting_status_description">Description</label>
+                    <textarea name="letting_status_description" id="letting_status_description" rows="6"
+                        class="form-control">{{ isset($property) && $property->letting_status_description ? $property->letting_status_description : '' }}</textarea>
+                        <div class="input_tag">0/5000 words</div>
+                    @error('letting_status_description')
                         <div class="text-danger">{{ $message }}</div>
                     @enderror
                 </div>
@@ -74,9 +84,6 @@
                     <div class="form-group">
                         <input type="checkbox" name="pets_allow" id="pets_allow" style="width: 5%;" value="{{ isset($property) && $property->pets_allow == 1 ? 1 : 0 }}" {{ isset($property) && $property->pets_allow == 1 ? 'checked' : '' }} />
                         <label for="pets_allow">Pets Allowed</label>
-                        @error('pets_allow')
-                            <div class="text-danger">{{ $message }}</div>
-                        @enderror
                     </div>
                 @endif
 

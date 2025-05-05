@@ -17,7 +17,10 @@ return new class extends Migration {
             $table->string('line_1')->nullable();
             $table->string('line_2')->nullable();
             $table->string('city')->nullable();
-            $table->string('country')->nullable();
+            // $table->string('country')->nullable();
+            $table->unsignedBigInteger('country')->nullable(); // Create the column
+            $table->foreign('country')->references('id')->on('countries')->onDelete('set null'); // Define the foreign key constraint
+            $table->string('county', 155)->nullable();
             $table->string('postcode')->nullable();
             $table->string('frunishing_type')->nullable();
             $table->string('property_type')->nullable();
@@ -39,7 +42,8 @@ return new class extends Migration {
             $table->string('aspects')->nullable();
             $table->string('sales_current_status',155)->nullable();
             $table->string('letting_current_status',155)->nullable();
-            $table->string('status_description')->nullable();
+            $table->longText('sales_status_description')->nullable();
+            $table->longText('letting_status_description')->nullable();
             $table->date('available_from')->nullable();
             $table->boolean('pets_allow')->default(0)->comment('1 for yes, 0 for no');
             $table->json('market_on')->nullable();
@@ -88,6 +92,7 @@ return new class extends Migration {
             $table->string('branch')->nullable();
             $table->decimal('commission_percentage', 5, 2)->nullable();
             $table->decimal('commission_amount', 10, 2)->nullable();
+            $table->longText('imp_notes')->nullable();
             $table->integer('step')->nullable();
             $table->integer('quick_step')->nullable();
             $table->foreignId('added_by')->nullable()->constrained('users')->onDelete('set null');

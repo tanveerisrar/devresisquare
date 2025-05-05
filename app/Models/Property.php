@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Notes;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes; // Import SoftDeletes
 
 class Property extends Model
@@ -19,6 +20,7 @@ class Property extends Model
         'line_2',
         'city',
         'country',
+        'county',
         'postcode',
         'frunishing_type',
         'property_type',
@@ -40,7 +42,8 @@ class Property extends Model
         'aspects',
         'sales_current_status',
         'letting_current_status',
-        'status_description',
+        'sales_status_description',
+        'letting_status_description',
         'available_from',
         'pets_allow',
         'market_on',
@@ -113,5 +116,24 @@ class Property extends Model
     public function complianceRecords()
     {
         return $this->hasMany(ComplianceRecord::class);
+    }
+
+    public function countryRelation()
+    {
+        return $this->belongsTo(Country::class, 'country');
+    }
+
+    public function notes()
+    {
+        return $this->hasMany(Notes::class);
+    }
+
+    /**
+     * The local authority this property belongs to.
+     */
+    public function localAuthority()
+    {
+        // assuming your properties table has local_authority FK
+        return $this->belongsTo(LocalAuthority::class, 'local_authority');
     }
 }

@@ -58,8 +58,17 @@
                                     <td>{{ $tenancy->tenancy_renewal_confirm_date }}</td>
                                     <td>{{ $tenancy->extension_date }}</td>
                                     <td>
-                                        <button data-url="{{ route('admin.tenancies.edit', $tenancy->id) }}" class="popup-tab-tenancy-edit btn btn-sm btn-warning">Edit</button>
-                                        <button class="btn btn-sm btn-danger action-icon" onclick="confirmModal('{{ route('admin.tenancies.delete', $tenancy->id) }}', responseHandler)">Delete</button>
+                                        <div class="d-flex justify-content-end">
+                                            <button data-url="{{ route('admin.tenancies.edit', $tenancy->id) }}" class="popup-tab-tenancy-edit btn btn-sm btn-outline-warning me-1" title="Edit Tenancy">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger me-1 action-icon" title="Delete Tenancy" onclick="confirmModal('{{ route('admin.tenancies.delete', $tenancy->id) }}', responseHandler)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                        </div>
+
+                                        {{-- <button  class="popup-tab-tenancy-edit btn btn-sm btn-warning">Edit</button>
+                                        <button class="btn btn-sm btn-danger action-icon" >Delete</button> --}}
                                     </td>
                                 </tr>
                             @endforeach

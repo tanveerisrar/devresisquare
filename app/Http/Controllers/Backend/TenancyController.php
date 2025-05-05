@@ -201,6 +201,9 @@ class TenancyController
             'tenancy_type_id' => 'nullable|exists:tenancy_types,id', // Assuming foreign key relationship
             'deposit_held_by' => 'nullable|string|max:255',
             'deposit_service' => 'nullable|string|max:255',
+            'tds_dps_number' => 'nullable|string|max:155',
+            'reference_number' => 'nullable|string|max:155',
+            'deposit_scheme' => 'nullable|string|max:155',
             'term_months' => 'nullable|integer',
             'term_days' => 'nullable|integer',
             'contact_id' => 'required|array', // Validate that the contact_id is an array

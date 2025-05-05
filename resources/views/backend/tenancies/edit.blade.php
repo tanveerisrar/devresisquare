@@ -17,6 +17,11 @@
     $deposit_number = isset($tenancy->deposit_number) ? $tenancy->deposit_number : '';
     $deposit_held_by = isset($tenancy->deposit_held_by) ? $tenancy->deposit_held_by : '';
     $deposit_service = isset($tenancy->deposit_service) ? $tenancy->deposit_service : '';
+
+    $tds_dps_number = isset($tenancy->tds_dps_number) ? $tenancy->tds_dps_number : '';
+    $reference_number = isset($tenancy->reference_number) ? $tenancy->reference_number : '';
+    $deposit_scheme = isset($tenancy->deposit_scheme) ? $tenancy->deposit_scheme : '';
+
     $periodic = isset($tenancy->periodic) && $tenancy->periodic === 1 ? 1 : 0;
     $rolling_contract = isset($tenancy->rolling_contract) && $tenancy->rolling_contract === 1 ? 1 : 0;
     $renewal_exempt = isset($tenancy->renewal_exempt) && $tenancy->renewal_exempt === 1 ? 1 : 0;
@@ -219,7 +224,7 @@
         <div class="row">
             <div class="col">
                 <div class="mb-3">
-                    <label for="depositService" class="form-label">Deposit Held By</label>
+                    <label for="deposit_held_by" class="form-label">Deposit Held By</label>
                     @php
                         $depositHeldByOptions = [
                             'landlord_holding' => 'Landlord Holding',
@@ -229,7 +234,7 @@
                         ];
                     @endphp
 
-                    <select class="form-select" id="depositService" name="deposit_held_by">
+                    <select class="form-select" id="deposit_held_by" name="deposit_held_by">
                         @foreach ($depositHeldByOptions as $value => $label)
                             <option value="{{ $value }}" @if ($deposit_held_by == $value) selected @endif>
                                 {{ $label }}</option>
@@ -249,6 +254,27 @@
                             Scheme</option>
                     </select>
                 </div>
+
+                <div class="mb-3 d-none" id="tds_dps_numberField">
+                    <label for="tds_dps_number" class="form-label">TDS or DPS Number</label>
+                    <input type="text" class="form-control" id="tds_dps_number" name="tds_dps_number" value="{{ old('tds_dps_number', $tds_dps_number) }}">
+                </div>
+                
+                <div class="mb-3 d-none" id="referenceNumberSchemeField">
+                    <label for="referenceNumber" class="form-label">Reference Number</label>
+                    <input type="text" class="form-control" id="referenceNumber" name="reference_number" value="{{ old('reference_number', $reference_number) }}">
+                </div>
+                
+                <div class="mb-3 d-none" id="depositSchemeDropdown">
+                    <label for="depositScheme" class="form-label">Deposit Scheme</label>
+                    <select class="form-select" id="depositScheme" name="deposit_scheme">
+                        <option value="">-- Select a scheme --</option>
+                        <option value="dps" @if ($deposit_scheme == 'dps') selected @endif>Deposit Protection Service</option>
+                        <option value="tds" @if ($deposit_scheme == 'tds') selected @endif>Tenancy Deposit Scheme</option>
+                        <option value="drs" @if ($deposit_scheme == 'drs') selected @endif>Deposit Replacement Scheme</option>
+                    </select>
+                </div>
+
             </div>
         </div>
         <div class="mb-3">
@@ -300,6 +326,30 @@
         if ($('input[name="is_main_person"]:checked').length === 0) {
             e.preventDefault(); // Prevent form submission
             alert('Please select a main contact.'); // Show alert message
+        }
+    });
+
+    $(document).on('change', '#depositService', function () {
+        const selected = $(this).val();
+
+        if (selected === 'number_of_scheme_or_number_of_reference') {
+            $('#referenceNumberSchemeField').removeClass('d-none');
+            $('#referenceNumber').attr('required', true);
+
+            $('#depositSchemeDropdown').removeClass('d-none');
+            $('#depositScheme').attr('required', true);
+
+            $('#tds_dps_numberField').addClass('d-none');
+            $('#tds_dps_number').removeAttr('required');
+        } else if (selected === 'tds_dps_number') {
+            $('#tds_dps_numberField').removeClass('d-none');
+            $('#tds_dps_number').attr('required', true);
+
+            $('#referenceNumberSchemeField').addClass('d-none');
+            $('#referenceNumber').removeAttr('required');
+
+            $('#depositSchemeDropdown').addClass('d-none');
+            $('#depositScheme').removeAttr('required');
         }
     });
 
@@ -402,6 +452,9 @@
 
         // Initial calculation if values are already filled
         calculateMoveOutDate();
+
+        // Trigger the change event on load to initialize correct fields for edit mode
+        $('#depositService').trigger('change');
     }
 
     // Initialize the form only once the content is fully loaded
