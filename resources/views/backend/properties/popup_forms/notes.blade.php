@@ -1,6 +1,9 @@
 @if(!isset($editMode) || !$editMode)
+@php
+    $impNotes = isset($property) && $property->imp_notes ? $property->imp_notes : '';
+@endphp
     <!-- Display View Mode -->
-    <p>{{ isset($property) && $property->imp_notes ? $property->imp_notes : '' }}</p>
+    <x-toggle-description :text="$impNotes" :limit="120" />
 @else
     <form id="propertyNotesForm">
         @csrf
