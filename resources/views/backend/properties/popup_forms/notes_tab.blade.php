@@ -41,7 +41,7 @@
                             </button>
                             <button class="btn btn-sm btn-outline-danger deleteNote me-1" title="Delete Note"
                             data-note-id="{{ $note->id }}" onclick="confirmModal('{{ url(route('admin.properties.note.delete', $note->id)) }}', responseHandler)">
-                            <i class="bi bi-trash"></i> Delete
+                            <i class="bi bi-trash">Delete</i>
                         </button>
                         </div>
                     </div>

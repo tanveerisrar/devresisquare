@@ -873,7 +873,7 @@ private function getTabContent($tabname, $propertyId, $property)
         }elseif ($formType === 'notes_tab') {
             // 1) full list for view mode
             $notes = $property->notes()
-                              ->orderBy('created_at','desc')
+                              ->orderBy('updated_at','desc')
                               ->get();
 
             // 2) single note when editing
