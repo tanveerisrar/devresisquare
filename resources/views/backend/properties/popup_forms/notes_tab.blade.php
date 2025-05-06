@@ -8,12 +8,13 @@
     </div>
     <div class="row g-3 mb-3 note-list">
         @forelse($notes as $note)
-            <div class="col-12 col-md-6">
+            <div class="col-12">
                 <div class="card shadow-sm h-100">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <span>
-                            <span class="badge bg-secondary">{{ $note->type }}</span>
-                            <small class="text-muted ms-2">{{ $note->created_at->format('M d, Y') }}</small>
+                        <span class="badge bg-secondary">{{ $note->type }}</span>
+                        <span class="d-flex align-items-end">
+                            <small class="text-muted ms-2">Added At: {{ $note->created_at->format('M d, Y') }}</small>
+                            <small class="text-muted ms-2">Updated At: {{ $note->updated_at->format('M d, Y') }}</small>
                         </span>
                         {{-- <button class="btn btn-outline-danger btn-sm editForm" data-form="notes_tab"
                             data-id="{{ $property->id }}" data-note-id="{{ $note->id }}" title="Edit Note">
@@ -26,8 +27,12 @@
                     </div>
                     <div class="card-footer text-end">
                         <div class="d-flex justify-content-end">
-                            <button class="btn btn-sm btn-outline-info viewNote me-1" data-type="{{ $note->type }}"
+                            {{-- <button class="btn btn-sm btn-outline-info viewNote me-1" data-type="{{ $note->type }}"
                                 data-content="{{ htmlentities($note->content) }}" title="View Full Note">
+                                <i class="bi bi-eye"> View</i>
+                            </button> --}}
+                            <button class="btn btn-sm btn-outline-info viewNote me-1" data-type="{{ $note->type }}"
+                                data-id="{{ $note->id }}" data-url="{{ route('admin.properties.note.show', $note->id) }}" title="View Full Note">
                                 <i class="bi bi-eye"> View</i>
                             </button>
                             <button class="btn btn-sm btn-outline-danger editNote editForm me-1" data-form="notes_tab"

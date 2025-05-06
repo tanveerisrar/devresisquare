@@ -183,8 +183,12 @@
         .hidden {
             display: none !important;
         }
-        .modal-content {
+        /* .modal-content {
             max-width: 900px;
+            margin: auto;
+        } */
+        .modal-content {
+            height: auto;
             margin: auto;
         }
         .add-tenant-btn {
@@ -500,6 +504,30 @@ var_dump($propertyId);
         });
     });
 }
+function toggleDescriptions() {
+    let propertyType = $('input[name="property_type"]:checked').val();
+    
+    // Show/hide based on selected type
+    if (propertyType === 'sales') {
+        $('.sales_description').show();
+        $('.lettings_description').hide();
+    } else if (propertyType === 'lettings') {
+        $('.sales_description').hide();
+        $('.lettings_description').show();
+    } else if (propertyType === 'both') {
+        $('.sales_description').show();
+        $('.lettings_description').show();
+    } else {
+        $('.sales_description, .lettings_description').hide();
+    }
+}
+
+
+    toggleDescriptions();
+    $(document).on('change', 'input[name="property_type"]', function() {
+        toggleDescriptions();
+    });
+
 
     // Open modal and load form via AJAX
     $(document).on('click', '.editForm, .addForm', function() {
@@ -520,14 +548,30 @@ var_dump($propertyId);
         
         let modalTitle = formTitles[formType] || "Edit Details"; // Default title if form type is not found
 
-        $("#largeModal .modal-title").html(modalTitle); // Set dynamic title
+        $("#extraLargeModal .modal-title").html(modalTitle); // Set dynamic title
+
+        // Remove previous modal size classes
+        $("#extraLargeModal .modal-dialog").removeClass("modal-sm modal-lg modal-xl");
+
+        // Apply the appropriate modal size based on the formType
+        if (formType === "property_status" || formType === "notes" || formType === "property_services") {
+            // Use small modal for "notes" or "notes_tab"
+            $("#extraLargeModal .modal-dialog").addClass("modal-md");
+        // } else if (formType === "property_details" || formType === "availability_pricing") {
+        //     // Use large modal for "property_details" or "availability_pricing"
+        //     $("#extraLargeModal .modal-dialog").addClass("modal-lg");
+        } else {
+            // Default size (medium size) for other forms
+            $("#extraLargeModal .modal-dialog").addClass("modal-xl");
+        }
+
         $.ajax({
             url: "{{ route('admin.properties.loadForm') }}", // Route to get form dynamically
             type: "GET",
             data: { form_type: formType, property_id: propertyId, note_id: noteId },
             success: function (response) {
-                $("#largeModal .modal-body").html(response.form_html);
-                $("#largeModal").modal("show");
+                $("#extraLargeModal .modal-body").html(response.form_html);
+                $("#extraLargeModal").modal("show");
 
                 // **Trigger the function ONLY for a specific form**
                 if (formType === "property_details") {
@@ -551,7 +595,7 @@ var_dump($propertyId);
             }
         });
     });
-    $(document).on("submit", "#largeModal form", function (e) {
+    $(document).on("submit", "#extraLargeModal form", function (e) {
         e.preventDefault(); 
 
         let form = $(this);
@@ -569,7 +613,7 @@ var_dump($propertyId);
                     $("#section-" + formType + "-" + propertyId).html(response.updated_html);
 
                     // Close the modal
-                    $("#largeModal").modal("hide");
+                    $("#extraLargeModal").modal("hide");
                     AIZ.plugins.notify('success', response.message);
                 } else {
                     alert("Error: " + response.error);
@@ -584,13 +628,31 @@ var_dump($propertyId);
     });
     
     // “View” button handler
-    $(document).on('click', '.viewNote', function(){
-        const type    = $(this).data('type');
-        const content = $(this).data('content');
+    // $(document).on('click', '.viewNote', function(){
+    //     const type    = $(this).data('type');
+    //     const content = $(this).data('content');
 
-        $("#largeModal .modal-title").html(type);
-        $("#largeModal .modal-body").html(content);
-        $("#largeModal").modal("show");
+    //     $("#largeModal .modal-title").html(type);
+    //     $("#largeModal .modal-body").html(content);
+    //     $("#largeModal").modal("show");
+    // });
+    $(document).on('click', '.viewNote', function() {
+        const noteId = $(this).data('id');
+        const noteUrl = $(this).data('url');
+        const type   = $(this).data('type');
+
+        $.ajax({
+            url: noteUrl,
+            method: 'GET',
+            success: function(response) {
+                $("#extraLargeModal .modal-title").text(type);
+                $("#extraLargeModal .modal-body").html(response.content); // show as plain text
+                $("#extraLargeModal").modal("show");
+            },
+            error: function() {
+                alert("Failed to load note content.");
+            }
+        });
     });
 
 
