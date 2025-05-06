@@ -1,8 +1,7 @@
 @php
     $lettingCurrentStatus = $property->letting_current_status ?? '';
     $salesCurrentStatus = $property->sales_current_status ?? '';
-    $salesStatusDescription = $property->sales_status_description ?? '';
-    $lettingStatusDescription = $property->letting_status_description ?? '';
+
 
     function getBadgeClass($status) {
         return match(strtolower($status)) {
@@ -16,35 +15,14 @@
 
 
 @if(!isset($editMode) || !$editMode)
-<style>
-.propertyStatusDescription {
-  position: relative;
-  line-height: 1.5;            /* make sure you know your line-height */
-  max-height: calc(1.5em * 5);  /* clamp to 5 lines */
-  overflow: hidden;
-  transition: max-height 0.3s ease;
-}
 
-.propertyStatusDescription.expanded {
-  max-height: none;
-}
-
-.view-more {
-  display: block;
-  margin-top: 0.5em;
-  color: #007bff;
-  cursor: pointer;
-  user-select: none;
-}
-
-</style>
     <!-- Display View Mode -->
     {{-- <div class="accordion_inner">
         <div class="mt-md-4 mt-3"> --}}
             <div class="accordion_inner_heading mb-2">Status </div>
 
             <div class="row mb-3">
-                <div class="col">
+                <div class="col-12">
                     <div class="left_item">Sales Status:</div>
                     <div class="right_item">
                         <span class="badge {{ getBadgeClass($salesCurrentStatus) }}">{{ $salesCurrentStatus }}</span>
@@ -54,7 +32,7 @@
             
             @if(isset($property) && ($property->property_type == 'lettings' || $property->property_type == 'both'))
                 <div class="row mb-3">
-                    <div class="col-6">
+                    <div class="col-12">
                         <div class="left_item">Letting Status:</div>
                         <div class="right_item">
                             <span class="badge {{ getBadgeClass($lettingCurrentStatus) }}">{{ $lettingCurrentStatus }}</span>
@@ -65,46 +43,10 @@
             
             
 
-            <div class="row mb-3">
-                <div class="col-12 mb-3">
-                    <div class="left_item">Sales Status Description :</div>
-                    <div class="propertyStatusDescription right_item">{{ $salesStatusDescription }}</div>
-                </div>
-                <div class="col-12 mb-3">
-                    <div class="left_item">Letting Status Description :</div>
-                    <div class="propertyStatusDescription2 right_item">{{ $lettingStatusDescription }}</div>
-                </div>
-            </div>
+
         {{-- </div>
     </div> --}}
-    <script>
-        $(function(){
-          // target all elements with this class [ $ is not a function error from here]
-          $('.propertyStatusDescription').each(function(){
-            var $desc = $(this),
-                lineHeight = parseFloat($desc.css('line-height')),
-                maxHeight = lineHeight * 5;
-        
-            // only proceed if there's overflow beyond 5 lines
-            if ($desc.length && $desc[0].scrollHeight > maxHeight) {
-              // append the view‐more link
-              var $link = $('<span class="view-more">View more</span>');
-              $desc.after($link);
-        
-              // toggle on click
-              $link.on('click', function(){
-                if ($desc.hasClass('expanded')) {
-                  $desc.removeClass('expanded');
-                  $link.text('View more');
-                } else {
-                  $desc.addClass('expanded');
-                  $link.text('View less');
-                }
-              });
-            }
-          });
-        });
-        </script>
+    
     
 @else
     <form id="propertyStatusForm">
@@ -113,7 +55,7 @@
         <input type="hidden" name="form_type" value="property_status">
 
         <div class="row">
-            <div class="col-lg-6 col-12">
+            <div class="col-12">
                 @if(isset($property) && ($property->property_type == 'sales' || $property->property_type == 'both'))
                     <div class="form-group">
                         <label for="sales_current_status">Sales Status</label>
@@ -153,24 +95,7 @@
 
             </div>
         </div>
-        <div class="form-group">
-            <label for="sales_status_description">Description</label>
-            <textarea name="sales_status_description" id="sales_status_description" rows="6"
-                class="form-control">{{ isset($property) && $property->sales_status_description ? $property->sales_status_description : '' }}</textarea>
-                <div class="input_tag">0/5000 words</div>
-            @error('sales_status_description')
-                <div class="text-danger">{{ $message }}</div>
-            @enderror
-        </div>
-        <div class="form-group">
-            <label for="letting_status_description">Description</label>
-            <textarea name="letting_status_description" id="letting_status_description" rows="6"
-                class="form-control">{{ isset($property) && $property->letting_status_description ? $property->letting_status_description : '' }}</textarea>
-                <div class="input_tag">0/5000 words</div>
-            @error('letting_status_description')
-                <div class="text-danger">{{ $message }}</div>
-            @enderror
-        </div>
+        
 
         <button type="submit" class="btn btn_secondary mt-3 float-end">Save Changes</button>
     </form>

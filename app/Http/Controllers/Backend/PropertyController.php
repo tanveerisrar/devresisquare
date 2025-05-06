@@ -190,13 +190,13 @@ private function getTabContent($tabname, $propertyId, $property)
         //     return view('backend.properties.tabs.work_offer', compact('propertyId'))->render();
         case 'notes':
             // Fetch the notes related to the specific property by property ID
-            $notes = Notes::where('property_id', $propertyId)->get();
-                
+            $notes = Notes::where('property_id', $propertyId)->orderBy('updated_at', 'desc')->get();
+            
             // Ensure it's an empty collection if no notes are found
             if ($notes->isEmpty()) {
                 $notes = collect();  // Make sure it's an empty collection, not null
             }
-        
+            
             // Return the view and pass the notes data (null or the notes collection)
             return view('backend.properties.tabs.notes', compact('propertyId', 'property', 'notes'))->render();        
         default:
@@ -752,7 +752,7 @@ private function getTabContent($tabname, $propertyId, $property)
                 break;
             case 'property_info':
                 $data = $request->only([
-                    'property_type', 'transaction_type', 'specific_property_type'
+                    'property_type', 'transaction_type', 'specific_property_type', 'sales_status_description','letting_status_description'
                 ]);
                 break;
             case 'property_accessibility':
@@ -777,13 +777,14 @@ private function getTabContent($tabname, $propertyId, $property)
                 break;
             case 'property_status':
                 $data = $request->only([
-                    'sales_current_status', 'letting_current_status', 'sales_status_description','letting_status_description'
+                    'sales_current_status', 'letting_current_status'
                 ]);
                 break;
             case 'notes':
                 $data = $request->only([
                     'imp_notes'
                 ]);
+                break;
             case 'notes_tab':
                 // $data = $request->only([
                 //     'notes'
@@ -899,7 +900,17 @@ private function getTabContent($tabname, $propertyId, $property)
         return response()->json($response);
         // return response()->json(['success' => true, 'message' => 'Note deleted successfully.']);
     }
-
+    public function showNote($id)
+    {
+        $note = Notes::findOrFail($id);
+    
+        // Optional: restrict to only notes belonging to the current user's property
+        // if needed for security
+    
+        return response()->json([
+            'content' => $note->content,
+        ]);
+    }
 
     // // Method to load the tab content for a specific property and tab
     // public function showTabContent($property_id, $tabname)

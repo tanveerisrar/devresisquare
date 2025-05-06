@@ -14,6 +14,21 @@
 </div>
 
 <!-- Modal -->
+<div class="modal fade" id="extraLargeModal" tabindex="-1" aria-labelledby="extraLargeModal-label" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="extraLargeModal-label">Loading...</h5>
+        <a type="button" class="btn-close" onclick="closeModel();" data-bs-dismiss="modal" aria-label="Close"></a>
+      </div>
+      <div class="modal-body">
+        Loading...
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
 <div class="modal fade" id="largeModalScrollable" tabindex="-1" aria-labelledby="largeModalScrollable-label" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
   <div class="modal-dialog modal-xl modal-dialog-scrollable">
     <div class="modal-content">
@@ -27,6 +42,22 @@
     </div>
   </div>
 </div>
+
+<!-- Full-Screen Modal -->
+<div class="modal fade" id="fullScreenModal" tabindex="-1" aria-labelledby="fullScreenModal-label" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-fullscreen">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="fullScreenModal-label">Full-Screen Modal</h5>
+        <a type="button" class="btn-close" onclick="closeModel();" data-bs-dismiss="modal" aria-label="Close"></a>
+      </div>
+      <div class="modal-body">
+        This is a full-screen modal.
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <div class="modal fade" id="smallModal" tabindex="-1" aria-labelledby="smallModal-label" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
   <div class="modal-dialog modal-md">

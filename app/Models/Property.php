@@ -78,7 +78,7 @@ class Property extends Model
         'floor_plan',
         'view_360',
         'video_url',
-        'notes',
+        'imp_notes',
         // 'designation',
         // 'branch',
         // 'commission_percentage',

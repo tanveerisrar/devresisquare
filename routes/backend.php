@@ -95,6 +95,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/save-form', 'saveForm')->name('saveForm');
 
             Route::post('/note/delete/{id}',  'deleteNote')->name('note.delete');
+            Route::get('/note/show/{id}',  'showNote')->name('note.show');
         });
 
         // Designation
