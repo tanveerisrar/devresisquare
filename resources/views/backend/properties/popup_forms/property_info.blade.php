@@ -26,14 +26,18 @@
         <span class="left_item">Specific Property Type:</span> 
         <span class="right_item capitalize">{{ $specificPropertyType }} </span>
     </div>
+    @if(isset($property) && ($property->property_type == 'sales' || $property->property_type == 'both'))
     <div class="accordion_property_info_item">
         <span class="left_item">Sales Status Description:</span> 
         <span class="right_item capitalize"><x-toggle-description :text="$salesStatusDescription" :limit="120" /></span>
     </div>
+    @endif
+    @if(isset($property) && ($property->property_type == 'lettings' || $property->property_type == 'both'))
     <div class="accordion_property_info_item">
         <span class="left_item">Letting Status Description:</span> 
         <span class="right_item capitalize"><x-toggle-description :text="$lettingStatusDescription" :limit="120" /></span>
     </div>
+    @endif
 </div>
 
 @else
@@ -110,20 +114,20 @@
                     @enderror
                 </div>
             </div>
-            @if(isset($property) && ($property->property_type == 'sales' || $property->property_type == 'both'))
+            {{-- @if(isset($property) && ($property->property_type == 'sales' || $property->property_type == 'both')) --}}
             <div class="form-group sales_description">
                 <label for="sales_status_description">Sales Description</label>
                 <textarea name="sales_status_description" id="sales_status_description" rows="6"
                     class="form-control">{{ isset($property) && $property->sales_status_description ? $property->sales_status_description : '' }}</textarea>
             </div>
-            @endif
-            @if(isset($property) && ($property->property_type == 'lettings' || $property->property_type == 'both'))
+            {{-- @endif --}}
+            {{-- @if(isset($property) && ($property->property_type == 'lettings' || $property->property_type == 'both')) --}}
             <div class="form-group lettings_description">
                 <label for="letting_status_description">Letting Description</label>
                 <textarea name="letting_status_description" id="letting_status_description" rows="6"
                     class="form-control">{{ isset($property) && $property->letting_status_description ? $property->letting_status_description : '' }}</textarea>
             </div>
-            @endif
+            {{-- @endif --}}
             
         </div>
 

@@ -504,29 +504,7 @@ var_dump($propertyId);
         });
     });
 }
-function toggleDescriptions() {
-    let propertyType = $('input[name="property_type"]:checked').val();
-    
-    // Show/hide based on selected type
-    if (propertyType === 'sales') {
-        $('.sales_description').show();
-        $('.lettings_description').hide();
-    } else if (propertyType === 'lettings') {
-        $('.sales_description').hide();
-        $('.lettings_description').show();
-    } else if (propertyType === 'both') {
-        $('.sales_description').show();
-        $('.lettings_description').show();
-    } else {
-        $('.sales_description, .lettings_description').hide();
-    }
-}
 
-
-    toggleDescriptions();
-    $(document).on('change', 'input[name="property_type"]', function() {
-        toggleDescriptions();
-    });
 
 
     // Open modal and load form via AJAX
@@ -557,9 +535,9 @@ function toggleDescriptions() {
         if (formType === "property_status" || formType === "notes" || formType === "property_services") {
             // Use small modal for "notes" or "notes_tab"
             $("#extraLargeModal .modal-dialog").addClass("modal-md");
-        // } else if (formType === "property_details" || formType === "availability_pricing") {
-        //     // Use large modal for "property_details" or "availability_pricing"
-        //     $("#extraLargeModal .modal-dialog").addClass("modal-lg");
+        // } else if (formType === "property_info") {
+            // Use large modal for "property_details" or "availability_pricing"
+            // $("#extraLargeModal .modal-dialog").addClass("modal-lg");
         } else {
             // Default size (medium size) for other forms
             $("#extraLargeModal .modal-dialog").addClass("modal-xl");
@@ -586,6 +564,9 @@ function toggleDescriptions() {
                 }
                 if (formType === "notes_tab") {
                     AIZ.plugins.textEditor();
+                }
+                if (formType === "property_info") {
+                    toggleDescriptions();
                 }
             },
             error: function (error) {
