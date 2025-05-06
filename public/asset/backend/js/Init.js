@@ -224,3 +224,18 @@ $(document).on("click", function (event) {
         $("#imagePreviewModal").modal("hide");
     }
 });
+$(document).on('click', '.toggle-link', function() {
+    const target = $(this).data('target');
+    const shortText = $('#' + target + '_short');
+    const fullText = $('#' + target + '_full');
+
+    if (fullText.hasClass('d-none')) {
+        shortText.addClass('d-none');
+        fullText.removeClass('d-none');
+        $(this).text('Show Less');
+    } else {
+        shortText.removeClass('d-none');
+        fullText.addClass('d-none');
+        $(this).text('Show More');
+    }
+});
