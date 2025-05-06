@@ -239,3 +239,27 @@ $(document).on('click', '.toggle-link', function() {
         $(this).text('Show More');
     }
 });
+
+function toggleDescriptions() {
+    let propertyType = $('input[name="property_type"]:checked').val();
+    
+    // Show/hide based on selected type
+    if (propertyType === 'sales') {
+        $('.sales_description').show();
+        $('.lettings_description').hide();
+    } else if (propertyType === 'lettings') {
+        $('.sales_description').hide();
+        $('.lettings_description').show();
+    } else if (propertyType === 'both') {
+        $('.sales_description').show();
+        $('.lettings_description').show();
+    } else {
+        $('.sales_description, .lettings_description').hide();
+    }
+}
+
+toggleDescriptions();
+
+$(document).on('change', 'input[name="property_type"]', function() {
+    toggleDescriptions();
+});
