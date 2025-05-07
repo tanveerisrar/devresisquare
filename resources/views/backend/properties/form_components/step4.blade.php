@@ -52,23 +52,13 @@
                 @endif
 
                 <div class="form-group">
-                    <label for="sales_status_description">Description</label>
-                    <textarea name="sales_status_description" id="sales_status_description" rows="6"
-                        class="form-control">{{ isset($property) && $property->sales_status_description ? $property->sales_status_description : '' }}</textarea>
-                        <div class="input_tag">0/5000 words</div>
-                    @error('sales_status_description')
-                        <div class="text-danger">{{ $message }}</div>
-                    @enderror
+                    <label for="sales_status_description">Sales Description</label>
+                    <textarea name="sales_status_description" id="sales_status_description" rows="6" class="form-control">{{ isset($property) && $property->sales_status_description ? $property->sales_status_description : '' }}</textarea>
                 </div>
 
                 <div class="form-group">
-                    <label for="letting_status_description">Description</label>
-                    <textarea name="letting_status_description" id="letting_status_description" rows="6"
-                        class="form-control">{{ isset($property) && $property->letting_status_description ? $property->letting_status_description : '' }}</textarea>
-                        <div class="input_tag">0/5000 words</div>
-                    @error('letting_status_description')
-                        <div class="text-danger">{{ $message }}</div>
-                    @enderror
+                    <label for="letting_status_description">Letting Description</label>
+                    <textarea name="letting_status_description" id="letting_status_description" rows="6" class="form-control">{{ isset($property) && $property->letting_status_description ? $property->letting_status_description : '' }}</textarea>
                 </div>
 
                 <div class="form-group">
