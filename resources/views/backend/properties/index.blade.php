@@ -516,7 +516,8 @@ var_dump($propertyId);
             "availability_pricing": "Edit Availability & Pricing",
             "property_info": "Edit Property Information",
             "property_features": "Edit Property Features",
-            "property_details": "Edit Property Details",
+            "property_compliance": "Edit Compliance Details",
+            "property_media": "Edit Media Details",
             "property_accessibility": "Edit Property Accessibility",
             "property_services": "Edit Property Services",
             "property_status": "Edit Property Status",
@@ -552,9 +553,12 @@ var_dump($propertyId);
                 $("#extraLargeModal").modal("show");
 
                 // **Trigger the function ONLY for a specific form**
-                if (formType === "property_details") {
-                    AIZ.uploader.previewGenerate();
+                if (formType === "property_compliance") {
                     $('.select2').select2();
+                    toggleEPCRating();
+                }
+                if (formType === "property_media") {
+                    AIZ.uploader.previewGenerate();
                 }
                 if (formType === "property_accessibility") {
                     initDynamicTagify();

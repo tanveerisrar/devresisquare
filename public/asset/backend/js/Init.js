@@ -263,3 +263,16 @@ toggleDescriptions();
 $(document).on('change', 'input[name="property_type"]', function() {
     toggleDescriptions();
 });
+
+function toggleEPCRating() {
+    if ($('input[name="epc_required"]:checked').val() === '1') {
+        $('#epc_rating_container').show();
+    } else {
+        $('#epc_rating_container').hide();
+    }
+}
+toggleEPCRating();
+$(document).on('change', 'input[name="epc_required"]', function() {
+    toggleEPCRating();
+});
+

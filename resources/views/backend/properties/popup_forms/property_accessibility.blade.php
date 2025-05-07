@@ -85,6 +85,41 @@
             <input type="hidden" name="nearest_school" value="{{ $property->nearest_school }}" class="hidden-input" required>
         </div>
 
+        @php
+        $nearestPlaces = old('nearest_places', isset($property) && $property->nearest_places ? json_decode($property->nearest_places, true) : []);
+        @endphp
+
+        <div class="my-3"> 
+            <label class="form-label">Other Places (Name & Distance in KM)</label> 
+            <div id="nearestPlacesWrapper"> 
+                @forelse ($nearestPlaces as $index => $place) 
+                <div class="row mb-2 nearest-place-group"> <div class="col-md-5"> 
+                    <input type="text" name="nearest_places[{{ $index }}][place]" class="form-control" placeholder="Place Name" value="{{ $place['place'] ?? '' }}" required> </div> 
+                    <div class="col-md-5"> 
+                        <input type="number" step="0.01" name="nearest_places[{{ $index }}][distance]" class="form-control" placeholder="Distance (in KM)" value="{{ $place['distance'] ?? '' }}" required> 
+                    </div> 
+                    <div class="col-md-2"> 
+                        <button type="button" class="btn btn-danger remove-place"><i class="fas fa-minus-circle"></i></button> 
+                    </div> 
+                </div>
+                @empty 
+                <div class="row mb-2 nearest-place-group"> 
+                    <div class="col-md-5"> 
+                        <input type="text" name="nearest_places[0][place]" class="form-control" placeholder="Place Name" required> 
+                    </div> 
+                    <div class="col-md-5"> 
+                        <input type="number" step="0.01" name="nearest_places[0][distance]" class="form-control" placeholder="Distance (in KM)" required> 
+                    </div> 
+                    <div class="col-md-2"> 
+                        <button type="button" class="btn btn-danger remove-place"><i class="fas fa-minus-circle"></i></button> 
+                    </div> 
+                </div> 
+                @endforelse 
+            </div> 
+            <button type="button" id="addMorePlace" class="btn btn-primary mt-2"><i class="fas fa-plus-circle"></i> Add More</button> 
+        </div>
+
+{{-- 
         <div class="form-group">
             <div class="rs_sub_title mb-2">Nearest Religious Places (Distance in KM)</div>
             @php
@@ -124,7 +159,7 @@
                 </div>
             </div>
         </div>
-        
+         --}}
 
         <div class="form-group">
             <label for="useful_information">Useful Information</label>

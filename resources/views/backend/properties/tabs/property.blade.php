@@ -177,10 +177,11 @@ $secondHalf = array_slice($allFeatures, $halfCount);
         $formSections = [
             ['key' => 'availability_pricing', 'title' => 'Availability & Pricing', 'order' => 1],
             ['key' => 'property_accessibility', 'title' => 'Accessibility', 'order' => 6],
-            ['key' => 'property_details', 'title' => 'Details', 'order' => 5],
+            ['key' => 'property_compliance', 'title' => 'Compliance', 'order' => 5],
             ['key' => 'property_features', 'title' => 'Property Features', 'order' => 3],
             ['key' => 'property_info', 'title' => 'Property Information', 'order' => 2],
             ['key' => 'property_services', 'title' => 'Service', 'order' => 4],
+            ['key' => 'property_media', 'title' => 'Media', 'order' => 7],
             // ['key' => 'property_status', 'title' => 'Status', 'order' => 7],
             // Add more sections with order values as needed
         ];

@@ -736,7 +736,6 @@ private function getTabContent($tabname, $propertyId, $property)
     {
         $property = Property::find($request->input('property_id'));
         $formType = $request->input('form_type');
-    
         if (!$property) {
             return response()->json(['error' => 'Property not found'], 404);
         }
@@ -757,13 +756,17 @@ private function getTabContent($tabname, $propertyId, $property)
                 break;
             case 'property_accessibility':
                 $data = $request->only([
-                    'access_arrangement', 'key_highlights', 'nearest_station', 'nearest_school', 'nearest_religious_places', 'useful_information'
+                    'access_arrangement', 'key_highlights', 'nearest_station', 'nearest_school', 'nearest_places', 'useful_information'
                 ]);
                 // $extraData = $this->getFormTypeExtras($formType, $property);
                 break;
-            case 'property_details':
+            case 'property_compliance':
                 $data = $request->only([
-                    'epc_required', 'epc_rating', 'gas_safe_acknowledged', 'is_gas', 'photos', 'floor_plan', 'view_360', 'market_on']);
+                    'epc_required', 'epc_rating', 'gas_safe_acknowledged', 'is_gas', 'market_on']);
+                break;
+            case 'property_media':
+                $data = $request->only([
+                    'photos', 'floor_plan', 'view_360','video_url','instagram_url', 'youtube_url']);
                 break;
             case 'property_features':
                 $data = $request->only([
