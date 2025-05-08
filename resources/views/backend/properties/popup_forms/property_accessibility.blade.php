@@ -76,12 +76,12 @@
 
         <div class="form-group">
             <label for="access_arrangement">Access Arrangement Description</label>
-            <textarea name="access_arrangement" id="access_arrangement" rows="6" placeholder="Write Description" class="form-control">{{ isset($property) && $property->access_arrangement ? $property->access_arrangement : '' }}</textarea>
+            <textarea required name="access_arrangement" id="access_arrangement" rows="6" placeholder="Write Description" class="form-control">{{ isset($property) && $property->access_arrangement ? $property->access_arrangement : '' }}</textarea>
         </div>
 
         <div class="form-group">
             <label for="key_highlights">Key Highlights Description</label>
-            <textarea name="key_highlights" id="key_highlights" rows="6" placeholder="Write Description" class="form-control">{{ isset($property) && $property->key_highlights ? $property->key_highlights : '' }}</textarea>
+            <textarea required name="key_highlights" id="key_highlights" rows="6" placeholder="Write Description" class="form-control">{{ isset($property) && $property->key_highlights ? $property->key_highlights : '' }}</textarea>
         </div>
 
         <!-- Nearest Station -->
