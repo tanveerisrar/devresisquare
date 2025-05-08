@@ -52,7 +52,7 @@
         }
     @endphp
     <div class="rs_sub_title">Nearest Places (Distance in KM):</div>  
-    @if(count($places))
+    @if(!empty($places))
         @foreach($places as $name => $distance)
             <p>
                 <strong>{{ ucfirst($name) }}:</strong>
