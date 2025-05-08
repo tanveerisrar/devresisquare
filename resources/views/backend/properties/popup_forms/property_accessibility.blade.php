@@ -25,7 +25,7 @@
         @endif
     </p>
 
-    <div class="rs_sub_title">Nearest Religious Places (Distance in KM):</div>
+    {{-- <div class="rs_sub_title">Nearest Religious Places (Distance in KM):</div>
     @php
     $religiousPlacesView = $property->nearest_religious_places;
 
@@ -40,7 +40,28 @@
     @endphp
     <p><strong>Masjid:</strong> {{ $religiousPlacesView['masjid'] ?? 'N/A' }} km</p>
     <p><strong>Church:</strong> {{ $religiousPlacesView['church'] ?? 'N/A' }} km</p>
-    <p><strong>Mandir:</strong> {{ $religiousPlacesView['mandir'] ?? 'N/A' }} km</p>
+    <p><strong>Mandir:</strong> {{ $religiousPlacesView['mandir'] ?? 'N/A' }} km</p> --}}
+
+    @php
+        // Decode JSON into an associative array
+        $places = $property->nearest_places;
+        if (is_string($places)) {
+            $places = json_decode($places, true) ?: [];
+        } elseif (is_object($places)) {
+            $places = (array) $places;
+        }
+    @endphp
+    <div class="rs_sub_title">Nearest Places (Distance in KM):</div>  
+    @if(count($places))
+        @foreach($places as $name => $distance)
+            <p>
+                <strong>{{ ucfirst($name) }}:</strong>
+                {{ $distance }} km
+            </p>
+        @endforeach
+    @else
+        <p>No nearby places recorded.</p>
+    @endif
 
 
     <div class="rs_sub_title">Useful Information:</div>
@@ -89,36 +110,194 @@
         $nearestPlaces = old('nearest_places', isset($property) && $property->nearest_places ? json_decode($property->nearest_places, true) : []);
         @endphp
 
-        <div class="my-3"> 
-            <label class="form-label">Other Places (Name & Distance in KM)</label> 
-            <div id="nearestPlacesWrapper"> 
-                @forelse ($nearestPlaces as $index => $place) 
-                <div class="row mb-2 nearest-place-group"> <div class="col-md-5"> 
-                    <input type="text" name="nearest_places[{{ $index }}][place]" class="form-control" placeholder="Place Name" value="{{ $place['place'] ?? '' }}" required> </div> 
-                    <div class="col-md-5"> 
-                        <input type="number" step="0.01" name="nearest_places[{{ $index }}][distance]" class="form-control" placeholder="Distance (in KM)" value="{{ $place['distance'] ?? '' }}" required> 
-                    </div> 
-                    <div class="col-md-2"> 
-                        <button type="button" class="btn btn-danger remove-place"><i class="fas fa-minus-circle"></i></button> 
-                    </div> 
+        {{-- <div class="mb-3">
+        <label class="form-label">Other Religious Places</label>
+        <div id="places-wrapper">
+            @if(count($nearestPlaces) > 0)
+                @foreach($nearestPlaces as $place => $distance)
+                    <div class="input-group mb-2 place-entry">
+                        <input 
+                            type="text" 
+                            name="nearest_places[{{ $loop->index }}][name]" 
+                            class="form-control" 
+                            placeholder="Place name" 
+                            value="{{ $place }}" 
+                            required
+                        >
+                        <input 
+                            type="number" 
+                            name="nearest_places[{{ $loop->index }}][distance]" 
+                            class="form-control" 
+                            placeholder="Distance (KM)" 
+                            value="{{ $distance }}" 
+                            required
+                        >
+                        <button class="btn btn-danger remove-place" type="button">-</button>
+                    </div>
+                @endforeach
+            @else
+                <div class="input-group mb-2 place-entry">
+                    <input 
+                        type="text" 
+                        name="nearest_places[0][name]" 
+                        class="form-control" 
+                        placeholder="Place name" 
+                        required
+                    >
+                    <input 
+                        type="number" 
+                        name="nearest_places[0][distance]" 
+                        class="form-control" 
+                        placeholder="Distance (KM)" 
+                        required
+                    >
+                   <button class="btn btn-danger remove-place" type="button">-</button>
                 </div>
-                @empty 
-                <div class="row mb-2 nearest-place-group"> 
-                    <div class="col-md-5"> 
-                        <input type="text" name="nearest_places[0][place]" class="form-control" placeholder="Place Name" required> 
-                    </div> 
-                    <div class="col-md-5"> 
-                        <input type="number" step="0.01" name="nearest_places[0][distance]" class="form-control" placeholder="Distance (in KM)" required> 
-                    </div> 
-                    <div class="col-md-2"> 
-                        <button type="button" class="btn btn-danger remove-place"><i class="fas fa-minus-circle"></i></button> 
-                    </div> 
-                </div> 
-                @endforelse 
-            </div> 
-            <button type="button" id="addMorePlace" class="btn btn-primary mt-2"><i class="fas fa-plus-circle"></i> Add More</button> 
+            @endif
         </div>
+        <button type="button" id="add-place-btn" class="btn btn-sm btn-success mt-2">Add More</button>
+        </div> --}}
 
+        <div class="my-3 my-md-4">
+            <label class="form-label">Other Places</label>
+          
+            <div class="near-places-target">
+              @if(count($nearestPlaces) > 0)
+                @foreach($nearestPlaces as $place2 => $distance2)
+                  <div class="row g-2 align-items-center place-entry2 mb-2">
+                    <div class="col-sm-5">
+                      <div class="form-floating">
+                        <input
+                          type="text"
+                          name="nearest_places[][name]"
+                          class="form-control"
+                          id="placeName{{ $loop->index }}"
+                          placeholder="Place name"
+                          value="{{ $place2 }}"
+                          required
+                        >
+                        <label for="placeName{{ $loop->index }}">Place name</label>
+                      </div>
+                    </div>
+                    <div class="col-sm-5">
+                      <div class="form-floating">
+                        <input
+                          type="number"
+                          name="nearest_places[][distance]"
+                          class="form-control"
+                          id="placeDist{{ $loop->index }}"
+                          placeholder="Distance (KM)"
+                          value="{{ $distance2 }}"
+                          required
+                        >
+                        <label for="placeDist{{ $loop->index }}">Distance (KM)</label>
+                      </div>
+                    </div>
+                    <div class="col-sm-2 text-end">
+                      <button
+                        class="btn btn-outline-danger remove-place"
+                        data-toggle="remove-parent"
+                        data-parent=".place-entry2"
+                        type="button"
+                      >
+                        <i class="fa fa-minus"></i>
+                      </button>
+                    </div>
+                  </div>
+                @endforeach
+              @else
+                {{-- one blank row --}}
+                <div class="row g-2 align-items-center place-entry2 mb-2">
+                  <div class="col-sm-5">
+                    <div class="form-floating">
+                      <input
+                        type="text"
+                        name="nearest_places[][name]"
+                        class="form-control"
+                        id="placeName0"
+                        placeholder="Place name"
+                        required
+                      >
+                      <label for="placeName0">Place name</label>
+                    </div>
+                  </div>
+                  <div class="col-sm-5">
+                    <div class="form-floating">
+                      <input
+                        type="number"
+                        name="nearest_places[][distance]"
+                        class="form-control"
+                        id="placeDist0"
+                        placeholder="Distance (KM)"
+                        required
+                      >
+                      <label for="placeDist0">Distance (KM)</label>
+                    </div>
+                  </div>
+                  <div class="col-sm-2 text-end">
+                    <button
+                      class="btn btn-outline-danger remove-place"
+                      data-toggle="remove-parent"
+                      data-parent=".place-entry2"
+                      type="button"
+                    >
+                      <i class="fa fa-minus"></i>
+                    </button>
+                  </div>
+                </div>
+              @endif
+            </div>
+          
+            {{-- bottom-right aligned “Add New” --}}
+            <div class="d-flex justify-content-end mt-3">
+              <button
+                type="button"
+                class="btn btn-outline-success btn-sm"
+                data-toggle="add-more"
+                data-target=".near-places-target"
+                data-content='
+                  <div class="row g-2 align-items-center place-entry2 mb-2">
+                    <div class="col-sm-5">
+                      <div class="form-floating">
+                        <input
+                          type="text"
+                          name="nearest_places[][name]"
+                          class="form-control"
+                          placeholder="Place name"
+                          required
+                        >
+                        <label>Place name</label>
+                      </div>
+                    </div>
+                    <div class="col-sm-5">
+                      <div class="form-floating">
+                        <input
+                          type="number"
+                          name="nearest_places[][distance]"
+                          class="form-control"
+                          placeholder="Distance (KM)"
+                          required
+                        >
+                        <label>Distance (KM)</label>
+                      </div>
+                    </div>
+                    <div class="col-sm-2 text-end">
+                      <button
+                        class="btn btn-outline-danger remove-place"
+                        data-toggle="remove-parent"
+                        data-parent=".place-entry2"
+                        type="button"
+                      >
+                        <i class="fa fa-minus"></i>
+                      </button>
+                    </div>
+                  </div>'
+              >
+                <i class="fa fa-plus me-1"></i> Add New
+              </button>
+            </div>
+          </div>
+          
 {{-- 
         <div class="form-group">
             <div class="rs_sub_title mb-2">Nearest Religious Places (Distance in KM)</div>
@@ -161,7 +340,7 @@
         </div>
          --}}
 
-        <div class="form-group">
+        <div class="form-group mt-3">
             <label for="useful_information">Useful Information</label>
             <input type="text" name="useful_information" id="useful_information" class="form-control"
                 value="{{ isset($property) && $property->useful_information ? $property->useful_information : '' }}"

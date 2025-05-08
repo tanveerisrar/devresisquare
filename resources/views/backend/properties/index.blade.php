@@ -562,6 +562,9 @@ var_dump($propertyId);
                 }
                 if (formType === "property_accessibility") {
                     initDynamicTagify();
+                    // initPlaces('#places-wrapper', '#add-place-btn');
+                    AIZ.extra.addMore();
+                    AIZ.extra.removeParent();
                 }
                 if (formType === "availability_pricing") {
                     $('.select2').select2();

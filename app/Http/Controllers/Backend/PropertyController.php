@@ -21,6 +21,7 @@ use App\Models\LocalAuthority;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Models\PropertyResponsibility;
+use Illuminate\Support\Facades\Validator;
 
 class PropertyController
 {
@@ -755,10 +756,61 @@ private function getTabContent($tabname, $propertyId, $property)
                 ]);
                 break;
             case 'property_accessibility':
-                $data = $request->only([
-                    'access_arrangement', 'key_highlights', 'nearest_station', 'nearest_school', 'nearest_places', 'useful_information'
-                ]);
+                // $data = $request->only([
+                //     'access_arrangement', 'key_highlights', 'nearest_station', 'nearest_school', 'nearest_places', 'useful_information'
+                // ]);
                 // $extraData = $this->getFormTypeExtras($formType, $property);
+                        
+                // 1. Pull only the simple fields
+                $data = $request->only([
+                    'access_arrangement',
+                    'key_highlights',
+                    'nearest_station',
+                    'nearest_school',
+                    'useful_information',
+                ]);
+                
+                // 2. Grab the raw, interleaved array
+                $raw = $request->input('nearest_places', []);
+
+                // 3. Merge name+distance pairs into a unified list
+                $merged = [];
+                foreach ($raw as $item) {
+                    // if this entry has a name, start a new pair
+                    if (isset($item['name'])) {
+                        $merged[] = [
+                            'name'     => trim($item['name']),
+                            'distance' => null,
+                        ];
+                    }
+                    // if it has a distance, attach to the last pair
+                    if (isset($item['distance']) && count($merged) > 0) {
+                        $merged[count($merged) - 1]['distance'] = $item['distance'];
+                    }
+                }
+
+                // 4. Filter out any incomplete or blank pairs, then re-index
+                $placesList = array_values(array_filter($merged, function($e) {
+                    return $e['name'] !== '' && $e['distance'] !== null;
+                }));
+
+                // 5. Validate the cleaned list
+                Validator::make(
+                    ['nearest_places' => $placesList],
+                    [
+                        'nearest_places'            => 'required|array|min:1',
+                        'nearest_places.*.name'     => 'required|string',
+                        'nearest_places.*.distance' => 'required|numeric|min:0',
+                    ]
+                )->validate();
+
+                // 6. Build your JSON payload
+                $assocPlaces = [];
+                foreach ($placesList as $entry) {
+                    $assocPlaces[$entry['name']] = $entry['distance'];
+                }
+                $data['nearest_places'] = json_encode($assocPlaces);
+                
                 break;
             case 'property_compliance':
                 $data = $request->only([
@@ -1169,7 +1221,7 @@ private function getTabContent($tabname, $propertyId, $property)
                     'key_highlights' => 'required|string',
                     'nearest_station' => 'required',
                     'nearest_school' => 'required',
-                    'nearest_religious_places' => 'required|array',
+                    // 'nearest_religious_places' => 'required|array',
                     'useful_information' => 'required|string',
                 ];
             case 7:

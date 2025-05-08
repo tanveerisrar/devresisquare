@@ -211,7 +211,7 @@ class AizUploadController
         return $uploads->paginate(60)->appends(request()->query());
     }
 
-    public function destroy($id)
+    /*public function destroy($id)
     {
         $upload = Upload::findOrFail($id);
         $user = current_user();
@@ -235,6 +235,31 @@ class AizUploadController
             flash('File deleted successfully')->success();
         }
         return back();
+    }*/
+
+    public function destroy($id)
+    {
+        $upload = Upload::findOrFail($id);
+        try {
+            if (env('FILESYSTEM_DRIVER') == 's3') {
+                Storage::disk('s3')->delete($upload->file_name);
+                if (file_exists(public_path() . '/' . $upload->file_name)) {
+                    unlink(public_path() . '/' . $upload->file_name);
+                }
+            } else {
+                unlink(public_path() . '/' . $upload->file_name);
+            }
+            $upload->delete();
+            $response = [
+                'message' => 'File deleted successfully'
+            ];
+        } catch (\Exception $e) {
+            $upload->delete();
+            $response = [
+                'message' => 'File deleted successfully'
+            ];
+        }
+        return $response;
     }
 
     public function bulk_uploaded_files_delete(Request $request)

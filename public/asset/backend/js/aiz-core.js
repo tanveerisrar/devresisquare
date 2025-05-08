@@ -95,7 +95,7 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                                     _method: "DELETE",
                                     _token: AIZ.data.csrf,
                                 },
-                                success: function () {
+                                success: function (response) {
                                     AIZ.uploader.data.selectedFiles = AIZ.uploader.data.selectedFiles.filter(
                                         function (item) {
                                             return (
@@ -118,6 +118,11 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                                             "/aiz-uploader/get_uploaded_files"
                                     );
                                     AIZ.uploader.data.clickedForDelete = null;
+                                    // if (response.status) {
+                                    AIZ.plugins.notify('success', response.message);
+                                    // } else {
+                                    // AIZ.plugins.notify('danger', response.message);
+                                    // }
                                     $("#aizUploaderDelete").modal("hide");
                                 },
                             });
@@ -421,24 +426,24 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                             data[i].selected +
                             '">' +
                             '<div class="aiz-file-box">' +
-                            // '<div class="dropdown-file">' +
-                            // '<a class="dropdown-link" data-toggle="dropdown">' +
-                            // '<i class="la la-ellipsis-v"></i>' +
-                            // "</a>" +
-                            // '<div class="dropdown-menu dropdown-menu-right">' +
-                            // '<a href="' +
-                            // AIZ.data.fileBaseUrl +
-                            // data[i].file_name +
-                            // '" target="_blank" download="' +
-                            // data[i].file_original_name +
-                            // "." +
-                            // data[i].extension +
-                            // '" class="dropdown-item"><i class="la la-download mr-2"></i>Download</a>' +
-                            // '<a href="#" class="dropdown-item aiz-uploader-delete" data-id="' +
-                            // data[i].id +
-                            // '"><i class="la la-trash mr-2"></i>Delete</a>' +
-                            // "</div>" +
-                            // "</div>" +
+                            '<div class="dropdown-file">' +
+                            '<a class="dropdown-link" data-toggle="dropdown">' +
+                            '<i class="fa-solid fa-ellipsis-v"></i>' +
+                            "</a>" +
+                            '<div class="dropdown-menu dropdown-menu-right">' +
+                            '<a href="' +
+                            AIZ.data.fileBaseUrl +
+                            data[i].file_name +
+                            '" target="_blank" download="' +
+                            data[i].file_original_name +
+                            "." +
+                            data[i].extension +
+                            '" class="dropdown-item"><i class="fa fa-download mr-2"></i>Download</a>' +
+                            '<a href="#" class="dropdown-item aiz-uploader-delete" data-id="' +
+                            data[i].id +
+                            '"><i class="fa fa-trash mr-2"></i>Delete</a>' +
+                            "</div>" +
+                            "</div>" +
                             '<div class="card card-file aiz-uploader-select" title="' +
                             data[i].file_original_name +
                             "." +

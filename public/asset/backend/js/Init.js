@@ -276,3 +276,69 @@ $(document).on('change', 'input[name="epc_required"]', function() {
     toggleEPCRating();
 });
 
+/**
+ * Initialize “Other Religious Places” add/remove + reindexing.
+ *
+ * @param {string} wrapperSel   Selector for the container (e.g. '#places-wrapper')
+ * @param {string} addBtnSel    Selector for the “Add More” button (e.g. '#add-place-btn')
+ */
+// function initPlaces(wrapperSel, addBtnSel) {
+//     const $wrapper = $(wrapperSel);
+//     const $addBtn   = $(addBtnSel);
+  
+//     // 1️⃣ Row template with a placeholder __IDX__
+//     const rowTpl = `
+//       <div class="input-group mb-2 place-entry">
+//         <input 
+//           type="text" 
+//           name="nearest_places[__IDX__][name]" 
+//           class="form-control" 
+//           placeholder="Place name" 
+//           required
+//         >
+//         <input 
+//           type="number" 
+//           name="nearest_places[__IDX__][distance]" 
+//           class="form-control" 
+//           placeholder="Distance (KM)" 
+//           required
+//         >
+//         <button class="btn btn-danger remove-place" type="button">-</button>
+//       </div>`;
+  
+//     // 2️⃣ Re-index every .place-entry in the wrapper
+//     function reIndex() {
+//       $wrapper.find('.place-entry').each(function(i, el) {
+//         const $el = $(el);
+//         $el.find('input[name$="[name]"]')
+//            .attr('name', `nearest_places[${i}][name]`);
+//         $el.find('input[name$="[distance]"]')
+//            .attr('name', `nearest_places[${i}][distance]`);
+//       });
+//     }
+  
+//     // 3️⃣ Add Row handler
+//     $addBtn.off('click.place').on('click.place', () => {
+//       // append with a dummy index, then reindex
+//       $wrapper.append(rowTpl.replace(/__IDX__/g, $wrapper.children().length));
+//       reIndex();
+//     });
+  
+//     // 4️⃣ Remove Row handler (delegated)
+//     $wrapper.off('click.place', '.remove-place')
+//             .on('click.place', '.remove-place', function() {
+//       $(this).closest('.place-entry').remove();
+//       reIndex();
+//     });
+  
+//     // 5️⃣ Initial reIndex to clean up any server-rendered rows
+//     reIndex();
+//   }
+  
+//   // — call on DOM ready —
+//   $(function(){
+//     initPlaces('#places-wrapper', '#add-place-btn');
+//   });
+
+// //can use in anywhere initPlaces('#places-wrapper', '#add-place-btn');
+  
