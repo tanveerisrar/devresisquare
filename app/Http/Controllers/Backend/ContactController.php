@@ -20,16 +20,88 @@ class ContactController
         // Get all categories (assuming you have a Category model related to contacts)
         $categories = ContactCategory::all();
 
-        // If a category filter is present, apply it to the contacts query
         $contacts = Contact::with('category')
             ->when($request->filled('category'), function ($query) use ($request) {
                 return $query->where('category_id', $request->category);
-            })
-            ->get();
+            })->orderBy('id', 'desc')->get();
+    
+        // Redirect to 'quick' if there are no contacts
+        if ($contacts->isEmpty()) {
+            flash("You don't have any contacts yet!")->error();
+            return redirect()->route('admin.contacts.quick');
+        }
 
-        return view('backend.contacts.index', compact('contacts', 'categories'));
+        // Get contact_id and tabname from query parameters
+        $contactId = $request->query('contact_id');
+        $tabName = $request->query('tabname', 'contact'); // Default to 'contact' if no tab is specified
+
+        // Check if the contact_id is provided, otherwise, select the first contact or handle it gracefully
+        // $contact = $contactId ? contact::findOrFail($contactId) : $properties->first(); // Use the first contact if none is selected
+        $contact = $contactId ? Contact::find($contactId) : null; // Use null if no contact is selected
+
+        if (!$contact) {
+            // Get the first contact that is NOT soft-deleted
+            $firstContact = Contact::orderBy('id', 'desc')->first();
+
+            if (!$firstContact) {
+                flash("You don't have any properties yet!")->error();
+                return redirect()->route('admin.properties.quick');
+            }
+
+            $contactId = $firstContact->id;
+            $contact = $firstContact;
+
+            // flash("The selected property does not exist or has been deleted. Showing another one instead.")->error();
+
+        }
+        
+        // Get tabs for properties (you can customize the tabs as per your needs)
+        $tabs = [
+            ['name' => 'Contact Details'],
+            ['name' => 'Bank Details'],
+            ['name' => 'Appointments'],
+            ['name' => 'Compliance'],
+            ['name' => 'Documents'],
+            ['name' => 'Notes']
+        ];
+        // Format the tab name
+        $formattedTabName = strtolower(str_replace(' ', '_', $tabName));
+        // Retrieve the content for the selected tab and property
+        $content = $this->getTabContent($formattedTabName, $contactId, $contact); // Dynamically get content for the tab and property
+
+        // Check if the request is via AJAX (this handles dynamic content loading)
+        if ($request->ajax()) {
+            // If the request is via AJAX, return only the content
+            return response()->json(['content' => $content]);
+        }
+        
+        return view('backend.contacts.index', compact('contacts', 'categories','tabs', 'tabName', 'contactId', 'contact', 'content'));
     }
-
+    private function getTabContent($tabname, $contactId, $contact)
+    {
+        switch (strtolower($tabname)) {
+            case 'contact_details':
+                return view('backend.contacts.tabs.contact_details', compact('contactId', 'contact'));
+            
+            case 'bank_details':
+                return view('backend.contacts.tabs.bank_details', compact('contactId', 'contact'));
+            
+            case 'appointments':
+                return view('backend.contacts.tabs.appointments', compact('contactId', 'contact'));
+            
+            case 'compliance':
+                return view('backend.contacts.tabs.compliance', compact('contactId', 'contact'));
+    
+            case 'documents':
+                return view('backend.contacts.tabs.documents', compact('contactId', 'contact'));
+    
+            case 'notes':
+                return view('backend.contacts.tabs.notes', compact('contactId', 'contact'));
+    
+            default:
+                return 'Tab content not found';
+        }
+    }
 
     /**
      * Show the form for creating a new resource.
