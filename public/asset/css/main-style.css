@@ -73,6 +73,8 @@
     --media-thumb-sm-width: 140px;
     --media-thumb-sm-height: 140px;
 
+    --max-container-width: 1920px;
+
 }
 
 /* color classes */
@@ -147,7 +149,7 @@
     .secondary-bg-dark{ background-color: var(--secondary-bg-dark);}
     .secondary-bg-light{ background-color: var(--secondary-bg-light); }
 
-
+    .bg_white{ background-color: var(--white); }
 
 
 
@@ -634,3 +636,195 @@ scrollbar
   ::-webkit-scrollbar-thumb:hover {
     background: var(--primary-color-dark);
   }
+  
+/* =======================================================================
+Frontend
+===========================================================================*/
+.frontend_body{
+    background-color: var(--primary-100);
+}
+.frontend_top_header{
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 16px;
+    .navbar-nav{
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        flex-direction: row;
+    }
+}
+.hero_section{
+    max-width: var(--max-container-width);
+    margin: 0 auto;
+    .main_hero_section{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 16px;
+        margin: 0 auto;
+        .hero_title{
+            font-size: 6em;
+            line-height: 115px;
+            font-weight: 600;
+            color: var(--primary);
+            span{
+                color: var(--secondary);
+            }
+        }
+        .hero_btns{
+            display: flex;
+            gap: 16px;
+        }
+    }
+    .hero_cards{
+        display: flex;
+        justify-content: center;
+        align-items: center;   
+        gap: 64px;
+        margin: 72px 0;
+        .hero_card_item{
+            max-width: 450px;
+            padding: 24px;
+            background-color: var(--primary-900);
+            color: var(--white);
+            border-radius: 12px;
+            p{
+                margin: 0;
+            }
+            .card_title{
+                font-size: 20px;
+                font-weight: 500;
+                margin-bottom: 16px;
+            }
+        }
+    }
+    .features_list{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 32px;
+        margin-bottom: 72px;
+        .feature_item{
+            max-width: 350px;
+            padding: 24px;
+            border-radius: 12px;
+            p{
+                margin: 0;
+            }
+            .card_title{
+                font-size: 20px;
+                font-weight: 500;
+                margin-bottom: 16px;
+            }
+        }   
+    }
+}
+.features_section{
+    .features_item{
+        padding: 120px 0;
+        .feature_card{
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;   
+        }
+    }
+}
+.book_demo_section{
+    padding: 60px 0;
+    .book_demo_card{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 16px;
+        .card_title{
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+    }
+    .container {
+        display: flex;
+        align-items: center;
+        .book_demo_btn{
+            min-width: 120px;
+        }
+    }
+}
+.footer_section{
+    background-color: var(--white);
+    border-top:1px solid var(--primary-300);
+    .frontend_footer{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 16px;
+        p{
+            margin: 0;
+        }
+        ul{
+            margin: 0;
+            display: flex;
+            li{
+                margin: 0;
+                img{
+                    width: 40px;
+                }
+            }
+        }
+    }
+}
+/* =======================================================================
+Features carrousel slider
+===========================================================================*/
+.carousel {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+}
+
+.carousel-inner {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+    overflow: hidden;
+}
+
+.carousel-item {
+    flex: 0 0 25%; /* Each item takes 25% of the width (4 items per row) */
+    display: block; /* Ensure all items are visible within the container */
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    z-index: 1000;
+}
+
+.carousel-control-prev {
+    left: 10px;
+}
+
+.carousel-control-next {
+    right: 10px;
+}
+
+
+/* =======================================================================
+Responsive
+===========================================================================*/
+/* Mobile */
+@media (max-width:766px) {
+    .hero_section{
+        .main_hero_section{
+            display: block;
+        }
+    }
+}

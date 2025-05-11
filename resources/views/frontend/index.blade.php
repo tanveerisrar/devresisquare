@@ -1,7 +1,169 @@
-@extends('frontend.layout.app')
+@extends('frontend.layout.home')
+
+@php
+    $hero_card = [
+        [
+            'title' => 'Property Management',
+            'details' => "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.",
+        ],
+        [
+            'title' => 'Manage Tenancies',
+            'details' => "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.",
+        ],
+        [
+            'title' => 'Manage Contacts',
+            'details' => "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.",
+        ],
+
+    ];
+    $features_list = [
+        [
+            'title' => 'Manage properties',
+            'details' => "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.",
+        ],
+        [
+            'title' => 'Manage Tenancies',
+            'details' => "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.",
+        ],
+        [
+            'title' => 'Manage Contacts',
+            'details' => "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.",
+        ],
+        [
+            'title' => 'Manage Bookings',
+            'details' => "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.",
+        ],
+    ];
+@endphp
 
 @section('content')
-<h1>Welcome to CRM Properties </h1>
-<a href="login"> Login</a>
-<a href="admin/dashboard"> Admin Dashboard</a>
+<section class="hero_section px-4">
+        <div class="main_hero_section">
+            <div class="">
+                <div class="hero_title">Property Management <br>
+                    <span>Web Framework</span>
+                </div>
+                <p>Use the timeline view to map out the big picture, communicate updates to stakeholders, and ensure your team stays on the same page.</p>
+                <div class="hero_btns">
+                    <button class="btn btn_primary">Get Started</button>
+                    <button class="btn btn_secondary">Book a Demo</button>
+                </div>
+            </div>
+            <div class="">
+                <img src="{{ asset('storage/uploads/all/hero_img.webp') }}" alt="Hero" class="">
+            </div>
+        </div>
+        
+        <div class="hero_cards">
+            @foreach ($hero_card as $card)
+                <div class="hero_card_item"> 
+                    <div class="card_title">{{ $card['title'] }}</div>
+                    <p>{{ $card['details'] }}</p>
+                </div>
+            @endforeach
+        </div>
+
+        <div class="text-center my-5">
+                <h2>Enable features as you grow</h2>
+        </div>
+        <div class="features_list">
+            {{-- @foreach ($features_list as $feature)
+                <div class="feature_item">
+                    <div class="feature_title">{{ $feature['title'] }}</div>
+                    <p>{{ $feature['details'] }}</p>
+                </div>
+            @endforeach --}}
+        <div class="carousel">
+            <div class="carousel-inner">
+                <div class="carousel-item feature_item active">
+                        <div class="card_title">Property Management</div>
+                        <p>1 Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
+                </div>
+                <div class="carousel-item feature_item">
+                        <div class="card_title">Manage Tenancies</div>
+                        <p>2 Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
+                </div>
+                <div class="carousel-item feature_item">
+                        <div class="card_title">Manage Contacts</div>
+                        <p>3 Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
+                </div>
+                <div class="carousel-item feature_item">
+                        <div class="card_title">Manage Contacts</div>
+                        <p>4 Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
+                </div>
+                <div class="carousel-item feature_item">
+                        <div class="card_title">Manage Contacts</div>
+                        <p>5 Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
+                </div>
+                <div class="carousel-item feature_item">
+                        <div class="card_title">Manage Contacts</div>
+                        <p>6 Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
+                </div>
+            </div>
+            <button class="carousel-control-prev">Prev</button>
+            <button class="carousel-control-next">Next</button>
+        </div>
+    </div>
+</section>
+<section class="features_section">
+    <div class="features_item bg_white">
+        <div class="container">
+            <div class="row">
+                <div class="col-6">
+                    <img src="{{ asset('storage/uploads/all/hero_img.webp') }}" alt="Feature" class="img-fluid">
+                </div>
+                <div class="col-6">
+                    <div class="feature_card ">
+                        <h3>Customize how your team’s work flows</h3>
+                        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="features_item">
+        <div class="container">
+            <div class="row">
+                <div class="col-6">
+                    <div class="feature_card">
+                        <h3>Customize how your team’s work flows</h3>
+                        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.</p>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <img src="{{ asset('storage/uploads/all/hero_img.webp') }}" alt="Feature" class="img-fluid">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="features_item bg_white">
+        <div class="container">
+            <div class="row">
+                <div class="col-6">
+                    <img src="{{ asset('storage/uploads/all/hero_img.webp') }}" alt="Feature" class="img-fluid">
+                </div>
+                <div class="col-6">
+                    <div class="feature_card">
+                        <h3>Customize how your team’s work flows</h3>
+                        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="book_demo_section">
+    <div class="container">
+            <div class="">
+                <h2>Book a demo now</h2>
+                <p>Use the timeline view to map out the big picture, communicate updates to stakeholders, and ensure your team stays on the same page.</p>
+            </div>
+            <div class="book_demo_btn">
+                <button class="btn btn_secondary btn-lg">Book Now</button>
+             </div>
+            <div class="">
+                <img src="{{ asset('storage/uploads/all/hero_img.webp') }}" alt="Book a demo" class="img-fluid">
+            </div>
+    </div>
+</section>
 @endsection
