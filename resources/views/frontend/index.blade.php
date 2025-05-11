@@ -33,6 +33,22 @@
             'title' => 'Manage Bookings',
             'details' => "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.",
         ],
+        [
+            'title' => 'Manage Bookings',
+            'details' => "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.",
+        ],
+        [
+            'title' => 'Manage Bookings',
+            'details' => "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.",
+        ],
+        [
+            'title' => 'Manage Bookings',
+            'details' => "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.",
+        ],
+        [
+            'title' => 'Manage Bookings',
+            'details' => "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.",
+        ],
     ];
 @endphp
 
@@ -67,43 +83,30 @@
                 <h2>Enable features as you grow</h2>
         </div>
         <div class="features_list">
-            {{-- @foreach ($features_list as $feature)
-                <div class="feature_item">
-                    <div class="feature_title">{{ $feature['title'] }}</div>
-                    <p>{{ $feature['details'] }}</p>
+            <div class="carousel">
+                <div class="carousel-inner">
+                    @php $chunks = array_chunk($features_list, 4); @endphp
+                    @foreach($chunks as $index => $chunk)
+                        <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
+                            <div class="carousel-grid">
+                                @foreach($chunk as $feature)
+                                    <div class="feature_item">
+                                        <div class="card_title">{{ $feature['title'] }}</div>
+                                        <p>{{ $feature['details'] }}</p>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
-            @endforeach --}}
-        <div class="carousel">
-            <div class="carousel-inner">
-                <div class="carousel-item feature_item active">
-                        <div class="card_title">Property Management</div>
-                        <p>1 Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
-                </div>
-                <div class="carousel-item feature_item">
-                        <div class="card_title">Manage Tenancies</div>
-                        <p>2 Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
-                </div>
-                <div class="carousel-item feature_item">
-                        <div class="card_title">Manage Contacts</div>
-                        <p>3 Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
-                </div>
-                <div class="carousel-item feature_item">
-                        <div class="card_title">Manage Contacts</div>
-                        <p>4 Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
-                </div>
-                <div class="carousel-item feature_item">
-                        <div class="card_title">Manage Contacts</div>
-                        <p>5 Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
-                </div>
-                <div class="carousel-item feature_item">
-                        <div class="card_title">Manage Contacts</div>
-                        <p>6 Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
-                </div>
+                <button class="carousel-control-prev">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="carousel-control-next">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
             </div>
-            <button class="carousel-control-prev">Prev</button>
-            <button class="carousel-control-next">Next</button>
         </div>
-    </div>
 </section>
 <section class="features_section">
     <div class="features_item bg_white">

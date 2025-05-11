@@ -16,11 +16,8 @@
     <link href="{{ asset('asset/backend/css/style.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-    <!-- Tagify CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet">
-
-
-
+    <!-- Tagify CSS -->    <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet">
+    <link href="{{ asset('asset/css/carousel.css') }}" rel="stylesheet">
 
     {{-- <link href="{{ asset('asset/backend/css/aiz-core.css') }}" rel="stylesheet"> --}}
     {{-- <link href="{{ asset('asset/backend/css/media.css') }}" rel="stylesheet"> --}}
@@ -31,11 +28,10 @@
     <x-frontend.header/>
     <div class="mt-4">
         @yield('content')
-    </div>
-    <x-frontend.footer/>
-    <script src="asset/js/jquery.min.js"></script>
-    <script src="asset/js/bootstrap.bundle.min.js"></script>
-    <script src="asset/js/carousel.js"></script>
+    </div>    <x-frontend.footer/>
+    <script src="{{ asset('asset/js/jquery.min.js') }}"></script>
+    <script src="{{ asset('asset/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('asset/js/carousel.js') }}"></script>
     @yield('page.scripts') 
 
 

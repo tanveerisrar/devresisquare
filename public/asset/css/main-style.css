@@ -778,43 +778,7 @@ Frontend
 /* =======================================================================
 Features carrousel slider
 ===========================================================================*/
-.carousel {
-    position: relative;
-    width: 100%;
-    overflow: hidden;
-}
 
-.carousel-inner {
-    display: flex;
-    transition: transform 0.5s ease-in-out;
-    overflow: hidden;
-}
-
-.carousel-item {
-    flex: 0 0 25%; /* Each item takes 25% of the width (4 items per row) */
-    display: block; /* Ensure all items are visible within the container */
-}
-
-.carousel-control-prev,
-.carousel-control-next {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background-color: rgba(0, 0, 0, 0.5);
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    z-index: 1000;
-}
-
-.carousel-control-prev {
-    left: 10px;
-}
-
-.carousel-control-next {
-    right: 10px;
-}
 
 
 /* =======================================================================
