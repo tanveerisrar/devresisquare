@@ -100,10 +100,10 @@
     <div class="features_item bg_white">
         <div class="container">
             <div class="row">
-                <div class="col-6">
+                <div class="col-md-6 col-12 mb-md-0 mb-3">
                     <img src="{{ asset('storage/uploads/all/hero_img.webp') }}" alt="Feature" class="img-fluid">
                 </div>
-                <div class="col-6">
+                <div class="col-md-6 col-12 mb-md-0 mb-3">
                     <div class="feature_card ">
                         <h3>Customize how your team’s work flows</h3>
                         <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.</p>
@@ -115,13 +115,13 @@
     <div class="features_item">
         <div class="container">
             <div class="row">
-                <div class="col-6">
+                <div class="col-md-6 col-12 mb-md-0 mb-3">
                     <div class="feature_card">
                         <h3>Customize how your team’s work flows</h3>
                         <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.</p>
                     </div>
                 </div>
-                <div class="col-6">
+                <div class="col-md-6 col-12 mb-md-0 mb-3">
                     <img src="{{ asset('storage/uploads/all/hero_img.webp') }}" alt="Feature" class="img-fluid">
                 </div>
             </div>
@@ -130,10 +130,10 @@
     <div class="features_item bg_white">
         <div class="container">
             <div class="row">
-                <div class="col-6">
+                <div class="col-md-6 col-12 mb-md-0 mb-3">
                     <img src="{{ asset('storage/uploads/all/hero_img.webp') }}" alt="Feature" class="img-fluid">
                 </div>
-                <div class="col-6">
+                <div class="col-md-6 col-12 mb-md-0 mb-3">
                     <div class="feature_card">
                         <h3>Customize how your team’s work flows</h3>
                         <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.</p>

@@ -167,6 +167,7 @@
 
 body{
     font-family: 'Poppins', Arial, Helvetica, sans-serif;
+    /* width: 100% !important; */
 }
 
 
@@ -672,7 +673,7 @@ Frontend
         padding: 50px 16px;
         margin: 0 auto;
         .hero_title{
-            font-size: 6em;
+            font-size: 6rem;
             line-height: 115px;
             font-weight: 600;
             color: var(--primary);
@@ -852,6 +853,50 @@ Responsive
     .hero_section{
         .main_hero_section{
             display: block;
+            padding: 0;
+            .hero_title{
+            font-size: 3rem;
+            line-height: 58px;
+            }
+            .hero_description{
+                padding-right: 0;
+                margin-bottom: 20px;
+            }
+            .hero_btns{
+                margin-bottom: 32px;
+            }
+        }
+        .hero_cards{  
+            flex-direction: column;
+            gap: 32px;
+        }
+        .features_list{
+            padding-top: 0;
+            .feature_item{
+                width: 100%;
+            }
+        }
+    }
+    .features_section{
+        .features_item{
+            padding: 38px 0;
+
+        }
+    }
+    .book_demo_section {
+        padding-top: 32px;
+        .container{
+            flex-direction: column;
+            align-items: start;
+        }
+        .book_demo_img {
+            width: 100%;
+            margin-top: 0;
+            img{
+                width: 591px;
+                margin-top: 65px;
+                margin-left: -83px;
+            }
         }
     }
 }

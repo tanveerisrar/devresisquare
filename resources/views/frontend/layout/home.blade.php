@@ -17,15 +17,6 @@
     <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/kenwheeler/slick@1.8.0/slick/slick.css"  />
     <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/kenwheeler/slick@1.8.0/slick/slick-theme.css"  />
 
-    <!-- Tagify CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet">
-
-
-
-
-    {{-- <link href="{{ asset('asset/backend/css/aiz-core.css') }}" rel="stylesheet"> --}}
-    {{-- <link href="{{ asset('asset/backend/css/media.css') }}" rel="stylesheet"> --}}
-    {{-- <link href="{{ asset('asset/backend/css/vendors.css') }}" rel="stylesheet"> --}}
 </head>
 <body class="frontend_body">
 
