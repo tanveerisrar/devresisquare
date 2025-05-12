@@ -59,14 +59,14 @@
                 <div class="hero_title">Property Management <br>
                     <span>Web Framework</span>
                 </div>
-                <p>Use the timeline view to map out the big picture, communicate updates to stakeholders, and ensure your team stays on the same page.</p>
+                <p class="hero_description">Use the timeline view to map out the big picture, communicate updates to stakeholders, and ensure your team stays on the same page.</p>
                 <div class="hero_btns">
                     <button class="btn btn_primary">Get Started</button>
                     <button class="btn btn_secondary">Book a Demo</button>
                 </div>
             </div>
             <div class="">
-                <img src="{{ asset('storage/uploads/all/hero_img.webp') }}" alt="Hero" class="">
+                <img src="{{ asset('storage/uploads/all/hero_img.webp') }}" alt="Hero" class="img-fluid">
             </div>
         </div>
         
@@ -79,10 +79,11 @@
             @endforeach
         </div>
 
-        <div class="text-center my-5">
+        
+        <div class="features_list">
+            <div class="text-center my-3">
                 <h2>Enable features as you grow</h2>
         </div>
-        {{-- <div class="features_list"> --}}
             <div class="carousel_wrapper">
                 <div class="carousel">
                     @foreach ($features_list as $feature)
@@ -93,7 +94,7 @@
                     @endforeach
                 </div>
             </div>
-        {{-- </div> --}}
+        </div>
 </section>
 <section class="features_section">
     <div class="features_item bg_white">
@@ -151,8 +152,8 @@
             <div class="book_demo_btn">
                 <button class="btn btn_secondary btn-lg">Book Now</button>
              </div>
-            <div class="">
-                <img src="{{ asset('storage/uploads/all/hero_img.webp') }}" alt="Book a demo" class="img-fluid">
+            <div class="book_demo_img">
+                <img src="{{ asset('storage/uploads/all/hero_img.webp') }}" alt="Book a demo" class="">
             </div>
     </div>
 </section>
