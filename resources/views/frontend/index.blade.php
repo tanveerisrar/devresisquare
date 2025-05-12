@@ -82,31 +82,18 @@
         <div class="text-center my-5">
                 <h2>Enable features as you grow</h2>
         </div>
-        <div class="features_list">
-            <div class="carousel">
-                <div class="carousel-inner">
-                    @php $chunks = array_chunk($features_list, 4); @endphp
-                    @foreach($chunks as $index => $chunk)
-                        <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
-                            <div class="carousel-grid">
-                                @foreach($chunk as $feature)
-                                    <div class="feature_item">
-                                        <div class="card_title">{{ $feature['title'] }}</div>
-                                        <p>{{ $feature['details'] }}</p>
-                                    </div>
-                                @endforeach
-                            </div>
+        {{-- <div class="features_list"> --}}
+            <div class="carousel_wrapper">
+                <div class="carousel">
+                    @foreach ($features_list as $feature)
+                        <div class="carousel-item feature_item {{ $loop->first ? 'active' : '' }}">
+                            <div class="card_title">{{ $feature['title'] }}</div>
+                            <p>{{ $feature['details'] }}</p>
                         </div>
                     @endforeach
                 </div>
-                <button class="carousel-control-prev">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                <button class="carousel-control-next">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
             </div>
-        </div>
+        {{-- </div> --}}
 </section>
 <section class="features_section">
     <div class="features_item bg_white">
