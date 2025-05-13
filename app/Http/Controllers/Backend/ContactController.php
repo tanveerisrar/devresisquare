@@ -57,7 +57,7 @@ class ContactController
         
         // Get tabs for properties (you can customize the tabs as per your needs)
         $tabs = [
-            ['name' => 'Contact Details'],
+            ['name' => 'Contact'],
             ['name' => 'Bank Details'],
             ['name' => 'Appointments'],
             ['name' => 'Compliance'],
@@ -65,25 +65,31 @@ class ContactController
             ['name' => 'Notes']
         ];
         // Format the tab name
-        $formattedTabName = strtolower(str_replace(' ', '_', $tabName));
+        // $formattedTabName = strtolower(str_replace(' ', '_', $tabName));
+        // $formattedTabName = strtolower(str_replace(' ', '', $tabName));
+        // var_dump($formattedTabName);
         // Retrieve the content for the selected tab and property
-        $content = $this->getTabContent($formattedTabName, $contactId, $contact); // Dynamically get content for the tab and property
+        $content = $this->getTabContent($tabName, $contactId, $contact); // Dynamically get content for the tab and property
+        // var_dump($content);
+        // var_dump($tabName);
+        // exit();
 
         // Check if the request is via AJAX (this handles dynamic content loading)
         if ($request->ajax()) {
             // If the request is via AJAX, return only the content
-            return response()->json(['content' => $content]);
+            return response()->json(['content' => $content, 'tabName' => $tabName]);
         }
-        
+        // var_dump($content);
+        // exit();
         return view('backend.contacts.index', compact('contacts', 'categories','tabs', 'tabName', 'contactId', 'contact', 'content'));
     }
     private function getTabContent($tabname, $contactId, $contact)
     {
         switch (strtolower($tabname)) {
-            case 'contact_details':
+            case 'contact':
                 return view('backend.contacts.tabs.contact_details', compact('contactId', 'contact'));
             
-            case 'bank_details':
+            case 'bankdetails':
                 return view('backend.contacts.tabs.bank_details', compact('contactId', 'contact'));
             
             case 'appointments':

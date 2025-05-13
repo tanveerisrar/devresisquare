@@ -469,14 +469,14 @@ var_dump($contactId);
             $('.pv_main_title').text(formattedTitle + ' Detail');
 
             // Show or hide the button based on the tabName
-            if (tabName === 'owners') {
+            if (tabName === 'details') {
                 // $('.tab-owners-btn').removeClass('d-none'); // Show the button for 'owner' tab
                 $('.tab-owners-group-btn').removeClass('d-none'); // Show the button for 'owner' tab
             } else {
                 // $('.tab-owners-btn').addClass('d-none'); // Hide the button for other tabs
                 $('.tab-owners-group-btn').addClass('d-none'); // Hide the button for other tabs
             }
-            if (tabName === 'offers') {
+            if (tabName === 'bank') {
                 $('.tab-offers-btn').removeClass('d-none'); // Show the button for 'owner' tab
             } else {
                 $('.tab-offers-btn').addClass('d-none'); // Hide the button for other tabs
@@ -528,10 +528,10 @@ var_dump($contactId);
 
             if (tabName && contactId) {
                 // Convert underscores back to spaces
-                var displayTabName = tabName.replace(/_/g, ' ');
+                // var displayTabName = tabName.replace(/_/g, ' ');
 
                 // Find the tab and contact card with the matching data attributes
-                var selectedTab = $('.tab-link[data-tab-name="' + displayTabName + '"]');
+                var selectedTab = $('.tab-link[data-tab-name="' + tabName + '"]');
                 var selectedContactCard = $('.contact-card[data-contact-id="' + contactId + '"]');
 
                 // Mark the selected tab and contact card as active/current
@@ -541,7 +541,7 @@ var_dump($contactId);
                 selectedContactCard.addClass('current');
 
                 // Load the content dynamically
-                loadTabContent(contactId, displayTabName);
+                loadTabContent(contactId, tabName);
             }
         }
 
@@ -572,9 +572,9 @@ var_dump($contactId);
         // Function to load tab content dynamically via AJAX
         function loadTabContent(contactId, tabName) {
             // Replace spaces with underscores for the URL
-            var formattedTabName = tabName.replace(/\s+/g, '_');
+            // var formattedTabName = tabName.replace(/\s+/g, '_');
             // Correctly format the URL with query parameters instead of placeholders
-            var url = '{{ route('admin.contacts.index') }}' + '?contact_id=' + contactId + '&tabname=' + formattedTabName;
+            var url = '{{ route('admin.contacts.index') }}' + '?contact_id=' + contactId + '&tabname=' + tabName;
 
             $.ajax({
                 url: url,
