@@ -59,6 +59,8 @@ class Contact extends Model
         return $this->hasMany(TenantMember::class, 'contact_id');
     }
 
+    public function creator() { return $this->belongsTo(User::class,'added_by');
+    }
     // protected $casts = [
     //     'selected_properties' => 'array', // Automatically casts JSON to an array
     // ];

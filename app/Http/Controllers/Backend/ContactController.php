@@ -17,92 +17,85 @@ class ContactController
      */
     public function index(Request $request)
     {
-        // Get all categories (assuming you have a Category model related to contacts)
+        // Fetch categories for your filter dropdown
         $categories = ContactCategory::all();
 
-        $contacts = Contact::with('category')
-            ->when($request->filled('category'), function ($query) use ($request) {
-                return $query->where('category_id', $request->category);
-            })->orderBy('id', 'desc')->get();
-    
-        // Redirect to 'quick' if there are no contacts
+        // Build base contacts query, eager‑loading all relationships
+        $contactsQuery = Contact::with([
+            'category',
+            'details',
+            'tenancies',
+            'repairIssues',
+            'tenantMembers',
+        ]);
+
+        // Apply a category filter if provided
+        if ($request->filled('category')) {
+            $contactsQuery->where('category_id', $request->category);
+        }
+
+        // Fetch all contacts (newest first)
+        $contacts = $contactsQuery->orderBy('id', 'desc')->get();
+
+        // If no contacts at all, redirect to quick-create
         if ($contacts->isEmpty()) {
             flash("You don't have any contacts yet!")->error();
             return redirect()->route('admin.contacts.quick');
         }
 
-        // Get contact_id and tabname from query parameters
+        // Decide which contact/tab to show
         $contactId = $request->query('contact_id');
-        $tabName = $request->query('tabname', 'contact'); // Default to 'contact' if no tab is specified
+        $tabName   = $request->query('tabname', 'contact');
 
-        // Check if the contact_id is provided, otherwise, select the first contact or handle it gracefully
-        // $contact = $contactId ? contact::findOrFail($contactId) : $properties->first(); // Use the first contact if none is selected
-        $contact = $contactId ? Contact::find($contactId) : null; // Use null if no contact is selected
+        // Try to find the requested contact or fall back to the most recent
+        $contact = $contactId
+            ? $contacts->firstWhere('id', $contactId)
+            : null;
 
-        if (!$contact) {
-            // Get the first contact that is NOT soft-deleted
-            $firstContact = Contact::orderBy('id', 'desc')->first();
-
-            if (!$firstContact) {
-                flash("You don't have any properties yet!")->error();
-                return redirect()->route('admin.properties.quick');
-            }
-
-            $contactId = $firstContact->id;
-            $contact = $firstContact;
-
-            // flash("The selected property does not exist or has been deleted. Showing another one instead.")->error();
-
+        if (! $contact) {
+            $contact = $contacts->first();
+            $contactId = $contact->id;
         }
-        
-        // Get tabs for properties (you can customize the tabs as per your needs)
+
+        // Define your tab list
         $tabs = [
             ['name' => 'Contact'],
-            ['name' => 'Bank Details'],
+            ['name' => 'Bank'],
             ['name' => 'Appointments'],
             ['name' => 'Compliance'],
             ['name' => 'Documents'],
-            ['name' => 'Notes']
+            ['name' => 'Notes'],
         ];
-        // Format the tab name
-        // $formattedTabName = strtolower(str_replace(' ', '_', $tabName));
-        // $formattedTabName = strtolower(str_replace(' ', '', $tabName));
-        // var_dump($formattedTabName);
-        // Retrieve the content for the selected tab and property
+
         $content = $this->getTabContent($tabName, $contactId, $contact); // Dynamically get content for the tab and property
-        // var_dump($content);
-        // var_dump($tabName);
-        // exit();
 
         // Check if the request is via AJAX (this handles dynamic content loading)
         if ($request->ajax()) {
-            // If the request is via AJAX, return only the content
             return response()->json(['content' => $content, 'tabName' => $tabName]);
         }
-        // var_dump($content);
-        // exit();
+
         return view('backend.contacts.index', compact('contacts', 'categories','tabs', 'tabName', 'contactId', 'contact', 'content'));
     }
     private function getTabContent($tabname, $contactId, $contact)
     {
         switch (strtolower($tabname)) {
             case 'contact':
-                return view('backend.contacts.tabs.contact_details', compact('contactId', 'contact'));
+                return view('backend.contacts.tabs.contact_details', compact('contactId', 'contact'))->render();
             
-            case 'bankdetails':
-                return view('backend.contacts.tabs.bank_details', compact('contactId', 'contact'));
+            case 'bank':
+                return view('backend.contacts.tabs.bank_details', compact('contactId', 'contact'))->render();
             
             case 'appointments':
-                return view('backend.contacts.tabs.appointments', compact('contactId', 'contact'));
+                return view('backend.contacts.tabs.appointments', compact('contactId', 'contact'))->render();
             
             case 'compliance':
-                return view('backend.contacts.tabs.compliance', compact('contactId', 'contact'));
+                return view('backend.contacts.tabs.compliance', compact('contactId', 'contact'))->render();
     
             case 'documents':
-                return view('backend.contacts.tabs.documents', compact('contactId', 'contact'));
+                return view('backend.contacts.tabs.documents', compact('contactId', 'contact'))->render();
     
             case 'notes':
-                return view('backend.contacts.tabs.notes', compact('contactId', 'contact'));
+                return view('backend.contacts.tabs.notes', compact('contactId', 'contact'))->render();
     
             default:
                 return 'Tab content not found';
