@@ -36,6 +36,7 @@ class DatabaseSeeder extends Seeder
             JobTypesSeeder::class,
             LocalAuthoritySeeder::class,
             CountrySeeder::class,
+            NationalitySeeder::class,
         ]);
 
         // User::factory()->create([

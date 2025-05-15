@@ -14,20 +14,15 @@
 
     {{-- NAMES --}}
     <div>
-        <strong>Name:</strong>
+        <strong>Full Name:</strong>
         {{
-    // if full_name is set use it,
-    // otherwise implode first/middle/last, dropping any empty parts
-    $contact->full_name
-    ? $contact->full_name
-    : implode(' ', array_filter([
-        $contact->first_name,
-        $contact->middle_name,
-        $contact->last_name
-    ]))
-  }}
+            $contact->full_name ? $contact->full_name : implode(' ', array_filter([
+                $contact->first_name,
+                $contact->middle_name,
+                $contact->last_name
+            ]))
+        }}
     </div>
-
 
     {{-- ADDRESS --}}
     <div>

@@ -293,5 +293,20 @@ var_dump($contactId);
 
     });
 </script>
+<script>
+$(function() {
+    // Delegate the change event to document
+    $(document).on('change', '#right_to_rent_check', function() {
+      if (this.checked) {
+        $('#rent-check-person-details').css('display', 'flex');
+        $('#rent-check-message').show();
+      } else {
+        $('#rent-check-person-details, #rent-check-message').hide();
+      }
+    });
 
+    // Trigger the handler once on load to initialize visibility
+    $(document).find('#right_to_rent_check').trigger('change');
+});
+</script>
 @endsection

@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('notes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('property_id')->constrained()->onDelete('cascade'); // Foreign key referencing the property
+            $table->foreignId('property_id')->constrained('properties')->onDelete('cascade'); // Foreign key referencing the property
+            $table->foreignId('contact_id')->constrained('contacts')->onDelete('cascade'); // Foreign key referencing the contact
             $table->text('content');  // Content of the note (this will hold the HTML from Quill)
             $table->enum('type', ['Email', 'Call', 'Text', 'General', 'MIS']);  // Type of note
             $table->timestamps();

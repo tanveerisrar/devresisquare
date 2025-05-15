@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers\Backend;
 
-use App\Http\Controllers\Controller;
-use App\Models\Property;
+use App\Models\User;
+use App\Models\Notes;
 use App\Models\Contact;
-use App\Models\ContactCategory;
-use Illuminate\Support\Facades\Auth;
+use App\Models\Property;
+use App\Models\Nationality;
 use Illuminate\Http\Request;
+use App\Models\ContactCategory;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class ContactController
 {
@@ -60,8 +63,11 @@ class ContactController
         // Define your tab list
         $tabs = [
             ['name' => 'Contact'],
-            ['name' => 'Bank'],
             ['name' => 'Appointments'],
+            ['name' => 'Link'],
+            ['name' => 'Bank'],
+            ['name' => 'Contact Owner'],
+            ['name' => 'Letters'],
             ['name' => 'Compliance'],
             ['name' => 'Documents'],
             ['name' => 'Notes'],
@@ -82,20 +88,65 @@ class ContactController
             case 'contact':
                 return view('backend.contacts.tabs.contact_details', compact('contactId', 'contact'))->render();
             
-            case 'bank':
-                return view('backend.contacts.tabs.bank_details', compact('contactId', 'contact'))->render();
-            
             case 'appointments':
-                return view('backend.contacts.tabs.appointments', compact('contactId', 'contact'))->render();
+                return view('backend.contacts.tabs.appointments', compact('contactId', 'contact'))->render();                
             
+            case 'link':
+                $propertyIds = [];
+
+                if (!empty($contact->selected_properties)) {
+                    $decoded = is_array($contact->selected_properties)
+                        ? $contact->selected_properties
+                        : json_decode($contact->selected_properties, true);
+
+                    if (is_array($decoded)) {
+                        $propertyIds = $decoded;
+                    }
+                }
+
+                $properties = !empty($propertyIds)
+                    ? Property::whereIn('id', $propertyIds)->get()
+                    : collect(); // empty collection if no IDs
+                    
+                return view('backend.contacts.tabs.linked', compact('contactId', 'contact', 'properties'))->render();
+
+            case 'bank':
+                // Fetch bank details related to the specific contact by contact ID
+                $bankDetails = $contact->bankDetails()->orderBy('updated_at', 'desc')->get();
+                // Ensure it's an empty collection if no bank details are found
+                if ($bankDetails->isEmpty()) {
+                    $bankDetails = collect();  // Make sure it's an empty collection, not null
+                }
+                return view('backend.contacts.tabs.bank_details', compact('contactId', 'contact', 'bankDetails'))->render();
+            
+            case 'contact owner':
+                $contact->load('creator.role'); // Eager load role
+                return view('backend.contacts.tabs.contact_owner', compact('contactId', 'contact'))->render();
+
+            case 'letters':
+                return view('backend.contacts.tabs.letters', compact('contactId', 'contact'))->render();
+    
             case 'compliance':
-                return view('backend.contacts.tabs.compliance', compact('contactId', 'contact'))->render();
+                // load all nationalities keyed by id→name
+                $nationalities = Nationality::orderBy('name')->pluck('name', 'id');
+                // load all users for the “checked by” dropdown
+                $users = User::orderBy('name')->pluck('name', 'id');
+                
+                return view('backend.contacts.tabs.compliance', compact('contactId', 'contact', 'users', 'nationalities'))->render();
     
             case 'documents':
                 return view('backend.contacts.tabs.documents', compact('contactId', 'contact'))->render();
     
             case 'notes':
-                return view('backend.contacts.tabs.notes', compact('contactId', 'contact'))->render();
+                // Fetch the notes related to the specific contact by contact ID
+                $notes = Notes::where('contact_id', $contactId)->orderBy('updated_at', 'desc')->get();
+                
+                // Ensure it's an empty collection if no notes are found
+                if ($notes->isEmpty()) {
+                    $notes = collect();  // Make sure it's an empty collection, not null
+                }
+                
+                return view('backend.contacts.tabs.notes', compact('contactId', 'contact', 'notes'))->render();
     
             default:
                 return 'Tab content not found';

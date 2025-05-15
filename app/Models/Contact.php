@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Contact extends Model
 {
@@ -59,8 +59,11 @@ class Contact extends Model
         return $this->hasMany(TenantMember::class, 'contact_id');
     }
 
-    public function creator() { return $this->belongsTo(User::class,'added_by');
+    public function creator() 
+    { 
+        return $this->belongsTo(User::class,'added_by');
     }
+
     // protected $casts = [
     //     'selected_properties' => 'array', // Automatically casts JSON to an array
     // ];
@@ -95,5 +98,10 @@ class Contact extends Model
             $this->attributes['last_name'] ?? '',
         ];
         $this->attributes['full_name'] = trim(implode(' ', array_filter($parts)));
+    }
+
+    public function bankDetails()
+    {
+        return $this->hasMany(BankDetails::class);
     }
 }
