@@ -16,6 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('contact_id'); // Foreign key to contacts table
             $table->string('employment_status')->nullable(); // Employment Status
             $table->string('business_name')->nullable(); // Business Name (if applicable)
+            $table->string('registered_address')->nullable(); // Business Name (if applicable)
             $table->boolean('guarantee')->nullable();
             $table->boolean('previously_rented')->nullable(); // Has previously rented?
             $table->boolean('poor_credit')->nullable(); // Poor credit history?

@@ -308,5 +308,157 @@ $(function() {
     // Trigger the handler once on load to initialize visibility
     $(document).find('#right_to_rent_check').trigger('change');
 });
+
+ // Open modal and load form via AJAX
+$(document).on('click', '.editForm, .addForm', function() {
+    let formType = $(this).data("form");
+    let contactId = $(this).data("id");
+    let noteId     = $(this).data('note-id') || '';
+    let formTitles = {
+        "contact_detail": "Edit Contact Details",
+        // "property_info": "Edit Property Information",
+        // "property_features": "Edit Property Features",
+        // "property_compliance": "Edit Compliance Details",
+        // "property_media": "Edit Media Details",
+        // "property_accessibility": "Edit Property Accessibility",
+        // "property_services": "Edit Property Services",
+        // "property_status": "Edit Property Status",
+        // "notes": "Edit Important Note",
+        // notes_tab: noteId ? 'Edit Note' : 'Add Note',
+    };
+    
+    let modalTitle = formTitles[formType] || "Edit Details"; // Default title if form type is not found
+
+    $("#extraLargeModal .modal-title").html(modalTitle); // Set dynamic title
+
+    // Remove previous modal size classes
+    $("#extraLargeModal .modal-dialog").removeClass("modal-sm modal-lg modal-xl");
+
+    // Apply the appropriate modal size based on the formType
+    // if (formType === "property_status" || formType === "notes" || formType === "property_services") {
+    //     // Use small modal for "notes" or "notes_tab"
+    //     $("#extraLargeModal .modal-dialog").addClass("modal-md");
+    // } else {
+        // Default size (medium size) for other forms
+        $("#extraLargeModal .modal-dialog").addClass("modal-xl");
+    // }
+
+    $.ajax({
+        url: "{{ route('admin.contacts.loadForm') }}", // Route to get form dynamically
+        type: "GET",
+        data: { form_type: formType, contact_id: contactId, note_id: noteId },
+        success: function (response) {
+            $("#extraLargeModal .modal-body").html(response.form_html);
+            $("#extraLargeModal").modal("show");
+
+            // **Trigger the function ONLY for a specific form**
+            if (formType === "contact_detail") {
+                $('.select2').select2();
+                AIZ.extra.addMore();
+                AIZ.extra.removeParent();
+            }
+            // if (formType === "property_media") {
+            //     AIZ.uploader.previewGenerate();
+            // }
+            // if (formType === "property_accessibility") {
+            //     initDynamicTagify();
+            //     // initPlaces('#places-wrapper', '#add-place-btn');
+            //     AIZ.extra.addMore();
+            //     AIZ.extra.removeParent();
+            // }
+            // if (formType === "availability_pricing") {
+            //     $('.select2').select2();
+            // }
+            // if (formType === "notes_tab") {
+            //     AIZ.plugins.textEditor();
+            // }
+            // if (formType === "property_info") {
+            //     toggleDescriptions();
+            // }
+        },
+        error: function (error) {
+            console.error(error);
+            let errorMessage = error.responseJSON?.message || 'An error occurred while saving the compliance record.';
+            AIZ.plugins.notify('danger', errorMessage);
+        }
+    });
+});
+$(document).on("submit", "#extraLargeModal form", function (e) {
+    e.preventDefault(); 
+
+    let form = $(this);
+    let formData = form.serialize();
+    let formType = form.find('input[name="form_type"]').val(); // Get form type dynamically
+    let contactId = form.find('input[name="contact_id"]').val(); // Get property ID
+
+    $.ajax({
+        url: "{{ route('admin.contacts.saveForm') }}",
+        type: "POST",
+        data: formData,
+        success: function (response) {
+            if (response.success) {
+                // Dynamically update the relevant accordion section
+                $("#section-" + formType + "-" + contactId).html(response.updated_html);
+
+                // Close the modal
+                $("#extraLargeModal").modal("hide");
+                AIZ.plugins.notify('success', response.message);
+            } else {
+                alert("Error: " + response.error);
+            }
+        },
+        error: function (error) {
+            console.error(error);
+            let errorMessage = error.responseJSON?.message || 'An error occurred while saving the form.';
+            AIZ.plugins.notify('danger', errorMessage);
+        }
+    });
+});
+
+$(function(){
+  // Add new email field
+  $(document).on('click', '#add-email', function(e){
+    e.preventDefault();
+    $('#emails-wrapper').append(`
+      <div class="flex items-center mb-2">
+        <input
+          type="email"
+          name="emails[]"
+          class="form-input flex-1"
+          placeholder="email@example.com"
+        >
+        <button type="button" class="ml-2 text-red-600 remove-email">&times;</button>
+      </div>
+    `);
+  });
+
+  // Remove an email field
+  $(document).on('click', '.remove-email', function(e){
+    e.preventDefault();
+    $(this).closest('div').remove();
+  });
+
+  // Add new phone field
+  $(document).on('click', '#add-phone', function(e){
+    e.preventDefault();
+    $('#phones-wrapper').append(`
+      <div class="flex items-center mb-2">
+        <input
+          type="text"
+          name="phones[]"
+          class="form-input flex-1"
+          placeholder="+44 7000 000000"
+        >
+        <button type="button" class="ml-2 text-red-600 remove-phone">&times;</button>
+      </div>
+    `);
+  });
+
+  // Remove a phone field
+  $(document).on('click', '.remove-phone', function(e){
+    e.preventDefault();
+    $(this).closest('div').remove();
+  });
+});
 </script>
 @endsection

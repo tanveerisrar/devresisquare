@@ -12,6 +12,7 @@ use App\Models\ContactCategory;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class ContactController
 {
@@ -499,5 +500,179 @@ class ContactController
 
         // flash("Contact deleted successfully!")->success();
         // return redirect()->route('admin.contacts.index');
+    }
+
+    
+    public function loadForm(Request $request)
+    {
+        $contact = Contact::find($request->contact_id);
+        $formType = $request->form_type;
+    
+        if (!$contact) {
+            return response()->json(['error' => 'contact not found'], 404);
+        }
+    
+        $viewPath = "backend.contacts.popup_forms.$formType";
+    
+        // Check if the form view exists
+        if (!view()->exists($viewPath)) {
+            return response()->json(['error' => 'Invalid form type'], 400);
+        }
+
+        $extraData = []; // <-- This prevents undefined variable errors
+        $extraData = $this->getFormTypeExtras($formType, $contact, $request->note_id ?? null);
+        // ** NEW: if we have a note_id, fetch that note and pass it in **
+        // if ($formType === 'notes_tab' && $request->filled('note_id')) {
+        //     $note = $contact->notes()->findOrFail($request->note_id);
+        //     $extraData['note'] = $note;
+        // }
+        $html = view($viewPath, array_merge(['contact' => $contact],['editMode' => true], $extraData))->render();
+
+        // Render the form with additional data
+        // $html = view($viewPath, [
+        //     'contact' => $contact,
+        //     'editMode' => true,
+        //     'stations' => $stations,
+        //     'schools' => $schools,
+        //     'allstations' => $allstations,
+        //     'allschools' => $allschools
+        // ])->render();
+
+        // Render the form and return it
+        // $html = view($viewPath, ['contact' => $contact, 'editMode' => true])->render();
+        
+        return response()->json(['success' => true, 'form_html' => $html]);
+    }
+    
+    
+    public function saveForm(Request $request)
+    {
+        $contact = Contact::find($request->input('contact_id'));
+        $formType = $request->input('form_type');
+        if (!$contact) {
+            return response()->json(['error' => 'contact not found'], 404);
+        }
+
+        $extraData = []; // <-- This prevents undefined variable errors
+
+        // Save the form data based on the form type
+        switch ($formType) {
+            case 'contact_detail':
+                $data = $request->only([
+                    'category_id',
+                    'first_name',
+                    'middle_name',
+                    'last_name',
+                    'address_line_1',
+                    'address_line_2',
+                    'city',
+                    'postcode',
+                    'country',
+                ]);
+
+                // 2) Prepare detail‐specific data
+                $detailData = [
+                    'correspondence_address' => $request->input('correspondence_address', null),
+                    'other'                  => $request->input('other', null),
+
+                    'allow_email' => $request->boolean('allow_email', false),
+                    'allow_post'  => $request->boolean('allow_post',  false),
+                    'allow_text'  => $request->boolean('allow_text',  false),
+                    'allow_call'  => $request->boolean('allow_call',  false),
+
+                    'occupation'         => $request->input('occupation', null),
+                    'business_name'      => $request->input('business_name', null),
+                    'registered_address' => $request->input('registered_address', null),
+                    'vat_number'         => $request->input('vat_number', null),
+
+                    // Eloquent will cast these arrays to JSON
+                    'emails' => array_values(array_filter($request->input('emails', []))),
+                    'phones' => array_values(array_filter($request->input('phones', []))),
+                ];
+
+                // 3) Create or update ContactDetail
+                $contact->details()->updateOrCreate(
+                    ['contact_id' => $contact->id],
+                    $detailData
+                );
+
+                
+                break;                      
+            case 'property_compliance':
+                $data = $request->only([
+                    'epc_required', 'epc_rating', 'gas_safe_acknowledged', 'is_gas', 'market_on']);
+                break;           
+            case 'notes':
+                $data = $request->only([
+                    'imp_notes'
+                ]);
+                break;
+            case 'notes_tab':
+                $data = $request->validate([
+                    'type'    => 'required|string',
+                    'content' => 'required|string',
+                    'note_id' => 'nullable|exists:notes,id',
+                ]);
+
+                if ($data['note_id']) {
+                    // Update existing
+                    $note = Notes::where('contact_id', $contact->id)
+                                ->findOrFail($data['note_id']);
+                    $note->update([
+                        'type'    => $data['type'],
+                        'content' => $data['content'],
+                    ]);
+                } else {
+                    // Create new
+                    $note = $contact->notes()->create([
+                        'type'    => $data['type'],
+                        'content' => $data['content'],
+                    ]);
+                }
+                break;
+            default:
+                return response()->json(['message' => 'Invalid form type'], 400);
+        }
+    
+        $contact->update($data);
+    
+        // 🛠️ Fix: Re-fetch related data like school/station names
+        $extraData = $this->getFormTypeExtras($formType, $contact);
+
+        // Render updated section
+        $updatedView = view("backend.contacts.popup_forms.$formType", array_merge(['contact' => $contact], $extraData))->render();
+    
+        return response()->json([
+            'success' => 'Form updated successfully', 
+            'updated_html' => $updatedView,
+            'status' => true,
+            'message'  => 'Updated successfully',
+        ]);
+    }
+    
+    private function getFormTypeExtras($formType, $contact, $noteId = null)
+    {
+        if ($formType === 'contact_detail') {
+            // Fetch categories for your filter dropdown
+            $categories = ContactCategory::all();
+            
+            return compact('categories');
+        }elseif ($formType === 'notes_tab') {
+            // 1) full list for view mode
+            $notes = $contact->notes()
+                              ->orderBy('updated_at','desc')
+                              ->get();
+
+            // 2) single note when editing
+            $note = null;
+            if ($noteId) {
+                $note = $contact->notes()
+                                 ->findOrFail($noteId);
+            }
+
+            return compact('notes', 'note');
+        } 
+
+        return [];
     }
 }

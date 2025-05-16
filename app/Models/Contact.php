@@ -104,4 +104,9 @@ class Contact extends Model
     {
         return $this->hasMany(BankDetails::class);
     }
+    
+    public function notes()
+    {
+        return $this->hasMany(Notes::class);
+    }
 }

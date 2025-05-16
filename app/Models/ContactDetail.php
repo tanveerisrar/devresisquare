@@ -13,6 +13,7 @@ class ContactDetail extends Model
         'contact_id',
         'employment_status',
         'business_name',
+        'registered_address',
         'guarantee',
         'previously_rented',
         'poor_credit',
@@ -35,6 +36,16 @@ class ContactDetail extends Model
         'pi_insurance',
         'pi_reference_number',
         'pi_certificate',
+    ];
+
+    // cast these fields to/from arrays automatically
+    protected $casts = [
+        'emails' => 'array',
+        'phones' => 'array',
+        'allow_email' => 'boolean',
+        'allow_post'  => 'boolean',
+        'allow_text'  => 'boolean',
+        'allow_call'  => 'boolean',
     ];
 
     /**

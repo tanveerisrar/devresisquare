@@ -130,6 +130,9 @@ Route::middleware('auth')->group(function () {
             Route::get('/edit/{id}', 'edit')->name('edit');  // Show edit form
             Route::post('/update/{id}', 'update')->name('update');  // Update contact
             Route::post('/delete/{id}', 'delete')->name('delete');  // Delete contact
+            
+            Route::get('/load-form', 'loadForm')->name('loadForm');
+            Route::post('/save-form', 'saveForm')->name('saveForm');
         });
 
         // Estate Charges
