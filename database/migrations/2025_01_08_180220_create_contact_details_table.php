@@ -44,10 +44,21 @@ return new class extends Migration
             $table->string('pi_reference_number')->nullable()->after('pi_insurance');
             $table->string('pi_certificate')->nullable()->after('pi_reference_number');
 
+            // contact compliance fields
+            $table->unsignedBigInteger('nationality_id')->nullable();
+            $table->date('visa_expiry')->nullable();
+            $table->string('passport_no')->nullable();
+            $table->string('nrl_number')->nullable();
+            $table->boolean('right_to_rent_check')->default(false);
+            $table->unsignedBigInteger('checked_by_user')->nullable();
+            $table->string('checked_by_external')->nullable(); // Assuming it's a name or ID as string
+
             $table->timestamps();
 
             // Foreign key constraint
             $table->foreign('contact_id')->references('id')->on('contacts')->onDelete('cascade');
+            $table->foreign('checked_by_user')->references('id')->on('users')->onDelete('set null');
+            $table->foreign('nationality_id')->references('id')->on('nationalities')->onDelete('set null');
         });
     }
 

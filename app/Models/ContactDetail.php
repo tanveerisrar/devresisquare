@@ -26,6 +26,7 @@ class ContactDetail extends Model
         'vat_number',
         'emails',
         'phones',
+        'other',
         'budget',
         'area',
         'tentative_move_in',
@@ -36,6 +37,13 @@ class ContactDetail extends Model
         'pi_insurance',
         'pi_reference_number',
         'pi_certificate',
+        'nationality_id',
+        'visa_expiry',
+        'passport_no',
+        'nrl_number',
+        'right_to_rent_check',
+        'checked_by_user',
+        'checked_by_external',
     ];
 
     // cast these fields to/from arrays automatically
@@ -55,4 +63,15 @@ class ContactDetail extends Model
     {
         return $this->belongsTo(Contact::class);
     }
+
+    public function nationality()
+    {
+        return $this->belongsTo(Nationality::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'checked_by_user');
+    }
+
 }

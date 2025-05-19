@@ -505,7 +505,7 @@ class ContactController
     
     public function loadForm(Request $request)
     {
-        $contact = Contact::find($request->contact_id);
+        $contact = Contact::with('details.user')->find($request->contact_id);
         $formType = $request->form_type;
     
         if (!$contact) {
@@ -596,12 +596,28 @@ class ContactController
                     $detailData
                 );
 
-                
-                break;                      
-            case 'property_compliance':
-                $data = $request->only([
-                    'epc_required', 'epc_rating', 'gas_safe_acknowledged', 'is_gas', 'market_on']);
-                break;           
+                break;
+            case 'compliance':
+                $data = $request->only([]);
+
+                // 2) Prepare detail‐specific data
+                $detailData = [
+                    'nationality_id' => $request->input('nationality_id', null),
+                    'visa_expiry' => $request->input('visa_expiry', null),
+                    'passport_no' => $request->input('passport_no', null),
+                    'nrl_number' => $request->input('nrl_number', null),
+
+                    'right_to_rent_check' => $request->boolean('right_to_rent_check', false),
+                    'checked_by_user' => $request->input('checked_by_user', null),
+                    'checked_by_external' => $request->input('checked_by_external', null),
+                ];
+
+                // 3) Create or update ContactDetail
+                $contact->details()->updateOrCreate(
+                    ['contact_id' => $contact->id],
+                    $detailData
+                );
+                break;      
             case 'notes':
                 $data = $request->only([
                     'imp_notes'
@@ -657,6 +673,12 @@ class ContactController
             $categories = ContactCategory::all();
             
             return compact('categories');
+        }elseif ($formType === 'compliance') {
+
+            $nationalities = Nationality::orderBy('name')->pluck('name', 'id');
+            $users = User::orderBy('name')->pluck('name', 'id');
+            return compact('nationalities','users');
+
         }elseif ($formType === 'notes_tab') {
             // 1) full list for view mode
             $notes = $contact->notes()

@@ -4,8 +4,8 @@
     // Normalize category name
     $cat = strtolower($contact->category->name ?? '');
     // Get the contact’s detail object (or null if it doesn’t exist)
-    $d = $contact->detail ?? null;
-
+    $d = $contact->details ?? null;
+// var_dump($d);
     // Lettings & Sales
     $budget = isset($d->budget) && !empty($d->budget) ? $d->budget : '';
     $area = isset($d->area) && !empty($d->area) ? $d->area : '';
@@ -29,28 +29,29 @@
         $allEmails[] = $contact->email;
     }
     // Append any detail‑emails (make sure cast/json_decode is working)
-    if (!empty($contact->detail->emails) && is_array($contact->detail->emails)) {
-        $allEmails = array_merge($allEmails, $contact->detail->emails);
+    if (!empty($d->emails) && is_array($d->emails)) {
+        $allEmails = array_merge($allEmails, $d->emails);
     }
 
     $allPhones = [];
     if (!empty($contact->phone)) {
         $allPhones[] = $contact->phone;
     }
-    if (!empty($contact->detail->phones) && is_array($contact->detail->phones)) {
-        $allPhones = array_merge($allPhones, $contact->detail->phones);
+    if (!empty($d->phones) && is_array($d->phones)) {
+        $allPhones = array_merge($allPhones, $d->phones);
     }
 @endphp
 
 @if (!isset($editMode) || !$editMode)
-
     <!-- Display View Mode -->
 
     {{-- CATEGORY --}}
-    <div><strong>Category:</strong> {{ $contact->category->name ?? '—' }}</div>
+    <div class="mb-3">
+        <strong>Category:</strong> {{ $contact->category->name ?? '—' }}
+    </div>
 
     {{-- NAMES --}}
-    <div>
+    <div class="mb-3">
         <strong>Full Name:</strong>
         {{ $contact->full_name
             ? $contact->full_name
@@ -58,8 +59,8 @@
     </div>
 
     {{-- ADDRESS --}}
-    <div>
-        <strong>Address:</strong>
+    <div class="mb-3">
+        <strong>Address:</strong><br>
         {{ $contact->address_line_1 }}<br>
         {{ $contact->address_line_2 }}<br>
         {{ $contact->city }}, {{ $contact->postcode }}<br>
@@ -67,100 +68,101 @@
     </div>
 
     {{-- CORRESPONDENCE ADDRESS --}}
-    <div>
+    <div class="mb-3">
         <strong>Correspondence Address:</strong><br>
-        {{ $contact->detail->correspondence_address ?? '—' }}
+        {{ $d->correspondence_address ?? '—' }}
     </div>
 
-    <strong>Emails:</strong>
-    <ul>
-        @forelse($allEmails as $e)
-            <li>{{ $e }}</li>
-        @empty
-            <li>—</li>
-        @endforelse
-    </ul>
+    {{-- EMAILS --}}
+    <div class="mb-3">
+        <strong>Emails:</strong>
+        <ul class="list-unstyled">
+            @forelse($allEmails as $e)
+                <li>{{ $e }}</li>
+            @empty
+                <li>—</li>
+            @endforelse
+        </ul>
+    </div>
 
-    <strong>Phones:</strong>
-    <ul>
-        @forelse($allPhones as $p)
-            <li>{{ $p }}</li>
-        @empty
-            <li>—</li>
-        @endforelse
-    </ul>
-    
-    {{-- OTHER free‑text --}}
-    <div>
+    {{-- PHONES --}}
+    <div class="mb-3">
+        <strong>Phones:</strong>
+        <ul class="list-unstyled">
+            @forelse($allPhones as $p)
+                <li>{{ $p }}</li>
+            @empty
+                <li>—</li>
+            @endforelse
+        </ul>
+    </div>
+
+    {{-- OTHER --}}
+    <div class="mb-3">
         <strong>Other:</strong><br>
-        {{ $contact->detail->other ?? '—' }}
+        {{ $d->other ?? '—' }}
     </div>
 
     {{-- CONSENTS --}}
-    <div>
+    <div class="mb-3">
         <strong>Allow:</strong>
-        Email: {{ optional($contact->detail)->allow_email === 1 ? 'Yes' : 'No' }} |
-        Post: {{ optional($contact->detail)->allow_post === 1 ? 'Yes' : 'No' }} |
-        Text: {{ optional($contact->detail)->allow_text === 1 ? 'Yes' : 'No' }} |
-        Call: {{ optional($contact->detail)->allow_call === 1 ? 'Yes' : 'No' }}
+        Email: {{ optional($d)->allow_email === 1 ? 'Yes' : 'No' }} |
+        Post: {{ optional($d)->allow_post === 1 ? 'Yes' : 'No' }} |
+        Text: {{ optional($d)->allow_text === 1 ? 'Yes' : 'No' }} |
+        Call: {{ optional($d)->allow_call === 1 ? 'Yes' : 'No' }}
     </div>
 
-    {{-- OCCUPATION & COMPANY --}}
-    <div>
-        <strong>Occupation:</strong> {{ $contact->detail->occupation ?? '—' }}<br>
-        <strong>Company Name:</strong> {{ $contact->detail->business_name ?? '—' }}
-    </div>
-
-    {{-- REGISTERED ADDRESS & VAT --}}
-    <div>
+    {{-- OCCUPATION & COMPANY, REGISTERED ADDRESS & VAT --}}
+    <div class="mb-3">
+        <strong>Occupation:</strong> {{ $d->occupation ?? '—' }}<br>
+        <strong>Company Name:</strong> {{ $d->business_name ?? '—' }}
         <strong>Registered Address:</strong><br>
-        {{ $contact->detail->registered_address ?? '—' }}<br>
-        <strong>VAT Number:</strong> {{ $contact->detail->vat_number ?? '—' }}
+        {{ $d->registered_address ?? '—' }}<br>
+        <strong>VAT Number:</strong> {{ $d->vat_number ?? '—' }}
     </div>
-    {{-- CREATED BY & CREATED AT --}}
-    <div>
+
+    {{-- CREATED INFO --}}
+    <div class="mb-3">
         <strong>Created By:</strong> {{ $contact->creator->name ?? '—' }}
     </div>
-    <div>
+    <div class="mb-3">
         <strong>Created At:</strong>
-        {{ $contact->created_at ? $contact->created_at->format('Y-m-d H:i:s') : '—' }}
+        {{ $contact->created_at ? formatDateTime($contact->created_at) : '—' }}
     </div>
-
-    {{-- LETTINGS & SALES APPLICANTS --}}
+       {{-- LETTINGS & SALES APPLICANTS --}}
     @if (in_array($cat, ['letting applicant', 'sales applicant']))
-        <div class="mb-4">
+        <div class="mb-3">
             <strong>Budget (rent per month):</strong>
             <p>{{ $budget !== '' ? number_format($budget, 2) : '—' }}</p>
         </div>
 
-        <div class="mb-4">
+        <div class="mb-3">
             <strong>Area:</strong>
             <p>{{ $area ?: '—' }}</p>
         </div>
 
-        <div class="mb-4">
+        <div class="mb-3">
             <strong>Tentative move-in:</strong>
             <p>{{ $tentative_move ? \Carbon\Carbon::parse($tentative_move)->toFormattedDateString() : '—' }}</p>
         </div>
 
-        <div class="mb-4">
+        <div class="mb-3">
             <strong>No. of Beds:</strong>
             <p>{{ $beds }}</p>
         </div>
 
-        <div class="mb-4">
+        <div class="mb-3">
             <strong>No. of Tenants (incl. applicant):</strong>
             <p>{{ $tenants }}</p>
         </div>
     @endif
 
-
     {{-- CONTRACTOR --}}
     @if ($cat === 'contractor')
-        <div class="mb-4">
+        <div class="mb-3">
             <strong>Specialisations:</strong>
             @if (count($specialisations))
-                <ul class="list-disc list-inside">
+                <ul class="list-unstyled">
                     @foreach ($specialisations as $spec)
                         <li>{{ $spec }}</li>
                     @endforeach
@@ -170,27 +172,27 @@
             @endif
         </div>
 
-        <div class="mb-4">
+        <div class="mb-3">
             <strong>Cover Areas:</strong>
             <p>{{ $cover_areas ?: '—' }}</p>
         </div>
 
-        <div class="mb-4">
+        <div class="mb-3">
             <strong>PI Insurance?</strong>
             <p>{{ $pi_insurance ? 'Yes' : 'No' }}</p>
         </div>
 
         @if ($pi_insurance)
-            <div class="mb-4">
+            <div class="mb-3">
                 <strong>Insurance Reference #:</strong>
                 <p>{{ $pi_ref ?: '—' }}</p>
             </div>
 
-            <div class="mb-4">
+            <div class="mb-3">
                 <strong>Certificate:</strong>
                 @if ($pi_cert_path)
                     <p>
-                        <a href="{{ asset('storage/' . $pi_cert_path) }}" target="_blank">
+                        <a href="{{ asset('storage/' . $pi_cert_path) }}" target="_blank" class="btn btn-sm btn-outline-primary">
                             View uploaded certificate
                         </a>
                     </p>
@@ -454,7 +456,7 @@
         <div class="mb-4">
             <label class="block font-medium">Created At:</label>
             <input type="text" class="form-input w-full"
-                value="{{ optional($contact->created_at)->format('Y-m-d H:i:s') }}" disabled>
+                value="{{ $contact->created_at ? formatDateTime($contact->created_at) : '' }}" disabled>
         </div>
 
         {{-- LETTINGS & SALES APPLICANTS --}}
