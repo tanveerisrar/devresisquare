@@ -1,7 +1,9 @@
 @php
-    $details = $contact->details ?? 'N/A';
+    $details = $contact->details ?? '';
 
-    $rightToRent = booleanToYesNo($details->right_to_rent_check) ?? 'N/A';
+    $rightToRent = is_object($details) && isset($details->right_to_rent_check)
+    ? booleanToYesNo($details->right_to_rent_check)
+    : '';
 @endphp
 @if(!isset($editMode) || !$editMode)
 
@@ -20,7 +22,9 @@
         {{-- Visa Expiry Date --}}
         <div class="col-md-6">
             <strong>Visa Expiry Date:</strong>
-            <p>{{ $details->visa_expiry ? \Carbon\Carbon::parse($details->visa_expiry)->format('d/m/Y') : 'N/A' }}</p>
+            <p>
+                {{ (is_object($details) && !empty($details->visa_expiry)) ? formatDate($details->visa_expiry) : 'N/A' }}
+            </p>
         </div>
 
         {{-- Passport No --}}
