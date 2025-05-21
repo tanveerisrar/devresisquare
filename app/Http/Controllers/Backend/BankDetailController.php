@@ -109,7 +109,13 @@ class BankDetailController
     {
         $bank = BankDetails::findOrFail($id);
         $bank->delete();
+        $response = [
+            'status' => true,
+            // 'notification' => 'Bank detail deleted successfully!',
+            'message' => 'Bank detail deleted successfully!',
+        ];
 
-        return response()->json(['success' => true, 'message' => 'Bank detail deleted successfully.']);
+        return response()->json($response);
+        // return response()->json(['success' => true, 'message' => 'Bank detail deleted successfully.']);
     }
 }

@@ -241,13 +241,7 @@ Route::middleware('auth')->group(function () {
         Route::prefix('bank_details')->name('bank_details.')->controller(BankDetailController::class)->group(function () {
             Route::get('/show/{id}', 'show')->name('show');
             Route::post('/store', 'store')->name('store');
-            Route::delete('/delete/{id}', 'destroy')->name('delete');
-        });
-
-        Route::prefix('bank_details')->name('bank_details.')->controller(BankDetailController::class)->group(function () {
-            Route::get('/show/{id}', 'show')->name('show');
-            Route::post('/store', 'store')->name('store');
-            Route::delete('/delete/{id}', 'destroy')->name('delete');
+            Route::post('/delete/{id}', 'destroy')->name('delete');
         });
 
         Route::prefix('notes')->name('notes.')->controller(NotesController::class)->group(function () {
