@@ -191,7 +191,8 @@ private function getTabContent($tabname, $propertyId, $property)
         //     return view('backend.properties.tabs.work_offer', compact('propertyId'))->render();
         case 'notes':
             // Fetch the notes related to the specific property by property ID
-            $notes = Notes::where('property_id', $propertyId)->orderBy('updated_at', 'desc')->get();
+            // $notes = Notes::where('property_id', $propertyId)->orderBy('updated_at', 'desc')->get();
+            $notes = $property->notes()->orderBy('updated_at', 'desc')->get();
             
             // Ensure it's an empty collection if no notes are found
             if ($notes->isEmpty()) {
@@ -853,16 +854,19 @@ private function getTabContent($tabname, $propertyId, $property)
 
                 if ($data['note_id']) {
                     // Update existing
-                    $note = Notes::where('property_id', $property->id)
-                                ->findOrFail($data['note_id']);
+                    // $note = Notes::where('property_id', $property->id)
+                    //             ->findOrFail($data['note_id']);
+                    
+                    // Update existing note belonging to this property
+                    $note = $property->notes()->where('id', $data['note_id'])->firstOrFail();
                     $note->update([
-                        'type'    => $data['type'],
+                        'note_type_id'  => $data['note_type_id'],
                         'content' => $data['content'],
                     ]);
                 } else {
                     // Create new
                     $note = $property->notes()->create([
-                        'type'    => $data['type'],
+                        'note_type_id'  => $data['note_type_id'],
                         'content' => $data['content'],
                     ]);
                 }
@@ -927,44 +931,18 @@ private function getTabContent($tabname, $propertyId, $property)
             return compact('groups');
         }elseif ($formType === 'notes_tab') {
             // 1) full list for view mode
-            $notes = $property->notes()
-                              ->orderBy('updated_at','desc')
-                              ->get();
+            $notes = $property->notes()->with('noteType')->orderBy('updated_at','desc')->get();
 
             // 2) single note when editing
             $note = null;
             if ($noteId) {
-                $note = $property->notes()
-                                 ->findOrFail($noteId);
+                $note = $property->notes()->with('noteType')->findOrFail($noteId);
             }
-
-            return compact('notes', 'note');
+            $noteTypes = \App\Models\NoteType::all();
+            return compact('notes', 'note', 'noteTypes');
         } 
 
         return [];
-    }
-
-    public function deleteNote($id)
-    {
-        $note = Notes::findOrFail($id);
-        $note->delete();
-        $response = [
-            'status' => true,
-            'message' => 'Note deleted successfully!',
-        ];
-        return response()->json($response);
-        // return response()->json(['success' => true, 'message' => 'Note deleted successfully.']);
-    }
-    public function showNote($id)
-    {
-        $note = Notes::findOrFail($id);
-    
-        // Optional: restrict to only notes belonging to the current user's property
-        // if needed for security
-    
-        return response()->json([
-            'content' => $note->content,
-        ]);
     }
 
     // // Method to load the tab content for a specific property and tab

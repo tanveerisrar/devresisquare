@@ -2,13 +2,19 @@
 
 namespace App\Http\Controllers\Backend;
 
-use App\Http\Controllers\Controller;
-use App\Models\Property;
+use App\Models\User;
+use App\Models\Notes;
 use App\Models\Contact;
-use App\Models\ContactCategory;
-use Illuminate\Support\Facades\Auth;
+use App\Models\NoteType;
+use App\Models\Property;
+use App\Models\BankDetails;
+use App\Models\Nationality;
 use Illuminate\Http\Request;
+use App\Models\ContactCategory;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class ContactController
 {
@@ -17,19 +23,138 @@ class ContactController
      */
     public function index(Request $request)
     {
-        // Get all categories (assuming you have a Category model related to contacts)
+        // Fetch categories for your filter dropdown
         $categories = ContactCategory::all();
 
-        // If a category filter is present, apply it to the contacts query
-        $contacts = Contact::with('category')
-            ->when($request->filled('category'), function ($query) use ($request) {
-                return $query->where('category_id', $request->category);
-            })
-            ->get();
+        // Build base contacts query, eager‑loading all relationships
+        $contactsQuery = Contact::with([
+            'category',
+            'details',
+            'tenancies',
+            'repairIssues',
+            'tenantMembers',
+        ]);
 
-        return view('backend.contacts.index', compact('contacts', 'categories'));
+        // Apply a category filter if provided
+        if ($request->filled('category')) {
+            $contactsQuery->where('category_id', $request->category);
+        }
+
+        // Fetch all contacts (newest first)
+        $contacts = $contactsQuery->orderBy('id', 'desc')->get();
+
+        // If no contacts at all, redirect to quick-create
+        if ($contacts->isEmpty()) {
+            flash("You don't have any contacts yet!")->error();
+            return redirect()->route('admin.contacts.quick');
+        }
+
+        // Decide which contact/tab to show
+        $contactId = $request->query('contact_id');
+        $tabName   = $request->query('tabname', 'contact');
+
+        // Try to find the requested contact or fall back to the most recent
+        $contact = $contactId
+            ? $contacts->firstWhere('id', $contactId)
+            : null;
+
+        if (! $contact) {
+            $contact = $contacts->first();
+            $contactId = $contact->id;
+        }
+
+        // Define your tab list
+        $tabs = [
+            ['name' => 'Contact'],
+            ['name' => 'Appointments'],
+            ['name' => 'Link'],
+            ['name' => 'Bank'],
+            ['name' => 'Contact Owner'],
+            ['name' => 'Letters'],
+            ['name' => 'Compliance'],
+            ['name' => 'Documents'],
+            ['name' => 'Notes'],
+        ];
+
+        $content = $this->getTabContent($tabName, $contactId, $contact); // Dynamically get content for the tab and property
+
+        // Check if the request is via AJAX (this handles dynamic content loading)
+        if ($request->ajax()) {
+            return response()->json(['content' => $content, 'tabName' => $tabName]);
+        }
+
+        return view('backend.contacts.index', compact('contacts', 'categories','tabs', 'tabName', 'contactId', 'contact', 'content'));
     }
+    private function getTabContent($tabname, $contactId, $contact)
+    {
+        switch (strtolower($tabname)) {
+            case 'contact':
+                return view('backend.contacts.tabs.contact_details', compact('contactId', 'contact'))->render();
+            
+            case 'appointments':
+                return view('backend.contacts.tabs.appointments', compact('contactId', 'contact'))->render();                
+            
+            case 'link':
+                $propertyIds = [];
 
+                if (!empty($contact->selected_properties)) {
+                    $decoded = is_array($contact->selected_properties)
+                        ? $contact->selected_properties
+                        : json_decode($contact->selected_properties, true);
+
+                    if (is_array($decoded)) {
+                        $propertyIds = $decoded;
+                    }
+                }
+
+                $properties = !empty($propertyIds)
+                    ? Property::whereIn('id', $propertyIds)->get()
+                    : collect(); // empty collection if no IDs
+                    
+                return view('backend.contacts.tabs.linked', compact('contactId', 'contact', 'properties'))->render();
+
+            case 'bank':
+                // Fetch bank details related to the specific contact by contact ID
+                $bankDetails = $contact->bankDetails()->orderByDesc('is_primary')->orderBy('updated_at', 'desc')->get();
+                // Ensure it's an empty collection if no bank details are found
+                if ($bankDetails->isEmpty()) {
+                    $bankDetails = collect();  // Make sure it's an empty collection, not null
+                }
+                return view('backend.contacts.tabs.bank_details', compact('contactId', 'contact', 'bankDetails'))->render();
+            
+            case 'contact owner':
+                $contact->load('creator.role'); // Eager load role
+                return view('backend.contacts.tabs.contact_owner', compact('contactId', 'contact'))->render();
+
+            case 'letters':
+                return view('backend.contacts.tabs.letters', compact('contactId', 'contact'))->render();
+    
+            case 'compliance':
+                // load all nationalities keyed by id→name
+                $nationalities = Nationality::orderBy('name')->pluck('name', 'id');
+                // load all users for the “checked by” dropdown
+                $users = User::orderBy('name')->pluck('name', 'id');
+                
+                return view('backend.contacts.tabs.compliance', compact('contactId', 'contact', 'users', 'nationalities'))->render();
+    
+            case 'documents':
+                return view('backend.contacts.tabs.documents', compact('contactId', 'contact'))->render();
+    
+            case 'notes':
+                // Fetch the notes related to the specific contact by contact ID
+                $notes = $contact->notes()->orderBy('updated_at', 'desc')->get();
+
+                // Ensure it's an empty collection if no notes are found
+                if ($notes->isEmpty()) {
+                    $notes = collect();  // Make sure it's an empty collection, not null
+                }
+                
+                return view('backend.contacts.tabs.notes', compact('contactId', 'contact', 'notes'))->render();
+    
+            default:
+                return 'Tab content not found';
+        }
+    }
 
     /**
      * Show the form for creating a new resource.
@@ -377,5 +502,281 @@ class ContactController
 
         // flash("Contact deleted successfully!")->success();
         // return redirect()->route('admin.contacts.index');
+    }
+
+    
+    public function loadForm(Request $request)
+    {
+        $contact = Contact::with('details.user')->find($request->contact_id);
+        $formType = $request->form_type;
+    
+        if (!$contact) {
+            return response()->json(['error' => 'contact not found'], 404);
+        }
+    
+        $viewPath = "backend.contacts.popup_forms.$formType";
+    
+        // Check if the form view exists
+        if (!view()->exists($viewPath)) {
+            return response()->json(['error' => 'Invalid form type'], 400);
+        }
+
+        $extraData = []; // <-- This prevents undefined variable errors
+        $extraData = $this->getFormTypeExtras($formType, $contact, $request->note_id ?? null, $request->bank_detail_id ?? null);
+        // ** NEW: if we have a note_id, fetch that note and pass it in **
+        // if ($formType === 'notes_tab' && $request->filled('note_id')) {
+        //     $note = $contact->notes()->findOrFail($request->note_id);
+        //     $extraData['note'] = $note;
+        // }
+        $html = view($viewPath, array_merge(['contact' => $contact],['editMode' => true], $extraData))->render();
+
+        // Render the form with additional data
+        // $html = view($viewPath, [
+        //     'contact' => $contact,
+        //     'editMode' => true,
+        //     'stations' => $stations,
+        //     'schools' => $schools,
+        //     'allstations' => $allstations,
+        //     'allschools' => $allschools
+        // ])->render();
+
+        // Render the form and return it
+        // $html = view($viewPath, ['contact' => $contact, 'editMode' => true])->render();
+        
+        return response()->json(['success' => true, 'form_html' => $html]);
+    }
+    
+    
+    public function saveForm(Request $request)
+    {
+        $contact = Contact::find($request->input('contact_id'));
+        $formType = $request->input('form_type');
+        if (!$contact) {
+            return response()->json(['error' => 'contact not found'], 404);
+        }
+
+        $extraData = []; // <-- This prevents undefined variable errors
+
+        // Save the form data based on the form type
+        switch ($formType) {
+            case 'contact_detail':
+                $data = $request->only([
+                    'category_id',
+                    'first_name',
+                    'middle_name',
+                    'last_name',
+                    'address_line_1',
+                    'address_line_2',
+                    'city',
+                    'postcode',
+                    'country',
+                ]);
+
+                // 2) Prepare detail‐specific data
+                $detailData = [
+                    'correspondence_address' => $request->input('correspondence_address', null),
+                    'other'                  => $request->input('other', null),
+
+                    'allow_email' => $request->boolean('allow_email', false),
+                    'allow_post'  => $request->boolean('allow_post',  false),
+                    'allow_text'  => $request->boolean('allow_text',  false),
+                    'allow_call'  => $request->boolean('allow_call',  false),
+
+                    'occupation'         => $request->input('occupation', null),
+                    'business_name'      => $request->input('business_name', null),
+                    'registered_address' => $request->input('registered_address', null),
+                    'vat_number'         => $request->input('vat_number', null),
+
+                    // Eloquent will cast these arrays to JSON
+                    'emails' => array_values(array_filter($request->input('emails', []))),
+                    'phones' => array_values(array_filter($request->input('phones', []))),
+                ];
+
+                // 3) Create or update ContactDetail
+                $contact->details()->updateOrCreate(
+                    ['contact_id' => $contact->id],
+                    $detailData
+                );
+
+                break;
+            case 'bank_detail':
+
+                // Forward the request to the controller
+                $bankDetailController = app(BankDetailController::class);
+                $bankDetailController->store($request);
+                $data = []; // <-- Prevents undefined variable error
+                // $data = $request->validate([
+                //     'bank_detail_id' => 'nullable|exists:bank_details,id',
+                //     'account_name'   => 'required|string|max:255',
+                //     'account_no'     => 'required|string|max:255',
+                //     'sort_code'      => 'required|string|max:255',
+                //     'bank_name'      => 'required|string|max:255',
+                //     'swift_code'     => 'nullable|string|max:255',
+                //     'is_active'      => 'nullable|boolean',
+                //     'is_primary'     => 'nullable|boolean',
+                // ]);
+
+                // // Default values for checkboxes
+                // $data['is_active'] = $request->has('is_active');
+                // $data['is_primary'] = $request->has('is_primary');
+
+                // if (!empty($data['is_primary'])) {
+                //     // Set all others to non-primary for this contact
+                //     BankDetails::where('contact_id', $contact->id)->update(['is_primary' => false]);
+                // }
+
+                // if (!empty($data['bank_detail_id'])) {
+                //     // Update existing record
+                //     $bank = BankDetails::where('contact_id', $contact->id)
+                //                 ->findOrFail($data['bank_detail_id']);
+
+                //     $bank->update([
+                //         'account_name' => $data['account_name'],
+                //         'account_no'   => $data['account_no'],
+                //         'sort_code'    => $data['sort_code'],
+                //         'bank_name'    => $data['bank_name'],
+                //         'swift_code'   => $data['swift_code'],
+                //         'is_active'    => $data['is_active'],
+                //         'is_primary'   => $data['is_primary'],
+                //     ]);
+                // } else {
+                //     // Create new record
+                //     $contact->bankDetails()->create([
+                //         'account_name' => $data['account_name'],
+                //         'account_no'   => $data['account_no'],
+                //         'sort_code'    => $data['sort_code'],
+                //         'bank_name'    => $data['bank_name'],
+                //         'swift_code'   => $data['swift_code'],
+                //         'is_active'    => $data['is_active'],
+                //         'is_primary'   => $data['is_primary'],
+                //     ]);
+                // }
+
+                break;
+            case 'compliance':
+                $data = $request->only([]);
+
+                // 2) Prepare detail‐specific data
+                $detailData = [
+                    'nationality_id' => $request->input('nationality_id', null),
+                    'visa_expiry' => $request->input('visa_expiry', null),
+                    'passport_no' => $request->input('passport_no', null),
+                    'nrl_number' => $request->input('nrl_number', null),
+
+                    'right_to_rent_check' => $request->boolean('right_to_rent_check', false),
+                    'checked_by_user' => $request->input('checked_by_user', null),
+                    'checked_by_external' => $request->input('checked_by_external', null),
+                ];
+
+                // 3) Create or update ContactDetail
+                $contact->details()->updateOrCreate(
+                    ['contact_id' => $contact->id],
+                    $detailData
+                );
+                break;      
+            case 'notes':
+                $data = $request->only([
+                    'imp_notes'
+                ]);
+                break;
+            case 'notes_tab':
+                    $dataNotes = $request->validate([
+                        'note_type_id'   => 'required|exists:note_types,id',
+                        'content' => 'required|string',
+                        'note_id' => 'nullable|exists:notes,id',
+                    ]);
+
+                    $notesController = new NotesController();
+
+                    $note = $notesController->saveNoteData([
+                        'noteable_type' => get_class($contact),
+                        'noteable_id'   => $contact->id,
+                        'note_type_id'  => $dataNotes['note_type_id'],
+                        'content'       => $dataNotes['content'],
+                        'note_id'       => $dataNotes['note_id'] ?? null,
+                    ]);
+
+                    $data = []; // <-- Prevents undefined variable error
+                break;
+            default:
+                return response()->json(['message' => 'Invalid form type'], 400);
+        }
+
+        if (!empty($data)) {
+            $contact->update($data);
+        }
+        // $contact->update($data);
+    
+        // 🛠️ Fix: Re-fetch related data like school/station names
+        $extraData = $this->getFormTypeExtras($formType, $contact);
+
+        // Render updated section
+        $updatedView = view("backend.contacts.popup_forms.$formType", array_merge(['contact' => $contact], $extraData))->render();
+    
+        return response()->json([
+            'success' => 'Form updated successfully', 
+            'updated_html' => $updatedView,
+            'status' => true,
+            'message'  => 'Updated successfully',
+        ]);
+    }
+    
+    private function getFormTypeExtras($formType, $contact, $noteId = null, $bankId = null)
+    {
+        if ($formType === 'contact_detail') {
+            // Fetch categories for your filter dropdown
+            $categories = ContactCategory::all();
+            
+            return compact('categories');
+        }elseif ($formType === 'compliance') {
+
+            $nationalities = Nationality::orderBy('name')->pluck('name', 'id');
+            $users = User::orderBy('name')->pluck('name', 'id');
+            return compact('nationalities','users');
+
+        }elseif ($formType === 'notes_tab') {
+            /*
+            // Prepare the Request object for NotesController
+            $requestData = new Request([
+                'noteable_type' => get_class($contact),  // e.g. App\Models\Contact
+                'noteable_id'   => $contact->id,
+                'note_id'       => $noteId,  // null if no noteId
+            ]);
+
+            $notesController = new NotesController();
+            $response = $notesController->listNotes($requestData);
+
+            $data = $response->getData(); // TRUE returns an array, not an object
+            $notes = $data->notes ?? collect();
+            $note = $data->note ?? null;
+            // 3) all available note types
+            $noteTypes = NoteType::all();
+            return compact('notes','note', 'noteTypes');
+            */
+            // 1) full list for view mode
+            $notes = $contact->notes()->with('noteType')->orderBy('updated_at','desc')->get();
+
+            // 2) single note when editing
+            $note = null;
+            if ($noteId) {
+                $note = $contact->notes()->with('noteType')->findOrFail($noteId);
+            }
+            $noteTypes = NoteType::all();
+            return compact('notes', 'note', 'noteTypes');
+        }elseif ($formType === 'bank_detail') {
+            // 1) full list for view mode
+            $bankDetails = $contact->bankDetails()->orderByDesc('is_primary')->orderBy('updated_at','desc')->get();
+
+            
+            $bankDetail = null;
+            if ($bankId) {
+                $bankDetail = $contact->bankDetails()
+                                 ->findOrFail($bankId);
+            }
+
+            return compact('bankDetails', 'bankDetail');
+        } 
+
+        return [];
     }
 }

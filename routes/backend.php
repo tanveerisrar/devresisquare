@@ -1,30 +1,33 @@
 <?php
 // routes/backend.php
 
-use App\Http\Controllers\Backend\AuthenticateController;
-use App\Http\Controllers\Backend\BranchController;
-use App\Http\Controllers\Backend\BusinessSettingsController;
-use App\Http\Controllers\Backend\ComplianceController;
-use App\Http\Controllers\Backend\ContactCategoryController;
-use App\Http\Controllers\Backend\ContactController;
-use App\Http\Controllers\Backend\DashboardController;
-use App\Http\Controllers\Backend\DesignationController;
-use App\Http\Controllers\Backend\EstateChargeController;
-use App\Http\Controllers\Backend\EstateChargeItemController;
-use App\Http\Controllers\Backend\InvoiceController;
-use App\Http\Controllers\Backend\JobTypeController;
-use App\Http\Controllers\Backend\OfferController;
-use App\Http\Controllers\Backend\OwnerGroupController;
-use App\Http\Controllers\Backend\PropertyController;
-use App\Http\Controllers\Backend\PropertyRepairController;
-use App\Http\Controllers\Backend\TenancyController;
-use App\Http\Controllers\Backend\TenancySubStatusController;
-use App\Http\Controllers\Backend\TenancyTypeController;
-use App\Http\Controllers\Backend\WebsiteController;
-use App\Http\Controllers\Backend\WorkOrderController;
+use App\Models\Upload;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Models\Upload;
+use App\Http\Controllers\Backend\NotesController;
+use App\Http\Controllers\Backend\OfferController;
+use App\Http\Controllers\Backend\BranchController;
+use App\Http\Controllers\Backend\ContactController;
+use App\Http\Controllers\Backend\InvoiceController;
+use App\Http\Controllers\Backend\JobTypeController;
+use App\Http\Controllers\Backend\TenancyController;
+use App\Http\Controllers\Backend\WebsiteController;
+use App\Http\Controllers\Backend\NoteTypeController;
+use App\Http\Controllers\Backend\PropertyController;
+use App\Http\Controllers\Backend\DashboardController;
+use App\Http\Controllers\Backend\WorkOrderController;
+use App\Http\Controllers\Backend\BankDetailController;
+use App\Http\Controllers\Backend\ComplianceController;
+use App\Http\Controllers\Backend\OwnerGroupController;
+use App\Http\Controllers\Backend\DesignationController;
+use App\Http\Controllers\Backend\TenancyTypeController;
+use App\Http\Controllers\Backend\AuthenticateController;
+use App\Http\Controllers\Backend\EstateChargeController;
+use App\Http\Controllers\Backend\PropertyRepairController;
+use App\Http\Controllers\Backend\ContactCategoryController;
+use App\Http\Controllers\Backend\BusinessSettingsController;
+use App\Http\Controllers\Backend\EstateChargeItemController;
+use App\Http\Controllers\Backend\TenancySubStatusController;
 
 // Login Routes
 Route::get('/login', [AuthenticateController::class, 'index'])->name('backend.login');
@@ -93,9 +96,6 @@ Route::middleware('auth')->group(function () {
 
             Route::get('/load-form', 'loadForm')->name('loadForm');
             Route::post('/save-form', 'saveForm')->name('saveForm');
-
-            Route::post('/note/delete/{id}',  'deleteNote')->name('note.delete');
-            Route::get('/note/show/{id}',  'showNote')->name('note.show');
         });
 
         // Designation
@@ -118,6 +118,17 @@ Route::middleware('auth')->group(function () {
             Route::delete('/delete/{branch}', 'destroy')->name('destroy');  // Delete branch
         });
 
+        // Note Types
+        Route::prefix('note-types')->name('note-types.')->controller(NoteTypeController::class)->group(function () {
+            Route::get('/all', 'index')->name('index');              // List all note types
+            Route::get('/show', 'show')->name('show');              // List all note types
+            Route::get('/create', 'create')->name('create');      // Show create form
+            Route::post('/store', 'store')->name('store');        // Store new note type
+            Route::get('/edit/{id}', 'edit')->name('edit'); // Show edit form
+            Route::post('/update/{id}', 'update')->name('update'); // Update note type
+            Route::delete('/delete/{id}', 'destroy')->name('destroy'); // Delete note type
+        });
+
         // Contacts
         Route::prefix('contacts')->name('contacts.')->controller(ContactController::class)->group(function () {
             Route::get('/', 'index')->name('index');  // List all contacts
@@ -130,6 +141,9 @@ Route::middleware('auth')->group(function () {
             Route::get('/edit/{id}', 'edit')->name('edit');  // Show edit form
             Route::post('/update/{id}', 'update')->name('update');  // Update contact
             Route::post('/delete/{id}', 'delete')->name('delete');  // Delete contact
+            
+            Route::get('/load-form', 'loadForm')->name('loadForm');
+            Route::post('/save-form', 'saveForm')->name('saveForm');
         });
 
         // Estate Charges
@@ -222,6 +236,29 @@ Route::middleware('auth')->group(function () {
             Route::post('/store', 'storeCompliance')->name('store');
             Route::post('/update', 'updateCompliance')->name('update');
             Route::delete('/delete/{complianceRecordId}', 'deleteCompliance')->name('delete');
+        });
+
+        Route::prefix('bank_details')->name('bank_details.')->controller(BankDetailController::class)->group(function () {
+            Route::get('/show/{id}', 'show')->name('show');
+            Route::post('/store', 'store')->name('store');
+            Route::delete('/delete/{id}', 'destroy')->name('delete');
+        });
+
+        Route::prefix('bank_details')->name('bank_details.')->controller(BankDetailController::class)->group(function () {
+            Route::get('/show/{id}', 'show')->name('show');
+            Route::post('/store', 'store')->name('store');
+            Route::delete('/delete/{id}', 'destroy')->name('delete');
+        });
+
+        Route::prefix('notes')->name('notes.')->controller(NotesController::class)->group(function () {
+            // List notes (with optional filtering for noteable_type, noteable_id, note_id)
+            Route::get('/all', 'listNotes')->name('list');
+            // Show single note by ID
+            Route::get('/show/{id}', 'showNote')->name('show');
+            // Create or update a note (store or update)
+            Route::post('/save', 'storeOrUpdate')->name('save');
+            // Delete a note by ID
+            Route::post('/delete/{id}', 'deleteNote')->name('delete');
         });
 
         Route::prefix('/property-repairs')->group(function () {
