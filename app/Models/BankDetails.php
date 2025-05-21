@@ -12,7 +12,9 @@ class BankDetails extends Model
         'account_no',
         'sort_code',
         'bank_name',
-        'swift_code',   
+        'swift_code',
+        'is_active',
+        'is_primary',
     ];
 
     public function contact()

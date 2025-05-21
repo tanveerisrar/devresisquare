@@ -205,6 +205,22 @@ if (!function_exists('booleanToYesNo')) {
     }
 }
 
+if (!function_exists('booleanToString')) {
+    /**
+     * Convert a boolean (0 or 1) to custom string values.
+     *
+     * @param  int|bool  $value
+     * @param  string  $trueText
+     * @param  string  $falseText
+     * @return string
+     */
+    function booleanToString($value, $trueText = 'Yes', $falseText = 'No')
+    {
+        return $value ? $trueText : $falseText;
+    }
+}
+
+
 if (!function_exists('jsonDecodeAndPrint')) {
     /**
      * Decode a JSON string and return its values as a string.

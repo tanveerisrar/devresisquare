@@ -5,15 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 class Notes extends Model
-{    
-    protected $fillable = ['property_id', 'contact_id', 'content', 'type'];
+{
+    protected $fillable = ['noteable_id', 'noteable_type', 'content', 'note_type_id'];
 
-    public function property()
+    public function noteType()
     {
-        return $this->belongsTo(Property::class);
+        return $this->belongsTo(NoteType::class, 'note_type_id');
     }
-    public function contact()
+
+    public function noteable()
     {
-        return $this->belongsTo(Contact::class);
+        return $this->morphTo();
     }
 }

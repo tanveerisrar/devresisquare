@@ -206,7 +206,8 @@
             <a href="#masterManageSubmenu" data-bs-toggle="collapse"
                 aria-expanded="{{ areActiveRoutes([
                     'admin.branches.index', 
-                    'admin.designations.index', 
+                    'admin.designations.index',
+                    'admin.note-types.index', 'admin.note-types.create', 
                     'admin.tenancy_types.index', 
                     'admin.tenancy_types.create', 
                     'admin.tenancy_sub_statuses.index', 
@@ -229,7 +230,8 @@
             <ul class="nav-second-level collapse list-unstyled {{ areActiveRoutes([
                 'contact-categories.index', 
                 'admin.branches.index', 
-                'admin.designations.index', 
+                'admin.designations.index',
+                'admin.note-types.index', 'admin.note-types.create',
                 'admin.tenancy_types.index', 
                 'admin.tenancy_types.create', 
                 'admin.tenancy_sub_statuses.index', 
@@ -259,7 +261,30 @@
                         <i class="fa-solid fa-user-tag"></i> Designation
                     </a>
                 </li>
-        
+                <!-- Note Types Section -->
+                <li class="sidebar-sub-list-item py-0 mb-0 submenu_wrapper">
+                    <a href="#noteTypesSubmenu" data-bs-toggle="collapse"
+                    aria-expanded="{{ areActiveRoutes(['admin.note-types.index', 'admin.note-types.create'], 'true') }}"
+                    class="dropdown-toggle {{ areActiveRoutes(['admin.note-types.index', 'admin.note-types.create']) }}">
+                        <i class="fa-solid fa-note-sticky"></i> Note Types
+                    </a>
+                    <ul class="nav-third-level collapse list-unstyled {{ areActiveRoutes(['admin.note-types.index', 'admin.note-types.create'], 'show') }}"
+                        id="noteTypesSubmenu">
+                        <li class="sidebar-sub-sub-list-item">
+                            <a class="{{ areActiveRoutes(['admin.note-types.index']) }}"
+                            href="{{ route('admin.note-types.index') }}">
+                                <i class="fa-solid fa-eye"></i> View All
+                            </a>
+                        </li>
+                        <li class="sidebar-sub-sub-list-item">
+                            <a class="{{ areActiveRoutes(['admin.note-types.create']) }}"
+                            href="{{ route('admin.note-types.create') }}">
+                                <i class="fa-solid fa-plus"></i> Add
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
                 <!-- Tenancy Types Section -->
                 <li class="sidebar-sub-list-item py-0 mb-0 submenu_wrapper">
                     <a href="#tenancyTypesSubmenu" data-bs-toggle="collapse"

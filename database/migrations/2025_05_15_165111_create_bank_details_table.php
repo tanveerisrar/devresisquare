@@ -19,6 +19,8 @@ return new class extends Migration
             $table->string('sort_code');
             $table->string('bank_name');
             $table->string('swift_code')->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->boolean('is_primary')->default(false);
             $table->timestamps();
         });
     }

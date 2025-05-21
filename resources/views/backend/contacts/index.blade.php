@@ -128,7 +128,9 @@ var_dump($contactId);
 @endif
 
 <script>
-
+    var responseHandler = function(response) {
+        location.reload();
+    }
     $(document).ready(function() {
         let isExpanded = true; // Initially, all accordions are open
     
@@ -314,6 +316,7 @@ $(document).on('click', '.editForm, .addForm', function() {
     let formType = $(this).data("form");
     let contactId = $(this).data("id");
     let noteId     = $(this).data('note-id') || '';
+    let bankId     = $(this).data('bank-detail-id') || '';
     let formTitles = {
         "contact_detail": "Edit Contact Details",
         // "property_info": "Edit Property Information",
@@ -324,7 +327,8 @@ $(document).on('click', '.editForm, .addForm', function() {
         // "property_services": "Edit Property Services",
         // "property_status": "Edit Property Status",
         // "notes": "Edit Important Note",
-        // notes_tab: noteId ? 'Edit Note' : 'Add Note',
+        notes_tab: noteId ? 'Edit Note' : 'Add Note',
+        bank_detail: bankId ? 'Edit Bank Detail' : 'Add Bank Detail',
     };
     
     let modalTitle = formTitles[formType] || "Edit Details"; // Default title if form type is not found
@@ -346,7 +350,7 @@ $(document).on('click', '.editForm, .addForm', function() {
     $.ajax({
         url: "{{ route('admin.contacts.loadForm') }}", // Route to get form dynamically
         type: "GET",
-        data: { form_type: formType, contact_id: contactId, note_id: noteId },
+        data: { form_type: formType, contact_id: contactId, note_id: noteId, bank_detail_id: bankId },
         success: function (response) {
             $("#extraLargeModal .modal-body").html(response.form_html);
             $("#extraLargeModal").modal("show");
@@ -369,9 +373,9 @@ $(document).on('click', '.editForm, .addForm', function() {
             // if (formType === "availability_pricing") {
             //     $('.select2').select2();
             // }
-            // if (formType === "notes_tab") {
-            //     AIZ.plugins.textEditor();
-            // }
+            if (formType === "notes_tab") {
+                AIZ.plugins.textEditor();
+            }
             // if (formType === "property_info") {
             //     toggleDescriptions();
             // }
@@ -460,5 +464,43 @@ $(function(){
     $(this).closest('div').remove();
   });
 });
+// View Bank Details
+$(document).on('click', '.viewBank', function() {
+    const bankId = $(this).data('id');
+    const bankUrl = $(this).data('url');
+    const type   = $(this).data('type');
+
+    $.ajax({
+        url: bankUrl,
+        method: 'GET',
+        success: function(response) {
+            $("#extraLargeModal .modal-title").text(type);
+            $("#extraLargeModal .modal-body").html(response.content); // show as plain text
+            $("#extraLargeModal").modal("show");
+        },
+        error: function() {
+            alert("Failed to load bank details.");
+        }
+    });
+});
+// View Notes
+$(document).on('click', '.viewNote', function() {
+        const noteId = $(this).data('id');
+        const noteUrl = $(this).data('url');
+        const type   = $(this).data('type');
+
+        $.ajax({
+            url: noteUrl,
+            method: 'GET',
+            success: function(response) {
+                $("#extraLargeModal .modal-title").text(type);
+                $("#extraLargeModal .modal-body").html(response.content); // show as plain text
+                $("#extraLargeModal").modal("show");
+            },
+            error: function() {
+                alert("Failed to load note content.");
+            }
+        });
+    });
 </script>
 @endsection

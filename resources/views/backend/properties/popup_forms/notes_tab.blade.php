@@ -11,7 +11,7 @@
             <div class="col-12">
                 <div class="card shadow-sm h-100">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <span class="badge bg-secondary">{{ $note->type }}</span>
+                        <span class="badge bg-secondary">{{ $note->noteType->name ?? 'N/A' }}</span>
                         <span class="d-flex align-items-end">
                             <small class="text-muted ms-2">Added At: {{ $note->created_at->format('M d, Y') }}</small>
                             <small class="text-muted ms-2">Updated At: {{ $note->updated_at->format('M d, Y') }}</small>
@@ -31,8 +31,8 @@
                                 data-content="{{ htmlentities($note->content) }}" title="View Full Note">
                                 <i class="bi bi-eye"> View</i>
                             </button> --}}
-                            <button class="btn btn-sm btn-outline-info viewNote me-1" data-type="{{ $note->type }}"
-                                data-id="{{ $note->id }}" data-url="{{ route('admin.properties.note.show', $note->id) }}" title="View Full Note">
+                            <button class="btn btn-sm btn-outline-info viewNote me-1" data-type="{{ $note->noteType->name ?? 'N/A' }}"
+                                data-id="{{ $note->id }}" data-url="{{ route('admin.notes.show', $note->id) }}" title="View Full Note">
                                 <i class="bi bi-eye"> View</i>
                             </button>
                             <button class="btn btn-sm btn-outline-danger editNote editForm me-1" data-form="notes_tab"
@@ -40,7 +40,7 @@
                                 <i class="bi bi-pencil">Edit</i>
                             </button>
                             <button class="btn btn-sm btn-outline-danger deleteNote me-1" title="Delete Note"
-                            data-note-id="{{ $note->id }}" onclick="confirmModal('{{ url(route('admin.properties.note.delete', $note->id)) }}', responseHandler)">
+                            data-note-id="{{ $note->id }}" onclick="confirmModal('{{ url(route('admin.notes.delete', $note->id)) }}', responseHandler)">
                             <i class="bi bi-trash">Delete</i>
                         </button>
                         </div>
@@ -62,15 +62,15 @@
         <input type="hidden" name="property_id" value="{{ $property->id }}">
         <input type="hidden" name="form_type" value="notes_tab">
         <input type="hidden" name="note_id" value="{{ $note->id ?? '' }}">
-
+        
         <div class="mb-3">
             <label for="noteType" class="form-label">Type</label>
-            <select name="type" id="noteType" class="form-select">
-                <option {{ (isset($note) && $note->type == 'Email') ? 'selected' : '' }}>Email</option>
-                <option {{ (isset($note) && $note->type == 'Call') ? 'selected' : '' }}>Call</option>
-                <option {{ (isset($note) && $note->type == 'Text') ? 'selected' : '' }}>Text</option>
-                <option {{ (isset($note) && $note->type == 'General') ? 'selected' : '' }}>General</option>
-                <option {{ (isset($note) && $note->type == 'MIS') ? 'selected' : '' }}>MIS</option>
+            <select name="note_type_id" id="noteType" class="form-select">
+                @foreach($noteTypes as $type)
+                    <option value="{{ $type->id }}" {{ isset($note) && $note->note_type_id == $type->id ? 'selected' : '' }}>
+                        {{ $type->name }}
+                    </option>
+                @endforeach
             </select>
         </div>
 
