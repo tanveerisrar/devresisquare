@@ -126,9 +126,13 @@ class Property extends Model
         return $this->belongsTo(Country::class, 'country');
     }
 
+    // public function notes()
+    // {
+    //     return $this->hasMany(Notes::class);
+    // }
     public function notes()
     {
-        return $this->hasMany(Notes::class);
+        return $this->morphMany(Notes::class, 'noteable');
     }
 
     /**
