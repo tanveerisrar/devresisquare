@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Models\Notes;
+use App\Models\NoteType;
 use Illuminate\Http\Request;
 
 class NotesController 
@@ -65,45 +66,57 @@ class NotesController
             'noteable_type' => 'required|string',
             'noteable_id'   => 'required|integer',
             'note_id'       => 'nullable|integer|exists:notes,id',
+            'note_type_id'  => 'nullable|integer',
+            'search'        => 'nullable|string',
+            'from_date'     => 'nullable|date',
+            'to_date'       => 'nullable|date',
+            'page'          => 'nullable|integer',
         ]);
 
-        // Get all notes for this noteable entity
-        $notes = Notes::with('noteType')->where('noteable_type', $data['noteable_type'])
-                    ->where('noteable_id', $data['noteable_id'])
-                    ->orderByDesc('updated_at')
-                    ->get();
+        $q = Notes::with('noteType')
+            ->where('noteable_type', $data['noteable_type'])
+            ->where('noteable_id', $data['noteable_id']);
 
-        // If a single note id provided, get that note, else null
-        $note = null;
-        if (!empty($data['note_id'])) {
-            $note = $notes->firstWhere('id', $data['note_id']);
-            // Optional: if not found in list, fallback to querying directly:
-            if (!$note) {
-                $note = Notes::with('noteType')->where('noteable_type', $data['noteable_type'])
-                            ->where('noteable_id', $data['noteable_id'])
-                            ->find($data['note_id']);
-            }
+        if (isset($data['note_type_id'] ) && $data['note_type_id']) {
+            $q->where('note_type_id', $data['note_type_id']);
+        }
+        if (!empty($data['search'])) {
+            $q->where('content','like','%'.$data['search'].'%');
+        }
+        if (!empty($data['from_date'])) {
+            $q->whereDate('created_at','>=',$data['from_date']);
+        }
+        if (!empty($data['to_date'])) {
+            $q->whereDate('created_at','<=',$data['to_date']);
         }
 
-        return response()->json(compact('notes', 'note'));
-    }
+        $notes     = $q->orderByDesc('updated_at')
+                           ->paginate(5)
+                           ->appends($request->except('page'));
+        $noteTypes = NoteType::orderBy('name')->get();
+
+        // Render the list partial
+        $html = view('components.backend.notes._notes_list', compact('notes','noteTypes'))->render();
+
+        return response()->json(['html' => $html]);
+    }   
 
 
     // Show single note content (for popup)
     /**
      * Show a single note by ID
      */
+    /**
+     * AJAX: Show a single note in “view” mode (rendered HTML).
+     */
     public function showNote($id)
     {
         $note = Notes::with('noteType')->findOrFail($id);
 
-        return response()->json([
-            'id'            => $note->id,
-            'type'          => $note->noteType->name ?? '',
-            'content'       => $note->content,
-            'created_at'    => $note->created_at,
-            'updated_at'    => $note->updated_at,
-        ]);
+        // Render the “show” partial
+        $html = view('components.backend.notes._notes_show', compact('note'))->render();
+
+        return response()->json(['html' => $html]);
     }
 
     /**

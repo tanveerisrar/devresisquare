@@ -1,4 +1,5 @@
 @if(!isset($editMode) || !$editMode)
+
     <!-- Display View Mode with Bootstrap 5 Cards -->
     <!-- Add New Note Card -->
     <div class="mb-3">
@@ -7,6 +8,36 @@
         </button>
     </div>
     <div class="row g-3 mb-3 note-list">
+        <form method="GET" class="row g-3 mb-4">
+            <div class="col-md-3">
+                <select name="note_type_id" class="form-select">
+                    <option value="">All Types</option>
+                    @foreach($noteTypes as $type)
+                        <option value="{{ $type->id }}" {{ request('note_type_id') == $type->id ? 'selected' : '' }}>
+                            {{ $type->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <input type="text" name="search" class="form-control" placeholder="Search in content" value="{{ request('search') }}">
+            </div>
+
+            <div class="col-md-3">
+                <input type="date" name="from_date" class="form-control" value="{{ request('from_date') }}">
+            </div>
+
+            <div class="col-md-3">
+                <input type="date" name="to_date" class="form-control" value="{{ request('to_date') }}">
+            </div>
+
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary">Filter</button>
+                <a href="{{ route('admin.contacts.show', $contact->id) }}" class="btn btn-secondary">Reset</a>
+            </div>
+        </form>
+
         @forelse($notes as $note)
             <div class="col-12">
                 <div class="card shadow-sm h-100">

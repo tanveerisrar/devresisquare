@@ -142,14 +142,15 @@ class ContactController
     
             case 'notes':
                 // Fetch the notes related to the specific contact by contact ID
-                $notes = $contact->notes()->orderBy('updated_at', 'desc')->get();
+                $notes = $contact->notes()->with('noteType')->orderByDesc('updated_at')->paginate(5);
 
                 // Ensure it's an empty collection if no notes are found
                 if ($notes->isEmpty()) {
                     $notes = collect();  // Make sure it's an empty collection, not null
                 }
-                
-                return view('backend.contacts.tabs.notes', compact('contactId', 'contact', 'notes'))->render();
+                $noteTypes = NoteType::all();
+                return view('backend.contacts.tabs.notes', compact('contactId', 'contact', 'notes', 'noteTypes'))->render();
+                // return view('backend.contacts.tabs.notes', compact('contactId', 'contact'))->render();
     
             default:
                 return 'Tab content not found';
@@ -522,7 +523,7 @@ class ContactController
         }
 
         $extraData = []; // <-- This prevents undefined variable errors
-        $extraData = $this->getFormTypeExtras($formType, $contact, $request->note_id ?? null, $request->bank_detail_id ?? null);
+        $extraData = $this->getFormTypeExtras($formType, $contact, $request, $request->note_id ?? null, $request->bank_detail_id ?? null);
         // ** NEW: if we have a note_id, fetch that note and pass it in **
         // if ($formType === 'notes_tab' && $request->filled('note_id')) {
         //     $note = $contact->notes()->findOrFail($request->note_id);
@@ -679,25 +680,25 @@ class ContactController
                     'imp_notes'
                 ]);
                 break;
-            case 'notes_tab':
-                    $dataNotes = $request->validate([
-                        'note_type_id'   => 'required|exists:note_types,id',
-                        'content' => 'required|string',
-                        'note_id' => 'nullable|exists:notes,id',
-                    ]);
+            // case 'notes_tab':
+            //         $dataNotes = $request->validate([
+            //             'note_type_id'   => 'required|exists:note_types,id',
+            //             'content' => 'required|string',
+            //             'note_id' => 'nullable|exists:notes,id',
+            //         ]);
 
-                    $notesController = new NotesController();
+            //         $notesController = new NotesController();
 
-                    $note = $notesController->saveNoteData([
-                        'noteable_type' => get_class($contact),
-                        'noteable_id'   => $contact->id,
-                        'note_type_id'  => $dataNotes['note_type_id'],
-                        'content'       => $dataNotes['content'],
-                        'note_id'       => $dataNotes['note_id'] ?? null,
-                    ]);
+            //         $note = $notesController->saveNoteData([
+            //             'noteable_type' => get_class($contact),
+            //             'noteable_id'   => $contact->id,
+            //             'note_type_id'  => $dataNotes['note_type_id'],
+            //             'content'       => $dataNotes['content'],
+            //             'note_id'       => $dataNotes['note_id'] ?? null,
+            //         ]);
 
-                    $data = []; // <-- Prevents undefined variable error
-                break;
+            //         $data = []; // <-- Prevents undefined variable error
+            //     break;
             default:
                 return response()->json(['message' => 'Invalid form type'], 400);
         }
@@ -721,7 +722,7 @@ class ContactController
         ]);
     }
     
-    private function getFormTypeExtras($formType, $contact, $noteId = null, $bankId = null)
+    private function getFormTypeExtras($formType, $contact, $noteId = null, $bankId = null, $request = null)
     {
         if ($formType === 'contact_detail') {
             // Fetch categories for your filter dropdown
@@ -734,27 +735,49 @@ class ContactController
             $users = User::orderBy('name')->pluck('name', 'id');
             return compact('nationalities','users');
 
-        }elseif ($formType === 'notes_tab') {
-            /*
+        //}
+        //elseif ($formType === 'notes_tab') {
+            
             // Prepare the Request object for NotesController
-            $requestData = new Request([
-                'noteable_type' => get_class($contact),  // e.g. App\Models\Contact
-                'noteable_id'   => $contact->id,
-                'note_id'       => $noteId,  // null if no noteId
-            ]);
+            // $requestData = new Request([
+            //     'noteable_type' => get_class($contact),  // e.g. App\Models\Contact
+            //     'noteable_id'   => $contact->id,
+            //     'note_id'       => $noteId,  // null if no noteId
+            // ]);
 
-            $notesController = new NotesController();
-            $response = $notesController->listNotes($requestData);
+            // $notesController = new NotesController();
+            // $response = $notesController->listNotes($requestData);
 
-            $data = $response->getData(); // TRUE returns an array, not an object
-            $notes = $data->notes ?? collect();
-            $note = $data->note ?? null;
-            // 3) all available note types
-            $noteTypes = NoteType::all();
-            return compact('notes','note', 'noteTypes');
-            */
+            // $data = $response->getData(); // TRUE returns an array, not an object
+            // $notes = $data->notes ?? collect();
+            // $note = $data->note ?? null;
+            // // 3) all available note types
+            // $noteTypes = NoteType::all();
+            // return compact('notes','note', 'noteTypes');
+            
             // 1) full list for view mode
-            $notes = $contact->notes()->with('noteType')->orderBy('updated_at','desc')->get();
+            // $notes = $contact->notes()->with('noteType')->orderBy('updated_at','desc')->get();
+            /*$notesQuery = $contact->notes()->with('noteType')->orderByDesc('updated_at');
+
+            // Filter by note type
+            if ($request->filled('note_type_id')) {
+                $notesQuery->where('note_type_id', $request->note_type_id);
+            }
+
+            // Filter by content
+            if ($request->filled('search')) {
+                $notesQuery->where('content', 'like', '%' . $request->search . '%');
+            }
+
+            // Filter by date range
+            if ($request->filled('from_date')) {
+                $notesQuery->whereDate('created_at', '>=', $request->from_date);
+            }
+            if ($request->filled('to_date')) {
+                $notesQuery->whereDate('created_at', '<=', $request->to_date);
+            }
+
+            $notes = $notesQuery->paginate(10); // Use pagination instead of get()
 
             // 2) single note when editing
             $note = null;
@@ -762,7 +785,7 @@ class ContactController
                 $note = $contact->notes()->with('noteType')->findOrFail($noteId);
             }
             $noteTypes = NoteType::all();
-            return compact('notes', 'note', 'noteTypes');
+            return compact('notes', 'note', 'noteTypes');*/
         }elseif ($formType === 'bank_detail') {
             // 1) full list for view mode
             $bankDetails = $contact->bankDetails()->orderByDesc('is_primary')->orderBy('updated_at','desc')->get();
