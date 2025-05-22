@@ -99,21 +99,22 @@ $secondHalf = array_slice($allFeatures, $halfCount);
         <img src="{{ asset('/asset/images/temp-property.webp') }}" alt="property">
     </div> --}}
     
-    <div class="pv_content">
+    <div class="pv_content w-100">
 
-        @if (isset($property) && isset($property->id))
-        {{-- @php
-        var_dump($property->id);
-        @endphp --}}
-            <!-- Delete Button -->
-            <button type="button" class="float-end btn btn-sm btn-outline-danger"
-            onclick="confirmModal('{{ url(route('admin.properties.delete', $property->id)) }}', responseHandler)">
-            <i class="mdi mdi-delete" title="Delete"></i>
-            Delete
-            </button>
-        @endif
-        <div class="pvc_ref_id"> <strong> Property Ref: {{$propRefNo}} </strong></div>
-        <div class="pvc_poperty_name">{{ $address }}</div>
+       <div class="pvc_property_name_wrapper">
+            <div>
+                <div class="pvc_ref_id"> <strong> Property Ref: {{$propRefNo}} </strong></div>
+                <div class="pvc_poperty_name">{{ $address }}</div>
+            </div>
+            @if (isset($property) && isset($property->id))
+                <!-- Delete Button -->
+                <button type="button" class="float-end btn btn-sm btn-outline-danger"
+                onclick="confirmModal('{{ url(route('admin.properties.delete', $property->id)) }}', responseHandler)">
+                <i class="mdi mdi-delete" title="Delete"></i>
+                Delete
+                </button>
+            @endif
+        </div>
         {{-- <div class="rs_property_icons">
             <div class="bed_icon rs_tooltip" data-label="Bedroom">
                 <img src=" {{ asset('asset/images/svg/icons/bed.svg') }} " alt="bedroom"> {{$bedroom}}
@@ -176,12 +177,12 @@ $secondHalf = array_slice($allFeatures, $halfCount);
         @php
         $formSections = [
             ['key' => 'availability_pricing', 'title' => 'Availability & Pricing', 'order' => 1],
-            ['key' => 'property_accessibility', 'title' => 'Accessibility', 'order' => 6],
-            ['key' => 'property_compliance', 'title' => 'Compliance', 'order' => 5],
             ['key' => 'property_features', 'title' => 'Property Features', 'order' => 3],
             ['key' => 'property_info', 'title' => 'Property Information', 'order' => 2],
             ['key' => 'property_services', 'title' => 'Service', 'order' => 4],
-            ['key' => 'property_media', 'title' => 'Media', 'order' => 7],
+            // ['key' => 'property_accessibility', 'title' => 'Accessibility', 'order' => 6],
+            // ['key' => 'property_compliance', 'title' => 'Compliance', 'order' => 5],
+            // ['key' => 'property_media', 'title' => 'Media', 'order' => 7],
             // ['key' => 'property_status', 'title' => 'Status', 'order' => 7],
             // Add more sections with order values as needed
         ];

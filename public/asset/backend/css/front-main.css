@@ -1199,11 +1199,15 @@ input[type="radio"]:checked+label::before {
                 border-radius: 6px;
 
                 .pv_content{
-
                     display: flex;
                     flex-direction: column;
                     gap: 6px;
-
+                    .pvc_property_name_wrapper{
+                        display: flex;
+                        gap: 16px;
+                        align-items: center;
+                        justify-content: space-between;
+                    }
                     .pvc_poperty_name{
                         font-size: 18px;
                         font-weight: 600;

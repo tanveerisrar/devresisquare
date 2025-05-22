@@ -66,11 +66,11 @@ class PropertyController
     $tabs = [
         ['name' => 'Property'],
         ['name' => 'Owners'],
-        ['name' => 'Offers'],
         ['name' => 'Compliance'],
+        ['name' => 'Media'],
+        ['name' => 'Offers'],
         ['name' => 'Tenancy'],
         ['name' => 'APS'],
-        ['name' => 'Media'],
         ['name' => 'Teams'],
         ['name' => 'Documents'],
         // ['name' => 'Contractor'],

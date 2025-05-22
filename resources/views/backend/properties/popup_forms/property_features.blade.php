@@ -26,14 +26,14 @@ $other = jsonDecodeAndPrint($property->other) ?? '';
                     {{ $kitchen ?: 'N/A' }}
                 </div>
             </div>
-            <div class="accordion_features_item">
+            {{-- <div class="accordion_features_item">
                 <div  class="accordion_features_label">
                     <div class="accordion_inner_heading">Heating and Cooling</div> 
                 </div>
                 <div  class="accordion_features_content">
                     {{ $heatingCooling ?: 'N/A' }}
                 </div>
-            </div>
+            </div> --}}
             <div class="accordion_features_item">
                 <div  class="accordion_features_label">
                     <div class="accordion_inner_heading">Safety</div> 
@@ -77,12 +77,12 @@ $other = jsonDecodeAndPrint($property->other) ?? '';
                 <div><span class="gray-500">Aspects:</span><span class="gray-950 fw-400"> {{ $property->aspects ?? 'N/A' }}</span></div>
             </div>
         </div>
-        <div class=" ">
+        {{-- <div class=" ">
             <div class="accordion_inner_heading mb-2">Rent</div>
             <div class="accordion_features_item">
                 <div><span class="gray-500">Collecting Rent: </span> <span class="gray-950 fw-400">{{ $property->collecting_rent == '1' ? 'Yes' : 'No' }}</span></div>
             </div>
-        </div>
+        </div> --}}
         <div class=" ">
             <div class="accordion_inner_heading mb-2">Area</div>
             <div class="accordion_features_item area">
