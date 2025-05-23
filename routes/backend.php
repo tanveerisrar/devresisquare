@@ -247,10 +247,12 @@ Route::middleware('auth')->group(function () {
         Route::prefix('notes')->name('notes.')->controller(NotesController::class)->group(function () {
             // List notes (with optional filtering for noteable_type, noteable_id, note_id)
             Route::get('/list', 'listNotes')->name('list');
+            Route::get('/create', 'create')->name('create');
+            Route::get('/{note}/edit', 'edit')->name('edit');
             // Show single note by ID
             Route::get('/show/{id}', 'showNote')->name('show');
             // Create or update a note (store or update)
-            Route::post('/save{id}', 'storeOrUpdate')->name('save');
+            Route::post('/save', 'storeOrUpdate')->name('save');
             // Delete a note by ID
             Route::post('/delete/{id}', 'deleteNote')->name('delete');
         });

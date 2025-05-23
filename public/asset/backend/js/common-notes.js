@@ -18,44 +18,19 @@
   }
 
   // Open add/edit note form
-  function openForm($c, mode, noteId = 0) {
-    const $modal = $c.find('.notes-modal');
-    const $form = $modal.find('.notes-form');
-
-    if (mode === 'add') {
-      $form[0].reset();
-      $form.find('[name=note_id]').val('');
-      $modal.find('.modal-title').text('Add Note');
-      $modal.find('.notes-save').text('Save');
-
-      // Reset your text editor here if needed:
-      AIZ.plugins.textEditor();
-
-      $modal.modal('show');
-      return;
-    }
-
-    // EDIT mode: fetch note data from server
-    $.getJSON(`${api}/show/${noteId}`, function(data) {
-      // Reset form first
-      $form[0].reset();
-
-      // Fill form fields manually
-      $form.find('[name=note_id]').val(data.id);
-      $form.find('[name=note_type_id]').val(data.note_type_id);
-      $form.find('[name=content]').val(data.content);
-
-      // Update the text editor's content after setting textarea value
+  function loadForm(url, title) {
+    $.get(url, function(html){
+      $('#notesModal .modal-title').text(title);
+      $('#notesModal .modal-body').html(html);
+      // re-init your rich-text editor if needed
       if (typeof AIZ !== 'undefined' && AIZ.plugins && AIZ.plugins.textEditor) {
         AIZ.plugins.textEditor();
       }
-
-      $modal.find('.modal-title').text('Edit Note');
-      $modal.find('.notes-save').text('Update');
-      $modal.modal('show');
+      $('#notesModal').modal('show');
+    }).fail(function(){
+      alert('Failed to load form.');
     });
   }
-
 
   // Initialize components
   $(function(){
@@ -82,58 +57,136 @@
     load($c);
   });
 
-  // Add note
-  $(document).on('click', '.notes-add', function () {
-    const $c = $(this).closest('.notes-component');
-    openForm($c, 'add');
+  // Add button
+  $(document).on('click', '.notes-add', function(){
+    const $comp = $(this).closest('.notes-component');
+    const type = encodeURIComponent($comp.data('noteable-type'));
+    const id   = $comp.data('noteable-id');
+    const url  = `${api}/create?noteable_type=${type}&noteable_id=${id}`;
+    loadForm(url, 'Add Note');
   });
 
-  // Edit note
-  $(document).on('click', '.notes-edit', function (e) {
-    const $btn = $(this);
-    const $c = $btn.closest('.notes-component');
-    openForm($c, 'edit', $btn.data('id'));
+  // Edit button
+  $(document).on('click', '.notes-edit', function(){
+    const noteId = $(this).data('id');
+    const url    = `${api}/${noteId}/edit`;
+    loadForm(url, 'Edit Note');
   });
 
-  // View note
-  $(document).on('click', '.notes-view', function () {
-    const $btn = $(this);
-    const $c = $btn.closest('.notes-component');
-    const $modal = $c.find('.notes-modal');
-    const nid = $btn.data('id');
-
-    $.get(`${api}/show/${nid}`, d => {
-      $modal.find('.modal-title').text('View Note');
-      $modal.find('.modal-body').html(d.html || '');
-      $modal.modal('show');
+  // View button
+  $(document).on('click', '.notes-view', function(){
+    const noteId = $(this).data('id');
+    const url    = `${api}/show/${noteId}`;
+    $.get(url, function(res){
+      $('#notesModal .modal-title').text('View Note');
+      $('#notesModal .modal-body').html(res.html || res);
+      $('#notesModal').modal('show');
+    }).fail(function(){
+      alert('Failed to load note.');
     });
   });
 
   // Delete note
-  $(document).on('click', '.notes-delete', function () {
-    if (!confirm('Delete?')) return;
-    const $btn = $(this);
-    const $c = $btn.closest('.notes-component');
-    const $filt = $c.find('.notes-filter-form');
+  // $(document).on('click', '.notes-delete', function () {
+  //   if (!confirm('Delete?')) return;
+  //   const $btn = $(this);
+  //   const $c = $btn.closest('.notes-component');
+  //   const $filt = $c.find('.notes-filter-form');
 
-    $.post(`${api}/delete/${$btn.data('id')}`, {
-      _token: '{{ csrf_token() }}'
-    }, _ => load($c, Object.fromEntries(new URLSearchParams($filt.serialize()))));
+  //   $.post(`${api}/delete/${$btn.data('id')}`, {
+  //     _token: '{{ csrf_token() }}'
+  //   }, _ => load($c, Object.fromEntries(new URLSearchParams($filt.serialize()))));
+  // });
+  $(function(){
+    let pendingDelete = null;
+    let pendingDeleteURL = null;
+    let pendingDeleteMessage = null;
+
+    // When user clicks a delete button, open the modal
+    $(document).on('click', '.notes-delete', function(){
+      pendingDelete = $(this).data('id');
+      pendingDeleteURL = $(this).data('url');
+      pendingDeleteMessage = $(this).data('message') || 'Are you sure you want to delete this item?';
+      $('#deleteConfirmModal .modal-body .delete-message').text(pendingDeleteMessage);
+      $('#deleteConfirmModal').modal('show');
+    });
+
+    // When user confirms deletion
+    $(document).on('click','#confirmDeleteBtn', function(){
+      if (!pendingDelete) return;
+      if (!pendingDeleteURL) return;
+      // Find the component context
+      const $btn = $(`.notes-delete[data-id="${pendingDelete}"]`);
+      const $comp = $btn.closest('.notes-component');
+      const $filt = $comp.find('.notes-filter-form');
+
+      $.post(pendingDeleteURL, {
+            _token: $('meta[name="csrf-token"]').attr('content')
+      }).done(function (response) {
+        // Hide modal
+        $('#deleteConfirmModal').modal('hide');
+        // Refresh list
+        const params = Object.fromEntries(new URLSearchParams($filt.serialize()));
+        load($comp, params);
+        pendingDelete = null;
+      }).fail(function(){
+        alert('Deletion failed. Please try again.');
+        $('#deleteConfirmModal').modal('hide');
+      });
+    });
+
+    // Clear pending if modal closed
+    $('#deleteConfirmModal').on('hidden.bs.modal', function(){
+      pendingDelete = null;
+    });
   });
 
   // Save note form (modal submit)
-  $(document).on('submit', '.notes-form', function(e) {
-    e.preventDefault();
-    const $form = $(this);
-    const $c = $form.closest('.notes-component');
-    const $modal = $c.find('.notes-modal');
-    const $filt = $c.find('.notes-filter-form');
+  // $(document).on('submit', '.notes-form', function(e) {
+  //   e.preventDefault();
+  //   initValidate(this);
+  //   const $form = $(this);
+  //   const $c = $form.closest('.notes-component');
+  //   const $modal = $c.find('.notes-modal');
+  //   const $filt = $c.find('.notes-filter-form');
 
-    $.post(`${api}/save`, $form.serialize(), r => {
+  //   $.post(`${api}/save`, $form.serialize(), r => {
+  //     $modal.modal('hide');
+  //     load($c, Object.fromEntries(new URLSearchParams($filt.serialize())));
+  //   });
+  // });
+
+  $(document).on('submit', '#notesForm', function(e) {
+    e.preventDefault();              // stop the normal form submit
+
+    const $form = $(this);
+    const $c    = $form.closest('.notes-component');
+    const $modal = $('#notesModal'); // or $form.closest('.notes-modal')
+    const $filt  = $c.find('.notes-filter-form');
+
+    // disable the save button to prevent double-click
+    const $btn = $form.find('.notes-save').prop('disabled', true);
+
+    $.ajax({
+      url:   $form.attr('action'),    // '/admin/notes/save'
+      method:'POST',
+      data:  $form.serialize(),
+    }).done(function(res) {
+      // you can inspect res.status or res.message if you return JSON
       $modal.modal('hide');
       load($c, Object.fromEntries(new URLSearchParams($filt.serialize())));
+    }).fail(function(xhr) {
+      // handle validation errors (xhr.responseJSON.errors)
+      let msg = 'Failed to save note.';
+      if (xhr.responseJSON && xhr.responseJSON.errors) {
+        msg = Object.values(xhr.responseJSON.errors).flat().join("\n");
+      }
+      alert(msg);
+    }).always(function() {
+      $btn.prop('disabled', false);
     });
   });
+
 
   // Pagination click
   $(document).on('click', '.notes-component .pagination a', function(e){

@@ -8,6 +8,38 @@ use Illuminate\Http\Request;
 
 class NotesController 
 {   
+    public function create(Request $request)
+    {
+        $request->validate([
+            'noteable_type' => 'required|string',
+            'noteable_id' => 'required|integer',
+        ]);
+
+        $noteableType = $request->noteable_type;
+        $noteableId = $request->noteable_id;
+
+        if (!class_exists($noteableType)) {
+            return response('Invalid noteable type.', 404);
+        }
+
+        $noteable = $noteableType::findOrFail($noteableId);
+        $noteTypes = NoteType::all();
+
+        return view('components.backend.notes.notes_form', compact('noteTypes', 'noteable'))->render();
+    }
+
+    public function edit(Notes $note)
+    {
+        $noteable = $note->noteable;
+        $noteTypes = NoteType::all();
+
+        return view('components.backend.notes.notes_form', [
+            'noteTypes' => $noteTypes,
+            'note' => $note,
+            'noteable' => $noteable,
+        ])->render();
+    }
+
     /**
      * Create or update a note
      * Expected input: noteable_type, noteable_id, type, content, optional note_id for update
