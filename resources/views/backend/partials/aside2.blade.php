@@ -208,6 +208,7 @@
                     'admin.branches.index', 
                     'admin.designations.index',
                     'admin.note-types.index', 'admin.note-types.create', 
+                    'admin.document-types.index', 'admin.document-types.create', 
                     'admin.tenancy_types.index', 
                     'admin.tenancy_types.create', 
                     'admin.tenancy_sub_statuses.index', 
@@ -232,6 +233,7 @@
                 'admin.branches.index', 
                 'admin.designations.index',
                 'admin.note-types.index', 'admin.note-types.create',
+                'admin.document-types.index', 'admin.document-types.create',
                 'admin.tenancy_types.index', 
                 'admin.tenancy_types.create', 
                 'admin.tenancy_sub_statuses.index', 
@@ -279,6 +281,29 @@
                         <li class="sidebar-sub-sub-list-item">
                             <a class="{{ areActiveRoutes(['admin.note-types.create']) }}"
                             href="{{ route('admin.note-types.create') }}">
+                                <i class="fa-solid fa-plus"></i> Add
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <!-- Document Types Section -->
+                <li class="sidebar-sub-list-item py-0 mb-0 submenu_wrapper">
+                    <a href="#documentTypesSubmenu" data-bs-toggle="collapse"
+                    aria-expanded="{{ areActiveRoutes(['admin.document-types.index', 'admin.document-types.create'], 'true') }}"
+                    class="dropdown-toggle {{ areActiveRoutes(['admin.document-types.index', 'admin.document-types.create']) }}">
+                        <i class="fa-solid fa-layer-group"></i> Document Types
+                    </a>
+                    <ul class="nav-third-level collapse list-unstyled {{ areActiveRoutes(['admin.document-types.index', 'admin.document-types.create'], 'show') }}"
+                        id="documentTypesSubmenu">
+                        <li class="sidebar-sub-sub-list-item">
+                            <a class="{{ areActiveRoutes(['admin.document-types.index']) }}"
+                            href="{{ route('admin.document-types.index') }}">
+                                <i class="fa-solid fa-eye"></i> View All
+                            </a>
+                        </li>
+                        <li class="sidebar-sub-sub-list-item">
+                            <a class="{{ areActiveRoutes(['admin.document-types.create']) }}"
+                            href="{{ route('admin.document-types.create') }}">
                                 <i class="fa-solid fa-plus"></i> Add
                             </a>
                         </li>
