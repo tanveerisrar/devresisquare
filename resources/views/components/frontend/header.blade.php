@@ -6,7 +6,13 @@
                 <img src="{{ uploaded_asset(get_setting('header_logo')) }}" alt="Resisquare logo">
                 {{-- <img src="{{ asset('asset/images/resisquare-logo.svg') }}" alt="Resisquare logo"> --}}
             </div>
-            <div class="navbar-nav ms-auto">               
+            <div class="navbar-nav ms-auto">    
+                <div class="nav-item">
+                    <button class="btn btn_secondary pricing_btn">Book a demo</button>
+                </div>           
+                <div class="nav-item">
+                    <a class="nav-link" href="{{ route('pricing') }}">Pricing</a>
+                </div>           
                 @if (Auth::check())                  
                     <div class="nav-item">
                         <form action="{{ route('logout') }}" method="POST" class="d-inline">

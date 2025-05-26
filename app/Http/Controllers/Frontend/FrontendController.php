@@ -27,4 +27,11 @@ class FrontendController
         return view('frontend.index');
     }
 
+    public function pricing()
+    {
+        
+        return view('frontend.pricing');
+    }
+    
+
 }

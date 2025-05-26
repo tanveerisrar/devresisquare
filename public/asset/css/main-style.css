@@ -848,6 +848,126 @@ Features carrousel slider
 }
 
 
+  
+/* =======================================================================
+Pricing page
+===========================================================================*/
+.pricing_section{
+    padding-top: 80px;
+    padding-bottom: 80px;
+    h2{
+        text-align: center;
+    }
+    .pricing_tables{
+        display: flex;
+        flex-direction: row;
+        justify-content:center;
+        gap: 64px;
+        .price_table{
+            width: 450px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background-color: var(--white);
+            overflow: hidden;
+            border-radius: 12px;
+            text-align: center;
+            padding-bottom: 24px;
+            
+            .price_table_header{
+                background-color: var(--primary-900);
+                color: var(--white);
+                padding : 20px;
+                h3{
+                    margin: 0;
+                }
+                h5{
+                    font-size: 14px;
+                    font-weight: 400
+                }
+            }
+            .price_table_content{
+                padding: 24px;
+                .desc{
+                    font-size: 14px;
+                    margin-bottom: 16px;
+                }
+                .price{
+                    font-size: 52px;
+                    font-weight: 600;
+                    margin: 0;
+                    padding: 24px 0;
+                    span{
+                        font-size: 24px;
+                        font-weight: 400;
+                        color: var(--primary-500);
+                    }
+                }
+                .pricing_features_wrapper{
+                    display: flex;
+                    justify-content: center;
+                    .pricing_features{
+                        text-align: left;
+                        li{
+                            margin: 0;
+                            padding: 8px 0;
+                            &:before {
+                                content: '✓';
+                                color: var(--secondary);
+
+                                padding-right: 8px;
+                            }
+                        }
+                    }
+                }
+            }
+            .pricing_btn{
+                margin-left: 24px;
+                margin-right: 24px;
+                width: -webkit-fill-available;
+                justify-content: center;
+            }
+        }
+
+    }
+    &.why_us_section{
+        background-color: var(--white);
+        display: flex;
+        justify-content: center;
+        .pricing_tables{
+            align-items: center;
+            gap: 64px;
+        }
+        .why_us_table{
+            width: 320px;
+            justify-content: center;
+            height: fit-content;
+            border: 1px solid var(--primary-300);
+            .price_table_content{
+                display:flex;
+                flex-direction: column;
+                gap: 32px;
+                img{
+                    margin-bottom: 16px;
+                }
+                p{
+                    font-size: 16px;
+                    line-height: 24px;
+                    font-weight: 500;
+                    color: var(--primary-800);
+                }
+            }
+        }
+    }
+}
+
+.trusted_by_section{
+    text-align: center;
+}
+
+
+
+
 /* =======================================================================
 Responsive
 ===========================================================================*/
@@ -899,6 +1019,26 @@ Responsive
                 width: 591px;
                 margin-top: 65px;
                 margin-left: -83px;
+            }
+        }
+    }
+
+    .pricing_section{
+        padding-left: 16px;
+        padding-right: 16px;
+        .pricing_tables{
+            flex-direction: column !important;
+            .price_table{
+                width: 100%;
+            }
+        }
+    }
+    .footer_section {
+        .frontend_footer {
+            flex-direction: column;
+            align-items: center;
+            ul {
+                margin-top: 16px;
             }
         }
     }

@@ -24,6 +24,7 @@ Route::group(['middleware' => 'web'], function () {
 
     // Frontend routes
     Route::get('/', [FrontendController::class, 'index'])->name('home');
+    Route::get('/pricing', [FrontendController::class, 'pricing'])->name('pricing');
 });
 Route::group(['middleware' => 'auth', 'prefix' => 'admin'], function () {
     Route::get('/login', [AuthenticateController::class, 'index'])->name('backend.login');
