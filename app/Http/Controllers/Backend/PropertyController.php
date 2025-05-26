@@ -8,13 +8,14 @@ use App\Models\Offer;
 use App\Models\Branch;
 use App\Models\Country;
 use App\Models\Tenancy;
+use App\Models\NoteType;
 use App\Models\Property;
 use App\Models\OwnerGroup;
 use App\Models\SchoolName;
 use App\Models\Designation;
 use App\Models\StationName;
-use App\Models\EstateCharge;
 // use App\Models\EstateCharge;
+use App\Models\EstateCharge;
 use Illuminate\Http\Request;
 use App\Models\ComplianceType;
 use App\Models\LocalAuthority;
@@ -192,15 +193,15 @@ private function getTabContent($tabname, $propertyId, $property)
         case 'notes':
             // Fetch the notes related to the specific property by property ID
             // $notes = Notes::where('property_id', $propertyId)->orderBy('updated_at', 'desc')->get();
-            $notes = $property->notes()->orderBy('updated_at', 'desc')->get();
-            
+            $notes = $property->notes()->with('noteType')->orderByDesc('updated_at')->paginate(5);
+
             // Ensure it's an empty collection if no notes are found
             if ($notes->isEmpty()) {
                 $notes = collect();  // Make sure it's an empty collection, not null
             }
-            
+            $noteTypes = NoteType::all();
             // Return the view and pass the notes data (null or the notes collection)
-            return view('backend.properties.tabs.notes', compact('propertyId', 'property', 'notes'))->render();        
+            return view('backend.properties.tabs.notes', compact('propertyId', 'property', 'notes', 'noteTypes'))->render();        
         default:
             return 'Tab content not found';
     }
@@ -841,7 +842,7 @@ private function getTabContent($tabname, $propertyId, $property)
                     'imp_notes'
                 ]);
                 break;
-            case 'notes_tab':
+            /*case 'notes_tab':
                 // $data = $request->only([
                 //     'notes'
                 // ]);
@@ -870,7 +871,7 @@ private function getTabContent($tabname, $propertyId, $property)
                         'content' => $data['content'],
                     ]);
                 }
-                break;
+                break;*/
             default:
                 return response()->json(['message' => 'Invalid form type'], 400);
         }
@@ -929,7 +930,8 @@ private function getTabContent($tabname, $propertyId, $property)
                 $q->orderBy('name');
             }])->orderBy('name')->get();
             return compact('groups');
-        }elseif ($formType === 'notes_tab') {
+        }
+        /*elseif ($formType === 'notes_tab') {
             // 1) full list for view mode
             $notes = $property->notes()->with('noteType')->orderBy('updated_at','desc')->get();
 
@@ -940,7 +942,7 @@ private function getTabContent($tabname, $propertyId, $property)
             }
             $noteTypes = \App\Models\NoteType::all();
             return compact('notes', 'note', 'noteTypes');
-        } 
+        } */
 
         return [];
     }
