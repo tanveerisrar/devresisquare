@@ -50,7 +50,33 @@
                 <p class="hero_description">Streamline operations, enhance tenant satisfaction, and maximize returns with ResiSquare's innovative property management solutions.</p>
                 <div class="hero_btns">
                     <button class="btn btn_primary">Get Started</button>
-                    <button class="btn btn_secondary">Book a Demo</button>
+                    {{-- <button class="btn btn_secondary">Book a Demo</button> --}}
+                    <!-- Trigger Button -->
+                    <button type="button" class="btn btn_secondary" data-bs-toggle="modal" data-bs-target="#bookDemoModal">
+                        Book a Demo
+                    </button>
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="bookDemoModal" tabindex="-1" aria-labelledby="bookDemoModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content border-0 shadow-lg rounded-4">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="bookDemoModalLabel">Book a Demo</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            {{-- Include your reusable form component --}}
+                            <x-form
+                                action="{{ route('form.submit', 'book_demo') }}"
+                                formId="bookDemoForm"
+                                submitText="Book Now"
+                                successMessage="Thank you! We will contact you shortly."
+                            />
+                        </div>
+                        </div>
+                    </div>
+                    </div>
                 </div>
             </div>
             <div class="">

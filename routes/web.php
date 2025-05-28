@@ -7,6 +7,7 @@ use App\Http\Controllers\Backend\DashboardController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Backend\AizUploadController;
 use niklasravnsborg\LaravelPdf\Facades\Pdf;
+use App\Http\Controllers\Frontend\FormController;
 
 // Route::get('/test-pdf', function() {
 //     $pdf = PDF::loadHTML('<h1>Hello World</h1>');
@@ -58,3 +59,6 @@ Route::controller(AizUploadController::class)->group(function () {
 Route::get('/helper', function () {
     return view('helper');
 });
+
+Route::get('/form/{type}', [FormController::class, 'show'])->name('form.show');
+Route::post('/form/{type}', [FormController::class, 'submit'])->name('form.submit');
