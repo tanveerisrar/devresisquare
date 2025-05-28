@@ -135,6 +135,11 @@ class Property extends Model
         return $this->morphMany(Notes::class, 'noteable');
     }
 
+    public function documents()
+    {
+        return $this->morphMany(Document::class, 'documentable');
+    }
+    
     /**
      * The local authority this property belongs to.
      */

@@ -19,7 +19,7 @@ return new class extends Migration
             $table->index(['documentable_type','documentable_id']);
             
             // reference to your Upload record (actual file metadata)
-            $table->foreignId('upload_ids')->constrained('uploads')->onDelete('cascade');
+            $table->string('upload_ids', 2000)->nullable();
             
             // optional categorization
             $table->foreignId('document_type_id')->nullable()->constrained('document_types')->onDelete('set null');

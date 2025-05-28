@@ -14,17 +14,9 @@ class Document extends Model
     protected $fillable = [
         'documentable_id',
         'documentable_type',
-        'upload_id',
+        'upload_ids',
         'document_type_id',
     ];
-
-    /**
-     * The parent model (user, product, complianceRecord, etc.)
-     */
-    public function documentable()
-    {
-        return $this->morphTo();
-    }
 
     /**
      * The actual Upload record holding file info.
@@ -34,11 +26,13 @@ class Document extends Model
         return $this->belongsTo(Upload::class);
     }
 
-    /**
-     * Optional type/category of this document.
-     */
-    public function type()
+    public function documentType()
     {
-        return $this->belongsTo(DocumentType::class, 'document_type_id');
+        return $this->belongsTo(DocumentType::class);
+    }
+
+    public function documentable()
+    {
+        return $this->morphTo();
     }
 }

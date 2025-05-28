@@ -293,6 +293,7 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="{{ asset('/asset/backend/js/property-offer.js') }}"></script>
 <script src="{{ asset('/asset/backend/js/common-notes.js') }}"></script>
+<script src="{{ asset('/asset/backend/js/common-documents.js') }}"></script>
 @endpush
 @section('page.scripts')
 @if (isset($propertyId) && isset($property) && $propertyId != $property->id)

@@ -114,4 +114,9 @@ class Contact extends Model
     {
         return $this->morphMany(Notes::class, 'noteable');
     }
+
+    public function documents()
+    {
+        return $this->morphMany(Document::class, 'documentable');
+    }
 }
