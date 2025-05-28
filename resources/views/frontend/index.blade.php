@@ -67,7 +67,7 @@
 
                         <div class="modal-body">
                             {{-- Include your reusable form component --}}
-                            <x-form
+                            <x-form-component
                                 action="{{ route('form.submit', 'book_demo') }}"
                                 formId="bookDemoForm"
                                 submitText="Book Now"
