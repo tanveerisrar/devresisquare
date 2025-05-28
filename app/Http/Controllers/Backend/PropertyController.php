@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Backend;
 
+use App\Models\DocumentType;
 use App\Models\User;
 use App\Models\Notes;
 use App\Models\Offer;
@@ -16,6 +17,7 @@ use App\Models\Designation;
 use App\Models\StationName;
 // use App\Models\EstateCharge;
 use App\Models\EstateCharge;
+use Dom\Document;
 use Illuminate\Http\Request;
 use App\Models\ComplianceType;
 use App\Models\LocalAuthority;
@@ -185,7 +187,15 @@ private function getTabContent($tabname, $propertyId, $property)
         case 'teams':
             return view('backend.properties.tabs.teams', compact('propertyId'))->render();
         case 'documents':
-            return view('backend.properties.tabs.documents', compact('propertyId'))->render();
+            
+            $documents = $property->documents()->with('documentType')->orderByDesc('updated_at')->paginate(5);
+
+            // Ensure it's an empty collection if no documents are found
+            if ($documents->isEmpty()) {
+                $documents = collect();  // Make sure it's an empty collection, not null
+            }
+            $documentTypes = DocumentType::all();
+            return view('backend.properties.tabs.documents', compact('propertyId', 'property', 'documentTypes', 'documents'))->render();
         // case 'contractor':
         //     return view('backend.properties.tabs.contractor', compact('propertyId'))->render();
         // case 'work offer':

@@ -274,14 +274,16 @@ Route::middleware('auth')->group(function () {
         });
 
         Route::prefix('documents')->name('documents.')->controller(DocumentsController::class)->group(function () {
-            // List notes (with optional filtering for noteable_type, noteable_id, note_id)
-            Route::get('/all', 'listNotes')->name('list');
-            // Show single note by ID
-            Route::get('/show/{id}', 'showNote')->name('show');
-            // Create or update a note (store or update)
+            // List documents (with optional filtering for documentable_type, documentable_id, upload_id)
+            Route::get('/list', 'listDocuments')->name('list');
+            Route::get('/create', 'create')->name('create');
+            Route::get('/{document}/edit', 'edit')->name('edit');
+            // Show single document by ID
+            Route::get('/show/{id}', 'showDocument')->name('show');
+            // Create or update a document (store or update)
             Route::post('/save', 'storeOrUpdate')->name('save');
-            // Delete a note by ID
-            Route::post('/delete/{id}', 'deleteNote')->name('delete');
+            // Delete a document by ID
+            Route::post('/delete/{id}', 'deleteDocument')->name('delete');
         });
 
         Route::prefix('/property-repairs')->group(function () {

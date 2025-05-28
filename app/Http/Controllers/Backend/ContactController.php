@@ -9,6 +9,7 @@ use App\Models\NoteType;
 use App\Models\Property;
 use App\Models\BankDetails;
 use App\Models\Nationality;
+use App\Models\DocumentType;
 use Illuminate\Http\Request;
 use App\Models\ContactCategory;
 use Illuminate\Support\Facades\Log;
@@ -33,6 +34,7 @@ class ContactController
             'tenancies',
             'repairIssues',
             'tenantMembers',
+            'documents',
         ]);
 
         // Apply a category filter if provided
@@ -138,7 +140,15 @@ class ContactController
                 return view('backend.contacts.tabs.compliance', compact('contactId', 'contact', 'users', 'nationalities'))->render();
     
             case 'documents':
-                return view('backend.contacts.tabs.documents', compact('contactId', 'contact'))->render();
+                $documents = $contact->documents()->with('documentType')->orderByDesc('updated_at')->paginate(5);
+
+                // Ensure it's an empty collection if no documents are found
+                if ($documents->isEmpty()) {
+                    $documents = collect();  // Make sure it's an empty collection, not null
+                }
+                $documentTypes = DocumentType::all();
+                // return 1;
+                return view('backend.contacts.tabs.documents', compact('contactId', 'contact', 'documents', 'documentTypes'))->render();
     
             case 'notes':
                 // Fetch the notes related to the specific contact by contact ID

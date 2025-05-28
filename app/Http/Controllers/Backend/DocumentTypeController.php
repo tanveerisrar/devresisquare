@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\Backend;
 
-use App\Http\Controllers\Controller;
+use Illuminate\Support\Str;
 use App\Models\DocumentType;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 class DocumentTypeController
 {
@@ -31,12 +32,22 @@ class DocumentTypeController
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name'        => 'required|string|unique:document_types,name',
             'description' => 'nullable|string',
         ]);
 
-        DocumentType::create($request->only('name', 'description'));
+        // Sanitize name: trim spaces, reduce multiple spaces, and title case
+        $name = preg_replace('/\s+/', ' ', trim($validated['name']));
+        $name = ucfirst($name);
+        // $name = ucfirst(strtolower($name));
+        // $name = Str::title(preg_replace('/\s+/', ' ', trim($validated['name'])));
+        $description = $validated['description'] ?? null;
+
+        DocumentType::create([
+            'name'        => $name,
+            'description' => $description,
+        ]);
 
         flash("Document type created!")->success();
         return redirect()->route('admin.document-types.index');
@@ -65,13 +76,24 @@ class DocumentTypeController
      */
     public function update(Request $request, string $id)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name'        => 'required|string|unique:document_types,name,' . $id,
             'description' => 'nullable|string',
         ]);
 
         $documentType = DocumentType::findOrFail($id);
-        $documentType->update($request->only('name', 'description'));
+
+        // Sanitize name: trim spaces, reduce multiple spaces, and title case
+        $name = preg_replace('/\s+/', ' ', trim($validated['name']));
+        // $name = ucfirst(strtolower($name));
+        $name = ucfirst($name);
+        // $name = Str::title(preg_replace('/\s+/', ' ', trim($validated['name'])));
+        $description = $validated['description'] ?? null;
+
+        $documentType->update([
+            'name'        => $name,
+            'description' => $description,
+        ]);
 
         flash("Document type updated!")->success();
         return redirect()->route('admin.document-types.index');
