@@ -27,7 +27,9 @@ body.show-sidebar #menu {
 
 #wrapper {
     padding-left: 24px;
-    width: 86vw;
+    padding-right: 24px;
+    /* width: 86vw; */
+    width: 100vw;
     transition: margin-left 0.3s;
     height: calc(100vh - 36px)
 }
@@ -497,7 +499,7 @@ ul#propertiesSubmenu li.sidebar-sub-list-item:hover a {
     padding-top: 16px;
 } */
 
-.property_list_wrapper{
+/* .property_list_wrapper{
     &.show_this{
         display: block;
     }
@@ -506,6 +508,38 @@ ul#propertiesSubmenu li.sidebar-sub-list-item:hover a {
     &.show_this{
         display: block;
     }
+} */
+
+.view_properties {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+}
+
+.property_list_wrapper {
+    flex: 1 1 600px;
+
+    .pv_header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+
+        .rs_search {
+            flex: 1 1 auto;
+            text-align: center;
+            max-width: 50%;
+
+            input {
+                width: 100%;
+            }
+        }
+    }
+}
+
+.property_detail_wrapper {
+    flex: 1 1 500px;
+
 }
 .mobile_only{
     display: none;
@@ -1121,14 +1155,14 @@ input[type="radio"]:checked+label::before {
         border-bottom: 1px solid var(--primary-300) ;
         padding-bottom: 8px;
         height: 40px;
-        overflow: hidden;
-        overflow-x: auto;
+        /* overflow: hidden;
+        overflow-x: auto; */
         ul{
             display: flex;
             gap: 16px;
-            flex-wrap: nowrap;
             margin: 0;
             padding: 0;
+            flex-wrap: wrap;
             li{
                 list-style: none;
                 cursor: pointer;
