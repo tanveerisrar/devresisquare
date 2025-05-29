@@ -14,7 +14,7 @@
                         />
                         <div class="pv_btn">
                             <a href="{{ route('admin.properties.quick') }}" class="btn mt-2 btn-sm btn-outline-danger">
-                                Add Property
+                                <span> Add Property </span>
                             </a>
                         </div>
                         {{-- <div class="pv_btn">

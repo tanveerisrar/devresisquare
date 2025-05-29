@@ -21,14 +21,9 @@
         display: flex;
     }
 
-    /* .property_list_wrapper {
-        flex: 1 1 400px;
+    .pvd_content_wrapper{
+        width: 93%;
     }
-
-    .property_detail_wrapper {
-        flex: 1 1 200px;
-
-    } */
 
 
 }
@@ -254,6 +249,7 @@
                 ul {
                     width: unset;
                     overflow: unset;
+                    flex-wrap: nowrap;
                 }
             }
 
@@ -360,6 +356,8 @@
             width: 50px;
             border-radius: 100%;
             position: relative;
+            background: var(--secondary-color);
+            color: var(--white);
 
             &::after {
                 content: '+';
@@ -423,6 +421,7 @@
             box-shadow: 0px 0px 8px 1px #0e0e0e70;
             padding: 16px;
             padding-top: 24px;
+            width: 93%;
         }
 
         .accordion {

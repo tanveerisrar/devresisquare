@@ -103,7 +103,7 @@ $secondHalf = array_slice($allFeatures, $halfCount);
 
        <div class="pvc_property_name_wrapper">
             <div>
-                <div class="pvc_ref_id"> <strong> Property Ref: {{$propRefNo}} </strong></div>
+                <div class="pvc_ref_id"> <strong> Property Ref:</strong> {{$propRefNo}} </div>
                 <div class="pvc_poperty_name">{{ $address }}</div>
             </div>
             @if (isset($property) && isset($property->id))
