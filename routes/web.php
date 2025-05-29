@@ -1,19 +1,26 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
+use niklasravnsborg\LaravelPdf\Facades\Pdf;
+use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Frontend\FormController;
+use App\Http\Controllers\Backend\AizUploadController;
+use App\Http\Controllers\Backend\DashboardController;
 use App\Http\Controllers\Frontend\FrontendController;
 use App\Http\Controllers\Backend\AuthenticateController;
-use App\Http\Controllers\Backend\DashboardController;
-use App\Http\Controllers\Auth\AuthController;
-use App\Http\Controllers\Backend\AizUploadController;
-use niklasravnsborg\LaravelPdf\Facades\Pdf;
-use App\Http\Controllers\Frontend\FormController;
 
 // Route::get('/test-pdf', function() {
 //     $pdf = PDF::loadHTML('<h1>Hello World</h1>');
 //     return $pdf->download('test.pdf');
 // });
-
+Route::get('/storage-link', function () {
+    if (!file_exists(public_path('storage'))) {
+        Artisan::call('storage:link');
+        return 'Storage link created successfully.';
+    }
+    return 'Storage link already exists.';
+});
 // Group for web routes
 Route::group(['middleware' => 'web'], function () {
     // Auth routes
