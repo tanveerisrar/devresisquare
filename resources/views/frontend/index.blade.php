@@ -80,7 +80,7 @@
                 </div>
             </div>
             <div class="">
-                <img src="{{ asset('storage/uploads/all/hero_img.webp') }}" alt="Hero" class="img-fluid">
+                <img src="{{ static_asset('asset/img/hero_img.webp') }}" alt="Hero" class="img-fluid">
             </div>
         </div>
         
@@ -115,7 +115,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-6 col-12 mb-md-0 mb-3">
-                    <img src="{{ asset('storage/uploads/all/hero_img.webp') }}" alt="Feature" class="img-fluid">
+                    <img src="{{ asset('asset/img/hero_img.webp') }}" alt="Feature" class="img-fluid">
                 </div>
                 <div class="col-md-6 col-12 mb-md-0 mb-3">
                     <div class="feature_card ">
@@ -137,7 +137,7 @@
                     </div>
                 </div>
                 <div class="col-md-6 col-12 mb-md-0 mb-3">
-                    <img src="{{ asset('storage/uploads/all/hero_img.webp') }}" alt="Feature" class="img-fluid">
+                    <img src="{{ asset('asset/img/hero_img.webp') }}" alt="Feature" class="img-fluid">
                 </div>
             </div>
         </div>
@@ -146,7 +146,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-6 col-12 mb-md-0 mb-3">
-                    <img src="{{ asset('storage/uploads/all/hero_img.webp') }}" alt="Feature" class="img-fluid">
+                    <img src="{{ asset('asset/img/hero_img.webp') }}" alt="Feature" class="img-fluid">
                 </div>
                 <div class="col-md-6 col-12 mb-md-0 mb-3">
                     <div class="feature_card">
@@ -169,7 +169,7 @@
                 <button class="btn btn_secondary btn-lg">Book Now</button>
              </div>
             <div class="book_demo_img">
-                <img src="{{ asset('storage/uploads/all/hero_img.webp') }}" alt="Book a demo" class="">
+                <img src="{{ asset('asset/img/hero_img.webp') }}" alt="Book a demo" class="">
             </div>
     </div>
 </section>
