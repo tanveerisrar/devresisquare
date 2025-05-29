@@ -85,11 +85,11 @@
                 </div>
                 <div class="price_table_content">
                     <div>
-                        <img src="{{ asset('storage/uploads/all/icons/no-hidden-fees.svg')}}" alt="">
+                        <img src="{{ static_asset('asset/img/icons/no-hidden-fees.svg')}}" alt="">
                         <p class="desc">No hidden fees</p>
                     </div>
                     <div>
-                        <img src="{{ asset('storage/uploads/all/icons/full_access.svg')}}" alt="">
+                        <img src="{{ static_asset('asset/img/icons/full_access.svg')}}" alt="">
                         <p class="desc">Full platform access</p>
                     </div>
                 </div>
@@ -102,15 +102,15 @@
                 </div>
                 <div class="price_table_content">
                     <div>
-                        <img src="{{ asset('storage/uploads/all/icons/streamline-lettings.svg')}}" alt="">
+                        <img src="{{ static_asset('asset/img/icons/streamline-lettings.svg')}}" alt="">
                         <p class="desc">Streamline lettings</p>
                     </div>
                     <div>
-                        <img src="{{ asset('storage/uploads/all/icons/sales.svg')}}" alt="">
+                        <img src="{{ static_asset('asset/img/icons/sales.svg')}}" alt="">
                         <p class="desc">Sales</p>
                     </div>
                     <div>
-                        <img src="{{ asset('storage/uploads/all/icons/maintenance-app.svg')}}" alt="">
+                        <img src="{{ static_asset('asset/img/icons/maintenance-app.svg')}}" alt="">
                         <p class="desc">Maintenance in one app</p>
                     </div>
                 </div>
@@ -123,11 +123,11 @@
                 </div>
                 <div class="price_table_content">
                     <div>
-                        <img src="{{ asset('storage/uploads/all/icons/manage-property.svg')}}" alt="">
+                        <img src="{{ static_asset('asset/img/icons/manage-property.svg')}}" alt="">
                         <p class="desc">Dedicated property managers</p>
                     </div>
                     <div>
-                        <img src="{{ asset('storage/uploads/all/icons/plans.svg')}}" alt="">
+                        <img src="{{ static_asset('asset/img/icons/plans.svg')}}" alt="">
                         <p class="desc">Premium plans</p>
                     </div>
                 </div>
