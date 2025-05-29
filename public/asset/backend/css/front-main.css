@@ -1213,6 +1213,7 @@ input[type="radio"]:checked+label::before {
 /* -------------- Tabs --------------------- */
 .property_detail_wrapper {
     /* padding: 0 24px; */
+    overflow: hidden;
 }
 
 .pv_detail_wrapper {
@@ -1232,7 +1233,8 @@ input[type="radio"]:checked+label::before {
             gap: 16px;
             margin: 0;
             padding: 0;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
+            overflow: auto;
 
             li {
                 list-style: none;
