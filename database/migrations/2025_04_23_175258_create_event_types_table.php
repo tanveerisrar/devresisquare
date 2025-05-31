@@ -13,7 +13,9 @@ return new class extends Migration
     {
         Schema::create('event_types', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
+            $table->string('name')->unique(); // e.g. “Meeting”, “Inspection”, etc.
+            $table->string('slug')->unique()->nullable(); // optional
+            $table->text('description')->nullable();
             $table->timestamps();
         });
     }

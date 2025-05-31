@@ -12,8 +12,8 @@ class Event extends Model
 
     protected $fillable = [
         'title',
-        'type',
-        'sub_type',
+        'type_id',       // foreign key
+        'sub_type_id',   // foreign key
         'office',
         'status',
         'diary_owner',
@@ -24,7 +24,8 @@ class Event extends Model
         'location',
         'reminder',
         'repeat',
-        'repeat_until',
+        'repeat_interval',
+        'repeat_until_count',
     ];
 
     protected $casts = [
@@ -44,4 +45,24 @@ class Event extends Model
         return $this->belongsTo(EventSubType::class, 'sub_type_id');
     }
 
+       /**
+     * Each master event has many instances.
+     */
+    public function instances()
+    {
+        return $this->hasMany(EventInstance::class);
+    }
+
+    /**
+     * Color helper from status (unchanged).
+     */
+    public function getColorAttribute()
+    {
+        return match ($this->status) {
+            'Cancelled' => '#dc3545',
+            'Confirmed' => '#28a745',
+            'Rescheduled'=> '#ffc107',
+            default      => '#007bff',
+        };
+    }
 }

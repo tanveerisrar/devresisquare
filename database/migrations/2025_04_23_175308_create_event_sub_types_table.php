@@ -17,6 +17,8 @@ return new class extends Migration
                   ->constrained('event_types')
                   ->onDelete('cascade');
             $table->string('name');
+            $table->string('slug')->unique()->nullable();
+            $table->text('description')->nullable();
             $table->timestamps();
             $table->unique(['event_type_id','name']);
         });

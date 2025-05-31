@@ -13,20 +13,32 @@ return new class extends Migration
     {
         Schema::create('events', function (Blueprint $table) {
             $table->id();
+                        // Basic fields
             $table->string('title');
             $table->string('type')->nullable();
             $table->string('sub_type')->nullable();
             $table->string('office')->nullable();
-            $table->string('status')->nullable();
+            $table->enum('status', ['Confirmed', 'Pending', 'Cancelled', 'Rescheduled'])
+                  ->default('Pending');
+
             $table->string('diary_owner')->nullable();
             $table->string('on_behalf_of')->nullable();
-            $table->datetime('start_datetime');
-            $table->datetime('end_datetime');
-            $table->text('description')->nullable();
             $table->string('location')->nullable();
-            $table->string('reminder')->nullable(); // e.g., 30 minutes
-            $table->string('repeat')->nullable(); // daily, weekly, monthly
-            $table->integer('repeat_until')->nullable(); // number of occurrences
+            $table->text('description')->nullable();
+            $table->string('reminder')->nullable(); 
+            // (e.g. “30 minutes”, or store a number/unit pair if you prefer)
+
+            // Recurrence rule
+            $table->enum('repeat', ['none', 'daily', 'weekly', 'monthly'])
+                  ->default('none');
+            $table->integer('repeat_interval')->nullable()
+                  ->default(1)
+                  ->comment('Every N days/weeks/months; default 1');
+            $table->integer('repeat_until_count')->nullable()
+                  ->comment('Number of occurrences (excluding the original).');
+
+            // Or, alternatively, you could store a repeat_end_date instead of a count.
+            // Here we’ll use a count approach for simplicity.
             $table->timestamps();
         });
     }

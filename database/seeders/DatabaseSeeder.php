@@ -34,6 +34,7 @@ class DatabaseSeeder extends Seeder
             PropertyResponsibilitySeeder::class,
             ComplianceTypeSeeder::class,
             JobTypesSeeder::class,
+            EventTypeSeeder::class,
         ]);
 
         // User::factory()->create([

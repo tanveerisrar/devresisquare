@@ -21,7 +21,11 @@
     </table>
 </div>
     {{-- Calendar --}}
-    @include('backend.partials.calendar')
+    <div class="container my-4">
+        <h2>Upcoming Events</h2>
+        @include('backend.partials.calendar')
+    </div>
+    
 @endsection
 
 @section('page.scripts')

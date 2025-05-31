@@ -13,6 +13,7 @@ use App\Http\Controllers\Backend\TenancyController;
 use App\Http\Controllers\Backend\WebsiteController;
 use App\Http\Controllers\Backend\PropertyController;
 use App\Http\Controllers\Backend\DashboardController;
+use App\Http\Controllers\Backend\EventTypeController;
 use App\Http\Controllers\Backend\WorkOrderController;
 use App\Http\Controllers\Backend\ComplianceController;
 use App\Http\Controllers\Backend\OwnerGroupController;
@@ -20,6 +21,7 @@ use App\Http\Controllers\Backend\DesignationController;
 use App\Http\Controllers\Backend\TenancyTypeController;
 use App\Http\Controllers\Backend\AuthenticateController;
 use App\Http\Controllers\Backend\EstateChargeController;
+use App\Http\Controllers\Backend\EventSubTypeController;
 use App\Http\Controllers\Backend\PropertyRepairController;
 use App\Http\Controllers\Backend\ContactCategoryController;
 use App\Http\Controllers\Backend\BusinessSettingsController;
@@ -281,7 +283,7 @@ Route::middleware('auth')->group(function () {
         });
     });
 
-    Route::group(['prefix' => 'calendar', 'as' => 'backend.events.'], function () {
+    /*Route::group(['prefix' => 'calendar', 'as' => 'backend.events.'], function () {
         Route::controller(EventController::class)->group(function () {
             Route::get('/events', 'index')->name('index');
             Route::get('/events/create', 'create')->name('create');
@@ -292,8 +294,54 @@ Route::middleware('auth')->group(function () {
             Route::put('/events/update/{event}', 'update')->name('update');
             Route::delete('/events/delete/{event}', 'destroy')->name('destroy');
         });
+    });*/
+
+    Route::group(['prefix' => 'calendar', 'as' => 'backend.events.'], function () {
+        Route::controller(EventController::class)->group(function () {
+            // Fetch all instances in a given date range for FullCalendar.
+            Route::get('/instances', 'index')->name('index');
+
+            // Create or update: we’ll use “store” for new, “updateInstance” for instance drag/drop.
+            Route::post('/instances/store', 'store')->name('store');              // create new master + instances
+            Route::post('/instances/update/{instance}', 'updateInstance')->name('updateInstance');
+            Route::delete('/instances/delete/{instance}', 'destroyInstance')->name('destroyInstance');
+
+            // Endpoints for master-level edits (e.g. change recurrence rule):
+            Route::put('/master/update/{event}', 'updateMaster')->name('updateMaster');
+            Route::delete('/master/delete/{event}', 'destroyMaster')->name('destroyMaster');
+            Route::post('/instances/{instance}/revert', 'revertInstanceField')->name('revertInstance');
+        });
     });
 
+    // Event Types CRUD
+    Route::group(['prefix'=>'', 'as'=>'backend.'], function() {
+        Route::resource('event-types', EventTypeController::class)
+            ->names([
+                'index'   => 'event_types.index',
+                'create'  => 'event_types.create',
+                'store'   => 'event_types.store',
+                'show'    => 'event_types.show',
+                'edit'    => 'event_types.edit',
+                'update'  => 'event_types.update',
+                'destroy' => 'event_types.destroy'
+            ]);
+
+        Route::resource('event-sub-types', EventSubTypeController::class)
+            ->names([
+                'index'   => 'event_sub_types.index',
+                'create'  => 'event_sub_types.create',
+                'store'   => 'event_sub_types.store',
+                'show'    => 'event_sub_types.show',
+                'edit'    => 'event_sub_types.edit',
+                'update'  => 'event_sub_types.update',
+                'destroy' => 'event_sub_types.destroy'
+            ]);
+
+        // AJAX route to fetch subtypes by type ID:
+        Route::get('api/event-sub-types/{typeId}', [EventSubTypeController::class, 'byType'])
+            ->name('api.event_sub_types.byType');
+    });
+    
     // website setting
     Route::group(['prefix' => 'website', 'as' => 'website.'], function () {
         Route::controller(WebsiteController::class)->group(function () {
