@@ -107,6 +107,3 @@
         </div>
     </div>
 </div>
-<script>
-    initSelect2('.select2');
-</script>

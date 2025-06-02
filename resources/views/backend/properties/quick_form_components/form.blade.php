@@ -168,6 +168,11 @@ $(document).ready(function() {
                 if (!$('#property_id').val()) {
                     $('#property_id').val(propertyId);
                 }
+                    
+                // Initialize select2 if elements with class 'select2' exist
+                if ($('.select2').length) {
+                    initSelect2('.select2');
+                }
             },
             error: function() {
                 toastr.error('Unable to load step. Please try again.', 'Error');

@@ -7,8 +7,8 @@
 @endphp
 
 <div class="description-toggle">
-    <span class="short-text" id="{{ $id }}_short">{{ $shortText }}</span>
-    <span class="full-text d-none" id="{{ $id }}_full">{{ $text }}</span>
+    <span class="short-text" id="{{ $id }}_short">{{ html_entity_decode($shortText) }}</span>
+    <span class="full-text d-none" id="{{ $id }}_full">{{ html_entity_decode($text) }}</span>
     
     @if ($isLongText)
     <button data-target="{{ $id }}" type="button" class="toggle-link btn btn-sm btn-outline-danger" style="display: inline-block; margin-left: 5px;">

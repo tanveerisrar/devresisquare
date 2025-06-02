@@ -500,7 +500,8 @@ private function getTabContent($tabname, $propertyId, $property)
 
         // Get the total number of steps dynamically
         $totalSteps = $this->getTotalQuickSteps();
-        $countries = Country::where('status', 1)->orderBy('name')->get();
+        $countries = Country::orderBy('name')->get();
+        // $countries = Country::where('status', 1)->orderBy('name')->get();
         // Check if the step is valid
         if ($step > 0 && $step <= $totalSteps) {
             return view('backend.properties.quick_form_components.step' . $step, compact('property','countries')); // Return the corresponding Blade view
