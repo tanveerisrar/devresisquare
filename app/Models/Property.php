@@ -21,6 +21,7 @@ class Property extends Model
         'city',
         'country',
         'county',
+        'currency',
         'postcode',
         'frunishing_type',
         'property_type',

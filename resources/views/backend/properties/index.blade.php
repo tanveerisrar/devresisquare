@@ -598,6 +598,10 @@ var_dump($propertyId);
             type: "POST",
             data: formData,
             success: function (response) {
+                console.log(response);
+                console.log("Form Type:", formType);
+                console.log("Property ID:", propertyId);
+                // Check if the response indicates success
                 if (response.success) {
                     // Dynamically update the relevant accordion section
                     $("#section-" + formType + "-" + propertyId).html(response.updated_html);

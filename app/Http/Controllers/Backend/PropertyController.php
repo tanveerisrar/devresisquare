@@ -1096,8 +1096,9 @@ private function getTabContent($tabname, $propertyId, $property)
                     'city' => 'required|string|max:100',
                     // 'country' => 'required|string|max:100',
                     'country' => 'required|exists:countries,id',
-                    'county' => 'required|string|max:50',
-                    'postcode' => 'required|string|max:20',
+                    'county' => 'nullable|string|max:50',
+                    'currency' => 'nullable|string|max:50',
+                    'postcode' => 'nullable|string|max:20',
                 ];
             case 2:
                 return [

@@ -1,4 +1,4 @@
-<h1 class="mb-4">Media</h1>
+{{-- <h1 class="mb-4">Media</h1> --}}
 
 @php
     $photos_ids = explode(',', $property->photos) ?? '';
@@ -7,6 +7,16 @@
     $video = $property->video_url ?? '';
 @endphp
 
+<div class="w-100">
+    <button class="btn btn-outline-danger btn-sm float-end editForm" data-form="{{ 'property_media' }}" data-id="{{ $property->id }}">
+        Edit
+    </button>
+</div>
+
+<div id="section-property_media-{{ $property->id }}">
+    @include("backend.properties.popup_forms.property_media", ['property' => $property])
+</div>
+{{-- 
 <!-- Photos Section -->
 @if ($photos_ids)
     <div class="mb-4">
@@ -75,7 +85,7 @@
             </div>
         </div>
     </div>
-@endif
+@endif --}}
 
 {{-- <!-- Video Section -->
 @if ($video)

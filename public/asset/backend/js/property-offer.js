@@ -79,7 +79,7 @@
                         <div class="form-group">
                             <label for="tenantPhone_${tenant.id}" class="form-label">Phone</label>
                             <input type="text" class="form-control" id="tenantPhone_${tenant.id}"
-                                name="tenantPhone_${tenant.id}" placeholder="1234567890" value="${tenant.phone || ''}" pattern="\d+" inputmode="numeric" title="Please enter only numbers" required>
+                                name="tenantPhone_${tenant.id}" placeholder="1234567890" value="${tenant.phone || ''}" pattern="\\d+" inputmode="numeric" title="Please enter only numbers" required>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -103,9 +103,18 @@
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="businessName_${tenant.id}" class="form-label">Business Name</label>
+                            <label id="businessName_label_${tenant.id}" for="businessName_${tenant.id}" class="form-label">
+                            ${
+                                tenant.employmentStatus === 'Employed'
+                                    ? 'Enter Company Name'
+                                    : 'Business Name'
+                            }</label>
                             <input type="text" class="form-control" id="businessName_${tenant.id}"
-                                name="businessName_${tenant.id}" placeholder="Rainbow Ltd." value="${tenant.businessName || ''}" required>
+                                name="businessName_${tenant.id}" placeholder="Rainbow Ltd." value="${tenant.businessName || ''}" ${
+                                tenant.employmentStatus === 'Unemployed'
+                                    ? ''
+                                    : 'required'
+                            }>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -149,6 +158,29 @@
                     checkAndEnableMainPersonCheckbox(tenant.id); // Check if all fields are filled
                 });
             });
+
+            // — NEW: when Employment Status changes, update label/text + required‐ness of Business Name —
+            const empSelect = tenantForm.querySelector(`#employmentStatus_${tenant.id}`);
+            const businessLabel = tenantForm.querySelector(`#businessName_label_${tenant.id}`);
+            const businessInput = tenantForm.querySelector(`#businessName_${tenant.id}`);
+
+            empSelect.addEventListener('change', function() {
+                if (this.value === 'Unemployed') {
+                    businessLabel.textContent = 'Business Name';
+                    businessInput.removeAttribute('required');
+                } else if (this.value === 'Employed') {
+                    businessLabel.textContent = 'Enter Company Name';
+                    businessInput.setAttribute('required', 'required');
+                    businessInput.classList.remove('is-invalid'); // Remove any previous validation error
+                } else {
+                    // e.g. 'Self Employed' or any other
+                    businessLabel.textContent = 'Business Name';
+                    businessInput.setAttribute('required', 'required');
+                }
+                // Also update tenantForms array so saveTenantFormData() picks up the new value:
+                saveTenantFormData();
+            });
+
         });
     }
 

@@ -70,15 +70,17 @@
                                     @error('country')
                                         <div class="text-danger">{{ $message }}</div>
                                     @enderror
-                                </div>                                
+                                </div>
+
                                 <div class="form-group col-lg-7 col-12">
                                     <label for="county">County</label>
-                                    <input required type="text" name="county" id="county" class="form-control"
+                                    <input type="text" name="county" id="county" class="form-control"
                                         value="{{ (isset($property) && $property->county) ? $property->county : '' }}">
                                     @error('county')
                                         <div class="text-danger">{{ $message }}</div>
                                     @enderror
                                 </div>
+
                                 {{-- <div class="form-group col-lg-7 col-12">
                                     <label for="country">Country</label>
                                     <input required type="text" name="country" id="country" class="form-control"
@@ -89,12 +91,22 @@
                                 </div> --}}
                                 <div class="form-group col-lg-5 col-12">
                                     <label for="postcode">Postcode</label>
-                                    <input required type="text" name="postcode" id="postcode" class="form-control"
+                                    <input type="text" name="postcode" id="postcode" class="form-control"
                                         value="{{ (isset($property) && $property->postcode) ? $property->postcode : '' }}">
                                     @error('postcode')
                                         <div class="text-danger">{{ $message }}</div>
                                     @enderror
                                 </div>
+                                
+                                <div class="form-group col-12">
+                                    <label for="currency">Currency</label>
+                                    <input type="text" name="currency" id="currency" class="form-control"
+                                        value="{{ (isset($property) && $property->currency) ? $property->currency : '' }}">
+                                    @error('currency')
+                                        <div class="text-danger">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
                             </div>
                             <button type="button" class="btn btn_secondary btn-sm next-step mt-4 w-100" data-next-step="{{$currentStep+1}}"
                     data-current-step="{{$currentStep}}">Next</button>
