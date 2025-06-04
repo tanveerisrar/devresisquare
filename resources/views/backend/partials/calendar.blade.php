@@ -68,12 +68,7 @@
                             <label class="form-label">Location</label>
                             <input type="text" name="location" class="form-control" placeholder="Meeting location">
                             <div class="text-danger" data-error-for="location"></div>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Reminder</label>
-                            <input type="text" name="reminder" class="form-control" placeholder="e.g. 30 minutes">
-                            <div class="text-danger" data-error-for="reminder"></div>
-                        </div>
+                        </div>                        
 
                         {{-- Instance fields (unchanged except error placeholders) --}}
                         <div class="col-md-6">
@@ -87,6 +82,12 @@
                             <div class="text-danger" data-error-for="end_datetime"></div>
                         </div>
 
+                        <div class="col-md-6">
+                            <label class="form-label">Reminder</label>
+                            <input type="text" name="reminder" class="form-control" placeholder="e.g. 30 minutes">
+                            <div class="text-danger" data-error-for="reminder"></div>
+                        </div>
+
                         {{-- Recurrence fields (master) with error placeholders --}}
                         <div class="col-md-6">
                             <label class="form-label">Repeat</label>
@@ -98,17 +99,19 @@
                             </select>
                             <div class="text-danger" data-error-for="repeat"></div>
                         </div>
+                        <!-- INTERVAL (Every N days/weeks/months) -->
                         <div class="col-md-6" id="intervalContainer">
                             <label class="form-label">Interval</label>
-                            <input type="number" name="repeat_interval" class="form-control" min="1"
-                                placeholder="Every N days/weeks/months" value="1">
+                            <input type="number" name="repeat_interval" class="form-control" min="1" value="1"
+                                placeholder="Every N days/weeks/months">
                             <div class="text-danger" data-error-for="repeat_interval"></div>
                         </div>
-                        <div class="col-md-6" id="occurrencesContainer">
-                            <label class="form-label">Occurrences</label>
-                            <input type="number" name="repeat_until_count" class="form-control" min="0"
-                                placeholder="Number of additional times" value="0">
-                            <div class="text-danger" data-error-for="repeat_until_count"></div>
+
+                        <!-- REPEAT UNTIL DATE -->
+                        <div class="col-md-6" id="repeatUntilDateContainer">
+                            <label class="form-label">Repeat Until</label>
+                            <input type="date" name="repeat_until_date" class="form-control">
+                            <div class="text-danger" data-error-for="repeat_until_date"></div>
                         </div>
 
                         <div class="col-12">
@@ -123,6 +126,10 @@
                     <input type="hidden" name="event_id" value="">
                     <input type="hidden" name="instance_id" value="">
                     <input type="hidden" name="master_id" value="">
+                    <input type="hidden" name="form_action" value="">      
+                    <input type="hidden" name="original_start" value="">
+                    <input type="hidden" name="original_end"   value="">
+                    {{-- Submit button --}} 
                     <button type="submit" class="btn btn-primary">Save</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
@@ -138,6 +145,33 @@
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const repeatSelect         = document.getElementById('repeatSelect');
+            const intervalContainer    = document.getElementById('intervalContainer');
+            const repeatUntilContainer = document.getElementById('repeatUntilDateContainer');
+
+            function toggleRepeatFields() {
+                if (repeatSelect.value === 'none') {
+                intervalContainer.style.display    = 'none';
+                repeatUntilContainer.style.display = 'none';
+                // Optionally clear their values:
+                $('input[name="repeat_interval"]').val(1);
+                $('input[name="repeat_until_date"]').val('');
+                } else {
+                intervalContainer.style.display    = 'block';
+                repeatUntilContainer.style.display = 'block';
+                }
+            }
+
+            // Initialize on page load
+            toggleRepeatFields();
+
+            // Whenever the user changes “Repeat” (None/Daily/Weekly/Monthly)
+            repeatSelect.addEventListener('change', toggleRepeatFields);
+        });
+    </script>
+
     <script>
 
         // Initialize Bootstrap 5 modal instance once
@@ -160,6 +194,7 @@
                     // Prepare modal for “Create New”:
                     $('input[name="instance_id"]').val('');
                     $('input[name="master_id"]').val('');
+                    $('input[name="form_action"]').val('create'); 
                     $('#eventForm')[0].reset();
                     $('.text-danger').remove();
 
@@ -188,6 +223,19 @@
                     $('input[name="instance_id"]').val(evID);
                     $('input[name="master_id"]').val(inst.master_id);
 
+                    // 2d) Because you clicked an existing instance, we’ll be at least in “updateInstance” mode.
+                    //     But if you want the user to be able to switch to “edit series,” the form_action can become “updateMaster.”
+                    //     For simplicity, let’s assume that opening via click means “updateInstance” by default.
+                    $('input[name="form_action"]').val('updateMaster');
+                    
+                    // 2e) Store original start/end for comparison
+                    $('input[name="original_start"]').val(
+                        moment(info.event.start).format('YYYY-MM-DD HH:mm:ss')
+                    );
+                    $('input[name="original_end"]').val(
+                        moment(info.event.end).format('YYYY-MM-DD HH:mm:ss')
+                    );
+                        
                     // Load master fields into form
                     $('input[name="title"]').val(info.event.title);
                     // $('input[name="type"]').val(inst.type);
@@ -222,22 +270,17 @@
                         // (A) Preselect Type dropdown
                         $('#type_id').val(typeId);
 
-                        // (B) Now fetch that type’s sub-type values via AJAX
-                        // $.getJSON('/admin/api/event-sub-types/' + typeId, function(responseData) {
-                        // // responseData is expected to be { id1: name1, id2: name2, … }
+                        // Fill the Type dropdown and then load SubTypes
+                        $('#type_id').val(typeId).trigger('change');
 
-                        // // Build <option> for each sub-type
-                        // $.each(responseData, function(id, name) {
-                        //     $('#sub_type_id').append(
-                        //     $('<option>', { value: id }).text(name)
-                        //     );
-                        // });
-
-                        // // Now that options exist, preselect the correct one:
-                        // if (subTypeId) {
-                        //     $('#sub_type_id').val(subTypeId);
-                        // }
-                        // });
+                        // After subtypes load, set the selected subtype
+                        // Because AJAX is async, we wait for the callback:
+                        $.getJSON('/admin/api/event-sub-types/' + typeId, function (data) {
+                            $.each(data, function (id, name) {
+                                $('#sub_type_id').append(`<option value="${id}">${name}</option>`);
+                            });
+                            $('#sub_type_id').val(subTypeId);
+                        });
                     } else {
                         // If no typeId, just clear the Type dropdown entirely
                         $('#type_id').val('');
@@ -257,7 +300,8 @@
                         data: {
                             _token: '{{ csrf_token() }}',
                             start_datetime: newStart,
-                            end_datetime: newEnd
+                            end_datetime: newEnd,
+                            form_action: 'updateInstance'
                         },
                         success: function () {
                             calendar.refetchEvents();
@@ -292,62 +336,6 @@
                 });
             });
 
-            // 2. When editing an existing instance, we must pre‐populate both Type and SubType:
-            //    In eventClick() we’ll do something like:
-            //      $('#type_id').val(inst.type_id);
-            //      load subtypes then set sub_type_id to inst.sub_type_id
-
-            // Modify the eventClick callback accordingly (excerpt):
-            calendar.setOption('eventClick', function (info) {
-                var inst = info.event.extendedProps;
-                var evID = info.event.id;  // instance ID
-                var masterId = inst.master_id;
-
-                // Clear previous errors
-                $('.text-danger').text('');
-
-                // Fill hidden IDs
-                $('input[name="instance_id"]').val(evID);
-                $('input[name="master_id"]').val(masterId);
-
-                // Fill simple fields
-                $('input[name="title"]').val(info.event.title);
-                $('input[name="office"]').val(inst.office);
-                $('select[name="status"]').val(inst.status);
-                $('input[name="diary_owner"]').val(inst.diary_owner);
-                $('input[name="on_behalf_of"]').val(inst.on_behalf_of);
-                $('input[name="location"]').val(inst.location);
-                $('input[name="reminder"]').val(inst.reminder);
-                $('textarea[name="description"]').val(inst.description);
-
-                // Fill instance date/times
-                $('input[name="start_datetime"]').val(
-                    moment(info.event.start).format('YYYY-MM-DDTHH:mm')
-                );
-                $('input[name="end_datetime"]').val(
-                    moment(info.event.end).format('YYYY-MM-DDTHH:mm')
-                );
-
-                // Fill recurrence
-                $('select[name="repeat"]').val(inst.repeat || 'none');
-                $('input[name="repeat_interval"]').val(inst.repeat_interval || 1);
-                $('input[name="repeat_until_count"]').val(inst.repeat_until_count || 0);
-
-                // Fill the Type dropdown and then load SubTypes
-                $('#type_id').val(inst.type_id).trigger('change');
-
-                // After subtypes load, set the selected subtype
-                // Because AJAX is async, we wait for the callback:
-                $.getJSON('/admin/api/event-sub-types/' + inst.type_id, function (data) {
-                    $.each(data, function (id, name) {
-                        $('#sub_type_id').append(`<option value="${id}">${name}</option>`);
-                    });
-                    $('#sub_type_id').val(inst.sub_type_id);
-                });
-
-                eventModal.show();
-            });
-
             // Handle form submission: could be “new master + instances” or “update instance + maybe update master”
             $('#eventForm').on('submit', function (e) {
                 e.preventDefault();
@@ -356,14 +344,24 @@
                 // Read hidden IDs
                 var instanceId = $('input[name="instance_id"]').val();
                 var masterId = $('input[name="master_id"]').val();
+                var formActionMode = $('input[name="form_action"]').val();
+                var originalStart  = $('input[name="original_start"]').val();
+                var originalEnd    = $('input[name="original_end"]').val();
 
+                
+                console.log('✏️[formSubmit] form_action=', formActionMode,
+                            'instanceId=', instanceId,
+                            'masterId=', masterId,
+                            'original_start=', originalStart,
+                            'original_end=', originalEnd);
+                            
                 // Collect form data
                 var formData = $(this).serializeArray();
                 var payload = {};
                 formData.forEach(function (f) { payload[f.name] = f.value; });
 
                 // If instanceId is present → update that single instance (drag/drop or manual edit)
-                if (instanceId) {
+                if (instanceId && formActionMode === 'updateInstance') {
                     // Only update instance’s start/end (we can allow editing other details if desired)
                     $.ajax({
                         url: '{{ route("backend.events.updateInstance", "") }}/' + instanceId,
@@ -372,6 +370,9 @@
                             _token: '{{ csrf_token() }}',
                             start_datetime: payload.start_datetime,
                             end_datetime: payload.end_datetime,
+                            // You could also send originalStart/originalEnd for auditing:
+                            original_start:  originalStart,
+                            original_end:    originalEnd
                         },
                         success: function () {
                             eventModal.hide();
@@ -394,7 +395,7 @@
                     });
                 }
                 // Else if masterId is present → user clicked an existing instance but may have changed recurrence or master data
-                else if (masterId) {
+                else if (masterId && formActionMode === 'updateMaster') {
                     $.ajax({
                         url: '{{ route("backend.events.updateMaster", "") }}/' + masterId,
                         method: 'PUT',

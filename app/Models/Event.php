@@ -18,20 +18,21 @@ class Event extends Model
         'status',
         'diary_owner',
         'on_behalf_of',
-        'start_datetime',
-        'end_datetime',
+        // 'start_datetime',
+        // 'end_datetime',
         'description',
         'location',
         'reminder',
         'repeat',
         'repeat_interval',
-        'repeat_until_count',
+        // 'repeat_until_count',
+        'repeat_until_date',
     ];
 
-    protected $casts = [
-        'start_datetime' => 'datetime',
-        'end_datetime' => 'datetime',
-    ];
+    // protected $casts = [
+    //     'start_datetime' => 'datetime',
+    //     'end_datetime' => 'datetime',
+    // ];
 
     // in app/Models/Event.php
 

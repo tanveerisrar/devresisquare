@@ -43,7 +43,9 @@ class EventController
                 'extendedProps' => [
                     'master_id' => $inst->event_id,
                     'instance_status' => $inst->instance_status,
-                        
+                    'type_id'     => $inst->event->type_id,
+                    'sub_type_id' => $inst->event->sub_type_id,
+                    
                     // We can keep these for display or other purposes:
                     'type_label'           => $inst->event->type,       // old string
                     'sub_type_label'       => $inst->event->sub_type,   // old string
@@ -59,7 +61,8 @@ class EventController
                     'reminder' => $inst->event->reminder,
                     'repeat' => $inst->event->repeat,
                     'repeat_interval' => $inst->event->repeat_interval,
-                    'repeat_until_count' => $inst->event->repeat_until_count,
+                    'repeat_until_date' => $inst->event->repeat_until_date,
+                    // 'repeat_until_count' => $inst->event->repeat_until_count,
                 ],
             ];
         });
@@ -89,7 +92,8 @@ class EventController
             'reminder' => ['nullable', 'string', 'regex:/^\d+(\s?(minutes|hours|days))?$/'],
             'repeat' => 'required|in:none,daily,weekly,monthly',
             'repeat_interval' => 'nullable|integer|min:1|max:100',
-            'repeat_until_count' => 'nullable|integer|min:0|max:1000',
+            // 'repeat_until_count' => 'nullable|integer|min:0|max:1000',
+            'repeat_until_date' => 'nullable|date|after:start_datetime',
 
             // The first occurrence:
             'start_datetime' => 'required|date|after_or_equal:today',
@@ -102,8 +106,8 @@ class EventController
             // 2.3. CREATE MASTER EVENT
             $master = Event::create([
                 'title' => $validated['title'],
-                'type' => $validated['type_id'] ?? null,
-                'sub_type' => $validated['sub_type_id'] ?? null,
+                'type_id' => $validated['type_id'] ?? null,
+                'sub_type_id' => $validated['sub_type_id'] ?? null,
                 'office' => $validated['office'] ?? null,
                 'status' => $validated['status'] ?? 'Pending',
                 'diary_owner' => $validated['diary_owner'] ?? null,
@@ -113,49 +117,59 @@ class EventController
                 'reminder' => $validated['reminder'] ?? null,
                 'repeat' => $validated['repeat'] ?? 'none',
                 'repeat_interval' => $validated['repeat_interval'] ?? 1,
-                'repeat_until_count' => $validated['repeat_until_count'] ?? 0,
+                // 'repeat_until_count' => $validated['repeat_until_count'] ?? 0,
+                'repeat_until_date' => $validated['repeat_until_date'] ?? null,
             ]);
 
-            // 2.4. INSERT INSTANCES
-            $originalStart = Carbon::parse($validated['start_datetime']);
-            $originalEnd = Carbon::parse($validated['end_datetime']);
+            // 2.3) ALWAYS create the first instance row
+            $firstStart = Carbon::parse($validated['start_datetime']);
+            $firstEnd   = Carbon::parse($validated['end_datetime']);
 
             // Always insert the first instance (i = 0)
             EventInstance::create([
-                'event_id' => $master->id,
-                'start_datetime' => $originalStart,
-                'end_datetime' => $originalEnd,
-                'instance_status' => 'Scheduled',
-                'notified' => false,
+                'event_id'       => $master->id,
+                'start_datetime' => $firstStart,
+                'end_datetime'   => $firstEnd,
+                'instance_status'=> 'Scheduled',
+                'notified'       => false,
             ]);
 
-            // If repeat != 'none' AND repeat_until_count > 0, generate additional
-            if ($master->repeat !== 'none' && ($master->repeat_until_count ?? 0) > 0) {
-                for ($i = 1; $i <= $master->repeat_until_count; $i++) {
-                    $start = $originalStart->copy();
-                    $end = $originalEnd->copy();
+            // 2.4) If repeat ≠ 'none' AND a valid until date, generate subsequent instances
+            if ($validated['repeat'] !== 'none' && !empty($validated['repeat_until_date'])) {
+                $interval  = $validated['repeat_interval'] ?? 1;
+                $untilDate = Carbon::parse($validated['repeat_until_date']);
 
-                    switch ($master->repeat) {
+                // Copy the first start/end for stepping:
+                $nextStart = $firstStart->copy();
+                $nextEnd   = $firstEnd->copy();
+
+                while (true) {
+                    switch ($validated['repeat']) {
                         case 'daily':
-                            $start->addDays($i * $master->repeat_interval);
-                            $end->addDays($i * $master->repeat_interval);
+                            $nextStart->addDays($interval);
+                            $nextEnd->addDays($interval);
                             break;
                         case 'weekly':
-                            $start->addWeeks($i * $master->repeat_interval);
-                            $end->addWeeks($i * $master->repeat_interval);
+                            $nextStart->addWeeks($interval);
+                            $nextEnd->addWeeks($interval);
                             break;
                         case 'monthly':
-                            $start->addMonths($i * $master->repeat_interval);
-                            $end->addMonths($i * $master->repeat_interval);
+                            $nextStart->addMonths($interval);
+                            $nextEnd->addMonths($interval);
                             break;
                     }
 
+                    // Stop if we've passed the “repeat until” date
+                    if ($nextStart->greaterThan($untilDate)) {
+                        break;
+                    }
+
                     EventInstance::create([
-                        'event_id' => $master->id,
-                        'start_datetime' => $start,
-                        'end_datetime' => $end,
-                        'instance_status' => 'Scheduled',
-                        'notified' => false,
+                        'event_id'       => $master->id,
+                        'start_datetime' => $nextStart->copy(),
+                        'end_datetime'   => $nextEnd->copy(),
+                        'instance_status'=> 'Scheduled',
+                        'notified'       => false,
                     ]);
                 }
             }
@@ -180,8 +194,11 @@ class EventController
     {
         // Validate incoming data
         $data = $request->validate([
-            'start_datetime' => 'required|date',
-            'end_datetime' => 'required|date|after_or_equal:start_datetime',
+            'start_datetime'   => 'required|date',
+            'end_datetime'     => 'required|date|after_or_equal:start_datetime',
+            'original_start'   => 'nullable|date',
+            'original_end'     => 'nullable|date',
+            'form_action'      => 'required|string|in:updateInstance'
         ]);
 
         // Keep track of old values
@@ -273,12 +290,12 @@ class EventController
      *      • Delete/cancel all future instances (after “now”)
      *      • Regenerate future instances based on new rule
      */
-    public function updateMaster(Request $request, Event $event)
+    /*public function updateMaster(Request $request, Event $event)
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'type' => 'nullable|string|max:100',
-            'sub_type' => 'nullable|string|max:100',
+            'type_id'             => 'nullable|exists:event_types,id',
+            'sub_type_id'         => 'nullable|exists:event_sub_types,id',
             'office' => 'nullable|string|max:100',
             'status' => 'nullable|in:Confirmed,Pending,Cancelled,Rescheduled',
             'diary_owner' => 'nullable|string|max:255',
@@ -289,6 +306,7 @@ class EventController
             'repeat' => 'nullable|in:none,daily,weekly,monthly',
             'repeat_interval' => 'nullable|integer|min:1|max:100',
             'repeat_until_count' => 'nullable|integer|min:0|max:1000',
+            'form_action'          => 'required|string|in:updateMaster'
         ]);
 
         DB::beginTransaction();
@@ -364,7 +382,184 @@ class EventController
                 'error' => $th->getMessage()
             ], 500);
         }
+    }*/
+
+    /**
+     * 5) UPDATE MASTER: edit series settings WITHOUT deleting user-edited instances.
+     *
+     *  Steps:
+     *    1. Validate master fields (no start/end on events table).
+     *    2. Update the master event’s own columns.
+     *    3. Fetch all existing instances (past or future), build a lookup by start_datetime.
+     *    4. If repeat=none:
+     *         • Update the earliest instance’s start/end to match the new values (or create it if none).
+     *       Else (repeat≠none):
+     *         • Ensure the earliest instance matches new start/end (update it if needed).
+     *    5. If repeat≠none:
+     *         • Loop from i=1..∞ stepping by interval until we exceed “repeatUntilDate,” and for each computed slot:
+     *             – If that start_time > now AND not already in DB, create a new instance.
+    */
+    public function updateMaster(Request $request, Event $event)
+    {
+        // 5.1) VALIDATION
+        $validated = $request->validate([
+            'title'               => 'required|string|max:255',
+            'type_id'             => 'required|exists:event_types,id',
+            'sub_type_id'         => 'required|exists:event_sub_types,id',
+            'office'              => 'nullable|string|max:100',
+            'status'              => 'nullable|in:Confirmed,Pending,Cancelled,Rescheduled',
+            'diary_owner'         => 'nullable|string|max:255',
+            'on_behalf_of'        => 'nullable|string|max:255',
+            'location'            => 'nullable|string|max:255',
+            'description'         => 'nullable|string',
+            'reminder'            => ['nullable','string','regex:/^\d+(\s?(minutes|hours|days))?$/'],
+
+            // The “new original” start/end for the first instance:
+            'start_datetime'      => 'required|date|after_or_equal:today',
+            'end_datetime'        => 'required|date|after_or_equal:start_datetime',
+
+            'repeat'              => 'required|in:none,daily,weekly,monthly',
+            'repeat_interval'     => 'nullable|integer|min:1|max:100',
+            'repeat_until_date'   => 'nullable|date|after:start_datetime',
+            'form_action'         => 'required|string|in:updateMaster',
+        ]);
+
+        \DB::beginTransaction();
+        try {
+            // 5.2) UPDATE only the master event’s own columns (not start/end):
+            $event->update([
+                'title'             => $validated['title'],
+                'type_id'           => $validated['type_id'],
+                'sub_type_id'       => $validated['sub_type_id'],
+                'office'            => $validated['office'] ?? null,
+                'status'            => $validated['status'] ?? null,
+                'diary_owner'       => $validated['diary_owner'] ?? null,
+                'on_behalf_of'      => $validated['on_behalf_of'] ?? null,
+                'location'          => $validated['location'] ?? null,
+                'description'       => $validated['description'] ?? null,
+                'reminder'          => $validated['reminder'] ?? null,
+
+                'repeat'            => $validated['repeat'],
+                'repeat_interval'   => $validated['repeat_interval'] ?? 1,
+                'repeat_until_date' => $validated['repeat_until_date'] ?? null,
+            ]);
+
+            // 5.3) COLLECT all existing instances (past & future) for lookup
+            $now = Carbon::now();
+            $existingInstances = $event->instances()
+                                    ->orderBy('start_datetime', 'asc')
+                                    ->get([
+                                        'id',
+                                        'start_datetime',
+                                        'end_datetime',
+                                    ]);
+
+            // Map of existing start‐times for quick "exists" check
+            $existingStarts = $existingInstances->pluck('start_datetime')
+                ->map(function($dt) {
+                    return $dt->format('Y-m-d H:i:s');
+                })
+                ->toArray();
+
+            // 5.4) UPDATE or CREATE the earliest (original) instance
+            $originalStart = Carbon::parse($validated['start_datetime']);
+            $originalEnd   = Carbon::parse($validated['end_datetime']);
+
+            if ($existingInstances->isEmpty()) {
+                // No instances at all → create the first one
+                EventInstance::create([
+                    'event_id'       => $event->id,
+                    'start_datetime' => $originalStart,
+                    'end_datetime'   => $originalEnd,
+                    'instance_status'=> 'Scheduled',
+                    'notified'       => false,
+                ]);
+                $existingStarts[] = $originalStart->format('Y-m-d H:i:s');
+            } else {
+                // There is at least one instance: update the first (earliest) if it differs
+                $firstInstance = $existingInstances->first();
+                $firstStart    = $firstInstance->start_datetime->format('Y-m-d H:i:s');
+                $newStartKey   = $originalStart->format('Y-m-d H:i:s');
+
+                if ($firstStart !== $newStartKey) {
+                    // Update that earliest row to match new start/end
+                    $firstInstance->update([
+                        'start_datetime' => $originalStart,
+                        'end_datetime'   => $originalEnd,
+                        'instance_status'=> 'Scheduled',
+                        'notified'       => false,
+                    ]);
+                    // Adjust our lookup array:
+                    $existingStarts[] = $newStartKey;
+                }
+            }
+
+            // 5.5) If repeat = none, we’re done (no other instances to add)
+            if ($validated['repeat'] === 'none' || empty($validated['repeat_until_date'])) {
+                \DB::commit();
+                return response()->json(['success' => true]);
+            }
+
+            // 5.6) Otherwise, REGENERATE missing future instances up to repeat_until_date
+            $interval  = $validated['repeat_interval'] ?? 1;
+            $untilDate = Carbon::parse($validated['repeat_until_date']);
+
+            $nextStart = $originalStart->copy();
+            $nextEnd   = $originalEnd->copy();
+
+            while (true) {
+                switch ($validated['repeat']) {
+                    case 'daily':
+                        $nextStart->addDays($interval);
+                        $nextEnd->addDays($interval);
+                        break;
+                    case 'weekly':
+                        $nextStart->addWeeks($interval);
+                        $nextEnd->addWeeks($interval);
+                        break;
+                    case 'monthly':
+                        $nextStart->addMonths($interval);
+                        $nextEnd->addMonths($interval);
+                        break;
+                }
+
+                // Stop if beyond the “repeat until” date
+                if ($nextStart->greaterThan($untilDate)) {
+                    break;
+                }
+
+                $slotKey = $nextStart->format('Y-m-d H:i:s');
+
+                // If we already have an instance at this start time, skip
+                if (in_array($slotKey, $existingStarts, true)) {
+                    continue;
+                }
+
+                // If the computed slot is in the future (i.e. > now), create it
+                if ($nextStart->greaterThan($now)) {
+                    EventInstance::create([
+                        'event_id'       => $event->id,
+                        'start_datetime' => $nextStart->copy(),
+                        'end_datetime'   => $nextEnd->copy(),
+                        'instance_status'=> 'Scheduled',
+                        'notified'       => false,
+                    ]);
+                    $existingStarts[] = $slotKey;
+                }
+            }
+
+            \DB::commit();
+            return response()->json(['success' => true]);
+        }
+        catch (\Throwable $th) {
+            \DB::rollBack();
+            return response()->json([
+                'message' => 'Error updating recurrence rule.',
+                'error'   => $th->getMessage()
+            ], 500);
+        }
     }
+
 
     /**
      * 6) DELETE (MASTER): Delete entire series (all instances).
