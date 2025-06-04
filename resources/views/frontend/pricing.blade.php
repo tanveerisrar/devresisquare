@@ -10,7 +10,7 @@
         {{-- table --}}
         <div class="price_table">
             <div class="price_table_header">
-                <h3>Resipro</h3>
+                <h3>Resi Pro</h3>
             </div>
             <div class="price_table_content">
                 <p class="desc">Full-featured property management for landlords and self-employed agents.
@@ -31,7 +31,7 @@
         {{-- table --}}
         <div class="price_table">
             <div class="price_table_header">
-                <h3>ResiPremium</h3>
+                <h3>Resi Premium</h3>
             </div>
             <div class="price_table_content">
                 <p class="desc">Enhanced support with a dedicated property manager. Everything in ResiLite plus personalized property management, priority issue resolution, and expert compliance guidance</p>
@@ -51,7 +51,7 @@
         {{-- table --}}
         <div class="price_table">
             <div class="price_table_header">
-                <h3>Resimax</h3>
+                <h3>Resi Max</h3>
                 <h5 class="mt-2">For estate agencies</h5>
             </div>
             <div class="price_table_content">
