@@ -12,7 +12,8 @@
                     <i class="bi bi-geo-alt-fill"></i>
                 </div>
                 <div class="left_title">
-                    Where is your<br /> <span class="secondary-color">property</span>?
+                     
+                    Let us know where the<br /> <span class="secondary-color">property</span> is?
                 </div>
             </div>
         </div>

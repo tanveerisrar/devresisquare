@@ -11,7 +11,7 @@
                     <i class="bi bi-building-fill"></i>
                 </div>
                 <div class="left_title">
-                    What<br /> <span class="secondary-color">type of property</span><br /> do you have?
+                    Tell us about your<br /> <span class="secondary-color">property</span><br /> ?
                 </div>
             </div>
         </div>

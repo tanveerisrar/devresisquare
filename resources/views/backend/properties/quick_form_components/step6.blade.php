@@ -8,7 +8,7 @@
                     <i class="bi bi-cup-hot-fill"></i>
                 </div>
                 <div class="left_title">
-                    Is you property <br/><span class="secondary-color">Furnish</span>?
+                    Is your property <br/><span class="secondary-color">Furnished</span>?
                 </div>
             </div>
         </div>
