@@ -4,15 +4,15 @@
     $hero_card = [
         [
             'title' => 'Still stuck with spreadsheets?',
-            'details' => "We get it. Managing properties the old-fashioned way can be overwhelming. With ResiSquare, you can kiss goodbye to scattered documents, delayed updates, and chaotic processes. We bring everything together under one clean, simple dashboard — so your property hustle feels like a breeze.",
+            'details' => "We get it. Managing properties the old-fashioned way is a headache — scattered docs, delayed updates, endless chaos. With ResiSquare, everything comes together in one clean, simple dashboard that makes your property hustle feel like a breeze.",
         ],
         [
             'title' => 'Paying sky-high commissions? Why?',
-            'details' => "No more jaw-dropping fees that eat into your profits. ResiSquare gives you all the tools you need — from maintenance tracking to automated rent collection — at a transparent, flat monthly rate. Because your hard-earned income deserves to stay with you.",
+            'details' => "Say goodbye to jaw-dropping fees that eat into your profits. ResiSquare puts everything you need — from maintenance tracking to automated rent collection — under one roof for one simple, transparent flat monthly rate. Because your hard-earned income deserves to stay exactly where it belongs: with you.",
         ],
         [
             'title' => 'Wasting hours on admin? Not anymore.',
-            'details' => "Landlords weren’t meant to be full-time administrators. Let our tech do the heavy lifting. With built-in automation, smart alerts, and custom workflows, ResiSquare cuts the admin drama so you can focus on scaling, not slogging.",
+            'details' => "Landlords weren’t meant to be full-time administrators. Let ResiSquare do the heavy lifting. With powerful automation, real-time alerts, and customizable workflows, our platform eliminates the admin burden—so you can focus on growing your portfolio, not getting buried in paperwork.",
         ],
 
     ];
