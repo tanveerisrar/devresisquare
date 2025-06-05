@@ -147,20 +147,103 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const repeatSelect         = document.getElementById('repeatSelect');
-            const intervalContainer    = document.getElementById('intervalContainer');
-            const repeatUntilContainer = document.getElementById('repeatUntilDateContainer');
+            let repeatSelect         = document.getElementById('repeatSelect');
+            let intervalContainer    = document.getElementById('intervalContainer');
+            let repeatUntilContainer = document.getElementById('repeatUntilDateContainer');
+
+            // Initialize Bootstrap 5 modal instance once
+            var modalEl = document.getElementById('eventModal');
+            var eventModal = new bootstrap.Modal(modalEl);
+            
+            // 1) The helper that enforces repeat_until_date ≥ start_datetime
+            /*function updateRepeatUntilMin() {
+                const $start = $('input[name="start_datetime"]');
+                const $until = $('input[name="repeat_until_date"]');
+                const startVal = $start.val(); // e.g. "2025-06-05T09:00"
+
+                if (!startVal) {
+                $until.removeAttr('min');
+                return;
+                }
+
+                // Extract just the date portion ("YYYY-MM-DD")
+                const minDate = startVal.split('T')[0];
+
+                // Set min= on the “Repeat Until” field
+                $until.attr('min', minDate);
+
+                // If the current value is earlier, bump it up
+                if ($until.val() && $until.val() < minDate) {
+                $until.val(minDate);
+                }
+                // console.log('✏️[updateRepeatUntilMin] Set min date for repeat_until_date:', minDate);
+            }*/
+
+            function updateRepeatUntilMin() {
+                const $start = $('input[name="start_datetime"]');
+                const $until = $('input[name="repeat_until_date"]');
+                const startVal = $start.val(); // e.g. "2025-06-05T09:00"
+
+                if (!startVal) {
+                // No start → no restriction
+                $until.removeAttr('min');
+                return;
+                }
+
+                // Extract the "YYYY-MM-DD" portion
+                const [datePart] = startVal.split('T'); // e.g. "2025-06-05"
+
+                // Convert to a Date object, add one day, then format back to "YYYY-MM-DD"
+                const dt = new Date(datePart);
+                dt.setDate(dt.getDate() + 1);
+                const year  = dt.getFullYear();
+                const month = String(dt.getMonth() + 1).padStart(2, '0');
+                const day   = String(dt.getDate()).padStart(2, '0');
+                const minDatePlusOne = `${year}-${month}-${day}`;
+
+                // Set that as the minimum selectable date
+                $until.attr('min', minDatePlusOne);
+
+                // If the existing “Repeat Until” is earlier than that, bump it up
+                if ($until.val() && $until.val() < minDatePlusOne) {
+                $until.val(minDatePlusOne);
+                }
+                console.log('✏️[updateRepeatUntilMin] Set min date for repeat_until_date:', minDatePlusOne);
+            }
+
+            function updateEndMin() {
+                const $start = $('input[name="start_datetime"]');
+                const $end   = $('input[name="end_datetime"]');
+                const startVal = $start.val(); // e.g. "2025-06-05T09:00"
+
+                if (!startVal) {
+                // If no start, clear any min restriction on End
+                $end.removeAttr('min');
+                return;
+                }
+
+                // Set the same string as min on End (so user cannot pick earlier)
+                $end.attr('min', startVal);
+
+                // If current End < Start, bump it to equal Start
+                if ($end.val() && $end.val() < startVal) {
+                $end.val(startVal);
+                }
+                console.log('✏️[updateEndMin] Set min date for end_datetime:', startVal);
+            }
 
             function toggleRepeatFields() {
                 if (repeatSelect.value === 'none') {
-                intervalContainer.style.display    = 'none';
-                repeatUntilContainer.style.display = 'none';
-                // Optionally clear their values:
-                $('input[name="repeat_interval"]').val(1);
-                $('input[name="repeat_until_date"]').val('');
+                    intervalContainer.style.display    = 'none';
+                    repeatUntilContainer.style.display = 'none';
+                    // Optionally clear their values:
+                    $('input[name="repeat_interval"]').val(1);
+                    $('input[name="repeat_until_date"]').val('');
                 } else {
-                intervalContainer.style.display    = 'block';
-                repeatUntilContainer.style.display = 'block';
+                    intervalContainer.style.display    = 'block';
+                    repeatUntilContainer.style.display = 'block';
+                    // Make sure the repeat until date can't be before the start date
+                    updateRepeatUntilMin();
                 }
             }
 
@@ -169,16 +252,15 @@
 
             // Whenever the user changes “Repeat” (None/Daily/Weekly/Monthly)
             repeatSelect.addEventListener('change', toggleRepeatFields);
-        });
-    </script>
 
-    <script>
+            // 2) Fire when the start_datetime changes
+            // Whenever the user edits Start Date & Time, re-apply the rule:
+            $('input[name="start_datetime"]').on('change', function() {
+                updateEndMin();
+                updateRepeatUntilMin();
+            });
 
-        // Initialize Bootstrap 5 modal instance once
-        var modalEl = document.getElementById('eventModal');
-        var eventModal = new bootstrap.Modal(modalEl);
-
-        document.addEventListener('DOMContentLoaded', function () {
+            
             var calendarEl = document.getElementById('calendar');
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
@@ -204,8 +286,9 @@
 
                     // Default recurrence to none
                     $('select[name="repeat"]').val('none');
+                    toggleRepeatFields(); // call to sync visibility
                     $('input[name="repeat_interval"]').val(1);
-                    $('input[name="repeat_until_count"]').val(0);
+                    $('input[name="repeat_until_date"]').val(null);
                     $('#sub_type_id').html('<option value="">— Select Sub-Type —</option>');
                     eventModal.show();
                 },
@@ -255,9 +338,14 @@
                         .format('YYYY-MM-DDTHH:mm'));
 
                     // Recurrence fields (master)
-                    $('select[name="repeat"]').val(inst.repeat || 'none');
+                    // $('select[name="repeat"]').val(inst.repeat || 'none');
+                    // var repeatSelect = document.getElementById('repeatSelect'); // assuming you gave it this ID
+                    // repeatSelect.value = inst.repeat || 'none'; // set the value
+                    document.getElementById('repeatSelect').value = inst.repeat || 'none';
+                    toggleRepeatFields(); // call to sync visibility
+                    updateEndMin(); // Ensure end time is valid
                     $('input[name="repeat_interval"]').val(inst.repeat_interval || 1);
-                    $('input[name="repeat_until_count"]').val(inst.repeat_until_count || 0);
+                    $('input[name="repeat_until_date"]').val(inst.repeat_until_date || null);
 
                     // 5) ————————————————————————————————
                     //     PRESELECT “Type” USING type_id
@@ -268,7 +356,7 @@
                     // If there is a valid typeId, set it & then load its sub-types
                     if (typeId) {
                         // (A) Preselect Type dropdown
-                        $('#type_id').val(typeId);
+                        // $('#type_id').val(typeId);
 
                         // Fill the Type dropdown and then load SubTypes
                         $('#type_id').val(typeId).trigger('change');
@@ -285,7 +373,7 @@
                         // If no typeId, just clear the Type dropdown entirely
                         $('#type_id').val('');
                     }
-
+                    
                     eventModal.show();
                 },
                 eventDrop: function (info) {
@@ -458,29 +546,6 @@
         //     });
         // });
 
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const repeatSelect = document.getElementById('repeatSelect');
-            const intervalDiv = document.getElementById('intervalContainer');
-            const occurDiv = document.getElementById('occurrencesContainer');
-
-            function toggleRepeatFields() {
-                if (repeatSelect.value === 'none') {
-                    intervalDiv.style.display = 'none';
-                    occurDiv.style.display = 'none';
-                } else {
-                    intervalDiv.style.display = 'block';
-                    occurDiv.style.display = 'block';
-                }
-            }
-
-            // Initialize on load
-            toggleRepeatFields();
-
-            // Whenever the user changes "Repeat"
-            repeatSelect.addEventListener('change', toggleRepeatFields);
-        });
     </script>
 
 @endpush

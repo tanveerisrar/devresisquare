@@ -136,8 +136,9 @@ class EventController
 
             // 2.4) If repeat ≠ 'none' AND a valid until date, generate subsequent instances
             if ($validated['repeat'] !== 'none' && !empty($validated['repeat_until_date'])) {
-                $interval  = $validated['repeat_interval'] ?? 1;
-                $untilDate = Carbon::parse($validated['repeat_until_date']);
+                // $interval  = $validated['repeat_interval'] ?? 1;
+                $interval = (int) ($validated['repeat_interval'] ?? 1);
+                $untilDate = Carbon::parse($validated['repeat_until_date'])->endOfDay();
 
                 // Copy the first start/end for stepping:
                 $nextStart = $firstStart->copy();
@@ -157,6 +158,10 @@ class EventController
                             $nextStart->addMonths($interval);
                             $nextEnd->addMonths($interval);
                             break;
+                        case 'yearly':
+                            $nextStart->addYears($interval);
+                            $nextEnd->addYears($interval);
+                        break;
                     }
 
                     // Stop if we've passed the “repeat until” date
@@ -440,7 +445,7 @@ class EventController
                 'reminder'          => $validated['reminder'] ?? null,
 
                 'repeat'            => $validated['repeat'],
-                'repeat_interval'   => $validated['repeat_interval'] ?? 1,
+                'repeat_interval'   => (int) ($validated['repeat_interval'] ?? 1),
                 'repeat_until_date' => $validated['repeat_until_date'] ?? null,
             ]);
 
@@ -501,8 +506,8 @@ class EventController
             }
 
             // 5.6) Otherwise, REGENERATE missing future instances up to repeat_until_date
-            $interval  = $validated['repeat_interval'] ?? 1;
-            $untilDate = Carbon::parse($validated['repeat_until_date']);
+            $interval   = (int) ($validated['repeat_interval'] ?? 1);          // Cast to int
+            $untilDate = Carbon::parse($validated['repeat_until_date'])->endOfDay();
 
             $nextStart = $originalStart->copy();
             $nextEnd   = $originalEnd->copy();
@@ -521,6 +526,20 @@ class EventController
                         $nextStart->addMonths($interval);
                         $nextEnd->addMonths($interval);
                         break;
+                    case 'yearly':
+                        $nextStart->addYears($interval);
+                        $nextEnd->addYears($interval);
+                        break;
+                    // case 'biannual':
+                    //     // Biannual is every 6 months
+                    //     $nextStart->addMonths($interval * 6);
+                    //     $nextEnd->addMonths($interval * 6);
+                    //     break;
+                    // case 'annual':
+                    //     // Annual is every 12 months
+                    //     $nextStart->addYears($interval);
+                    //     $nextEnd->addYears($interval);
+                    //     break;
                 }
 
                 // Stop if beyond the “repeat until” date
