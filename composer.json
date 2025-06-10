@@ -11,7 +11,8 @@
         "laravel/framework": "^11.9",
         "laravel/tinker": "^2.9",
         "mpdf/mpdf": "^8.2",
-        "niklasravnsborg/laravel-pdf": "^4.1"
+        "niklasravnsborg/laravel-pdf": "^4.1",
+        "rlanvin/php-rrule": "^2.6"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.14",

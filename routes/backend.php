@@ -310,6 +310,11 @@ Route::middleware('auth')->group(function () {
             Route::put('/master/update/{event}', 'updateMaster')->name('updateMaster');
             Route::delete('/master/delete/{event}', 'destroyMaster')->name('destroyMaster');
             Route::post('/instances/{instance}/revert', 'revertInstanceField')->name('revertInstance');
+            
+            // Additional Recurrence Features
+            Route::post('/cancel-series/{series_id}',  'cancelSeries')->name('cancelSeries');
+            Route::post('/split-series/{event_id}',  'splitSeries')->name('splitSeries');
+            
         });
     });
 
