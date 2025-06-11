@@ -27,6 +27,8 @@ class Event extends Model
         'repeat_interval',
         // 'repeat_until_count',
         'repeat_until_date',
+        'rrule',
+        'exdates'
     ];
 
     // protected $casts = [

@@ -71,15 +71,8 @@ class EventController
         return response()->json($data);
     }
 
-    /**
-     * 2) STORE: Create a new master event + generate its instances immediately (up to repeat count).
-     *    Request payload: (title, type, sub_type, office, status, diary_owner, on_behalf_of,
-     *    location, description, reminder, repeat, repeat_interval, repeat_until_count,
-     *    start_datetime, end_datetime)
-     */
     public function store(Request $request)
     {
-        // 2.1. VALIDATION
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'type_id' => 'required|exists:event_types,id',
@@ -91,28 +84,19 @@ class EventController
             'location' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'reminder' => ['nullable', 'string', 'regex:/^\d+(\s?(minutes|hours|days))?$/'],
-            // 'repeat' => 'required|in:none,daily,weekly,monthly',
-            // 'repeat_interval' => 'nullable|integer|min:1|max:100',
-            // // 'repeat_until_count' => 'nullable|integer|min:0|max:1000',
-            // 'repeat_until_date' => 'nullable|date|after:start_datetime',
-
-            // The first occurrence:
             'start_datetime' => 'required|date|after_or_equal:today',
             'end_datetime' => 'required|date|after_or_equal:start_datetime',
-
-
-            'rrule' => 'nullable|string', // RFC-5545 string
-            'exdates' => 'nullable|string', // JSON array of dates
+            'rrule' => 'nullable|string',   // e.g. "FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,TU;COUNT=3"
+            'exdates' => 'nullable|string',   // JSON array of dates
         ]);
 
-        // 2.2. WRAP IN TRANSACTION
-        DB::beginTransaction();
+        \DB::beginTransaction();
         try {
-            // 2.3. CREATE MASTER EVENT
+            // 1) Create master, storing the raw RRULE string + exdates JSON
             $master = Event::create([
                 'title' => $validated['title'],
-                'type_id' => $validated['type_id'] ?? null,
-                'sub_type_id' => $validated['sub_type_id'] ?? null,
+                'type_id' => $validated['type_id'],
+                'sub_type_id' => $validated['sub_type_id'],
                 'office' => $validated['office'] ?? null,
                 'status' => $validated['status'] ?? 'Pending',
                 'diary_owner' => $validated['diary_owner'] ?? null,
@@ -120,61 +104,56 @@ class EventController
                 'location' => $validated['location'] ?? null,
                 'description' => $validated['description'] ?? null,
                 'reminder' => $validated['reminder'] ?? null,
-                // 'repeat' => $validated['repeat'] ?? 'none',
-                // 'repeat_interval' => $validated['repeat_interval'] ?? 1,
-                // // 'repeat_until_count' => $validated['repeat_until_count'] ?? 0,
-                // 'repeat_until_date' => $validated['repeat_until_date'] ?? null,
-
-                // Recurrence fields:
                 'rrule' => $validated['rrule'] ?? null,
                 'exdates' => $validated['exdates'] ?? null,
             ]);
 
-            // 2.3) ALWAYS create the first instance row
+            // 2) Create the first instance
             $firstStart = Carbon::parse($validated['start_datetime']);
             $firstEnd = Carbon::parse($validated['end_datetime']);
 
-            // Always insert the first instance (i = 0)
             EventInstance::create([
                 'event_id' => $master->id,
                 'start_datetime' => $firstStart,
                 'end_datetime' => $firstEnd,
                 'instance_status' => 'Scheduled',
+                'is_exception' => false,
                 'notified' => false,
             ]);
+            // dd([
+            //     'rrule' => $validated['rrule'],
+            //     'firstStart' => $firstStart,
+            //     'firstStartAtom' => $firstStart->toAtomString(),
+            // ]);
 
-            // 3) If there’s an rrule string, generate all future occurrences
+            // 3) If there’s an RRULE, parse & generate future occurrences
             if (!empty($validated['rrule'])) {
-                // Build an RRule object. We need to set “dtstart” to the original start datetime:
-                $rruleArr = [
-                    'rrule' => $validated['rrule'],
-                    'dtstart' => $firstStart->toAtomString(), // e.g. “2025-06-05T09:00:00+00:00”
-                ];
 
-                $rule = new RRule($rruleArr);
-
-                // Convert exdates JSON string into an array of Y-m-d strings (if any):
-                $exdates = [];
-                if (!empty($validated['exdates'])) {
-                    $exdates = json_decode($validated['exdates'], true);
+                $rruleString = trim($validated['rrule']);
+                if (stripos($rruleString, 'RRULE:') === 0) {
+                    $rruleString = trim(substr($rruleString, 6));
                 }
 
-                // Loop through each occurrence generated by RRule
-                foreach ($rule as $occ) {
-                    // $occ is a DateTime instance in UTC. Compare to the “first” we already saved.
-                    if ($occ->getTimestamp() === $firstStart->getTimestamp()) {
-                        continue; // skip the original we've already inserted
+                $rule = new RRule($rruleString, $firstStart);
+// dd($rule);
+                $exdates = json_decode($validated['exdates'] ?? '[]', true);
+
+                foreach ($rule as $occurrence) {
+                    $occTs = Carbon::instance($occurrence);
+
+                    // Skip the original start:
+                    if ($occTs->equalTo($firstStart)) {
+                        continue;
                     }
-                    // If the date part (Y-m-d) is in exdates, skip
-                    $dateOnly = $occ->format('Y-m-d');
+
+                    // If this date is in the exdates JSON, insert a canceled exception:
+                    $dateOnly = $occTs->toDateString();
                     if (in_array($dateOnly, $exdates, true)) {
-                        // Create a placeholder marked “Canceled” so we never regenerate it:
                         EventInstance::create([
                             'event_id' => $master->id,
-                            'start_datetime' => Carbon::instance($occ),
-                            'end_datetime' => Carbon::instance($occ)->addSeconds(
-                                $firstEnd->diffInSeconds($firstStart)
-                            ),
+                            'start_datetime' => $occTs,
+                            'end_datetime' => $occTs->copy()
+                                ->addSeconds($firstEnd->diffInSeconds($firstStart)),
                             'instance_status' => 'Canceled',
                             'is_exception' => true,
                             'notified' => false,
@@ -182,30 +161,30 @@ class EventController
                         continue;
                     }
 
-                    // Otherwise, insert a normal scheduled instance
+                    // Otherwise insert a normal scheduled occurrence:
                     EventInstance::create([
                         'event_id' => $master->id,
-                        'start_datetime' => Carbon::instance($occ),
-                        'end_datetime' => Carbon::instance($occ)->addSeconds(
-                            $firstEnd->diffInSeconds($firstStart)
-                        ),
+                        'start_datetime' => $occTs,
+                        'end_datetime' => $occTs->copy()
+                            ->addSeconds($firstEnd->diffInSeconds($firstStart)),
                         'instance_status' => 'Scheduled',
                         'is_exception' => false,
                         'notified' => false,
                     ]);
                 }
             }
-            DB::commit();
 
+            \DB::commit();
             return response()->json(['success' => true]);
         } catch (\Throwable $th) {
-            DB::rollBack();
+            \DB::rollBack();
             return response()->json([
                 'message' => 'An error occurred while saving.',
                 'error' => $th->getMessage()
             ], 500);
         }
     }
+
 
     /**
      * 3) UPDATE AN INSTANCE (drag/drop or per-instance edit).
@@ -303,7 +282,7 @@ class EventController
 
         return response()->json(['success' => true]);
     }
-    
+
     public function destroySeries(Request $request, Event $event)
     {
         // Mark the master as Canceled

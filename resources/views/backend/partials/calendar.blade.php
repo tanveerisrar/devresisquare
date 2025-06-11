@@ -262,294 +262,339 @@
 @endpush
 
 @push('scripts')
+    <!-- 1) FullCalendar & Moment -->
     <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/rrule@2.7.1/dist/es5/rrule.min.js"></script>
 
+    <!-- 2) rrule via Skypack -->
+    <script type="module">
+        import { RRule } from 'https://cdn.skypack.dev/rrule';
+        window.RRule = RRule;
+        console.log('✅ rrule loaded via Skypack:', typeof RRule);
+    </script>
+
+    <!-- 3) Your integration code -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            if (typeof RRule === 'undefined') {
+                console.error('RRule missing!');
+                return;
+            }
 
+            // Shortcuts to elements:
+            const $rruleModal = $('#rruleModal');
+            const $freqSelect = $('#freqSelect');
+            const $intervalInput = $('#intervalInput');
+            const $intervalLabel = $('#intervalLabel');
+            const $byDayC = $('#byDayContainer');
+            const $byOrdinalC = $('#byOrdinalContainer');
+            const $endType = $('#endTypeSelect');
+            const $endAfterC = $('#endAfterContainer');
+            const $endByDateC = $('#endByDateContainer');
+            const $endAfterCnt = $('#endAfterCount');
+            const $endByDate = $('#endByDateInput');
+            const $exdateList = $('#exdateList');
+            const $rruleInput = $('#rruleInput');
+            const $exdatesInput = $('#exdatesInput');
+            const $rruleSummary = $('#rruleSummary');
 
+            // Utility: render the human‐readable summary in #rruleSummary
+            function renderRRuleSummary(rruleString, exdatesArray) {
+                if (!rruleString) {
+                    $('#rruleSummary').text('No recurrence');
+                    return;
+                }
+                try {
+                    const rule = RRule.fromString(rruleString);
+                    const human = rule.toText(); // e.g. “Every week on Monday, Wednesday until December 31, 2025”
+                    $('#rruleSummary').text(human);
+                }
+                catch (e) {
+                    $('#rruleSummary').text('Invalid recurrence rule');
+                }
+            }
 
-            $(function () {
-                // Shortcuts to elements:
-                const $rruleModal = $('#rruleModal');
-                const $freqSelect = $('#freqSelect');
-                const $intervalInput = $('#intervalInput');
-                const $intervalLabel = $('#intervalLabel');
-                const $byDayC = $('#byDayContainer');
-                const $byOrdinalC = $('#byOrdinalContainer');
-                const $endType = $('#endTypeSelect');
-                const $endAfterC = $('#endAfterContainer');
-                const $endByDateC = $('#endByDateContainer');
-                const $endAfterCnt = $('#endAfterCount');
-                const $endByDate = $('#endByDateInput');
-                const $exdateList = $('#exdateList');
+            // Show/hide parts of the modal based on frequency
+            /*function onFrequencyChange() {
+                const freq = $freqSelect.val();
+                // Update the “interval” label
+                let unitLabel = 'day(s)';
+                if (freq === 'WEEKLY') unitLabel = 'week(s)';
+                else if (freq === 'MONTHLY') unitLabel = 'month(s)';
+                else if (freq === 'YEARLY') unitLabel = 'year(s)';
+                $intervalLabel.text(unitLabel);
 
-                // Utility: render the human‐readable summary in #rruleSummary
-                function renderRRuleSummary(rruleString, exdatesArray) {
-                    if (!rruleString) {
-                        $('#rruleSummary').text('No recurrence');
-                        return;
-                    }
+                // Show/hide “byDay” for WEEKLY
+                if (freq === 'WEEKLY') {
+                    $byDayC.removeClass('d-none');
+                } else {
+                    $byDayC.addClass('d-none');
+                    $('input[type="checkbox"][id^="chk"]').prop('checked', false);
+                }
+
+                // Show/hide “byOrdinal” for MONTHLY
+                if (freq === 'MONTHLY') {
+                    $byOrdinalC.removeClass('d-none');
+                } else {
+                    $byOrdinalC.addClass('d-none');
+                    $('#bySetPos').val('1');
+                    $('#byDayOrdinal').val('MO');
+                }
+            }*/
+            function onFrequencyChange() {
+                const freq = document.getElementById('freqSelect').value;
+                const label = document.getElementById('intervalLabel');
+                const byDayC = document.getElementById('byDayContainer');
+                const byOrdC = document.getElementById('byOrdinalContainer');
+
+                let unit = 'day(s)';
+                if (freq === 'WEEKLY') unit = 'week(s)';
+                else if (freq === 'MONTHLY') unit = 'month(s)';
+                else if (freq === 'YEARLY') unit = 'year(s)';
+                label.textContent = unit;
+
+                if (freq === 'WEEKLY') {
+                    byDayC.classList.remove('d-none');
+                } else {
+                    byDayC.classList.add('d-none');
+                    document.querySelectorAll('#byDayContainer input[type=checkbox]').forEach(cb => cb.checked = false);
+                }
+
+                if (freq === 'MONTHLY') {
+                    byOrdC.classList.remove('d-none');
+                } else {
+                    byOrdC.classList.add('d-none');
+                    document.getElementById('bySetPos').value = '1';
+                    document.getElementById('byDayOrdinal').value = 'MO';
+                }
+            }
+            // When the user clicks “Set Recurrence…”
+            $('#editRRuleBtn').on('click', function () {
+                // 1) If there is already an rrule string in the hidden <textarea>, parse it and fill the fields
+                const existingRRule = $('#rruleInput').val().trim();
+                const existingExdates = $('#exdatesInput').val().trim()
+                    ? JSON.parse($('#exdatesInput').val())
+                    : [];
+
+                if (existingRRule) {
                     try {
-                        const rule = RRule.fromString(rruleString);
-                        const human = rule.toText(); // e.g. “Every week on Monday, Wednesday until December 31, 2025”
-                        $('#rruleSummary').text(human);
+                        const rule = RRule.fromString(existingRRule);
+                        // Fill frequency & interval
+                        $freqSelect.val(rule.options.freq === RRule.YEARLY ? 'YEARLY'
+                            : rule.options.freq === RRule.MONTHLY ? 'MONTHLY'
+                                : rule.options.freq === RRule.WEEKLY ? 'WEEKLY'
+                                    : 'DAILY');
+                        $intervalInput.val(rule.options.interval);
+
+                        // Show/hide relevant sections
+                        onFrequencyChange();
+
+                        // For “WEEKLY” → check appropriate weekdays
+                        if (rule.options.freq === RRule.WEEKLY && rule.options.byweekday) {
+                            const days = rule.options.byweekday;
+                            // rule.options.byweekday is an array of Weekday instances (e.g. [RRule.MO, RRule.WE])
+                            $('input[type="checkbox"][id^="chk"]').prop('checked', false);
+                            days.forEach(d => {
+                                // day.weekday returns 0=MO,1=TU,…6=SU
+                                const idMap = ['chkMO', 'chkTU', 'chkWE', 'chkTH', 'chkFR', 'chkSA', 'chkSU'];
+                                const chkId = idMap[d.weekday];
+                                $('#' + chkId).prop('checked', true);
+                            });
+                        }
+
+                        // For “MONTHLY” → check if bymonthday (e.g. day 15) or bysetpos/byday
+                        if (rule.options.freq === RRule.MONTHLY) {
+                            if (rule.options.bymonthday) {
+                                // You’d need another UI control to let user pick day-of-month directly
+                                // (not shown above), e.g. <input type="number" id="bymonthday" min="1" max="31">
+                                $('#bymonthday').val(rule.options.bymonthday[0]);
+                                $('#bymonthdayContainer').show();
+                                $byOrdinalC.addClass('d-none');
+                            }
+                            else if (rule.options.bysetpos && rule.options.byweekday) {
+                                $byOrdinalC.removeClass('d-none');
+                                $('#bymonthdayContainer').hide();
+                                $('#bySetPos').val(rule.options.bysetpos[0]);        // e.g. 2 for “Second”
+                                $('#byDayOrdinal').val(rule.options.byweekday[0].weekday); // e.g. “WE” → 2
+                            }
+                        }
+
+                        // End conditions:
+                        if (rule.options.count) {
+                            $endType.val('AFTER');
+                            $endAfterC.removeClass('d-none');
+                            $endByDateC.addClass('d-none');
+                            $endAfterCnt.val(rule.options.count);
+                        }
+                        else if (rule.options.until) {
+                            $endType.val('BYDATE');
+                            $endAfterC.addClass('d-none');
+                            $endByDateC.removeClass('d-none');
+                            // rule.options.until is a JS Date object → format to "YYYY-MM-DD"
+                            const u = rule.options.until;
+                            const y = u.getFullYear();
+                            const m = String(u.getMonth() + 1).padStart(2, '0');
+                            const d = String(u.getDate()).padStart(2, '0');
+                            $endByDate.val(`${y}-${m}-${d}`);
+                        }
+                        else {
+                            $endType.val('NEVER');
+                            $endAfterC.addClass('d-none');
+                            $endByDateC.addClass('d-none');
+                        }
                     }
                     catch (e) {
-                        $('#rruleSummary').text('Invalid recurrence rule');
+                        console.warn('Failed to parse existing RRule:', e);
                     }
                 }
-
-                // When the user clicks “Set Recurrence…”
-                $('#editRRuleBtn').on('click', function () {
-                    // 1) If there is already an rrule string in the hidden <textarea>, parse it and fill the fields
-                    const existingRRule = $('#rruleInput').val().trim();
-                    const existingExdates = $('#exdatesInput').val().trim()
-                        ? JSON.parse($('#exdatesInput').val())
-                        : [];
-
-                    if (existingRRule) {
-                        try {
-                            const rule = RRule.fromString(existingRRule);
-                            // Fill frequency & interval
-                            $freqSelect.val(rule.options.freq === RRule.YEARLY ? 'YEARLY'
-                                : rule.options.freq === RRule.MONTHLY ? 'MONTHLY'
-                                    : rule.options.freq === RRule.WEEKLY ? 'WEEKLY'
-                                        : 'DAILY');
-                            $intervalInput.val(rule.options.interval);
-
-                            // Show/hide relevant sections
-                            onFrequencyChange();
-
-                            // For “WEEKLY” → check appropriate weekdays
-                            if (rule.options.freq === RRule.WEEKLY && rule.options.byweekday) {
-                                const days = rule.options.byweekday;
-                                // rule.options.byweekday is an array of Weekday instances (e.g. [RRule.MO, RRule.WE])
-                                $('input[type="checkbox"][id^="chk"]').prop('checked', false);
-                                days.forEach(d => {
-                                    // day.weekday returns 0=MO,1=TU,…6=SU
-                                    const idMap = ['chkMO', 'chkTU', 'chkWE', 'chkTH', 'chkFR', 'chkSA', 'chkSU'];
-                                    const chkId = idMap[d.weekday];
-                                    $('#' + chkId).prop('checked', true);
-                                });
-                            }
-
-                            // For “MONTHLY” → check if bymonthday (e.g. day 15) or bysetpos/byday
-                            if (rule.options.freq === RRule.MONTHLY) {
-                                if (rule.options.bymonthday) {
-                                    // You’d need another UI control to let user pick day-of-month directly
-                                    // (not shown above), e.g. <input type="number" id="bymonthday" min="1" max="31">
-                                    $('#bymonthday').val(rule.options.bymonthday[0]);
-                                    $('#bymonthdayContainer').show();
-                                    $byOrdinalC.hide();
-                                }
-                                else if (rule.options.bysetpos && rule.options.byweekday) {
-                                    $byOrdinalC.show();
-                                    $('#bymonthdayContainer').hide();
-                                    $('#bySetPos').val(rule.options.bysetpos[0]);        // e.g. 2 for “Second”
-                                    $('#byDayOrdinal').val(rule.options.byweekday[0].weekday); // e.g. “WE” → 2
-                                }
-                            }
-
-                            // End conditions:
-                            if (rule.options.count) {
-                                $endType.val('AFTER');
-                                $endAfterC.show();
-                                $endByDateC.hide();
-                                $endAfterCnt.val(rule.options.count);
-                            }
-                            else if (rule.options.until) {
-                                $endType.val('BYDATE');
-                                $endAfterC.hide();
-                                $endByDateC.show();
-                                // rule.options.until is a JS Date object → format to "YYYY-MM-DD"
-                                const u = rule.options.until;
-                                const y = u.getFullYear();
-                                const m = String(u.getMonth() + 1).padStart(2, '0');
-                                const d = String(u.getDate()).padStart(2, '0');
-                                $endByDate.val(`${y}-${m}-${d}`);
-                            }
-                            else {
-                                $endType.val('NEVER');
-                                $endAfterC.hide();
-                                $endByDateC.hide();
-                            }
-                        }
-                        catch (e) {
-                            console.warn('Failed to parse existing RRule:', e);
-                        }
-                    }
-                    else {
-                        // No existing rrule → reset UI
-                        $freqSelect.val('DAILY');
-                        $intervalInput.val(1);
-                        onFrequencyChange();
-                        $endType.val('NEVER');
-                        $endAfterC.hide();
-                        $endByDateC.hide();
-                        $exdateList.empty();
-                    }
-
-                    // 2) Populate exdates UI
+                else {
+                    // No existing rrule → reset UI
+                    $freqSelect.val('DAILY');
+                    $intervalInput.val(1);
+                    onFrequencyChange();
+                    $endType.val('NEVER');
+                    $endAfterC.addClass('d-none');
+                    $endByDateC.addClass('d-none');
                     $exdateList.empty();
-                    if (existingExdates.length) {
-                        existingExdates.forEach(d => {
-                            addExdateRow(d);
-                        });
-                    }
-
-                    $rruleModal.modal('show');
-                });
-
-                // Show/hide parts of the modal based on frequency
-                function onFrequencyChange() {
-                    const freq = $freqSelect.val();
-                    // Update the “interval” label
-                    let unitLabel = 'day(s)';
-                    if (freq === 'WEEKLY') unitLabel = 'week(s)';
-                    else if (freq === 'MONTHLY') unitLabel = 'month(s)';
-                    else if (freq === 'YEARLY') unitLabel = 'year(s)';
-                    $intervalLabel.text(unitLabel);
-
-                    // Show/hide “byDay” for WEEKLY
-                    if (freq === 'WEEKLY') {
-                        $byDayC.removeClass('d-none');
-                    } else {
-                        $byDayC.addClass('d-none');
-                        $('input[type="checkbox"][id^="chk"]').prop('checked', false);
-                    }
-
-                    // Show/hide “byOrdinal” for MONTHLY
-                    if (freq === 'MONTHLY') {
-                        $byOrdinalC.removeClass('d-none');
-                    } else {
-                        $byOrdinalC.addClass('d-none');
-                        $('#bySetPos').val('1');
-                        $('#byDayOrdinal').val('MO');
-                    }
                 }
 
-                $freqSelect.on('change', onFrequencyChange);
-
-                // Show/hide end condition fields
-                $endType.on('change', function () {
-                    const val = $(this).val();
-                    if (val === 'AFTER') {
-                        $endAfterC.removeClass('d-none');
-                        $endByDateC.addClass('d-none');
-                    } else if (val === 'BYDATE') {
-                        $endAfterC.addClass('d-none');
-                        $endByDateC.removeClass('d-none');
-                    } else {
-                        $endAfterC.addClass('d-none');
-                        $endByDateC.addClass('d-none');
-                    }
-                });
-
-                // Add a new Exclusion Date row
-                $('#addExdateBtn').on('click', function () {
-                    addExdateRow();
-                });
-
-                function addExdateRow(initialValue = '') {
-                    const idx = $exdateList.children().length;
-                    const html = `
-                                              <div class="input-group mb-2" data-idx="${idx}">
-                                                <input type="date" class="form-control exdateInput" value="${initialValue}">
-                                                <button class="btn btn-outline-danger removeExdateBtn" type="button">
-                                                  &times;
-                                                </button>
-                                              </div>`;
-                    $exdateList.append(html);
-                }
-
-                // Remove a specific exdate row
-                $exdateList.on('click', '.removeExdateBtn', function () {
-                    $(this).closest('.input-group').remove();
-                });
-
-                // 3) When user clicks “Save Recurrence”
-                $('#saveRRuleBtn').on('click', function () {
-                    // Build options for RRule
-                    const freq = $freqSelect.val(); // DAILY, WEEKLY, MONTHLY, YEARLY
-                    const interval = parseInt($intervalInput.val()) || 1;
-                    const options = {
-                        freq: RRule[freq],
-                        interval: interval,
-                    };
-
-                    // If WEEKLY → collect byweekday
-                    if (freq === 'WEEKLY') {
-                        const days = [];
-                        $('input[id^="chk"]').each(function () {
-                            if ($(this).prop('checked')) {
-                                days.push(RRule[$(this).val()]);
-                            }
-                        });
-                        if (days.length) {
-                            options.byweekday = days;
-                        }
-                    }
-
-                    // If MONTHLY and user picked an ordinal day
-                    if (freq === 'MONTHLY') {
-                        const setpos = parseInt($('#bySetPos').val());     // e.g. 2
-                        const bydayVal = $('#byDayOrdinal').val();         // e.g. "TU"
-                        options.bysetpos = setpos;
-                        options.byweekday = [RRule[bydayVal]];
-                    }
-
-                    // End conditions
-                    const endType = $endType.val();
-                    if (endType === 'AFTER') {
-                        options.count = parseInt($endAfterCnt.val()) || 1;
-                    }
-                    else if (endType === 'BYDATE') {
-                        const untilRaw = $endByDate.val(); // "YYYY-MM-DD"
-                        if (untilRaw) {
-                            // Convert to JS date at 23:59:59 local time
-                            const ut = new Date(untilRaw + 'T23:59:59');
-                            options.until = ut;
-                        }
-                    }
-                    // else “NEVER” → we leave options.count & options.until undefined
-
-                    // Build the actual RRule
-                    let rruleString = '';
-                    try {
-                        const rule = new RRule(options);
-                        rruleString = rule.toString(); // e.g. "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,WE;COUNT=10"
-                    } catch (e) {
-                        alert('Failed to build recurrence rule: ' + e);
-                        return;
-                    }
-
-                    // Collect exdates from UI
-                    const exdates = [];
-                    $exdateList.find('.exdateInput').each(function () {
-                        const val = $(this).val();
-                        if (val) {
-                            exdates.push(val); // e.g. "2025-07-04"
-                        }
+                // 2) Populate exdates UI
+                $exdateList.empty();
+                if (existingExdates.length) {
+                    existingExdates.forEach(d => {
+                        addExdateRow(d);
                     });
+                }
 
-                    // Write them back to the hidden form fields
-                    $('#rruleInput').val(rruleString);
-                    $('#exdatesInput').val(JSON.stringify(exdates));
-
-                    // Also render the summary:
-                    renderRRuleSummary(rruleString, exdates);
-
-                    // Close the modal
-                    $rruleModal.modal('hide');
-                });
+                $rruleModal.modal('show');
             });
 
+            $freqSelect.on('change', onFrequencyChange);
+
+            // Show/hide end condition fields
+            $endType.on('change', function () {
+                const val = $(this).val();
+                if (val === 'AFTER') {
+                    $endAfterC.removeClass('d-none');
+                    $endByDateC.addClass('d-none');
+                } else if (val === 'BYDATE') {
+                    $endAfterC.addClass('d-none');
+                    $endByDateC.removeClass('d-none');
+                } else {
+                    $endAfterC.addClass('d-none');
+                    $endByDateC.addClass('d-none');
+                }
+            });
+
+            // Add a new Exclusion Date row
+            $('#addExdateBtn').on('click', function () {
+                addExdateRow();
+            });
+
+            function addExdateRow(initialValue = '') {
+                const idx = $exdateList.children().length;
+                const html = `
+                                                            <div class="input-group mb-2" data-idx="${idx}">
+                                                            <input type="date" class="form-control exdateInput" value="${initialValue}">
+                                                            <button class="btn btn-outline-danger removeExdateBtn" type="button">
+                                                                &times;
+                                                            </button>
+                                                            </div>`;
+                $exdateList.append(html);
+            }
+
+            // Remove a specific exdate row
+            $exdateList.on('click', '.removeExdateBtn', function () {
+                $(this).closest('.input-group').remove();
+            });
+
+            // 3) When user clicks “Save Recurrence”
+            $('#saveRRuleBtn').on('click', function () {
+                // Build options for RRule
+                const freq = $freqSelect.val(); // DAILY, WEEKLY, MONTHLY, YEARLY
+                const interval = parseInt($intervalInput.val()) || 1;
+                const options = {
+                    freq: RRule[freq],
+                    interval: interval,
+                };
+
+                // If WEEKLY → collect byweekday
+                if (freq === 'WEEKLY') {
+                    const days = [];
+                    $('input[id^="chk"]').each(function () {
+                        if ($(this).prop('checked')) {
+                            days.push(RRule[$(this).val()]);
+                        }
+                    });
+                    if (days.length) {
+                        options.byweekday = days;
+                    }
+                }
+
+                // If MONTHLY and user picked an ordinal day
+                if (freq === 'MONTHLY') {
+                    const setpos = parseInt($('#bySetPos').val());     // e.g. 2
+                    const bydayVal = $('#byDayOrdinal').val();         // e.g. "TU"
+                    options.bysetpos = setpos;
+                    options.byweekday = [RRule[bydayVal]];
+                }
+
+                // End conditions
+                const endType = $endType.val();
+                if (endType === 'AFTER') {
+                    options.count = parseInt($endAfterCnt.val()) || 1;
+                }
+                else if (endType === 'BYDATE') {
+                    const untilRaw = $endByDate.val(); // "YYYY-MM-DD"
+                    if (untilRaw) {
+                        // Convert to JS date at 23:59:59 local time
+                        const ut = new Date(untilRaw + 'T23:59:59');
+                        options.until = ut;
+                    }
+                }
+                // else “NEVER” → we leave options.count & options.until undefined
+
+                // Build the actual RRule
+                let rruleString = '';
+                try {
+                    const rule = new RRule(options);
+                    rruleString = rule.toString(); // e.g. "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,WE;COUNT=10"
+                } catch (e) {
+                    alert('Failed to build recurrence rule: ' + e);
+                    return;
+                }
+                // let rule;
+                // try { rule = new RRule(opts); }
+                // catch (err) { return alert('Invalid recurrence: '+ err.message); }
+
+                // // Serialize
+                // $rruleInput.val(rule.toString());
+                // renderRRuleSummary(rule.toString());
+
+                // Collect exdates from UI
+                const exdates = [];
+                $exdateList.find('.exdateInput').each(function () {
+                    const val = $(this).val();
+                    if (val) {
+                        exdates.push(val); // e.g. "2025-07-04"
+                    }
+                });
+
+                // Write them back to the hidden form fields
+                $('#rruleInput').val(rruleString);
+                $('#exdatesInput').val(JSON.stringify(exdates));
+
+                // Also render the summary:
+                renderRRuleSummary(rruleString, exdates);
+
+                // Close the modal
+                $rruleModal.modal('hide');
+            });
+
+
             // Initialize Bootstrap 5 modal instance once
-            var modalEl = document.getElementById('eventModal');
-            var eventModal = new bootstrap.Modal(modalEl);
+            // var modalEl = document.getElementById('eventModal');
+            // var eventModal = new bootstrap.Modal(modalEl);
 
             function updateRepeatUntilMin() {
                 const $start = $('input[name="start_datetime"]');
@@ -645,22 +690,25 @@
                     $('#intervalInput').val(1);
                     onFrequencyChange();
                     $endType.val('NEVER');
-                    $endAfterC.hide();
-                    $endByDateC.hide();
+                    $endAfterC.addClass('d-none');
+                    $endByDateC.addClass('d-none');
                     $exdateList.empty();
 
                     // Clear Type/Sub‐Type
                     $('#type_id').val('');
                     $('#sub_type_id').html('<option value="">— Select Sub-Type —</option>');
 
-                    eventModal.show();
+                    // eventModal.show();
+                    $('#eventModal').modal('show');
                 },
                 eventClick: function (info) {
                     // When clicking an existing instance, load data into modal to “Edit Instance”
                     var inst = info.event.extendedProps;
                     // If no recurrence → treat as a single
                     if (!inst.rrule) {
-                        openSingleInstanceModal(info);
+                        console.log('✏️[eventClick] Editing single instance:', inst.id);
+                        openSingleInstanceModal(info); // or whatever shows the modal
+                        $('input[name="form_action"]').val('updateMaster');
                         return;
                     }
 
@@ -681,6 +729,11 @@
                             openSingleInstanceModal(info);
                             break;
                         case '2':
+                            // Editing entire series
+                            $('input[name="form_action"]').val('updateMaster');
+                            $('input[name="master_id"]').val(inst.master_id);
+                            $('input[name="instance_id"]').val('');
+                            $('.text-danger').remove(); // Clear old errors
                             openSeriesModal(info);
                             break;
                         case '3':
@@ -745,328 +798,335 @@
             });
 
             calendar.render();
-        });
 
-        $('#type_id').on('change', function () {
-            var typeId = $(this).val();
-            var $sub = $('#sub_type_id');
 
-            // Clear existing options
-            $sub.html('<option value="">— Select Sub-Type —</option>');
+            $('#type_id').on('change', function () {
+                var typeId = $(this).val();
+                var $sub = $('#sub_type_id');
 
-            if (!typeId) {
-                return; // no type chosen
-            }
+                // Clear existing options
+                $sub.html('<option value="">— Select Sub-Type —</option>');
 
-            $.getJSON('/admin/api/event-sub-types/' + typeId, function (data) {
-                // data is an object {id: name, ...}
-                $.each(data, function (id, name) {
-                    $sub.append(`<option value="${id}">${name}</option>`);
+                if (!typeId) {
+                    return; // no type chosen
+                }
+
+                $.getJSON('/admin/api/event-sub-types/' + typeId, function (data) {
+                    // data is an object {id: name, ...}
+                    $.each(data, function (id, name) {
+                        $sub.append(`<option value="${id}">${name}</option>`);
+                    });
                 });
             });
+
+            // Handle form submission: could be “new master + instances” or “update instance + maybe update master”
+            $('#eventForm').on('submit', function (e) {
+                e.preventDefault();
+                $('.text-danger').remove();
+
+                // Read hidden IDs
+                var instanceId = $('input[name="instance_id"]').val();
+                var masterId = $('input[name="master_id"]').val();
+                var formActionMode = $('input[name="form_action"]').val();
+                var originalStart = $('input[name="original_start"]').val();
+                var originalEnd = $('input[name="original_end"]').val();
+
+
+                console.log('✏️[formSubmit] form_action=', formActionMode,
+                    'instanceId=', instanceId,
+                    'masterId=', masterId,
+                    'original_start=', originalStart,
+                    'original_end=', originalEnd);
+
+                // Collect form data
+                var formData = $(this).serializeArray();
+                var payload = {};
+                formData.forEach(function (f) { payload[f.name] = f.value; });
+
+                // If instanceId is present → update that single instance (drag/drop or manual edit)
+                if (instanceId && formActionMode === 'updateInstance') {
+                    // Only update instance’s start/end (we can allow editing other details if desired)
+                    $.ajax({
+                        url: '{{ route("backend.events.updateInstance", "") }}/' + instanceId,
+                        method: 'POST',
+                        data: {
+                            _token: '{{ csrf_token() }}',
+                            start_datetime: payload.start_datetime,
+                            end_datetime: payload.end_datetime,
+                            // You could also send originalStart/originalEnd for auditing:
+                            original_start: originalStart,
+                            original_end: originalEnd
+                        },
+                        success: function () {
+                            // eventModal.hide();
+                            $('#eventForm')[0].reset();
+                            $('#eventModal').modal('hide');
+                            calendar.refetchEvents();
+                        },
+                        error: function (xhr) {
+                            if (xhr.status === 422) {
+                                let errs = xhr.responseJSON.errors;
+                                $.each(errs, function (key, msgs) {
+                                    var $input = $('[name="' + key + '"]');
+                                    if ($input.length) {
+                                        $input.after('<div class="text-danger">' + msgs[0] + '</div>');
+                                    }
+                                });
+                            } else {
+                                alert('Error updating instance.');
+                            }
+                        }
+                    });
+                }
+                // Else if masterId is present → user clicked an existing instance but may have changed recurrence or master data
+                else if (masterId && formActionMode === 'updateMaster') {
+                    $.ajax({
+                        url: '{{ route("backend.events.updateMaster", "") }}/' + masterId,
+                        method: 'PUT',
+                        data: payload,
+                        success: function () {
+                            // eventModal.hide();
+                            $('#eventForm')[0].reset();
+                            $('#eventModal').modal('hide');
+                            calendar.refetchEvents();
+                        },
+                        error: function (xhr) {
+                            if (xhr.status === 422) {
+                                let errs = xhr.responseJSON.errors;
+                                $.each(errs, function (key, msgs) {
+                                    var $input = $('[name="' + key + '"]');
+                                    if ($input.length) {
+                                        $input.after('<div class="text-danger">' + msgs[0] + '</div>');
+                                    }
+                                });
+                            } else {
+                                alert('Error updating series.');
+                            }
+                        }
+                    });
+                }
+                else if (formActionMode === 'splitSeries' && instanceId) {
+                    // Edit this & all following occurrences (split)
+                    $.ajax({
+                        url: '{{ route("backend.events.splitSeries", "") }}/' + instanceId,
+                        method: 'POST',
+                        data: payload,
+                        success: function () {
+                            // eventModal.hide();
+                            $('#eventForm')[0].reset();
+                            $('#eventModal').modal('hide');
+                            calendar.refetchEvents();
+                        },
+                        error: function (xhr) {
+                            if (xhr.status === 422) {
+                                let errs = xhr.responseJSON.errors;
+                                $.each(errs, function (key, msgs) {
+                                    var $input = $('[name="' + key + '"]');
+                                    if ($input.length) {
+                                        $input.after('<div class="text-danger">' + msgs[0] + '</div>');
+                                    }
+                                });
+                            } else {
+                                alert('Error splitting series.');
+                            }
+                        }
+                    });
+                }
+                // Otherwise → new master + instances
+                else {
+                    $.ajax({
+                        url: '{{ route("backend.events.store") }}',
+                        method: 'POST',
+                        data: payload,
+                        success: function () {
+                            // eventModal.hide();
+                            $('#eventForm')[0].reset();
+                            $('#eventModal').modal('hide');
+                            calendar.refetchEvents();
+                        },
+                        error: function (xhr) {
+                            if (xhr.status === 422) {
+                                let errs = xhr.responseJSON.errors;
+                                $.each(errs, function (key, msgs) {
+                                    var $input = $('[name="' + key + '"]');
+                                    if ($input.length) {
+                                        $input.after('<div class="text-danger">' + msgs[0] + '</div>');
+                                    }
+                                });
+                            } else {
+                                alert('Error saving event.');
+                            }
+                        }
+                    });
+                }
+            });
+
+            // -------------------------------------------------
+            // Helper to open the “Single Instance” modal
+            // -------------------------------------------------
+            function openSingleInstanceModal(info) {
+                const inst = info.event.extendedProps;
+                $('input[name="instance_id"]').val(info.event.id);
+                $('input[name="master_id"]').val(inst.master_id);
+                $('input[name="form_action"]').val('updateInstance');
+                $('#eventForm')[0].reset();
+                $('.text-danger').remove();
+
+                $('input[name="title"]').val(info.event.title);
+                $('input[name="office"]').val(inst.office);
+                $('select[name="status"]').val(inst.status);
+                $('input[name="diary_owner"]').val(inst.diary_owner);
+                $('input[name="on_behalf_of"]').val(inst.on_behalf_of);
+                $('input[name="location"]').val(inst.location);
+                $('input[name="reminder"]').val(inst.reminder);
+                $('textarea[name="description"]').val(inst.description);
+
+                $('input[name="start_datetime"]').val(
+                    moment(info.event.start).format('YYYY-MM-DDTHH:mm')
+                );
+                $('input[name="end_datetime"]').val(
+                    moment(info.event.end).format('YYYY-MM-DDTHH:mm')
+                );
+                updateEndMin();
+                updateRepeatUntilMin();
+
+                // Fill recurrence fields from this instance’s master
+                $('#rruleInput').val(inst.rrule || '');
+                $('#exdatesInput').val(inst.exdates || '[]');
+                renderRRuleSummary(inst.rrule, inst.exdates ? JSON.parse(inst.exdates) : []);
+
+                // Hide editing recurrence in single mode
+                $('#editRRuleBtn').hide();
+
+                // Type / Sub‐Type
+                $('#type_id').val(inst.type_id);
+                $('#sub_type_id').html('<option value="">— Select Sub‐Type —</option>');
+                if (inst.type_id) {
+                    $.getJSON('/admin/api/event-sub-types/' + inst.type_id, function (data) {
+                        $.each(data, function (id, name) {
+                            $('#sub_type_id').append(
+                                $('<option>', { value: id }).text(name)
+                            );
+                        });
+                        $('#sub_type_id').val(inst.sub_type_id);
+                    });
+                }
+
+                // eventModal.show();
+                $('#eventModal').modal('show');
+            }
+
+            // -------------------------------------------------
+            // Helper to open the “Entire Series” modal
+            // -------------------------------------------------
+            function openSeriesModal(info) {
+                const inst = info.event.extendedProps;
+                $('input[name="instance_id"]').val('');
+                $('input[name="master_id"]').val(inst.master_id);
+                $('input[name="form_action"]').val('updateMaster');
+                $('#eventForm')[0].reset();
+                $('.text-danger').remove();
+
+                // Fill master‐level fields (title, office, etc.) from extendedProps
+                $('input[name="title"]').val(inst.title);
+                $('input[name="office"]').val(inst.office);
+                $('select[name="status"]').val(inst.status);
+                $('input[name="diary_owner"]').val(inst.diary_owner);
+                $('input[name="on_behalf_of"]').val(inst.on_behalf_of);
+                $('input[name="location"]').val(inst.location);
+                $('input[name="reminder"]').val(inst.reminder);
+                $('textarea[name="description"]').val(inst.description);
+
+                // Use clicked instance’s datetime as the new “dtstart”
+                $('input[name="start_datetime"]').val(
+                    moment(info.event.start).format('YYYY-MM-DDTHH:mm')
+                );
+                $('input[name="end_datetime"]').val(
+                    moment(info.event.end).format('YYYY-MM-DDTHH:mm')
+                );
+                updateEndMin();
+                updateRepeatUntilMin();
+
+                // Fill recurrence fields from master
+                $('#rruleInput').val(inst.rrule || '');
+                $('#exdatesInput').val(inst.exdates || '[]');
+                renderRRuleSummary(inst.rrule, inst.exdates ? JSON.parse(inst.exdates) : []);
+
+                $('#editRRuleBtn').show();
+
+                // Type / Sub‐Type
+                $('#type_id').val(inst.type_id);
+                $('#sub_type_id').html('<option value="">— Select Sub‐Type —</option>');
+                if (inst.type_id) {
+                    $.getJSON('/admin/api/event-sub-types/' + inst.type_id, function (data) {
+                        $.each(data, function (id, name) {
+                            $('#sub_type_id').append(
+                                $('<option>', { value: id }).text(name)
+                            );
+                        });
+                        $('#sub_type_id').val(inst.sub_type_id);
+                    });
+                }
+
+                // eventModal.show();
+                $('#eventModal').modal('show');
+            }
+
+            // -------------------------------------------------
+            // Helper to open the “Split Series” modal (edit this & future)
+            // -------------------------------------------------
+            function openSplitSeriesModal(info) {
+                const inst = info.event.extendedProps;
+                $('input[name="instance_id"]').val(info.event.id);
+                $('input[name="master_id"]').val(inst.master_id);
+                $('input[name="form_action"]').val('splitSeries');
+                $('#eventForm')[0].reset();
+                $('.text-danger').remove();
+
+                // Copy most fields from the old master, but use clicked datetime as new dtstart
+                $('input[name="title"]').val(inst.title);
+                $('input[name="office"]').val(inst.office);
+                $('select[name="status"]').val(inst.status);
+                $('input[name="diary_owner"]').val(inst.diary_owner);
+                $('input[name="on_behalf_of"]').val(inst.on_behalf_of);
+                $('input[name="location"]').val(inst.location);
+                $('input[name="reminder"]').val(inst.reminder);
+                $('textarea[name="description"]').val(inst.description);
+
+                $('input[name="start_datetime"]').val(
+                    moment(info.event.start).format('YYYY-MM-DDTHH:mm')
+                );
+                $('input[name="end_datetime"]').val(
+                    moment(info.event.end).format('YYYY-MM-DDTHH:mm')
+                );
+                updateEndMin();
+                updateRepeatUntilMin();
+
+                // We need to let them define a brand-new recurrence rule for the split series
+                $('#rruleInput').val(inst.rrule || '');
+                $('#exdatesInput').val(inst.exdates || '[]');
+                renderRRuleSummary(inst.rrule, inst.exdates ? JSON.parse(inst.exdates) : []);
+
+                $('#editRRuleBtn').show();
+
+                // Type / Sub‐Type
+                $('#type_id').val(inst.type_id);
+                $('#sub_type_id').html('<option value="">— Select Sub‐Type —</option>');
+                if (inst.type_id) {
+                    $.getJSON('/admin/api/event-sub-types/' + inst.type_id, function (data) {
+                        $.each(data, function (id, name) {
+                            $('#sub_type_id').append(
+                                $('<option>', { value: id }).text(name)
+                            );
+                        });
+                        $('#sub_type_id').val(inst.sub_type_id);
+                    });
+                }
+
+                // eventModal.show();
+                $('#eventModal').modal('show');
+            }
         });
-
-        // Handle form submission: could be “new master + instances” or “update instance + maybe update master”
-        $('#eventForm').on('submit', function (e) {
-            e.preventDefault();
-            $('.text-danger').remove();
-
-            // Read hidden IDs
-            var instanceId = $('input[name="instance_id"]').val();
-            var masterId = $('input[name="master_id"]').val();
-            var formActionMode = $('input[name="form_action"]').val();
-            var originalStart = $('input[name="original_start"]').val();
-            var originalEnd = $('input[name="original_end"]').val();
-
-
-            console.log('✏️[formSubmit] form_action=', formActionMode,
-                'instanceId=', instanceId,
-                'masterId=', masterId,
-                'original_start=', originalStart,
-                'original_end=', originalEnd);
-
-            // Collect form data
-            var formData = $(this).serializeArray();
-            var payload = {};
-            formData.forEach(function (f) { payload[f.name] = f.value; });
-
-            // If instanceId is present → update that single instance (drag/drop or manual edit)
-            if (instanceId && formActionMode === 'updateInstance') {
-                // Only update instance’s start/end (we can allow editing other details if desired)
-                $.ajax({
-                    url: '{{ route("backend.events.updateInstance", "") }}/' + instanceId,
-                    method: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        start_datetime: payload.start_datetime,
-                        end_datetime: payload.end_datetime,
-                        // You could also send originalStart/originalEnd for auditing:
-                        original_start: originalStart,
-                        original_end: originalEnd
-                    },
-                    success: function () {
-                        eventModal.hide();
-                        $('#eventForm')[0].reset();
-                        calendar.refetchEvents();
-                    },
-                    error: function (xhr) {
-                        if (xhr.status === 422) {
-                            let errs = xhr.responseJSON.errors;
-                            $.each(errs, function (key, msgs) {
-                                var $input = $('[name="' + key + '"]');
-                                if ($input.length) {
-                                    $input.after('<div class="text-danger">' + msgs[0] + '</div>');
-                                }
-                            });
-                        } else {
-                            alert('Error updating instance.');
-                        }
-                    }
-                });
-            }
-            // Else if masterId is present → user clicked an existing instance but may have changed recurrence or master data
-            else if (masterId && formActionMode === 'updateMaster') {
-                $.ajax({
-                    url: '{{ route("backend.events.updateMaster", "") }}/' + masterId,
-                    method: 'PUT',
-                    data: payload,
-                    success: function () {
-                        eventModal.hide();
-                        $('#eventForm')[0].reset();
-                        calendar.refetchEvents();
-                    },
-                    error: function (xhr) {
-                        if (xhr.status === 422) {
-                            let errs = xhr.responseJSON.errors;
-                            $.each(errs, function (key, msgs) {
-                                var $input = $('[name="' + key + '"]');
-                                if ($input.length) {
-                                    $input.after('<div class="text-danger">' + msgs[0] + '</div>');
-                                }
-                            });
-                        } else {
-                            alert('Error updating series.');
-                        }
-                    }
-                });
-            }
-            else if (formAction === 'splitSeries' && instanceId) {
-                // Edit this & all following occurrences (split)
-                $.ajax({
-                    url: '{{ route("backend.events.splitSeries", "") }}/' + instanceId,
-                    method: 'POST',
-                    data: payload,
-                    success: function () {
-                        eventModal.hide();
-                        $('#eventForm')[0].reset();
-                        calendar.refetchEvents();
-                    },
-                    error: function (xhr) {
-                        if (xhr.status === 422) {
-                            let errs = xhr.responseJSON.errors;
-                            $.each(errs, function (key, msgs) {
-                                var $input = $('[name="' + key + '"]');
-                                if ($input.length) {
-                                    $input.after('<div class="text-danger">' + msgs[0] + '</div>');
-                                }
-                            });
-                        } else {
-                            alert('Error splitting series.');
-                        }
-                    }
-                });
-            }
-            // Otherwise → new master + instances
-            else {
-                $.ajax({
-                    url: '{{ route("backend.events.store") }}',
-                    method: 'POST',
-                    data: payload,
-                    success: function () {
-                        eventModal.hide();
-                        $('#eventForm')[0].reset();
-                        calendar.refetchEvents();
-                    },
-                    error: function (xhr) {
-                        if (xhr.status === 422) {
-                            let errs = xhr.responseJSON.errors;
-                            $.each(errs, function (key, msgs) {
-                                var $input = $('[name="' + key + '"]');
-                                if ($input.length) {
-                                    $input.after('<div class="text-danger">' + msgs[0] + '</div>');
-                                }
-                            });
-                        } else {
-                            alert('Error saving event.');
-                        }
-                    }
-                });
-            }
-        });
-
-        // -------------------------------------------------
-        // Helper to open the “Single Instance” modal
-        // -------------------------------------------------
-        function openSingleInstanceModal(info) {
-            const inst = info.event.extendedProps;
-            $('input[name="instance_id"]').val(info.event.id);
-            $('input[name="master_id"]').val(inst.master_id);
-            $('input[name="form_action"]').val('updateInstance');
-            $('#eventForm')[0].reset();
-            $('.text-danger').remove();
-
-            $('input[name="title"]').val(info.event.title);
-            $('input[name="office"]').val(inst.office);
-            $('select[name="status"]').val(inst.status);
-            $('input[name="diary_owner"]').val(inst.diary_owner);
-            $('input[name="on_behalf_of"]').val(inst.on_behalf_of);
-            $('input[name="location"]').val(inst.location);
-            $('input[name="reminder"]').val(inst.reminder);
-            $('textarea[name="description"]').val(inst.description);
-
-            $('input[name="start_datetime"]').val(
-                moment(info.event.start).format('YYYY-MM-DDTHH:mm')
-            );
-            $('input[name="end_datetime"]').val(
-                moment(info.event.end).format('YYYY-MM-DDTHH:mm')
-            );
-            updateEndMin();
-            updateRepeatUntilMin();
-
-            // Fill recurrence fields from this instance’s master
-            $('#rruleInput').val(inst.rrule || '');
-            $('#exdatesInput').val(inst.exdates || '[]');
-            renderRRuleSummary(inst.rrule, inst.exdates ? JSON.parse(inst.exdates) : []);
-
-            // Hide editing recurrence in single mode
-            $('#editRRuleBtn').hide();
-
-            // Type / Sub‐Type
-            $('#type_id').val(inst.type_id);
-            $('#sub_type_id').html('<option value="">— Select Sub‐Type —</option>');
-            if (inst.type_id) {
-                $.getJSON('/admin/api/event-sub-types/' + inst.type_id, function (data) {
-                    $.each(data, function (id, name) {
-                        $('#sub_type_id').append(
-                            $('<option>', { value: id }).text(name)
-                        );
-                    });
-                    $('#sub_type_id').val(inst.sub_type_id);
-                });
-            }
-
-            eventModal.show();
-        }
-
-        // -------------------------------------------------
-        // Helper to open the “Entire Series” modal
-        // -------------------------------------------------
-        function openSeriesModal(info) {
-            const inst = info.event.extendedProps;
-            $('input[name="instance_id"]').val('');
-            $('input[name="master_id"]').val(inst.master_id);
-            $('input[name="form_action"]').val('updateMaster');
-            $('#eventForm')[0].reset();
-            $('.text-danger').remove();
-
-            // Fill master‐level fields (title, office, etc.) from extendedProps
-            $('input[name="title"]').val(inst.title);
-            $('input[name="office"]').val(inst.office);
-            $('select[name="status"]').val(inst.status);
-            $('input[name="diary_owner"]').val(inst.diary_owner);
-            $('input[name="on_behalf_of"]').val(inst.on_behalf_of);
-            $('input[name="location"]').val(inst.location);
-            $('input[name="reminder"]').val(inst.reminder);
-            $('textarea[name="description"]').val(inst.description);
-
-            // Use clicked instance’s datetime as the new “dtstart”
-            $('input[name="start_datetime"]').val(
-                moment(info.event.start).format('YYYY-MM-DDTHH:mm')
-            );
-            $('input[name="end_datetime"]').val(
-                moment(info.event.end).format('YYYY-MM-DDTHH:mm')
-            );
-            updateEndMin();
-            updateRepeatUntilMin();
-
-            // Fill recurrence fields from master
-            $('#rruleInput').val(inst.rrule || '');
-            $('#exdatesInput').val(inst.exdates || '[]');
-            renderRRuleSummary(inst.rrule, inst.exdates ? JSON.parse(inst.exdates) : []);
-
-            $('#editRRuleBtn').show();
-
-            // Type / Sub‐Type
-            $('#type_id').val(inst.type_id);
-            $('#sub_type_id').html('<option value="">— Select Sub‐Type —</option>');
-            if (inst.type_id) {
-                $.getJSON('/admin/api/event-sub-types/' + inst.type_id, function (data) {
-                    $.each(data, function (id, name) {
-                        $('#sub_type_id').append(
-                            $('<option>', { value: id }).text(name)
-                        );
-                    });
-                    $('#sub_type_id').val(inst.sub_type_id);
-                });
-            }
-
-            eventModal.show();
-        }
-
-        // -------------------------------------------------
-        // Helper to open the “Split Series” modal (edit this & future)
-        // -------------------------------------------------
-        function openSplitSeriesModal(info) {
-            const inst = info.event.extendedProps;
-            $('input[name="instance_id"]').val(info.event.id);
-            $('input[name="master_id"]').val(inst.master_id);
-            $('input[name="form_action"]').val('splitSeries');
-            $('#eventForm')[0].reset();
-            $('.text-danger').remove();
-
-            // Copy most fields from the old master, but use clicked datetime as new dtstart
-            $('input[name="title"]').val(inst.title);
-            $('input[name="office"]').val(inst.office);
-            $('select[name="status"]').val(inst.status);
-            $('input[name="diary_owner"]').val(inst.diary_owner);
-            $('input[name="on_behalf_of"]').val(inst.on_behalf_of);
-            $('input[name="location"]').val(inst.location);
-            $('input[name="reminder"]').val(inst.reminder);
-            $('textarea[name="description"]').val(inst.description);
-
-            $('input[name="start_datetime"]').val(
-                moment(info.event.start).format('YYYY-MM-DDTHH:mm')
-            );
-            $('input[name="end_datetime"]').val(
-                moment(info.event.end).format('YYYY-MM-DDTHH:mm')
-            );
-            updateEndMin();
-            updateRepeatUntilMin();
-
-            // We need to let them define a brand-new recurrence rule for the split series
-            $('#rruleInput').val(inst.rrule || '');
-            $('#exdatesInput').val(inst.exdates || '[]');
-            renderRRuleSummary(inst.rrule, inst.exdates ? JSON.parse(inst.exdates) : []);
-
-            $('#editRRuleBtn').show();
-
-            // Type / Sub‐Type
-            $('#type_id').val(inst.type_id);
-            $('#sub_type_id').html('<option value="">— Select Sub‐Type —</option>');
-            if (inst.type_id) {
-                $.getJSON('/admin/api/event-sub-types/' + inst.type_id, function (data) {
-                    $.each(data, function (id, name) {
-                        $('#sub_type_id').append(
-                            $('<option>', { value: id }).text(name)
-                        );
-                    });
-                    $('#sub_type_id').val(inst.sub_type_id);
-                });
-            }
-
-            eventModal.show();
-        }
-
     </script>
 
 @endpush
