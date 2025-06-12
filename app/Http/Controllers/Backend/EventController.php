@@ -44,9 +44,15 @@ class EventController
                 'extendedProps' => [
                     'master_id' => $inst->event_id,
                     'instance_status' => $inst->instance_status,
+
+                    'id' => $inst->id,
+                    'title' => $inst->event->title,
+                    'start' => $inst->start_datetime->format('Y-m-d H:i:s'),
+                    'end' => $inst->end_datetime->format('Y-m-d H:i:s'),
+                    // These two lines are the critical additions:
                     'type_id' => $inst->event->type_id,
                     'sub_type_id' => $inst->event->sub_type_id,
-
+                    'backgroundColor' => $inst->event->color, // from master’s getColorAttribute()
                     // We can keep these for display or other purposes:
                     'type_label' => $inst->event->type,       // old string
                     'sub_type_label' => $inst->event->sub_type,   // old string
@@ -64,6 +70,8 @@ class EventController
                     'repeat_interval' => $inst->event->repeat_interval,
                     'repeat_until_date' => $inst->event->repeat_until_date,
                     // 'repeat_until_count' => $inst->event->repeat_until_count,
+                    'rrule' => $inst->event->rrule,
+                    'exdates' => $inst->event->exdates,
                 ],
             ];
         });
@@ -84,7 +92,8 @@ class EventController
             'location' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'reminder' => ['nullable', 'string', 'regex:/^\d+(\s?(minutes|hours|days))?$/'],
-            'start_datetime' => 'required|date|after_or_equal:today',
+            'start_datetime' => 'required|date',
+            // 'start_datetime' => 'required|date|after_or_equal:today',
             'end_datetime' => 'required|date|after_or_equal:start_datetime',
             'rrule' => 'nullable|string',   // e.g. "FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,TU;COUNT=3"
             'exdates' => 'nullable|string',   // JSON array of dates
@@ -129,15 +138,16 @@ class EventController
             // 3) If there’s an RRULE, parse & generate future occurrences
             if (!empty($validated['rrule'])) {
 
-                $rruleString = trim($validated['rrule']);
-                if (stripos($rruleString, 'RRULE:') === 0) {
-                    $rruleString = trim(substr($rruleString, 6));
-                }
+                $rruleString = preg_replace('/^RRULE:/i', '', trim($validated['rrule']));
 
+                // *** Pass Carbon, not a string ***
                 $rule = new RRule($rruleString, $firstStart);
-// dd($rule);
+                $duration = abs($firstEnd->diffInSeconds($firstStart));
+
+                // dd($duration);
                 $exdates = json_decode($validated['exdates'] ?? '[]', true);
 
+                $endLimit = now()->addYear(); // Only generate events up to 1 year ahead
                 foreach ($rule as $occurrence) {
                     $occTs = Carbon::instance($occurrence);
 
@@ -146,15 +156,19 @@ class EventController
                         continue;
                     }
 
+                    // Skip if it’s already past the end limit:
+                    if ($occTs->greaterThan($endLimit)) {
+                        break;
+                    }
+
                     // If this date is in the exdates JSON, insert a canceled exception:
                     $dateOnly = $occTs->toDateString();
                     if (in_array($dateOnly, $exdates, true)) {
                         EventInstance::create([
                             'event_id' => $master->id,
                             'start_datetime' => $occTs,
-                            'end_datetime' => $occTs->copy()
-                                ->addSeconds($firstEnd->diffInSeconds($firstStart)),
-                            'instance_status' => 'Canceled',
+                            'end_datetime' => $occTs->copy()->addSeconds($duration),
+                            'instance_status' => 'Cancelled',
                             'is_exception' => true,
                             'notified' => false,
                         ]);
@@ -165,8 +179,7 @@ class EventController
                     EventInstance::create([
                         'event_id' => $master->id,
                         'start_datetime' => $occTs,
-                        'end_datetime' => $occTs->copy()
-                            ->addSeconds($firstEnd->diffInSeconds($firstStart)),
+                        'end_datetime' => $occTs->copy()->addSeconds($duration),
                         'instance_status' => 'Scheduled',
                         'is_exception' => false,
                         'notified' => false,
@@ -298,13 +311,26 @@ class EventController
 
         return response()->json(['success' => true]);
     }
-    public function splitSeriesFromInstance(Request $request, $instanceId)
+    public function splitSeries(Request $request, $instanceId)
     {
         $validated = $request->validate([
-            'title' => 'required|string',
+            'title' => 'required|string|max:255',
             'type_id' => 'required|exists:event_types,id',
-            // … all other master fields + new rrule/exdates …
-            'form_action' => 'required|string|in=splitSeries',
+            'sub_type_id' => 'required|exists:event_sub_types,id',
+            'office' => 'nullable|string|max:100',
+            'status' => 'nullable|in:Confirmed,Pending,Cancelled,Rescheduled',
+            'diary_owner' => 'nullable|string|max:255',
+            'on_behalf_of' => 'nullable|string|max:255',
+            'location' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'reminder' => ['nullable', 'string', 'regex:/^\d+(\s?(minutes|hours|days))?$/'],
+            'start_datetime' => 'required|date',
+            // 'start_datetime' => 'required|date|after_or_equal:today',
+            'end_datetime' => 'required|date|after_or_equal:start_datetime',
+            'rrule' => 'nullable|string',   // e.g. "FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,TU;COUNT=3"
+            'exdates' => 'nullable|string',   // JSON array of dates
+            'form_action' => 'required|string|in:splitSeries',
+
         ]);
 
         $instance = EventInstance::with('event')->findOrFail($instanceId);
@@ -317,7 +343,7 @@ class EventController
             EventInstance::where('event_id', $oldMaster->id)
                 ->where('start_datetime', '>=', $pivotTime)
                 ->update([
-                    'instance_status' => 'Canceled',
+                    'instance_status' => 'Cancelled',
                     'is_exception' => true
                 ]);
 
@@ -325,9 +351,16 @@ class EventController
             $newMaster = Event::create([
                 'title' => $validated['title'],
                 'type_id' => $validated['type_id'],
-                // … copy all other fields from $validated or $oldMaster as needed …
-                'rrule' => $validated['rrule'],      // new rule
-                'exdates' => $validated['exdates'],    // new exceptions
+                'sub_type_id' => $validated['sub_type_id'],
+                'office' => $validated['office'] ?? null,
+                'status' => $validated['status'] ?? 'Pending',
+                'diary_owner' => $validated['diary_owner'] ?? null,
+                'on_behalf_of' => $validated['on_behalf_of'] ?? null,
+                'location' => $validated['location'] ?? null,
+                'description' => $validated['description'] ?? null,
+                'reminder' => $validated['reminder'] ?? null,
+                'rrule' => $validated['rrule'] ?? null,
+                'exdates' => $validated['exdates'] ?? null,
             ]);
 
             // 3) Create the first occurrence for newMaster at pivotTime
@@ -343,10 +376,18 @@ class EventController
 
             // 4) If the newMaster has its own rrule, generate subsequent instances
             if (!empty($validated['rrule'])) {
-                $rule = new RRule([
-                    'rrule' => $validated['rrule'],
-                    'dtstart' => $pivotTime->toAtomString()
-                ]);
+
+                $rruleString = trim($validated['rrule']);
+                if (stripos($rruleString, 'RRULE:') === 0) {
+                    $rruleString = trim(substr($rruleString, 6));
+                }
+
+                $rule = new RRule($rruleString, $pivotTime);
+
+                // $rule = new RRule([
+                //     'rrule' => $validated['rrule'],
+                //     'dtstart' => $pivotTime->toAtomString()
+                // ]);
                 $exdates = json_decode($validated['exdates'] ?? '[]', true);
                 foreach ($rule as $occ) {
                     if ($occ->getTimestamp() === $pivotTime->getTimestamp()) {
@@ -396,8 +437,10 @@ class EventController
             'reminder' => ['nullable', 'string', 'regex:/^\d+(\s?(minutes|hours|days))?$/'],
 
             // The “new original” start/end for the first instance:
-            'start_datetime' => 'required|date|after_or_equal:today',
-            'end_datetime' => 'required|date|after_or_equal:start_datetime',
+            'start_datetime' => 'required|date',
+            // 'start_datetime' => 'required|date|after_or_equal:today',
+            'end_datetime' => 'required|date',
+            // 'end_datetime' => 'required|date|after_or_equal:start_datetime',
 
             // 'repeat'              => 'required|in:none,daily,weekly,monthly',
             // 'repeat_interval'     => 'nullable|integer|min:1|max:100',
@@ -494,11 +537,24 @@ class EventController
             }
 
             // 5.7) Use RRULE to generate future instances
-            $rruleArr = [
-                'rrule' => $validated['rrule'],
-                'dtstart' => $originalStart->toAtomString(),
-            ];
-            $rrule = new RRule($rruleArr);
+            $rruleString = trim($validated['rrule']);
+            if (stripos($rruleString, 'RRULE:') === 0) {
+                $rruleString = trim(substr($rruleString, 6));
+            }
+
+            $rrule = new RRule($rruleString, $originalStart);
+
+            // 5.7a) Purge any old instances *after* the new last occurrence
+            $allOccs = iterator_to_array($rrule);
+            $lastOcc = end($allOccs); // a DateTime
+            $lastCarbon = Carbon::instance($lastOcc);
+            $event->instances()->where('start_datetime', '>', $lastCarbon)->delete();
+
+            // $rruleArr = [
+            //     'rrule' => $validated['rrule'],
+            //     'dtstart' => $originalStart->toAtomString(),
+            // ];
+            // $rrule = new RRule($rruleArr);
 
             $durationInSeconds = $originalEnd->diffInSeconds($originalStart);
 

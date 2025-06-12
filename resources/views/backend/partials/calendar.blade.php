@@ -494,12 +494,12 @@
             function addExdateRow(initialValue = '') {
                 const idx = $exdateList.children().length;
                 const html = `
-                                                            <div class="input-group mb-2" data-idx="${idx}">
-                                                            <input type="date" class="form-control exdateInput" value="${initialValue}">
-                                                            <button class="btn btn-outline-danger removeExdateBtn" type="button">
-                                                                &times;
-                                                            </button>
-                                                            </div>`;
+                                                                        <div class="input-group mb-2" data-idx="${idx}">
+                                                                        <input type="date" class="form-control exdateInput" value="${initialValue}">
+                                                                        <button class="btn btn-outline-danger removeExdateBtn" type="button">
+                                                                            &times;
+                                                                        </button>
+                                                                        </div>`;
                 $exdateList.append(html);
             }
 
@@ -596,37 +596,6 @@
             // var modalEl = document.getElementById('eventModal');
             // var eventModal = new bootstrap.Modal(modalEl);
 
-            function updateRepeatUntilMin() {
-                const $start = $('input[name="start_datetime"]');
-                const $until = $('input[name="repeat_until_date"]');
-                const startVal = $start.val(); // e.g. "2025-06-05T09:00"
-
-                if (!startVal) {
-                    // No start → no restriction
-                    $until.removeAttr('min');
-                    return;
-                }
-
-                // Extract the "YYYY-MM-DD" portion
-                const [datePart] = startVal.split('T'); // e.g. "2025-06-05"
-
-                // Convert to a Date object, add one day, then format back to "YYYY-MM-DD"
-                const dt = new Date(datePart);
-                dt.setDate(dt.getDate() + 1);
-                const year = dt.getFullYear();
-                const month = String(dt.getMonth() + 1).padStart(2, '0');
-                const day = String(dt.getDate()).padStart(2, '0');
-                const minDatePlusOne = `${year}-${month}-${day}`;
-
-                // Set that as the minimum selectable date
-                $until.attr('min', minDatePlusOne);
-
-                // If the existing “Repeat Until” is earlier than that, bump it up
-                if ($until.val() && $until.val() < minDatePlusOne) {
-                    $until.val(minDatePlusOne);
-                }
-                console.log('✏️[updateRepeatUntilMin] Set min date for repeat_until_date:', minDatePlusOne);
-            }
 
             function updateEndMin() {
                 const $start = $('input[name="start_datetime"]');
@@ -653,7 +622,6 @@
             // Whenever the user edits Start Date & Time, re-apply the rule:
             $('input[name="start_datetime"]').on('change', function () {
                 updateEndMin();
-                updateRepeatUntilMin();
             });
 
 
@@ -680,7 +648,6 @@
                     $("input[name='start_datetime']").val(info.startStr + 'T09:00');
                     $("input[name='end_datetime']").val(info.startStr + 'T10:00');
                     updateEndMin();
-                    updateRepeatUntilMin();
 
                     $('#rruleInput').val('');
                     $('#exdatesInput').val('');
@@ -751,7 +718,8 @@
                         case '5':
                             if (confirm('Cancel the entire series?')) {
                                 $.post(
-                                    '{{ route("backend.events.cancelSeries", "") }}/' + inst.master_id,
+                                    '{{ route("backend.events.destroyMaster", "") }}/' + inst.master_id,
+                                    // '{{ route("backend.events.cancelSeries", "") }}/' + inst.master_id,
                                     { _token: '{{ csrf_token() }}' },
                                     function () { calendar.refetchEvents(); }
                                 );
@@ -761,7 +729,7 @@
                             if (confirm('Cancel this & future occurrences?')) {
                                 $.post(
                                     '{{ route("backend.events.splitSeries", "") }}/' + info.event.id,
-                                    $(/* serialize form for the “split” defaults… */).serialize(),
+                                    { _token: '{{ csrf_token() }}' },
                                     function () { calendar.refetchEvents(); }
                                 );
                             }
@@ -988,7 +956,6 @@
                     moment(info.event.end).format('YYYY-MM-DDTHH:mm')
                 );
                 updateEndMin();
-                updateRepeatUntilMin();
 
                 // Fill recurrence fields from this instance’s master
                 $('#rruleInput').val(inst.rrule || '');
@@ -1045,7 +1012,6 @@
                     moment(info.event.end).format('YYYY-MM-DDTHH:mm')
                 );
                 updateEndMin();
-                updateRepeatUntilMin();
 
                 // Fill recurrence fields from master
                 $('#rruleInput').val(inst.rrule || '');
@@ -1076,7 +1042,12 @@
             // Helper to open the “Split Series” modal (edit this & future)
             // -------------------------------------------------
             function openSplitSeriesModal(info) {
+                // console.log('✏️[openSplitSeriesModal] Opening split series modal for:', info);
                 const inst = info.event.extendedProps;
+                const startDate = moment(info.event.start).format('YYYY-MM-DD HH:mm:ss');
+                const endDate = moment(info.event.end).format('YYYY-MM-DD HH:mm:ss');
+                console.log('✏️[openSplitSeriesModal] startDate:', startDate, 'endDate:', endDate);
+
                 $('input[name="instance_id"]').val(info.event.id);
                 $('input[name="master_id"]').val(inst.master_id);
                 $('input[name="form_action"]').val('splitSeries');
@@ -1093,14 +1064,14 @@
                 $('input[name="reminder"]').val(inst.reminder);
                 $('textarea[name="description"]').val(inst.description);
 
+                // now format both as "YYYY-MM-DDTHH:mm" for your datetime-local inputs
                 $('input[name="start_datetime"]').val(
-                    moment(info.event.start).format('YYYY-MM-DDTHH:mm')
+                    moment(startDate).format('YYYY-MM-DDTHH:mm')
                 );
                 $('input[name="end_datetime"]').val(
-                    moment(info.event.end).format('YYYY-MM-DDTHH:mm')
+                    moment(endDate).format('YYYY-MM-DDTHH:mm')
                 );
                 updateEndMin();
-                updateRepeatUntilMin();
 
                 // We need to let them define a brand-new recurrence rule for the split series
                 $('#rruleInput').val(inst.rrule || '');

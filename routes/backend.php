@@ -304,7 +304,7 @@ Route::middleware('auth')->group(function () {
             // Create or update: we’ll use “store” for new, “updateInstance” for instance drag/drop.
             Route::post('/instances/store', 'store')->name('store');              // create new master + instances
             Route::post('/instances/update/{instance}', 'updateInstance')->name('updateInstance');
-            Route::delete('/instances/delete/{instance}', 'destroyInstance')->name('destroyInstance');
+            Route::post('/instances/delete/{instance}', 'destroyInstance')->name('destroyInstance');
 
             // Endpoints for master-level edits (e.g. change recurrence rule):
             Route::put('/master/update/{event}', 'updateMaster')->name('updateMaster');
