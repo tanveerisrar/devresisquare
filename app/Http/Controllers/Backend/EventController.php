@@ -27,7 +27,7 @@ class EventController
         // Fetch instances whose start_datetime is between $start and $end
         $instances = EventInstance::whereBetween('start_datetime', [$start, $end])
             ->where('instance_status', '!=', 'Cancelled')
-            ->with('event')   // eager-load master to get titles/colors if needed
+            ->with(['event', 'reminders'])   // eager-load master to get titles/colors if needed  & eager‑load reminders
             ->get();
 
         // Map to FullCalendar’s JSON format
@@ -41,6 +41,15 @@ class EventController
                 'type_id' => $inst->event->type_id,
                 'sub_type_id' => $inst->event->sub_type_id,
                 'backgroundColor' => $inst->event->color, // from master’s getColorAttribute()
+
+
+                // NEW: include a simple count and the full reminder array
+                'remindersCount' => $inst->reminders->count(),
+                'reminders' => $inst->reminders->map(fn($r) => [
+                    'minutes_before' => $r->minutes_before,
+                    'channel' => $r->channel,
+                ]),
+
                 'extendedProps' => [
                     'master_id' => $inst->event_id,
                     'instance_status' => $inst->instance_status,
@@ -56,6 +65,13 @@ class EventController
                     // We can keep these for display or other purposes:
                     'type_label' => $inst->event->type,       // old string
                     'sub_type_label' => $inst->event->sub_type,   // old string
+
+                    'reminders' => $inst->reminders->map(function ($r) {
+                        return [
+                            'minutes_before' => $r->minutes_before,
+                            'channel' => $r->channel,
+                        ];
+                    }),
 
                     // 'type' => $inst->event->type,
                     // 'sub_type' => $inst->event->sub_type,
@@ -97,6 +113,11 @@ class EventController
             'end_datetime' => 'required|date|after_or_equal:start_datetime',
             'rrule' => 'nullable|string',   // e.g. "FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,TU;COUNT=3"
             'exdates' => 'nullable|string',   // JSON array of dates
+
+            // just ensure it’s an array, and each sub‑array may have either key
+            'reminders' => 'nullable|array',
+            'reminders.*.minutes_before' => 'nullable|integer|min:0',
+            'reminders.*.channel' => 'nullable|in:email,in_app,sms,push',
         ]);
 
         \DB::beginTransaction();
@@ -121,7 +142,7 @@ class EventController
             $firstStart = Carbon::parse($validated['start_datetime']);
             $firstEnd = Carbon::parse($validated['end_datetime']);
 
-            EventInstance::create([
+            $instance = EventInstance::create([
                 'event_id' => $master->id,
                 'start_datetime' => $firstStart,
                 'end_datetime' => $firstEnd,
@@ -129,6 +150,24 @@ class EventController
                 'is_exception' => false,
                 'notified' => false,
             ]);
+
+
+            // Normalize and save any reminders
+            if (!empty($validated['reminders'])) {
+                $instance->reminders()->delete();
+
+                foreach ($validated['reminders'] as $r) {
+                    // skip totally empty rows
+                    if ((!isset($r['minutes_before']) || $r['minutes_before'] === '' || $r['minutes_before'] === null) && (empty($r['channel']))) {
+                        continue;
+                    }
+                    $instance->reminders()->create([
+                        'minutes_before' => $r['minutes_before'] ?? 0,
+                        'channel' => $r['channel'] ?? 'email',
+                    ]);
+                }
+            }
+
             // dd([
             //     'rrule' => $validated['rrule'],
             //     'firstStart' => $firstStart,
@@ -148,7 +187,33 @@ class EventController
                 $exdates = json_decode($validated['exdates'] ?? '[]', true);
 
                 $endLimit = now()->addYear(); // Only generate events up to 1 year ahead
-                foreach ($rule as $occurrence) {
+                $originalReminders = $instance->reminders()->get(); // get reminders of the first instance
+                foreach ($rule as $occ) {
+                    $occTs = Carbon::instance($occ);
+                    if ($occTs->equalTo($firstStart) || $occTs->greaterThan($endLimit)) {
+                        continue;
+                    }
+                    $dateOnly = $occTs->toDateString();
+                    $isException = in_array($dateOnly, $exdates, true);
+                    $newInstance = EventInstance::create([
+                        'event_id' => $master->id,
+                        'start_datetime' => $occTs,
+                        'end_datetime' => $occTs->copy()->addSeconds($duration),
+                        'instance_status' => $isException ? 'Cancelled' : 'Scheduled',
+                        'is_exception' => $isException,
+                        'notified' => false,
+                    ]);
+
+                    // Attach the same reminders to this new instance
+                    foreach ($originalReminders as $reminder) {
+                        $newInstance->reminders()->create([
+                            'minutes_before' => $reminder->minutes_before,
+                            'channel' => $reminder->channel,
+                        ]);
+                    }
+                }
+
+                /*foreach ($rule as $occurrence) {
                     $occTs = Carbon::instance($occurrence);
 
                     // Skip the original start:
@@ -184,7 +249,7 @@ class EventController
                         'is_exception' => false,
                         'notified' => false,
                     ]);
-                }
+                }*/
             }
 
             \DB::commit();
@@ -311,6 +376,7 @@ class EventController
 
         return response()->json(['success' => true]);
     }
+
     public function splitSeries(Request $request, $instanceId)
     {
         $validated = $request->validate([
@@ -330,6 +396,11 @@ class EventController
             'rrule' => 'nullable|string',   // e.g. "FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,TU;COUNT=3"
             'exdates' => 'nullable|string',   // JSON array of dates
             'form_action' => 'required|string|in:splitSeries',
+
+            // just ensure it’s an array, and each sub‑array may have either key
+            'reminders' => 'nullable|array',
+            'reminders.*.minutes_before' => 'nullable|integer|min:0',
+            'reminders.*.channel' => 'nullable|in:email,in_app,sms,push',
 
         ]);
 
@@ -365,7 +436,7 @@ class EventController
 
             // 3) Create the first occurrence for newMaster at pivotTime
             $firstEnd = Carbon::parse($validated['end_datetime']);
-            EventInstance::create([
+            $newInstance = EventInstance::create([
                 'event_id' => $newMaster->id,
                 'start_datetime' => $pivotTime,
                 'end_datetime' => $firstEnd,
@@ -374,39 +445,80 @@ class EventController
                 'notified' => false,
             ]);
 
+            // 3b. Save first instance reminders
+            if (!empty($validated['reminders'])) {
+                $newInstance->reminders()->delete();
+
+                foreach ($validated['reminders'] as $r) {
+                    if (
+                        (!isset($r['minutes_before']) || $r['minutes_before'] === '' || $r['minutes_before'] === null)
+                        && (empty($r['channel']))
+                    ) {
+                        continue;
+                    }
+
+                    $newInstance->reminders()->create([
+                        'minutes_before' => $r['minutes_before'] ?? 0,
+                        'channel' => $r['channel'] ?? 'email',
+                    ]);
+                }
+            }
+
             // 4) If the newMaster has its own rrule, generate subsequent instances
             if (!empty($validated['rrule'])) {
 
-                $rruleString = trim($validated['rrule']);
-                if (stripos($rruleString, 'RRULE:') === 0) {
-                    $rruleString = trim(substr($rruleString, 6));
-                }
+                // $rruleString = trim($validated['rrule']);
+                // if (stripos($rruleString, 'RRULE:') === 0) {
+                //     $rruleString = trim(substr($rruleString, 6));
+                // }
 
+                // $rule = new RRule($rruleString, $pivotTime);
+
+                $rruleString = preg_replace('/^RRULE:/i', '', trim($validated['rrule']));
                 $rule = new RRule($rruleString, $pivotTime);
 
                 // $rule = new RRule([
                 //     'rrule' => $validated['rrule'],
                 //     'dtstart' => $pivotTime->toAtomString()
                 // ]);
+                // $exdates = json_decode($validated['exdates'] ?? '[]', true);
+
+                $duration = $firstEnd->diffInSeconds($pivotTime);
                 $exdates = json_decode($validated['exdates'] ?? '[]', true);
+                $originalReminders = $newInstance->reminders()->get(); // clone these to next ones
+                $endLimit = now()->addYear();
+
                 foreach ($rule as $occ) {
-                    if ($occ->getTimestamp() === $pivotTime->getTimestamp()) {
+                    // if ($occ->getTimestamp() === $pivotTime->getTimestamp()) {
+                    //     continue;
+                    // }
+                    $occTime = Carbon::instance($occ);
+                    if ($occTime->equalTo($pivotTime) || $occTime->greaterThan($endLimit)) {
                         continue;
                     }
                     $dateOnly = $occ->format('Y-m-d');
+                    $isException = in_array($dateOnly, $exdates, true);
+
                     if (in_array($dateOnly, $exdates, true)) {
                         continue;
                     }
-                    EventInstance::create([
+                    $newRepeatInstance = EventInstance::create([
                         'event_id' => $newMaster->id,
                         'start_datetime' => Carbon::instance($occ),
                         'end_datetime' => Carbon::instance($occ)->addSeconds(
                             $firstEnd->diffInSeconds($pivotTime)
                         ),
-                        'instance_status' => 'Scheduled',
-                        'is_exception' => false,
+                        'instance_status' => $isException ? 'Cancelled' : 'Scheduled',
+                        'is_exception' => $isException,
                         'notified' => false,
                     ]);
+
+                    foreach ($originalReminders as $reminder) {
+                        $newRepeatInstance->reminders()->create([
+                            'minutes_before' => $reminder->minutes_before,
+                            'channel' => $reminder->channel,
+                        ]);
+                    }
                 }
             }
 
@@ -448,6 +560,11 @@ class EventController
 
             'rrule' => 'nullable|string',
             'exdates' => 'nullable|string',
+
+            // just ensure it’s an array, and each sub‑array may have either key
+            'reminders' => 'nullable|array',
+            'reminders.*.minutes_before' => 'nullable|integer|min:0',
+            'reminders.*.channel' => 'nullable|in:email,in_app,sms,push',
 
             'form_action' => 'required|string|in:updateMaster',
         ]);
@@ -524,6 +641,17 @@ class EventController
                 }
             }
 
+            // ← INSERT: now sync its reminders
+            if ($request->filled('reminders')) {
+                $firstInstance->reminders()->delete();
+                foreach ($request->input('reminders', []) as $r) {
+                    $firstInstance->reminders()->create([
+                        'minutes_before' => $r['minutes_before'],
+                        'channel' => $r['channel'],
+                    ]);
+                }
+            }
+
             // 5.5) If no RRULE, we’re done
             if (empty($validated['rrule'])) {
                 \DB::commit();
@@ -574,7 +702,7 @@ class EventController
 
                 // Check if it's in the exclusion list
                 if (in_array($startCarbon->format('Y-m-d'), $exdates, true)) {
-                    EventInstance::create([
+                    $instance = EventInstance::create([
                         'event_id' => $event->id,
                         'start_datetime' => $startCarbon,
                         'end_datetime' => $startCarbon->copy()->addSeconds($durationInSeconds),
@@ -587,7 +715,7 @@ class EventController
 
                 // Normal future instance
                 if ($startCarbon->greaterThan($now)) {
-                    EventInstance::create([
+                    $instance = EventInstance::create([
                         'event_id' => $event->id,
                         'start_datetime' => $startCarbon,
                         'end_datetime' => $startCarbon->copy()->addSeconds($durationInSeconds),
@@ -595,6 +723,29 @@ class EventController
                         'is_exception' => false,
                         'notified' => false,
                     ]);
+
+                    // → Add reminders for this instance
+                    // if ($request->filled('reminders')) {
+                    //     foreach ($request->input('reminders', []) as $r) {
+                    //         $instance->reminders()->create([
+                    //             'minutes_before' => $r['minutes_before'],
+                    //             'channel' => $r['channel'],
+                    //         ]);
+                    //     }
+                    // }
+                    if ($request->filled('reminders')) {
+                        foreach ($request->input('reminders', []) as $r) {
+                            if (!isset($r['minutes_before']) || !isset($r['channel'])) {
+                                continue;
+                            }
+
+                            $firstInstance->reminders()->create([
+                                'minutes_before' => $r['minutes_before'],
+                                'channel' => $r['channel'],
+                            ]);
+                        }
+                    }
+
                 }
             }
 
@@ -666,4 +817,36 @@ class EventController
             'message' => "{$field} reverted to previous value",
         ]);
     }
+
+    /**
+     * Cancel this and all future occurrences of a series.
+     */
+    public function cancelSeries(Request $request, $seriesId)
+    {
+        $request->validate([
+            'occurrence_start' => 'required|date',
+        ]);
+
+        // Normalize the pivot to match your DB format
+        $pivot = Carbon::parse($request->occurrence_start)
+            ->setTimezone(config('app.timezone'))
+            ->format('Y-m-d H:i:s');
+
+        // Fetch the Event and its instances relation
+        $event = Event::findOrFail($seriesId);
+
+        // Use the relation to scope & update future instances
+        $event->instances()
+            ->where('start_datetime', '>=', $pivot)
+            ->where('instance_status', '!=', 'Cancelled')
+            ->update([
+                'instance_status' => 'Cancelled',
+                'is_exception' => true,
+            ]);
+
+        return response()->json(['success' => true]);
+    }
+
+
+
 }

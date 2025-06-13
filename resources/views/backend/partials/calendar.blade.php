@@ -219,6 +219,14 @@
                             <div class="text-danger" data-error-for="reminder"></div>
                         </div>
 
+                        <div id="remindersContainer" class="mb-3">
+                            <label class="form-label">Reminders</label>
+                            <div id="reminderList"></div>
+                            <button type="button" id="addReminderBtn" class="btn btn-sm btn-outline-primary">
+                                + Add Reminder
+                            </button>
+                        </div>
+
                         <div class="mb-3">
                             <label class="form-label">Recurrence</label>
                             <button class="btn btn-sm btn-outline-secondary" type="button" id="editRRuleBtn">
@@ -257,6 +265,20 @@
     </div>
 </div>
 
+<template id="reminderTpl">
+    <div class="input-group mb-2 reminder-row">
+        <input type="number" name="reminders[][minutes_before]" class="form-control w-25" min="0" value="30">
+        <select name="reminders[][channel]" class="form-select w-25">
+            <option value="email">EMAIL</option>
+            <option value="in_app">IN APP</option>
+            <option value="sms">SMS</option>
+            <option value="push">PUSH</option>
+        </select>
+        <span class="input-group-text">minutes before</span>
+        <button type="button" class="btn btn-outline-danger removeReminderBtn">&times;</button>
+    </div>
+</template>
+
 @push('styles')
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.css" rel="stylesheet" />
 @endpush
@@ -271,6 +293,29 @@
         import { RRule } from 'https://cdn.skypack.dev/rrule';
         window.RRule = RRule;
         console.log('✅ rrule loaded via Skypack:', typeof RRule);
+    </script>
+    <script>
+        // Reminder UI:
+        let reminderIndex = 0;
+
+        $('#addReminderBtn').click(function () {
+            const tpl = document.getElementById('reminderTpl').content.cloneNode(true);
+            const $row = $(tpl).find('div');
+
+            // Set correct name attributes
+            $row.find('input').attr('name', `reminders[${reminderIndex}][minutes_before]`);
+            $row.find('select').attr('name', `reminders[${reminderIndex}][channel]`);
+
+            $('#reminderList').append($row);
+            reminderIndex++;
+        });
+
+
+        // Remove:
+        $('#reminderList').on('click', '.removeReminderBtn', function () {
+            $(this).closest('.reminder-row').remove();
+        });
+
     </script>
 
     <!-- 3) Your integration code -->
@@ -493,13 +538,7 @@
 
             function addExdateRow(initialValue = '') {
                 const idx = $exdateList.children().length;
-                const html = `
-                                                                        <div class="input-group mb-2" data-idx="${idx}">
-                                                                        <input type="date" class="form-control exdateInput" value="${initialValue}">
-                                                                        <button class="btn btn-outline-danger removeExdateBtn" type="button">
-                                                                            &times;
-                                                                        </button>
-                                                                        </div>`;
+                const html = `<div class="input-group mb-2" data-idx="${idx}"><input type="date" class="form-control exdateInput" value="${initialValue}"><button class="btn btn-outline-danger removeExdateBtn" type="button">&times;</button></div>`;
                 $exdateList.append(html);
             }
 
@@ -644,6 +683,9 @@
                     $('#eventForm')[0].reset();
                     $('.text-danger').remove();
 
+                    // ❗Remove any previous Delete button
+                    $('#eventModal .modal-footer .js-single-delete-btn').remove();
+
                     // Pre-fill start/end times
                     $("input[name='start_datetime']").val(info.startStr + 'T09:00');
                     $("input[name='end_datetime']").val(info.startStr + 'T10:00');
@@ -665,10 +707,14 @@
                     $('#type_id').val('');
                     $('#sub_type_id').html('<option value="">— Select Sub-Type —</option>');
 
+                    // Clear previous reminders
+                    $('#reminderList').empty();
+
                     // eventModal.show();
                     $('#eventModal').modal('show');
                 },
                 eventClick: function (info) {
+
                     // When clicking an existing instance, load data into modal to “Edit Instance”
                     var inst = info.event.extendedProps;
                     // If no recurrence → treat as a single
@@ -708,35 +754,85 @@
                             break;
                         case '4':
                             if (confirm('Cancel only this occurrence?')) {
-                                $.post(
-                                    '{{ route("backend.events.destroyInstance", "") }}/' + info.event.id,
-                                    { _token: '{{ csrf_token() }}' },
-                                    function () { calendar.refetchEvents(); }
-                                );
+                                $.ajax({
+                                    url: '{{ route("backend.events.destroyInstance", "") }}/' + info.event.id,
+                                    type: 'DELETE',
+                                    data: {
+                                        _token: '{{ csrf_token() }}'
+                                    },
+                                    success: function () {
+                                        calendar.refetchEvents();
+                                    }
+                                });
                             }
                             break;
                         case '5':
                             if (confirm('Cancel the entire series?')) {
-                                $.post(
-                                    '{{ route("backend.events.destroyMaster", "") }}/' + inst.master_id,
-                                    // '{{ route("backend.events.cancelSeries", "") }}/' + inst.master_id,
-                                    { _token: '{{ csrf_token() }}' },
-                                    function () { calendar.refetchEvents(); }
-                                );
+                                $.ajax({
+                                    url: '{{ route("backend.events.destroyMaster", "") }}/' + inst.master_id,
+                                    type: 'DELETE',
+                                    data: {
+                                        _token: '{{ csrf_token() }}'
+                                    },
+                                    success: function () {
+                                        calendar.refetchEvents();
+                                    }
+                                });
                             }
                             break;
                         case '6':
                             if (confirm('Cancel this & future occurrences?')) {
                                 $.post(
-                                    '{{ route("backend.events.splitSeries", "") }}/' + info.event.id,
-                                    { _token: '{{ csrf_token() }}' },
+                                    '{{ route("backend.events.cancelSeries", "") }}/' + inst.master_id,
+                                    {
+                                        _token: '{{ csrf_token() }}',
+                                        occurrence_start: info.event.startStr
+                                    },
                                     function () { calendar.refetchEvents(); }
                                 );
                             }
                             break;
+
+                        // case '6':
+                        //     if (confirm('Cancel this & future occurrences?')) {
+                        //         $.post(
+                        //             '{{ route("backend.events.splitSeries", "") }}/' + info.event.id,
+                        //             { _token: '{{ csrf_token() }}' },
+                        //             function () { calendar.refetchEvents(); }
+                        //         );
+                        //     }
+                        //     break;
                         default:
                             break;
                     }
+                    // On “edit” load existing reminders:
+                    // Clear previous reminders
+                    $('#reminderList').empty();
+
+                    // Get reminders from event's extendedProps
+                    let existing = info.event.extendedProps.reminders;
+
+                    // if (Array.isArray(existing)) {
+                    //     existing.forEach(r => {
+                    //         const tpl = document.getElementById('reminderTpl').content.cloneNode(true);
+                    //         const $row = $(tpl).find('div').appendTo('#reminderList');
+                    //         $row.find('input').val(r.minutes_before);
+                    //         $row.find('select').val(r.channel);
+                    //     });
+                    // }
+                    if (Array.isArray(existing)) {
+                        existing.forEach((r, index) => {
+                            const tpl = document.getElementById('reminderTpl').content.cloneNode(true);
+                            const $row = $(tpl).find('div').appendTo('#reminderList');
+
+                            $row.find('input').val(r.minutes_before)
+                                .attr('name', `reminders[${index}][minutes_before]`);
+
+                            $row.find('select').val(r.channel)
+                                .attr('name', `reminders[${index}][channel]`);
+                        });
+                    }
+
                 },
                 eventDrop: function (info) {
                     // When user drags to reschedule an instance
@@ -761,6 +857,14 @@
                             info.revert();
                         }
                     });
+                },
+                eventContent: function (arg) {
+                    const hasReminder = arg.event.extendedProps.remindersCount > 0;
+                    let html = `<div>${arg.event.title}</div>`;
+                    if (hasReminder) {
+                        html += `<div class="fc-event-bell">🔔</div>`;
+                    }
+                    return { html };
                 },
                 events: '{{ route("backend.events.index") }}'
             });
@@ -934,8 +1038,12 @@
             // -------------------------------------------------
             function openSingleInstanceModal(info) {
                 const inst = info.event.extendedProps;
-                $('input[name="instance_id"]').val(info.event.id);
-                $('input[name="master_id"]').val(inst.master_id);
+                const isRecurringInstance = !!inst.rrule;
+                const eventId = info.event.id;       // instance_id
+                const masterId = inst.master_id;      // master series id
+
+                $('input[name="instance_id"]').val(eventId);
+                $('input[name="master_id"]').val(masterId);
                 $('input[name="form_action"]').val('updateInstance');
                 $('#eventForm')[0].reset();
                 $('.text-danger').remove();
@@ -963,7 +1071,7 @@
                 renderRRuleSummary(inst.rrule, inst.exdates ? JSON.parse(inst.exdates) : []);
 
                 // Hide editing recurrence in single mode
-                $('#editRRuleBtn').hide();
+                $('#editRRuleBtn').show();
 
                 // Type / Sub‐Type
                 $('#type_id').val(inst.type_id);
@@ -978,6 +1086,50 @@
                         $('#sub_type_id').val(inst.sub_type_id);
                     });
                 }
+                // 1) Clean up any old delete button
+                const $footer = $('#eventModal .modal-footer');
+                $footer.find('.js-single-delete-btn').remove();
+
+                // 2) Create the Delete button
+                const $deleteBtn = $('<button>')
+                    .addClass('btn btn-danger me-auto js-single-delete-btn')
+                    .text('Delete')
+                    .on('click', function (e) {
+                        e.preventDefault();
+                        const msg = isRecurringInstance
+                            ? 'Delete only this occurrence?'
+                            : 'Delete this event?';
+                        if (!confirm(msg)) return;
+
+                        // Choose the correct URL and HTTP verb:
+                        const url = isRecurringInstance
+                            // delete instance route
+                            ? '{{ route("backend.events.destroyInstance", "") }}/' + eventId
+                            // delete master route
+                            : '{{ route("backend.events.destroyMaster", "") }}/' + masterId;
+
+                        const method = isRecurringInstance ? 'POST' : 'DELETE';
+                        const data = { _token: '{{ csrf_token() }}' };
+
+                        // If you use POST for instance deletion, you might need:
+                        // data._method = 'DELETE';
+
+                        $.ajax({
+                            url: url,
+                            method: method,
+                            data: data,
+                            success: function () {
+                                $('#eventModal').modal('hide');
+                                calendar.refetchEvents();
+                            },
+                            error: function () {
+                                alert('Could not delete.');
+                            }
+                        });
+                    });
+
+                // 3) Inject it into the footer
+                $footer.prepend($deleteBtn);
 
                 // eventModal.show();
                 $('#eventModal').modal('show');

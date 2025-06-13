@@ -14,14 +14,15 @@ class EventInstance extends Model
         'start_datetime',
         'end_datetime',
         'instance_status',
+        'is_exception',
         'notified',
     ];
 
     // Casts for date/time
     protected $casts = [
         'start_datetime' => 'datetime',
-        'end_datetime'   => 'datetime',
-        'notified'       => 'boolean',
+        'end_datetime' => 'datetime',
+        'notified' => 'boolean',
     ];
 
     /**
@@ -31,7 +32,7 @@ class EventInstance extends Model
     {
         return $this->belongsTo(Event::class);
     }
-    
+
     /** 
      * Audit‐trail relationship: one instance has many changes 
      */
@@ -39,4 +40,10 @@ class EventInstance extends Model
     {
         return $this->hasMany(EventInstanceChange::class, 'event_instance_id');
     }
+
+    public function reminders()
+    {
+        return $this->hasMany(EventReminder::class);
+    }
+
 }
