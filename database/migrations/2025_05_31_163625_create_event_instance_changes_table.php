@@ -15,8 +15,13 @@ return new class extends Migration
             $table->id();
 
             // Link back to the instance that changed
-            $table->foreignId('event_instance_id')
-                  ->constrained('event_instances')
+            // $table->foreignId('event_instance_id')
+            //       ->constrained('event_instances')
+            //       ->onDelete('cascade');
+
+            // Link back to the unified events table (instance or master)
+            $table->foreignId('event_id')
+                  ->constrained('events')
                   ->onDelete('cascade');
 
             // Which field changed (e.g. 'start_datetime', 'end_datetime', 'instance_status')

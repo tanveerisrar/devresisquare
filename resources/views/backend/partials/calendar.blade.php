@@ -213,12 +213,6 @@
                             <div class="text-danger" data-error-for="end_datetime"></div>
                         </div>
 
-                        <div class="col-md-6">
-                            <label class="form-label">Reminder</label>
-                            <input type="text" name="reminder" class="form-control" placeholder="e.g. 30 minutes">
-                            <div class="text-danger" data-error-for="reminder"></div>
-                        </div>
-
                         <div id="remindersContainer" class="mb-3">
                             <label class="form-label">Reminders</label>
                             <div id="reminderList"></div>
@@ -294,29 +288,53 @@
         window.RRule = RRule;
         console.log('✅ rrule loaded via Skypack:', typeof RRule);
     </script>
-    <script>
-        // Reminder UI:
-        let reminderIndex = 0;
+<script>
+  // Add a new reminder row:
+  $('#addReminderBtn').on('click', function() {
+    // 1. clone template
+    const tpl = document.getElementById('reminderTpl').content.cloneNode(true);
+    const $row = $(tpl).find('.reminder-row');
 
-        $('#addReminderBtn').click(function () {
-            const tpl = document.getElementById('reminderTpl').content.cloneNode(true);
-            const $row = $(tpl).find('div');
+    // 2. compute next index from existing rows
+    const idx = $('#reminderList .reminder-row').length;
 
-            // Set correct name attributes
-            $row.find('input').attr('name', `reminders[${reminderIndex}][minutes_before]`);
-            $row.find('select').attr('name', `reminders[${reminderIndex}][channel]`);
+    // 3. set correct name attributes
+    $row.find('input')
+        .attr('name', `reminders[${idx}][minutes_before]`)
+        .val('');         // clear any default
+    $row.find('select')
+        .attr('name', `reminders[${idx}][channel]`)
+        .val('email');    // or blank
 
-            $('#reminderList').append($row);
-            reminderIndex++;
-        });
+    // 4. append to the list
+    $('#reminderList').append($row);
+  });
 
+  // Remove a row:
+  $('#reminderList').on('click', '.removeReminderBtn', function() {
+    $(this).closest('.reminder-row').remove();
+    // **optional** re-number the remaining rows so indexes stay sequential:
+    $('#reminderList .reminder-row').each(function(i, el) {
+      $(el).find('input')
+           .attr('name', `reminders[${i}][minutes_before]`);
+      $(el).find('select')
+           .attr('name', `reminders[${i}][channel]`);
+    });
+  });
 
-        // Remove:
-        $('#reminderList').on('click', '.removeReminderBtn', function () {
-            $(this).closest('.reminder-row').remove();
-        });
+  // When editing an event, populate existing reminders:
+  function loadExistingReminders(existingArray) {
+    $('#reminderList').empty();
+    existingArray.forEach((r, idx) => {
+      $('#addReminderBtn').click();     // adds a new blank row
+      const $last = $('#reminderList .reminder-row').last();
+      $last.find('input').val(r.minutes_before);
+      $last.find('select').val(r.channel);
+    });
+  }
 
-    </script>
+</script>
+
 
     <!-- 3) Your integration code -->
     <script>
@@ -714,14 +732,18 @@
                     $('#eventModal').modal('show');
                 },
                 eventClick: function (info) {
-
                     // When clicking an existing instance, load data into modal to “Edit Instance”
                     var inst = info.event.extendedProps;
+
                     // If no recurrence → treat as a single
                     if (!inst.rrule) {
-                        console.log('✏️[eventClick] Editing single instance:', inst.id);
+                        console.log('✏️[eventClick] Editing single instance:', inst.master_id);
                         openSingleInstanceModal(info); // or whatever shows the modal
                         $('input[name="form_action"]').val('updateMaster');
+                        // 🔁 Setup reminders before any return
+                        // On “edit” load existing reminders:
+                        $('#reminderList').empty();
+                        loadExistingReminders(info.event.extendedProps.reminders);
                         return;
                     }
 
@@ -736,7 +758,7 @@
                         '6 → Delete this & future occurrences',
                         '1'
                     );
-
+                    console.log('1');
                     switch (choice) {
                         case '1':
                             openSingleInstanceModal(info);
@@ -805,13 +827,46 @@
                         default:
                             break;
                     }
+                    // 🔁 Setup reminders before any return
+                    // On “edit” load existing reminders:
+                    // Clear previous reminders
+                    $('#reminderList').empty(); // Clear existing UI
+
+                    let existing = info.event.extendedProps.reminders;
+                    console.log('✏️[eventClick] Existing reminders:', existing);
+
+                    if (Array.isArray(existing)) {
+                    // after you've emptied the list:
+                    const tpl = document.getElementById('reminderTpl').content;
+                    existing.forEach((r, index) => {
+                    // 1) clone the template
+                    const clone = tpl.cloneNode(true);
+
+                    // 2) append it
+                    document.getElementById('reminderList').appendChild(clone);
+
+                    // 3) select _that_ last row
+                    const $lastRow = $('#reminderList .reminder-row').last();
+
+                    // 4) now set its values & names
+                    $lastRow.find('input[type="number"]')
+                            .val(r.minutes_before)
+                            .attr('name', `reminders[${index}][minutes_before]`);
+
+                    $lastRow.find('select')
+                            .val(r.channel)
+                            .attr('name', `reminders[${index}][channel]`);
+                    });
+
+                    }
+                    /*
                     // On “edit” load existing reminders:
                     // Clear previous reminders
                     $('#reminderList').empty();
 
                     // Get reminders from event's extendedProps
                     let existing = info.event.extendedProps.reminders;
-
+                    console.log('✏️[eventClick] Existing reminders:', existing);
                     // if (Array.isArray(existing)) {
                     //     existing.forEach(r => {
                     //         const tpl = document.getElementById('reminderTpl').content.cloneNode(true);
@@ -831,7 +886,7 @@
                             $row.find('select').val(r.channel)
                                 .attr('name', `reminders[${index}][channel]`);
                         });
-                    }
+                    }*/
 
                 },
                 eventDrop: function (info) {

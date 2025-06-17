@@ -4,37 +4,56 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class Event extends Model
+class Event extends Model implements Auditable
 {
     /** @use HasFactory<\Database\Factories\EventFactory> */
     use HasFactory;
+    use \OwenIt\Auditing\Auditable;
+
+    // Audit only these fields
+    protected $auditInclude = [
+        'title',
+        'type_id',
+        'sub_type_id',
+        'office',
+        'status',
+        'diary_owner',
+        'on_behalf_of',
+        'description',
+        'location',
+        'rrule',
+        'exdates',
+        'start_datetime',
+        'end_datetime',
+        'parent_id',
+    ];
 
     protected $fillable = [
         'title',
+        'parent_id',       // foreign key
         'type_id',       // foreign key
         'sub_type_id',   // foreign key
         'office',
         'status',
         'diary_owner',
         'on_behalf_of',
-        // 'start_datetime',
-        // 'end_datetime',
+        'start_datetime',
+        'end_datetime',
         'description',
         'location',
-        'reminder',
-        'repeat',
-        'repeat_interval',
-        // 'repeat_until_count',
         'repeat_until_date',
         'rrule',
-        'exdates'
+        'exdates',
+        'is_exception',
+        'instance_status',
     ];
 
-    // protected $casts = [
-    //     'start_datetime' => 'datetime',
-    //     'end_datetime' => 'datetime',
-    // ];
+    protected $casts = [
+        'start_datetime' => 'datetime',
+        'end_datetime' => 'datetime',
+    ];
 
     // in app/Models/Event.php
 
@@ -43,12 +62,18 @@ class Event extends Model
         return $this->belongsTo(EventType::class, 'type_id');
     }
 
-    public function subType()
+    // public function subType()
+    // {
+    //     return $this->belongsTo(EventSubType::class, 'sub_type_id');
+    // }
+
+    public function children()
     {
-        return $this->belongsTo(EventSubType::class, 'sub_type_id');
+        return $this->hasMany(Event::class, 'parent_id');
     }
 
-       /**
+
+    /**
      * Each master event has many instances.
      */
     public function instances()
@@ -64,8 +89,21 @@ class Event extends Model
         return match ($this->status) {
             'Cancelled' => '#dc3545',
             'Confirmed' => '#28a745',
-            'Rescheduled'=> '#ffc107',
-            default      => '#007bff',
+            'Rescheduled' => '#ffc107',
+            default => '#007bff',
         };
+    }
+
+    /** 
+     * Audit‐trail relationship: one instance has many changes 
+     */
+    public function changes()
+    {
+        return $this->hasMany(EventInstanceChange::class, 'event_instance_id');
+    }
+
+    public function reminders()
+    {
+        return $this->hasMany(EventReminder::class, 'event_id');
     }
 }

@@ -19,7 +19,7 @@ class EventController
      *
      * FullCalendar will call ?start=YYYY-MM-DD&end=YYYY-MM-DD.
      */
-    public function index(Request $request)
+    /*public function index(Request $request)
     {
         $start = Carbon::parse($request->query('start'));
         $end = Carbon::parse($request->query('end'));
@@ -93,9 +93,67 @@ class EventController
         });
 
         return response()->json($data);
+    }*/
+    public function index(Request $request)
+    {
+        $start = Carbon::parse($request->query('start'));
+        $end = Carbon::parse($request->query('end'));
+
+        // Fetch events directly
+        $events = Event::whereBetween('start_datetime', [$start, $end])
+            ->where('status', '!=', 'Cancelled')
+            ->with('reminders')
+            ->get();
+
+        $data = $events->map(function ($event) {
+            return [
+                'id' => $event->id,
+                'title' => $event->title,
+                'start' => $event->start_datetime->format('Y-m-d H:i:s'),
+                'end' => $event->end_datetime->format('Y-m-d H:i:s'),
+                'type_id' => $event->type_id,
+                'sub_type_id' => $event->sub_type_id,
+                'backgroundColor' => $event->color, // assuming getColorAttribute() exists in model
+
+                'remindersCount' => $event->reminders->count(),
+                'reminders' => $event->reminders->map(fn($r) => [
+                    'minutes_before' => $r->minutes_before,
+                    'channel' => $r->channel,
+                ]),
+
+                'extendedProps' => [
+                    // 'start' => $event->start_datetime->toIso8601String(),
+                    // 'end' => $event->end_datetime->toIso8601String(),
+                    'start' => $event->start_datetime->format('Y-m-d H:i:s'),
+                    'end' => $event->end_datetime->format('Y-m-d H:i:s'),
+                    'master_id' => $event->id, // use parent_id if exists, else self
+                    'parent_id' => $event->parent_id,
+                    'status' => $event->status,
+                    'office' => $event->office,
+                    'diary_owner' => $event->diary_owner,
+                    'on_behalf_of' => $event->on_behalf_of,
+                    'location' => $event->location,
+                    'description' => $event->description,
+                    'repeat_until_date' => $event->repeat_until_date,
+                    'rrule' => $event->rrule,
+                    'exdates' => $event->exdates,
+                    'type_id' => $event->type_id,
+                    'sub_type_id' => $event->sub_type_id,
+                    'type_label' => $event->type,           // assuming string fallback or relationship
+                    'sub_type_label' => $event->sub_type,
+                    'reminders' => $event->reminders->map(fn($r) => [
+                        'minutes_before' => $r->minutes_before,
+                        'channel' => $r->channel,
+                    ]),
+                ],
+            ];
+        });
+
+        return response()->json($data);
     }
 
-    public function store(Request $request)
+
+    /*public function store(Request $request)
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -213,43 +271,119 @@ class EventController
                     }
                 }
 
-                /*foreach ($rule as $occurrence) {
-                    $occTs = Carbon::instance($occurrence);
+            }
 
-                    // Skip the original start:
-                    if ($occTs->equalTo($firstStart)) {
+            \DB::commit();
+            return response()->json(['success' => true]);
+        } catch (\Throwable $th) {
+            \DB::rollBack();
+            return response()->json([
+                'message' => 'An error occurred while saving.',
+                'error' => $th->getMessage()
+            ], 500);
+        }
+    }*/
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'type_id' => 'required|exists:event_types,id',
+            'sub_type_id' => 'required|exists:event_sub_types,id',
+            'office' => 'nullable|string|max:100',
+            'status' => 'nullable|in:Confirmed,Pending,Cancelled,Rescheduled',
+            'diary_owner' => 'nullable|string|max:255',
+            'on_behalf_of' => 'nullable|string|max:255',
+            'location' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'start_datetime' => 'required|date',
+            'end_datetime' => 'required|date|after_or_equal:start_datetime',
+            'rrule' => 'nullable|string',
+            'exdates' => 'nullable|string',
+            'reminders' => 'nullable|array',
+            'reminders.*.minutes_before' => 'nullable|integer|min:0',
+            'reminders.*.channel' => 'nullable|in:email,in_app,sms,push',
+        ]);
+
+        \DB::beginTransaction();
+        try {
+            $start = Carbon::parse($validated['start_datetime']);
+            $end = Carbon::parse($validated['end_datetime']);
+            $duration = abs($end->diffInSeconds($start));
+
+            // 1. Create master event
+            $master = Event::create([
+                'title' => $validated['title'],
+                'type_id' => $validated['type_id'],
+                'sub_type_id' => $validated['sub_type_id'],
+                'office' => $validated['office'] ?? null,
+                'status' => $validated['status'] ?? 'Pending',
+                'diary_owner' => $validated['diary_owner'] ?? null,
+                'on_behalf_of' => $validated['on_behalf_of'] ?? null,
+                'location' => $validated['location'] ?? null,
+                'description' => $validated['description'] ?? null,
+                'start_datetime' => $start,
+                'end_datetime' => $end,
+                'rrule' => $validated['rrule'] ?? null,
+                'exdates' => $validated['exdates'] ?? null,
+            ]);
+
+            // 2. Attach reminders to master
+            if (!empty($validated['reminders'])) {
+                foreach ($validated['reminders'] as $r) {
+                    if (
+                        (!isset($r['minutes_before']) || $r['minutes_before'] === '' || $r['minutes_before'] === null)
+                        && (empty($r['channel']))
+                    ) {
                         continue;
                     }
-
-                    // Skip if it’s already past the end limit:
-                    if ($occTs->greaterThan($endLimit)) {
-                        break;
-                    }
-
-                    // If this date is in the exdates JSON, insert a canceled exception:
-                    $dateOnly = $occTs->toDateString();
-                    if (in_array($dateOnly, $exdates, true)) {
-                        EventInstance::create([
-                            'event_id' => $master->id,
-                            'start_datetime' => $occTs,
-                            'end_datetime' => $occTs->copy()->addSeconds($duration),
-                            'instance_status' => 'Cancelled',
-                            'is_exception' => true,
-                            'notified' => false,
-                        ]);
-                        continue;
-                    }
-
-                    // Otherwise insert a normal scheduled occurrence:
-                    EventInstance::create([
-                        'event_id' => $master->id,
-                        'start_datetime' => $occTs,
-                        'end_datetime' => $occTs->copy()->addSeconds($duration),
-                        'instance_status' => 'Scheduled',
-                        'is_exception' => false,
-                        'notified' => false,
+                    $master->reminders()->create([
+                        'minutes_before' => $r['minutes_before'] ?? 0,
+                        'channel' => $r['channel'] ?? 'email',
                     ]);
-                }*/
+                }
+            }
+
+            // 3. If rrule exists, generate child events with parent_id
+            if (!empty($validated['rrule'])) {
+                $rruleString = preg_replace('/^RRULE:/i', '', trim($validated['rrule']));
+                $rule = new RRule($rruleString, $start);
+                $exdates = json_decode($validated['exdates'] ?? '[]', true);
+                $endLimit = now()->addYear();
+                $reminders = $master->reminders()->get();
+
+                foreach ($rule as $occurrence) {
+                    $occ = Carbon::instance($occurrence);
+                    if ($occ->equalTo($start) || $occ->greaterThan($endLimit))
+                        continue;
+
+                    $dateOnly = $occ->toDateString();
+                    if (in_array($dateOnly, $exdates, true))
+                        continue;
+
+                    $child = Event::create([
+                        'parent_id' => $master->id,
+                        'title' => $master->title,
+                        'type_id' => $master->type_id,
+                        'sub_type_id' => $master->sub_type_id,
+                        'office' => $master->office,
+                        'status' => 'Scheduled',
+                        'diary_owner' => $master->diary_owner,
+                        'on_behalf_of' => $master->on_behalf_of,
+                        'location' => $master->location,
+                        'description' => $master->description,
+                        'reminder' => $master->reminder,
+                        'start_datetime' => $occ,
+                        'end_datetime' => $occ->copy()->addSeconds($duration),
+                    ]);
+
+                    // Copy reminders to each child event
+                    foreach ($reminders as $r) {
+                        $child->reminders()->create([
+                            'minutes_before' => $r->minutes_before,
+                            'channel' => $r->channel,
+                        ]);
+                    }
+                }
             }
 
             \DB::commit();
@@ -263,12 +397,11 @@ class EventController
         }
     }
 
-
     /**
      * 3) UPDATE AN INSTANCE (drag/drop or per-instance edit).
      *    Payload: start_datetime, end_datetime (plus any instance-level fields you want)
      */
-    public function updateInstance(Request $request, EventInstance $instance)
+    /*public function updateInstance(Request $request, EventInstance $instance)
     {
         // Validate incoming data
         $data = $request->validate([
@@ -336,13 +469,75 @@ class EventController
         }
 
         return response()->json(['success' => true]);
+    }*/
+    public function updateInstance(Request $request, $id)
+    {
+        $event = Event::findOrFail($id); // now $event won't be null
+
+        $data = $request->validate([
+            'start_datetime' => 'required|date',
+            'end_datetime' => 'required|date|after_or_equal:start_datetime',
+            'form_action' => 'required|string|in:updateInstance'
+        ]);
+
+        $userId = auth()->id();
+
+        $oldStart = optional($event->start_datetime)->format('Y-m-d H:i:s');
+        $oldEnd = optional($event->end_datetime)->format('Y-m-d H:i:s');
+        $oldStatus = $event->status;
+
+        $event->update([
+            'start_datetime' => $data['start_datetime'],
+            'end_datetime' => $data['end_datetime'],
+            'status' => 'Rescheduled',
+            'instance_status' => 'Rescheduled',
+            'is_exception' => true,
+        ]);
+
+        if ($oldStart !== $data['start_datetime']) {
+            DB::table('event_instance_changes')->insert([
+                'event_id' => $event->id,
+                'changed_field' => 'start_datetime',
+                'old_value' => $oldStart,
+                'new_value' => $data['start_datetime'],
+                'changed_by' => $userId,
+                'changed_at' => now(),
+                'comment' => 'Start time changed',
+            ]);
+        }
+
+        if ($oldEnd !== $data['end_datetime']) {
+            DB::table('event_instance_changes')->insert([
+                'event_id' => $event->id,
+                'changed_field' => 'end_datetime',
+                'old_value' => $oldEnd,
+                'new_value' => $data['end_datetime'],
+                'changed_by' => $userId,
+                'changed_at' => now(),
+                'comment' => 'End time changed',
+            ]);
+        }
+
+        if ($oldStatus !== 'Rescheduled') {
+            DB::table('event_instance_changes')->insert([
+                'event_id' => $event->id,
+                'changed_field' => 'status',
+                'old_value' => $oldStatus,
+                'new_value' => 'Rescheduled',
+                'changed_by' => $userId,
+                'changed_at' => now(),
+                'comment' => 'Status changed to Rescheduled',
+            ]);
+        }
+
+        return response()->json(['success' => true]);
     }
 
 
     /**
      * 4) DELETE / CANCEL A SINGLE INSTANCE
      */
-    public function destroyInstance(EventInstance $instance)
+    /*public function destroyInstance(EventInstance $instance)
     {
         // Mark as cancelled
         $oldStatus = $instance->instance_status;
@@ -375,7 +570,45 @@ class EventController
             ]);
 
         return response()->json(['success' => true]);
+    }*/
+    public function destroyInstance(Event $event)
+    {
+        $oldStatus = $event->instance_status;
+
+        $event->update([
+            'instance_status' => 'Cancelled',
+            'is_exception' => true,
+        ]);
+
+        \DB::table('event_changes')->insert([
+            'event_id' => $event->id,
+            'changed_field' => 'instance_status',
+            'old_value' => $oldStatus,
+            'new_value' => 'Cancelled',
+            'changed_by' => auth()->id(),
+            'changed_at' => now(),
+            'comment' => 'Single event instance cancelled by user',
+        ]);
+
+        return response()->json(['success' => true]);
     }
+
+    public function destroySeries(Event $event)
+    {
+        // Cancel the master event
+        $event->update(['status' => 'Cancelled']);
+
+        // Cancel all children (future events with same parent)
+        Event::where('parent_id', $event->id)
+            ->where('start_datetime', '>=', now())
+            ->update([
+                'instance_status' => 'Cancelled',
+                'is_exception' => true,
+            ]);
+
+        return response()->json(['success' => true]);
+    }
+
 
     public function splitSeries(Request $request, $instanceId)
     {
@@ -533,9 +766,236 @@ class EventController
         }
     }
 
+    /* public function updateMaster(Request $request, Event $event)
+     {
+         // 5.1) VALIDATION
+         $validated = $request->validate([
+             'title' => 'required|string|max:255',
+             'type_id' => 'required|exists:event_types,id',
+             'sub_type_id' => 'required|exists:event_sub_types,id',
+             'office' => 'nullable|string|max:100',
+             'status' => 'nullable|in:Confirmed,Pending,Cancelled,Rescheduled',
+             'diary_owner' => 'nullable|string|max:255',
+             'on_behalf_of' => 'nullable|string|max:255',
+             'location' => 'nullable|string|max:255',
+             'description' => 'nullable|string',
+             'reminder' => ['nullable', 'string', 'regex:/^\d+(\s?(minutes|hours|days))?$/'],
+
+             // The “new original” start/end for the first instance:
+             'start_datetime' => 'required|date',
+             // 'start_datetime' => 'required|date|after_or_equal:today',
+             'end_datetime' => 'required|date',
+             // 'end_datetime' => 'required|date|after_or_equal:start_datetime',
+
+             // 'repeat'              => 'required|in:none,daily,weekly,monthly',
+             // 'repeat_interval'     => 'nullable|integer|min:1|max:100',
+             // 'repeat_until_date'   => 'nullable|date|after:start_datetime',
+
+             'rrule' => 'nullable|string',
+             'exdates' => 'nullable|string',
+
+             // just ensure it’s an array, and each sub‑array may have either key
+             'reminders' => 'nullable|array',
+             'reminders.*.minutes_before' => 'nullable|integer|min:0',
+             'reminders.*.channel' => 'nullable|in:email,in_app,sms,push',
+
+             'form_action' => 'required|string|in:updateMaster',
+         ]);
+
+         \DB::beginTransaction();
+         try {
+             // 5.2) UPDATE only the master event’s own columns (not start/end):
+             $event->update([
+                 'title' => $validated['title'],
+                 'type_id' => $validated['type_id'],
+                 'sub_type_id' => $validated['sub_type_id'],
+                 'office' => $validated['office'] ?? null,
+                 'status' => $validated['status'] ?? null,
+                 'diary_owner' => $validated['diary_owner'] ?? null,
+                 'on_behalf_of' => $validated['on_behalf_of'] ?? null,
+                 'location' => $validated['location'] ?? null,
+                 'description' => $validated['description'] ?? null,
+                 'reminder' => $validated['reminder'] ?? null,
+
+                 'rrule' => $validated['rrule'] ?? null,
+                 'exdates' => $validated['exdates'] ?? null,
+
+                 // 'repeat'            => $validated['repeat'],
+                 // 'repeat_interval'   => (int) ($validated['repeat_interval'] ?? 1),
+                 // 'repeat_until_date' => $validated['repeat_until_date'] ?? null,
+             ]);
+
+             // 5.3) COLLECT all existing instances (past & future) for lookup
+             $now = Carbon::now();
+             // $existingInstances = $event->instances()
+             $existingInstances = Event::where('parent_id', $event->id)
+                 ->orderBy('start_datetime', 'asc')
+                 ->get([
+                     'id',
+                     'start_datetime',
+                     'end_datetime',
+                 ]);
+
+             // Map of existing start‐times for quick "exists" check
+             $existingStarts = $existingInstances->pluck('start_datetime')
+                 ->map(function ($dt) {
+                     return $dt->format('Y-m-d H:i:s');
+                 })
+                 ->toArray();
+
+             // 5.4) UPDATE or CREATE the earliest (original) instance
+             $originalStart = Carbon::parse($validated['start_datetime']);
+             $originalEnd = Carbon::parse($validated['end_datetime']);
+
+             if ($existingInstances->isEmpty()) {
+                 // No instances at all → create the first one
+                 EventInstance::create([
+                     'event_id' => $event->id,
+                     'start_datetime' => $originalStart,
+                     'end_datetime' => $originalEnd,
+                     'instance_status' => 'Scheduled',
+                     'is_exception' => false,
+                     'notified' => false,
+                 ]);
+                 $existingStarts[] = $originalStart->format('Y-m-d H:i:s');
+             } else {
+                 $firstInstance = $existingInstances->first();
+                 $firstStart = $firstInstance->start_datetime->format('Y-m-d H:i:s');
+                 $newStartKey = $originalStart->format('Y-m-d H:i:s');
+
+                 if ($firstStart !== $newStartKey) {
+                     $firstInstance->update([
+                         'start_datetime' => $originalStart,
+                         'end_datetime' => $originalEnd,
+                         'instance_status' => 'Scheduled',
+                         'is_exception' => false,
+                         'notified' => false,
+                     ]);
+                     $existingStarts[] = $newStartKey;
+                 }
+             }
+
+             // ← INSERT: now sync its reminders
+             if ($request->filled('reminders')) {
+                 $firstInstance->reminders()->delete();
+                 foreach ($request->input('reminders', []) as $r) {
+                     $firstInstance->reminders()->create([
+                         'minutes_before' => $r['minutes_before'],
+                         'channel' => $r['channel'],
+                     ]);
+                 }
+             }
+
+             // 5.5) If no RRULE, we’re done
+             if (empty($validated['rrule'])) {
+                 \DB::commit();
+                 return response()->json(['success' => true]);
+             }
+
+             // 5.6) Parse exdates (if any)
+             $exdates = [];
+             if (!empty($validated['exdates'])) {
+                 $exdates = json_decode($validated['exdates'], true);
+             }
+
+             // 5.7) Use RRULE to generate future instances
+             $rruleString = trim($validated['rrule']);
+             if (stripos($rruleString, 'RRULE:') === 0) {
+                 $rruleString = trim(substr($rruleString, 6));
+             }
+
+             $rrule = new RRule($rruleString, $originalStart);
+
+             // 5.7a) Purge any old instances *after* the new last occurrence
+             $allOccs = iterator_to_array($rrule);
+             $lastOcc = end($allOccs); // a DateTime
+             $lastCarbon = Carbon::instance($lastOcc);
+             $event->instances()->where('start_datetime', '>', $lastCarbon)->delete();
+
+             // $rruleArr = [
+             //     'rrule' => $validated['rrule'],
+             //     'dtstart' => $originalStart->toAtomString(),
+             // ];
+             // $rrule = new RRule($rruleArr);
+
+             $durationInSeconds = $originalEnd->diffInSeconds($originalStart);
+
+             foreach ($rrule as $occurrence) {
+                 $startCarbon = Carbon::instance($occurrence);
+                 $startKey = $startCarbon->format('Y-m-d H:i:s');
+
+                 // Skip if it's the first one (already created/updated above)
+                 if ($startKey === $originalStart->format('Y-m-d H:i:s')) {
+                     continue;
+                 }
+
+                 // Skip if already exists
+                 if (in_array($startKey, $existingStarts, true)) {
+                     continue;
+                 }
+
+                 // Check if it's in the exclusion list
+                 if (in_array($startCarbon->format('Y-m-d'), $exdates, true)) {
+                     $instance = EventInstance::create([
+                         'event_id' => $event->id,
+                         'start_datetime' => $startCarbon,
+                         'end_datetime' => $startCarbon->copy()->addSeconds($durationInSeconds),
+                         'instance_status' => 'Canceled',
+                         'is_exception' => true,
+                         'notified' => false,
+                     ]);
+                     continue;
+                 }
+
+                 // Normal future instance
+                 if ($startCarbon->greaterThan($now)) {
+                     $instance = EventInstance::create([
+                         'event_id' => $event->id,
+                         'start_datetime' => $startCarbon,
+                         'end_datetime' => $startCarbon->copy()->addSeconds($durationInSeconds),
+                         'instance_status' => 'Scheduled',
+                         'is_exception' => false,
+                         'notified' => false,
+                     ]);
+
+                     // → Add reminders for this instance
+                     // if ($request->filled('reminders')) {
+                     //     foreach ($request->input('reminders', []) as $r) {
+                     //         $instance->reminders()->create([
+                     //             'minutes_before' => $r['minutes_before'],
+                     //             'channel' => $r['channel'],
+                     //         ]);
+                     //     }
+                     // }
+                     if ($request->filled('reminders')) {
+                         foreach ($request->input('reminders', []) as $r) {
+                             if (!isset($r['minutes_before']) || !isset($r['channel'])) {
+                                 continue;
+                             }
+
+                             $firstInstance->reminders()->create([
+                                 'minutes_before' => $r['minutes_before'],
+                                 'channel' => $r['channel'],
+                             ]);
+                         }
+                     }
+
+                 }
+             }
+
+             // 5.8) Commit the transaction
+             \DB::commit();
+             return response()->json(['success' => true]);
+         } catch (\Throwable $th) {
+             \DB::rollBack();
+             return response()->json([
+                 'message' => 'Error updating recurrence rule.',
+                 'error' => $th->getMessage()
+             ], 500);
+         }
+     }*/
     public function updateMaster(Request $request, Event $event)
     {
-        // 5.1) VALIDATION
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'type_id' => 'required|exists:event_types,id',
@@ -547,220 +1007,120 @@ class EventController
             'location' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'reminder' => ['nullable', 'string', 'regex:/^\d+(\s?(minutes|hours|days))?$/'],
-
-            // The “new original” start/end for the first instance:
             'start_datetime' => 'required|date',
-            // 'start_datetime' => 'required|date|after_or_equal:today',
-            'end_datetime' => 'required|date',
-            // 'end_datetime' => 'required|date|after_or_equal:start_datetime',
-
-            // 'repeat'              => 'required|in:none,daily,weekly,monthly',
-            // 'repeat_interval'     => 'nullable|integer|min:1|max:100',
-            // 'repeat_until_date'   => 'nullable|date|after:start_datetime',
-
+            'end_datetime' => 'required|date|after_or_equal:start_datetime',
             'rrule' => 'nullable|string',
             'exdates' => 'nullable|string',
-
-            // just ensure it’s an array, and each sub‑array may have either key
             'reminders' => 'nullable|array',
             'reminders.*.minutes_before' => 'nullable|integer|min:0',
             'reminders.*.channel' => 'nullable|in:email,in_app,sms,push',
-
             'form_action' => 'required|string|in:updateMaster',
         ]);
 
         \DB::beginTransaction();
+
         try {
-            // 5.2) UPDATE only the master event’s own columns (not start/end):
+            // 1. UPDATE MASTER EVENT
             $event->update([
                 'title' => $validated['title'],
                 'type_id' => $validated['type_id'],
                 'sub_type_id' => $validated['sub_type_id'],
                 'office' => $validated['office'] ?? null,
-                'status' => $validated['status'] ?? null,
+                'status' => $validated['status'] ?? 'Confirmed',
                 'diary_owner' => $validated['diary_owner'] ?? null,
                 'on_behalf_of' => $validated['on_behalf_of'] ?? null,
                 'location' => $validated['location'] ?? null,
                 'description' => $validated['description'] ?? null,
                 'reminder' => $validated['reminder'] ?? null,
-
+                'start_datetime' => $validated['start_datetime'],
+                'end_datetime' => $validated['end_datetime'],
                 'rrule' => $validated['rrule'] ?? null,
                 'exdates' => $validated['exdates'] ?? null,
-
-                // 'repeat'            => $validated['repeat'],
-                // 'repeat_interval'   => (int) ($validated['repeat_interval'] ?? 1),
-                // 'repeat_until_date' => $validated['repeat_until_date'] ?? null,
+                'is_exception' => false,
+                'instance_status' => 'Scheduled',
             ]);
 
-            // 5.3) COLLECT all existing instances (past & future) for lookup
-            $now = Carbon::now();
-            $existingInstances = $event->instances()
-                ->orderBy('start_datetime', 'asc')
-                ->get([
-                    'id',
-                    'start_datetime',
-                    'end_datetime',
-                ]);
+            // 2. DELETE OLD CHILD INSTANCES
+            Event::where('parent_id', $event->id)->delete();
 
-            // Map of existing start‐times for quick "exists" check
-            $existingStarts = $existingInstances->pluck('start_datetime')
-                ->map(function ($dt) {
-                    return $dt->format('Y-m-d H:i:s');
-                })
-                ->toArray();
-
-            // 5.4) UPDATE or CREATE the earliest (original) instance
-            $originalStart = Carbon::parse($validated['start_datetime']);
-            $originalEnd = Carbon::parse($validated['end_datetime']);
-
-            if ($existingInstances->isEmpty()) {
-                // No instances at all → create the first one
-                EventInstance::create([
-                    'event_id' => $event->id,
-                    'start_datetime' => $originalStart,
-                    'end_datetime' => $originalEnd,
-                    'instance_status' => 'Scheduled',
-                    'is_exception' => false,
-                    'notified' => false,
-                ]);
-                $existingStarts[] = $originalStart->format('Y-m-d H:i:s');
-            } else {
-                $firstInstance = $existingInstances->first();
-                $firstStart = $firstInstance->start_datetime->format('Y-m-d H:i:s');
-                $newStartKey = $originalStart->format('Y-m-d H:i:s');
-
-                if ($firstStart !== $newStartKey) {
-                    $firstInstance->update([
-                        'start_datetime' => $originalStart,
-                        'end_datetime' => $originalEnd,
-                        'instance_status' => 'Scheduled',
-                        'is_exception' => false,
-                        'notified' => false,
-                    ]);
-                    $existingStarts[] = $newStartKey;
-                }
-            }
-
-            // ← INSERT: now sync its reminders
+            // 3. HANDLE REMINDERS FOR MASTER
+            $event->reminders()->delete();
             if ($request->filled('reminders')) {
-                $firstInstance->reminders()->delete();
-                foreach ($request->input('reminders', []) as $r) {
-                    $firstInstance->reminders()->create([
-                        'minutes_before' => $r['minutes_before'],
-                        'channel' => $r['channel'],
-                    ]);
+                foreach ($validated['reminders'] as $r) {
+                    if (!empty($r['minutes_before']) && !empty($r['channel'])) {
+                        $event->reminders()->create([
+                            'minutes_before' => $r['minutes_before'],
+                            'channel' => $r['channel'],
+                        ]);
+                    }
                 }
             }
 
-            // 5.5) If no RRULE, we’re done
+            // 4. IF NO RRULE, EXIT
             if (empty($validated['rrule'])) {
                 \DB::commit();
-                return response()->json(['success' => true]);
+                return response()->json(['success' => true, 'message' => 'Single event updated.']);
             }
 
-            // 5.6) Parse exdates (if any)
+            // 5. PARSE RRULE + EXDATES
             $exdates = [];
             if (!empty($validated['exdates'])) {
                 $exdates = json_decode($validated['exdates'], true);
             }
 
-            // 5.7) Use RRULE to generate future instances
-            $rruleString = trim($validated['rrule']);
-            if (stripos($rruleString, 'RRULE:') === 0) {
-                $rruleString = trim(substr($rruleString, 6));
+            $rruleStr = trim($validated['rrule']);
+            if (str_starts_with($rruleStr, 'RRULE:')) {
+                $rruleStr = substr($rruleStr, 6);
             }
 
-            $rrule = new RRule($rruleString, $originalStart);
-
-            // 5.7a) Purge any old instances *after* the new last occurrence
-            $allOccs = iterator_to_array($rrule);
-            $lastOcc = end($allOccs); // a DateTime
-            $lastCarbon = Carbon::instance($lastOcc);
-            $event->instances()->where('start_datetime', '>', $lastCarbon)->delete();
-
-            // $rruleArr = [
-            //     'rrule' => $validated['rrule'],
-            //     'dtstart' => $originalStart->toAtomString(),
-            // ];
-            // $rrule = new RRule($rruleArr);
-
-            $durationInSeconds = $originalEnd->diffInSeconds($originalStart);
+            $rrule = new RRule($rruleStr, Carbon::parse($validated['start_datetime']));
+            $duration = Carbon::parse($validated['end_datetime'])->diffInSeconds(Carbon::parse($validated['start_datetime']));
+            $now = Carbon::now();
 
             foreach ($rrule as $occurrence) {
-                $startCarbon = Carbon::instance($occurrence);
-                $startKey = $startCarbon->format('Y-m-d H:i:s');
+                $start = Carbon::instance($occurrence);
+                $end = $start->copy()->addSeconds($duration);
 
-                // Skip if it's the first one (already created/updated above)
-                if ($startKey === $originalStart->format('Y-m-d H:i:s')) {
+                // Skip first occurrence (already stored in master)
+                if ($start->eq(Carbon::parse($validated['start_datetime']))) {
                     continue;
                 }
 
-                // Skip if already exists
-                if (in_array($startKey, $existingStarts, true)) {
-                    continue;
-                }
+                // Check if excluded
+                $isException = in_array($start->format('Y-m-d'), $exdates, true);
 
-                // Check if it's in the exclusion list
-                if (in_array($startCarbon->format('Y-m-d'), $exdates, true)) {
-                    $instance = EventInstance::create([
-                        'event_id' => $event->id,
-                        'start_datetime' => $startCarbon,
-                        'end_datetime' => $startCarbon->copy()->addSeconds($durationInSeconds),
-                        'instance_status' => 'Canceled',
-                        'is_exception' => true,
-                        'notified' => false,
-                    ]);
-                    continue;
-                }
-
-                // Normal future instance
-                if ($startCarbon->greaterThan($now)) {
-                    $instance = EventInstance::create([
-                        'event_id' => $event->id,
-                        'start_datetime' => $startCarbon,
-                        'end_datetime' => $startCarbon->copy()->addSeconds($durationInSeconds),
-                        'instance_status' => 'Scheduled',
-                        'is_exception' => false,
-                        'notified' => false,
-                    ]);
-
-                    // → Add reminders for this instance
-                    // if ($request->filled('reminders')) {
-                    //     foreach ($request->input('reminders', []) as $r) {
-                    //         $instance->reminders()->create([
-                    //             'minutes_before' => $r['minutes_before'],
-                    //             'channel' => $r['channel'],
-                    //         ]);
-                    //     }
-                    // }
-                    if ($request->filled('reminders')) {
-                        foreach ($request->input('reminders', []) as $r) {
-                            if (!isset($r['minutes_before']) || !isset($r['channel'])) {
-                                continue;
-                            }
-
-                            $firstInstance->reminders()->create([
-                                'minutes_before' => $r['minutes_before'],
-                                'channel' => $r['channel'],
-                            ]);
-                        }
-                    }
-
-                }
+                Event::create([
+                    'title' => $event->title,
+                    'type_id' => $event->type_id,
+                    'sub_type_id' => $event->sub_type_id,
+                    'office' => $event->office,
+                    'status' => $event->status,
+                    'diary_owner' => $event->diary_owner,
+                    'on_behalf_of' => $event->on_behalf_of,
+                    'location' => $event->location,
+                    'description' => $event->description,
+                    'reminder' => $event->reminder,
+                    'start_datetime' => $start,
+                    'end_datetime' => $end,
+                    'rrule' => null,
+                    'exdates' => null,
+                    'is_exception' => $isException,
+                    'instance_status' => $isException ? 'Cancelled' : 'Scheduled',
+                    'parent_id' => $event->id,
+                ]);
             }
 
-            // 5.8) Commit the transaction
             \DB::commit();
-            return response()->json(['success' => true]);
-        } catch (\Throwable $th) {
+            return response()->json(['success' => true, 'message' => 'Recurring event updated successfully.']);
+
+        } catch (\Throwable $e) {
             \DB::rollBack();
             return response()->json([
-                'message' => 'Error updating recurrence rule.',
-                'error' => $th->getMessage()
+                'success' => false,
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
-
 
     /**
      * 6) DELETE (MASTER): Delete entire series (all instances).
@@ -769,53 +1129,6 @@ class EventController
     {
         $event->delete();
         return response()->json(['success' => true]);
-    }
-
-    public function revertInstanceField(Request $request, EventInstance $instance)
-    {
-        // 1) Validate that ‘field’ is provided and is a valid column
-        $data = $request->validate([
-            'field' => 'required|string|in:start_datetime,end_datetime,instance_status',
-        ]);
-
-        $field = $data['field'];
-
-        // 2) Find the most recent change for this instance & field
-        $lastChange = EventInstanceChange::where('event_instance_id', $instance->id)
-            ->where('changed_field', $field)
-            ->orderBy('changed_at', 'desc')
-            ->first();
-
-        if (!$lastChange) {
-            return response()->json([
-                'message' => 'No previous change found to revert.'
-            ], 404);
-        }
-
-        // 3) Grab old and current values
-        $oldValue = $lastChange->old_value;
-        $currentValue = $instance->{$field};
-
-        // 4) Update the instance, reverting that field
-        $instance->update([
-            $field => $oldValue
-        ]);
-
-        // 5) Log a new change that we reverted
-        EventInstanceChange::create([
-            'event_instance_id' => $instance->id,
-            'changed_field' => $field,
-            'old_value' => $currentValue,
-            'new_value' => $oldValue,
-            'changed_by' => Auth::id(),
-            'changed_at' => Carbon::now(),
-            'comment' => "Reverted {$field} to previous value",
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => "{$field} reverted to previous value",
-        ]);
     }
 
     /**
@@ -836,8 +1149,8 @@ class EventController
         $event = Event::findOrFail($seriesId);
 
         // Use the relation to scope & update future instances
-        $event->instances()
-            ->where('start_datetime', '>=', $pivot)
+        // $event->instances()
+        $event->where('start_datetime', '>=', $pivot)
             ->where('instance_status', '!=', 'Cancelled')
             ->update([
                 'instance_status' => 'Cancelled',

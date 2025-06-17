@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('events', function (Blueprint $table) {
+        /*Schema::create('events', function (Blueprint $table) {
             $table->id();
                         // Basic fields
             $table->string('title');
@@ -40,6 +40,43 @@ return new class extends Migration
             // Or, alternatively, you could store a repeat_end_date instead of a count.
             // Here we’ll use a count approach for simplicity.
             $table->timestamps();
+        });*/
+
+        Schema::create('events', function (Blueprint $table) {
+            $table->id();
+
+            // Recurrence parent (null = master)
+            $table->foreignId('parent_id')->nullable()->constrained('events')->onDelete('set null');
+
+            // Event metadata
+            $table->string('title');
+            $table->unsignedBigInteger('type_id')->nullable();
+            $table->unsignedBigInteger('sub_type_id')->nullable();
+            $table->string('office')->nullable();
+            $table->enum('status', ['Confirmed', 'Pending', 'Cancelled', 'Rescheduled', 'Scheduled'])->default('Pending');
+            $table->string('diary_owner')->nullable();
+            $table->string('on_behalf_of')->nullable();
+            $table->string('location')->nullable();
+            $table->text('description')->nullable();
+            $table->string('reminder')->nullable(); // e.g., "30 minutes"
+
+            // Date/time
+            $table->dateTime('start_datetime');
+            $table->dateTime('end_datetime');
+
+            // Recurrence fields (only used in master)
+            $table->string('rrule')->nullable();     // Full RRULE string
+            $table->text('exdates')->nullable();     // JSON of exclusion dates: ["2025-06-17", "2025-06-20"]
+
+            // Status of this specific instance
+            $table->boolean('is_exception')->default(false); // If this instance overrides default pattern
+            $table->enum('instance_status', ['Scheduled', 'Cancelled', 'Completed', 'Rescheduled'])->nullable();
+
+            $table->timestamps();
+
+            // Indexes
+            $table->index('start_datetime');
+            $table->index('parent_id');
         });
     }
 

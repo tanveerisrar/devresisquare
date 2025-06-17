@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class EventReminder extends Model
 {
     protected $fillable = [
-        'event_instance_id',
+        'event_id',
         'minutes_before',
         'channel',
         'sent',
@@ -16,6 +16,6 @@ class EventReminder extends Model
     // Each reminder belongs to one EventInstance
     public function instance()
     {
-        return $this->belongsTo(EventInstance::class, 'event_instance_id');
+        return $this->belongsTo(EventInstance::class, 'event_id');
     }
 }

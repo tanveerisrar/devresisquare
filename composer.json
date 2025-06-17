@@ -12,6 +12,7 @@
         "laravel/tinker": "^2.9",
         "mpdf/mpdf": "^8.2",
         "niklasravnsborg/laravel-pdf": "^4.1",
+        "owen-it/laravel-auditing": "^14.0",
         "rlanvin/php-rrule": "^2.6"
     },
     "require-dev": {
