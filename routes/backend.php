@@ -304,16 +304,17 @@ Route::middleware('auth')->group(function () {
             // Create or update: we’ll use “store” for new, “updateInstance” for instance drag/drop.
             Route::post('/instances/store', 'store')->name('store');              // create new master + instances
             Route::post('/instances/update/{instance}', 'updateInstance')->name('updateInstance');
-            Route::delete('/instances/delete/{instance}', 'destroyInstance')->name('destroyInstance');
+            Route::delete('/instances/delete/{event}', 'destroyInstance')->name('destroyInstance');
 
             // Endpoints for master-level edits (e.g. change recurrence rule):
             Route::put('/master/update/{event}', 'updateMaster')->name('updateMaster');
             Route::delete('/master/delete/{event}', 'destroyMaster')->name('destroyMaster');
-            Route::post('/instances/{instance}/revert', 'revertInstanceField')->name('revertInstance');
+            Route::post('/instances/{event}/revert', 'revertInstanceField')->name('revertInstance');
             
             // Additional Recurrence Features
             Route::post('/cancel-series/{series_id}',  'cancelSeries')->name('cancelSeries');
-            Route::post('/split-series/{event_id}',  'splitSeries')->name('splitSeries');
+            Route::post('/instances/cancel/{id}', 'cancelInstance')->name('cancelInstance');
+
             
         });
     });

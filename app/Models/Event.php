@@ -72,6 +72,15 @@ class Event extends Model implements Auditable
         return $this->hasMany(Event::class, 'parent_id');
     }
 
+    /**
+     * Each event can have a parent event (for recurring events).
+     * This is a self-referential relationship.
+     */
+    public function parent()
+    {
+        return $this->belongsTo(Event::class, 'parent_id');
+    }
+
 
     /**
      * Each master event has many instances.
