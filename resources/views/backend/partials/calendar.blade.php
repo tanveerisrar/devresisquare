@@ -161,10 +161,10 @@
                     </li>
                     <li class="list-group-item action-item" data-action="edit-all">Edit entire series</li>
 
-                    <li class="list-group-item action-item" data-action="delete-one">Cancel only this occurrence</li>
-                    <li class="list-group-item action-item" data-action="delete-future">Cancel this & future occurrences
+                    <li class="list-group-item action-item" data-action="cancel-one">Cancel only this occurrence</li>
+                    <li class="list-group-item action-item" data-action="cancel-future">Cancel this & future occurrences
                     </li>
-                    <li class="list-group-item action-item" data-action="delete-all">Cancel entire series</li>
+                    <li class="list-group-item action-item" data-action="cancel-all">Cancel entire series</li>
                 </ul>
             </div>
         </div>
@@ -769,7 +769,7 @@
                 const action = $(this).data('action');
                 $seriesChoiceModal.modal('hide');
                 console.log('Event ID:', info.event.id);
-                console.log('Master ID:', info.event.extendedProps.parent_id);
+                console.log('Master ID:', info.event.extendedProps.master_id);
 
                 // Dispatch just like your old switch, but driven by `action`:
                 switch (action) {
@@ -787,7 +787,7 @@
                         openEventModal(info, 'future');
                         loadExistingReminders(info.event.extendedProps.reminders);
                         break;
-                    case 'delete-one':
+                    case 'cancel-one':
                         if (confirm('Cancel only this occurrence?')) {
                             $.ajax({
                                 url: '{{ route("backend.events.cancelInstance", "") }}/' + info.event.id,
@@ -808,7 +808,7 @@
                         }
                         break;
 
-                    case 'delete-all':
+                    case 'cancel-all':
                         if (confirm('Cancel entire series?')) {
                             $.ajax({
                                 url: '{{ route("backend.events.cancelInstance", "") }}/' + info.event.id,
@@ -829,7 +829,7 @@
                         }
                         break;
 
-                    case 'delete-future':
+                    case 'cancel-future':
                         if (confirm('Cancel this & future occurrences?')) {
                             $.ajax({
                                 url: '{{ route("backend.events.cancelInstance", "") }}/' + info.event.id,
@@ -1078,7 +1078,7 @@
 
                 // set hidden flags
                 $('input[name="instance_id"]').val(inst.event_id ?? '');
-                $('input[name="master_id"]').val(inst.parent_id ?? '');
+                $('input[name="master_id"]').val(inst.master_id ?? '');
                 $('input[name="form_action"]').val('updateMaster');
                 $('input[name="choice_action"]').val(mode);
                 // console.log('Setting status:', inst.event_status);
@@ -1121,20 +1121,19 @@
                     });
                 }
 
-                // --------- delete button ---------
+                // ---------- DELETE BUTTON ----------
                 const $footer = $('#eventModal .modal-footer');
-                $footer.find('.js-delete-btn').remove(); // remove any old
+                $footer.find('.js-delete-btn').remove(); // remove existing delete buttons
+
                 const btnText = isSingle
                     ? 'Delete this occurrence'
                     : isSeries
                         ? 'Delete entire series'
                         : 'Delete this & future';
-                const url = isSingle
-                    ? '{{ route("backend.events.destroyInstance", "") }}/' + inst.event_id
-                    : isSeries
-                        ? '{{ route("backend.events.destroyMaster", "") }}/' + inst.parent_id
-                        : '{{ route("backend.events.cancelSeries", "") }}/' + inst.parent_id;
-                const method = isSingle || isSeries ? 'DELETE' : 'POST';
+
+                const targetId = isSingle ? inst.event_id : inst.master_id;
+                const url = '{{ route("backend.events.deleteInstance", ":id") }}'.replace(':id', targetId);
+                const method = 'POST';
 
                 const $del = $('<button>')
                     .addClass('btn btn-danger me-auto js-delete-btn')
@@ -1142,17 +1141,24 @@
                     .on('click', e => {
                         e.preventDefault();
                         if (!confirm(btnText + '?')) return;
-                        const data = { _token: '{{ csrf_token() }}' };
-                        if (method === 'POST' && isSplitFuture) data.occurrence_start = info.event.startStr;
+
+                        const data = {
+                            _token: '{{ csrf_token() }}',
+                            choice_action: mode,
+                            occurrence_start: info.event.startStr
+                        };
+
                         $.ajax({
-                            url, method, data,
+                            url: url,
+                            method: method,
+                            data: data,
                             success(response) {
                                 if (response.success) {
-                                    AIZ.plugins.notify('success', response.message || 'Event cancelled successfully.');
+                                    AIZ.plugins.notify('success', response.message || 'Event deleted successfully.');
                                 } else {
                                     AIZ.plugins.notify('error', response.message || 'Could not delete event.');
                                 }
-                                $eventModal.modal('hide');
+                                $('#eventModal').modal('hide');
                                 calendar.refetchEvents();
                             },
                             error(xhr) {
@@ -1162,7 +1168,6 @@
                                 }
                                 AIZ.plugins.notify('error', errorMsg);
                             }
-
                         });
                     });
                 $footer.prepend($del);

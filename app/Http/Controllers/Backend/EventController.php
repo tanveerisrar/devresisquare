@@ -48,8 +48,8 @@ class EventController
                     'start' => $event->start_datetime->format('Y-m-d H:i:s'),
                     'end' => $event->end_datetime->format('Y-m-d H:i:s'),
                     'event_id' => $event->id, // use parent_id if exists, else self
-                    'parent_id' => $event->parent_id,
-                    'master_id' => $event->parent_id,
+                    // 'parent_id' => $event->parent_id ?? $event->id,
+                    'master_id' => $event->parent_id ?? $event->id, // if no parent, use self
                     'event_status' => $event->status,
                     'office' => $event->office,
                     'diary_owner' => $event->diary_owner,
@@ -253,37 +253,6 @@ class EventController
         return response()->json(['success' => true]);
     }
 
-    public function destroyInstance($eventID)
-    {
-        $event = Event::findOrFail($eventID); // Ensure the event exists
-
-        // Cancel the instance
-        if ($event->status === 'Cancelled' || $event->instance_status === 'Cancelled') {
-            return response()->json(['error' => 'Instance already cancelled'], 400);
-        }
-
-        // Record the change
-        $oldStatus = $event->instance_status;
-
-        $event->update([
-            'status' => 'Cancelled',
-            'instance_status' => 'Cancelled',
-            'is_exception' => true,
-        ]);
-
-        \DB::table('event_instance_changes')->insert([
-            'event_id' => $event->id,
-            'changed_field' => 'instance_status',
-            'old_value' => $oldStatus,
-            'new_value' => 'Cancelled',
-            'changed_by' => auth()->id(),
-            'changed_at' => now(),
-            'comment' => 'Single event instance cancelled by user',
-        ]);
-
-        return response()->json(['success' => true, 'message' => 'Event instance cancelled successfully']);
-    }
-
     public function updateMaster(Request $request, Event $event)
     {
         $validated = $request->validate([
@@ -394,8 +363,18 @@ class EventController
 
                     \DB::commit();
                     return response()->json(['success' => true, 'message' => 'Single occurrence updated.']);
-                case 'series':
-                    // Always update the master event
+
+                case 'series': {
+                    $oldStart = $event->start_datetime;
+                    $oldEnd = $event->end_datetime;
+
+                    $newStart = Carbon::parse($validated['start_datetime']);
+                    $newEnd = Carbon::parse($validated['end_datetime']);
+
+                    $timeDiffInSeconds = $oldStart->diffInSeconds($newStart, false);
+                    $timeChanged = $oldStart->ne($newStart) || $oldEnd->ne($newEnd);
+
+                    // Always update master
                     $event->update([
                         'title' => $validated['title'],
                         'type_id' => $validated['type_id'],
@@ -409,13 +388,13 @@ class EventController
                         'reminder' => $validated['reminder'] ?? null,
                         'start_datetime' => $validated['start_datetime'],
                         'end_datetime' => $validated['end_datetime'],
-                        'rrule' => $validated['rrule'], // updated or same
+                        'rrule' => $validated['rrule'],
                         'exdates' => $validated['exdates'] ?? '[]',
                         'is_exception' => false,
                         'instance_status' => 'Scheduled',
                     ]);
 
-                    // Update reminders
+                    // Update master reminders
                     $event->reminders()->delete();
                     if ($request->filled('reminders')) {
                         foreach ($validated['reminders'] as $r) {
@@ -426,12 +405,20 @@ class EventController
                     }
 
                     if ($rruleChanged) {
-                        // Recurrence rule changed: delete and regenerate children
+                        // If recurrence rule changed, delete and regenerate all children
                         $event->children()->delete();
                         $this->generateChildInstances($event, $validated);
                     } else {
-                        // RRule not changed: update existing children
+                        // If only time or other data changed, update each child
                         foreach ($event->children as $child) {
+                            $adjustedStart = $child->start_datetime;
+                            $adjustedEnd = $child->end_datetime;
+
+                            if ($timeChanged) {
+                                $adjustedStart = $child->start_datetime->copy()->addSeconds($timeDiffInSeconds);
+                                $adjustedEnd = $child->end_datetime->copy()->addSeconds($timeDiffInSeconds);
+                            }
+
                             $child->update([
                                 'title' => $validated['title'],
                                 'type_id' => $validated['type_id'],
@@ -443,24 +430,25 @@ class EventController
                                 'location' => $validated['location'] ?? null,
                                 'description' => $validated['description'] ?? null,
                                 'reminder' => $validated['reminder'] ?? null,
-                                'rrule' => $validated['rrule'], // same as master
+                                'start_datetime' => $adjustedStart,
+                                'end_datetime' => $adjustedEnd,
+                                'rrule' => $validated['rrule'],
                                 'exdates' => $validated['exdates'] ?? '[]',
                                 'is_exception' => false,
                                 'instance_status' => 'Scheduled',
-                                // Do not update `start_datetime` and `end_datetime`
-                                // because each child has its own instance time
                             ]);
                         }
                     }
 
-                    \DB::commit();
+                    DB::commit();
                     return response()->json(['success' => true, 'message' => 'Series updated successfully.']);
+                }
 
 
                 case 'future':
                     // Update all future instances
 
-                    if ($rruleChanged && $newRrule) {
+                    if ($rruleChanged) {
                         $oldMaster = $instance->parent ?? $instance;
 
                         // Step 1: Add current instance's start_datetime to old master exdates
@@ -498,7 +486,10 @@ class EventController
                         return response()->json(['success' => true, 'message' => 'Future instances updated with new series.']);
                     }
 
-                    // rrule not changed, just update this and future children
+                    // 1) Find the “master” of this series (if this instance has no parent, it is the master)
+                    $master = $instance->parent ?: $instance;
+
+                    // 2) Update this clicked instance first
                     $instance->update([
                         'title' => $validated['title'],
                         'type_id' => $validated['type_id'],
@@ -516,6 +507,7 @@ class EventController
                         'instance_status' => 'Scheduled',
                     ]);
 
+                    // 3) Sync its reminders
                     $instance->reminders()->delete();
                     if ($request->filled('reminders')) {
                         foreach ($validated['reminders'] as $r) {
@@ -525,10 +517,14 @@ class EventController
                         }
                     }
 
-                    // Update all future siblings (after current)
-                    Event::where('parent_id', $instance->parent_id)
+                    // 4) Grab _future_ children via the relation, then loop to update each
+                    $futureChildren = $master
+                        ->children()
                         ->where('start_datetime', '>', $instance->start_datetime)
-                        ->update([
+                        ->get();
+
+                    foreach ($futureChildren as $child) {
+                        $child->update([
                             'title' => $validated['title'],
                             'type_id' => $validated['type_id'],
                             'sub_type_id' => $validated['sub_type_id'],
@@ -543,6 +539,18 @@ class EventController
                             'instance_status' => 'Scheduled',
                         ]);
 
+                        // re‐sync reminders on each future child
+                        $child->reminders()->delete();
+                        if ($request->filled('reminders')) {
+                            foreach ($validated['reminders'] as $r) {
+                                if (!empty($r['minutes_before']) && !empty($r['channel'])) {
+                                    $child->reminders()->create($r);
+                                }
+                            }
+                        }
+                    }
+
+
                     \DB::commit();
                     return response()->json(['success' => true, 'message' => 'Future occurrences updated successfully.']);
 
@@ -556,34 +564,54 @@ class EventController
             return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
+    /**
+     * Generate all child events from a master, starting _after_ $startFrom (if given).
+     *
+     * @param  \App\Models\Event  $master
+     * @param  array               $validated
+     * @param  \Carbon\Carbon|null $startFrom
+     * @return void
+     */
     protected function generateChildInstances(Event $master, array $validated, ?Carbon $startFrom = null)
     {
-        $rruleStr = $validated['rrule'];
-        if (str_starts_with($rruleStr, 'RRULE:')) {
-            $rruleStr = substr($rruleStr, 6);
-        }
+        // 1) Normalize the RRULE
+        $rruleStr = preg_replace('/^RRULE:/i', '', trim($validated['rrule']));
 
-        $start = Carbon::parse($validated['start_datetime']);
-        $end = Carbon::parse($validated['end_datetime']);
-        $duration = abs($end->diffInSeconds($start));
+        $dtStart = Carbon::parse($validated['start_datetime']);
+        $dtEnd = Carbon::parse($validated['end_datetime']);
+        $duration = $dtEnd->diffInSeconds($dtStart);
 
-        $rrule = new RRule($rruleStr, $start);
+        $rule = new RRule($rruleStr, $dtStart);
         $exdates = json_decode($validated['exdates'] ?? '[]', true);
+        $reminders = $master->reminders()->get();
+        $endLimit = now()->addYear();
 
-        foreach ($rrule as $occurrence) {
-            $occurrenceStart = Carbon::instance($occurrence);
-            if ($occurrenceStart->eq($start)) {
-                continue; // skip master
+        foreach ($rule as $occurrence) {
+            $occStart = Carbon::instance($occurrence);
+
+            // 2) Skip original master
+            if ($occStart->equalTo($dtStart)) {
+                continue;
             }
 
-            if ($startFrom && $occurrenceStart->lt($startFrom)) {
-                continue; // skip past for "future" mode
+            // 3) If we’re rebuilding “future” only, skip before pivot
+            if ($startFrom && $occStart->lt($startFrom)) {
+                continue;
             }
 
-            $occurrenceEnd = $occurrenceStart->copy()->addSeconds($duration);
-            $isException = in_array($occurrenceStart->format('Y-m-d'), $exdates, true);
+            // 4) Too far out?
+            if ($occStart->greaterThan($endLimit)) {
+                break;
+            }
 
-            Event::create([
+            // 5) Skip exclusions
+            if (in_array($occStart->toDateString(), $exdates, true)) {
+                continue;
+            }
+
+            // 6) Create each child
+            $child = Event::create([
+                'parent_id' => $master->id,
                 'title' => $master->title,
                 'type_id' => $master->type_id,
                 'sub_type_id' => $master->sub_type_id,
@@ -594,16 +622,24 @@ class EventController
                 'location' => $master->location,
                 'description' => $master->description,
                 'reminder' => $master->reminder,
-                'start_datetime' => $occurrenceStart,
-                'end_datetime' => $occurrenceEnd,
-                'rrule' => $validated['rrule'],
-                'exdates' => $validated['exdates'] ?? '[]',
-                'is_exception' => $isException,
-                'instance_status' => $isException ? 'Cancelled' : 'Scheduled',
-                'parent_id' => $master->id,
+                'start_datetime' => $occStart,
+                'end_datetime' => $occStart->copy()->addSeconds($duration),
+                'rrule' => null,
+                'exdates' => null,
+                'is_exception' => false,
+                'instance_status' => 'Scheduled',
             ]);
+
+            // 7) Copy over reminders
+            foreach ($reminders as $r) {
+                $child->reminders()->create([
+                    'minutes_before' => $r->minutes_before,
+                    'channel' => $r->channel,
+                ]);
+            }
         }
     }
+
 
     public function cancelInstance(Request $request, $id)
     {
@@ -682,45 +718,81 @@ class EventController
     }
 
 
-
-    /**
-     * 6) DELETE (MASTER): Delete entire series (all instances).
-     */
-    public function destroyMaster(Event $event)
-    {
-        $event->delete();
-        return response()->json(['success' => true]);
-    }
-
-    /**
-     * Cancel this and all future occurrences of a series.
-     */
-    public function cancelSeries(Request $request, $seriesId)
+    public function deleteInstance(Request $request, $id)
     {
         $request->validate([
+            'choice_action' => 'in:single,series,future',
             'occurrence_start' => 'required|date',
         ]);
 
-        // Normalize the pivot to match your DB format
+        $choice = $request->input('choice_action', 'single');
         $pivot = Carbon::parse($request->occurrence_start)
             ->setTimezone(config('app.timezone'))
             ->format('Y-m-d H:i:s');
 
-        // Fetch the Event and its instances relation
-        $event = Event::findOrFail($seriesId);
+        $event = Event::findOrFail($id);
 
-        // Use the relation to scope & update future instances
-        // $event->instances()
-        $event->where('start_datetime', '>=', $pivot)
-            ->where('instance_status', '!=', 'Cancelled')
-            ->update([
-                'instance_status' => 'Cancelled',
-                'is_exception' => true,
-            ]);
+        switch ($choice) {
+            case 'single':
+                if ($event->children()->exists()) {
+                    // Get the first child (by earliest start, or just first one)
+                    $newParent = $event->children()->orderBy('start_datetime')->first();
 
-        return response()->json(['success' => true]);
+                    if ($newParent) {
+                        // Reassign all other children to the first child
+                        $event->children()
+                            ->where('id', '!=', $newParent->id)
+                            ->update(['parent_id' => $newParent->id]);
+                    }
+
+                    // Now delete the original master
+                    $event->delete();
+                } else {
+                    // No children, safe to delete
+                    $event->delete();
+                }
+                break;
+
+            case 'series':
+                // Always resolve the real master event by following parent_id
+                $master = $event->parent_id ? Event::find($event->parent_id) : $event;
+
+                if (!$master) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Master event not found.'
+                    ], 404);
+                }
+
+                // Delete all child events first
+                $master->children()->delete();
+
+                // Then delete the master event
+                $master->delete();
+                break;
+
+
+            case 'future':
+                // Determine the master event
+                $master = $event->parent ?: $event;
+
+                // Delete the master if it starts at or after the pivot
+                if ($master->start_datetime >= $pivot) {
+                    $master->delete();
+                }
+
+                // Delete children starting from pivot onward
+                $master->children()
+                    ->where('start_datetime', '>=', $pivot)
+                    ->delete();
+                break;
+
+            default:
+                return response()->json(['success' => false, 'message' => 'Invalid action.'], 400);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Deletion successful.']);
     }
-
 
 
 }

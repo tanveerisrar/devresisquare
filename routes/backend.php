@@ -298,24 +298,25 @@ Route::middleware('auth')->group(function () {
 
     Route::group(['prefix' => 'calendar', 'as' => 'backend.events.'], function () {
         Route::controller(EventController::class)->group(function () {
+            
             // Fetch all instances in a given date range for FullCalendar.
             Route::get('/instances', 'index')->name('index');
 
-            // Create or update: we’ll use “store” for new, “updateInstance” for instance drag/drop.
-            Route::post('/instances/store', 'store')->name('store');              // create new master + instances
+            // Create new event or master event.
+            Route::post('/instances/store', 'store')->name('store');
+
+            // “updateInstance” for instance drag/drop.
             Route::post('/instances/update/{instance}', 'updateInstance')->name('updateInstance');
-            Route::delete('/instances/delete/{event}', 'destroyInstance')->name('destroyInstance');
 
             // Endpoints for master-level edits (e.g. change recurrence rule):
             Route::put('/master/update/{event}', 'updateMaster')->name('updateMaster');
-            Route::delete('/master/delete/{event}', 'destroyMaster')->name('destroyMaster');
-            Route::post('/instances/{event}/revert', 'revertInstanceField')->name('revertInstance');
-            
-            // Additional Recurrence Features
-            Route::post('/cancel-series/{series_id}',  'cancelSeries')->name('cancelSeries');
+
+            // Cancel an instance by ID.
             Route::post('/instances/cancel/{id}', 'cancelInstance')->name('cancelInstance');
 
-            
+            // Delete an instance by ID[single, series, future].
+            Route::post('/instances/delete/{id}', 'deleteInstance')->name('deleteInstance');
+
         });
     });
 
