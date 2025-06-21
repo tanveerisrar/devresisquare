@@ -23,7 +23,7 @@ class EventController
         // Fetch events directly
         $events = Event::whereBetween('start_datetime', [$start, $end])
             ->where('status', '!=', 'Cancelled')
-            ->with('reminders')
+            ->with('reminders', 'properties')
             ->get();
 
         $data = $events->map(function ($event) {
@@ -67,6 +67,8 @@ class EventController
                         'minutes_before' => $r->minutes_before,
                         'channel' => $r->channel,
                     ]),
+                    'property_ids' => $event->properties->pluck('id')->toArray(),
+
                 ],
             ];
         });
@@ -93,6 +95,13 @@ class EventController
             'reminders' => 'nullable|array',
             'reminders.*.minutes_before' => 'nullable|integer|min:0',
             'reminders.*.channel' => 'nullable|in:email,in_app,sms,push',
+
+            'property_ids' => 'nullable|array',
+            'property_ids.*' => 'exists:properties,id',
+            'repair_ids' => 'nullable|array',
+            'repair_ids.*' => 'exists:repairs,id',
+            'contact_ids' => 'nullable|array',
+            'contact_ids.*' => 'exists:contacts,id',
         ]);
 
         \DB::beginTransaction();
@@ -133,6 +142,9 @@ class EventController
                     ]);
                 }
             }
+
+            // attach polymorphic relations:
+            $this->syncMorphRelations($master, $validated);
 
             // 3. If rrule exists, generate child events with parent_id
             if (!empty($validated['rrule'])) {
@@ -275,6 +287,13 @@ class EventController
             'reminders.*.channel' => 'nullable|in:email,in_app,sms,push',
             'form_action' => 'required|string|in:updateMaster',
             'choice_action' => 'required|in:single,series,future',
+
+            'property_ids' => 'nullable|array',
+            'property_ids.*' => 'exists:properties,id',
+            'repair_ids' => 'nullable|array',
+            'repair_ids.*' => 'exists:repairs,id',
+            'contact_ids' => 'nullable|array',
+            'contact_ids.*' => 'exists:contacts,id',
         ]);
 
         \DB::beginTransaction();
@@ -323,6 +342,8 @@ class EventController
                                 }
                             }
                         }
+                        
+                        $this->syncMorphRelations($instance, $validated); // or $event
 
                         // Generate children from this new master
                         $this->generateChildInstances($instance, $validated);
@@ -360,6 +381,9 @@ class EventController
                             }
                         }
                     }
+
+                    // resync relations:
+                    $this->syncMorphRelations($instance, $validated);
 
                     \DB::commit();
                     return response()->json(['success' => true, 'message' => 'Single occurrence updated.']);
@@ -403,6 +427,8 @@ class EventController
                             }
                         }
                     }
+                    
+                    $this->syncMorphRelations($event, $validated);
 
                     if ($rruleChanged) {
                         // If recurrence rule changed, delete and regenerate all children
@@ -437,6 +463,8 @@ class EventController
                                 'is_exception' => false,
                                 'instance_status' => 'Scheduled',
                             ]);
+
+                            $this->syncMorphRelations($child, $validated);
                         }
                     }
 
@@ -479,6 +507,7 @@ class EventController
                             'parent_id' => null, // Make it a new master
                         ]);
 
+                        $this->syncMorphRelations($instance, $validated);
                         // Step 3: Generate children from this new master
                         $this->generateChildInstances($instance, $validated);
 
@@ -517,6 +546,8 @@ class EventController
                         }
                     }
 
+                    $this->syncMorphRelations($instance, $validated);
+
                     // 4) Grab _future_ children via the relation, then loop to update each
                     $futureChildren = $master
                         ->children()
@@ -548,6 +579,9 @@ class EventController
                                 }
                             }
                         }
+
+                        $this->syncMorphRelations($child, $validated);
+
                     }
 
 
@@ -792,6 +826,13 @@ class EventController
         }
 
         return response()->json(['success' => true, 'message' => 'Deletion successful.']);
+    }
+
+    protected function syncMorphRelations(Event $event, array $validated)
+    {
+        $event->properties()->sync($validated['property_ids'] ?? []);
+        $event->repairs()->sync($validated['repair_ids'] ?? []);
+        $event->contacts()->sync($validated['contact_ids'] ?? []);
     }
 
 

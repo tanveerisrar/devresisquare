@@ -116,4 +116,9 @@ class RepairIssue extends Model
     {
         return $this->hasOneThrough(Invoice::class, WorkOrder::class, 'repair_issue_id', 'work_order_id');
     }
+
+    public function events()
+    {
+        return $this->morphToMany(Event::class, 'eventable');
+    }
 }

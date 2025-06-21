@@ -32,7 +32,7 @@ class Event extends Model implements Auditable
 
     protected $fillable = [
         'title',
-        'parent_id',       // foreign key
+        'parent_id',      // foreign key
         'type_id',       // foreign key
         'sub_type_id',   // foreign key
         'office',
@@ -114,5 +114,29 @@ class Event extends Model implements Auditable
     public function reminders()
     {
         return $this->hasMany(EventReminder::class, 'event_id');
+    }
+
+    /**
+     * All the Properties attached to this Event.
+     */
+    public function properties()
+    {
+        return $this->morphedByMany(Property::class, 'eventable');
+    }
+
+    /**
+     * All the Repairs attached to this Event.
+     */
+    public function repairs()
+    {
+        return $this->morphedByMany(RepairIssue::class, 'eventable');
+    }
+
+    /**
+     * All the Contacts attached to this Event.
+     */
+    public function contacts()
+    {
+        return $this->morphedByMany(Contact::class, 'eventable');
     }
 }

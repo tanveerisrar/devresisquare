@@ -58,9 +58,14 @@ class Contact extends Model
     {
         return $this->hasMany(TenantMember::class, 'contact_id');
     }
-    
+
     // protected $casts = [
     //     'selected_properties' => 'array', // Automatically casts JSON to an array
     // ];
+
+    public function events()
+    {
+        return $this->morphToMany(Event::class, 'eventable');
+    }
 
 }

@@ -183,6 +183,28 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                @php
+                    $propertyOptions = \App\Models\Property::optionsForSelect();
+                    $propertySelectMode = 'multi'; // or 'single'
+                    $maxProperties = 3;
+                    $multi = $propertySelectMode === 'multi';
+                    // @dd($propertyOptions);
+                @endphp
+
+                <select id="property-select"
+                    class="form-control"
+                    name="{{ $multi ? 'property_ids[]' : 'property_id' }}"
+                    data-mode="{{ $propertySelectMode }}"
+                    data-max="{{ $maxProperties }}"
+                    @if($multi) multiple @endif
+                >
+                    {{-- <option value="">— none —</option> --}}
+                    @foreach($propertyOptions as $id => $label)
+                        <option value="{{ $id }}">{{ $label }}</option>
+                    @endforeach
+                </select>
+
+
                     <div class="row g-3">
                         {{-- Master fields (updated) --}}
                         <div class="col-md-6">
@@ -314,7 +336,8 @@
         <button type="button" class="btn btn-outline-danger removeReminderBtn">&times;</button>
     </div>
 </template>
-
+{{-- Include the partial to push Select2 assets into the stacks --}}
+@include('backend.partials.assets.select2')
 @push('styles')
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.css" rel="stylesheet" />
 @endpush
@@ -331,6 +354,49 @@
         // console.log('✅ rrule loaded via Skypack:', typeof RRule);
     </script>
     <script>
+        function initPropertySelect() {
+            const $sel = $("#property-select");
+            const mode = $sel.data("mode");
+            const max = parseInt($sel.data("max"), 10);
+            // Step 1: Keep current selections
+            const selectedValues = $sel.val();
+
+            // Destroy if already initialized
+            if ($sel.hasClass("select2-hidden-accessible")) {
+                $sel.select2("destroy");
+            }
+            // Reset any selected value(s)
+            $sel.val(null).trigger("change");
+
+            // Update attributes before initializing
+            if (mode === "multi") {
+                $sel.attr("multiple", "multiple").prop("name", "property_ids[]");
+            } else {
+                $sel.removeAttr("multiple").prop("name", "property_id");
+            }
+
+            $sel.select2({
+                dropdownParent: $('#eventModal'), // if inside modal
+                placeholder: mode === "multi"
+                    ? `Select up to ${max} properties`
+                    : "Select one property",
+                allowClear: mode === "single",
+                maximumSelectionLength: mode === "multi" ? max : 1,
+                allowClear: true,
+                width: '100%',
+            });
+            
+            // Step 5: Re-set the selected values
+            // if (selectedValues) {
+            //     $sel.val(selectedValues).trigger("change");
+            // }
+
+        }
+
+        // $(document).ready(function () {
+        //     initPropertySelect();
+        // });
+
 
         // Modal cleanup handler
         $(document).on('hidden.bs.modal', '.modal', function () {
@@ -899,14 +965,23 @@
 
                     // Clear previous reminders
                     $('#reminderList').empty();
-
+                    initPropertySelect();
                     // eventModal.show();
                     $eventModal.modal('show');
                 },
                 eventClick: function (info) {
                     // When clicking an existing instance, load data into modal to “Edit Instance”
                     var inst = info.event.extendedProps;
-
+                    console.log('✏️[eventClick] Instance data:', inst);
+                    initPropertySelect();
+                        
+                    // Preselect related properties
+                    $('#property-select').val(null).trigger('change'); // clear first
+                    const propertyIds = inst.property_ids || [];
+                    if (propertyIds.length > 0) {
+                        $('#property-select').val(propertyIds).trigger('change'); // set values
+                    }
+                    
                     // If no recurrence → treat as a single
                     if (!inst.rrule) {
                         console.log('✏️[eventClick] Editing single instance:', inst.master_id);
@@ -1003,8 +1078,20 @@
 
                 // Collect form data
                 var formData = $(this).serializeArray();
+                // var payload = {};
+                // formData.forEach(function (f) { payload[f.name] = f.value; });
                 var payload = {};
-                formData.forEach(function (f) { payload[f.name] = f.value; });
+                formData.forEach(function (f) {
+                    if (payload[f.name]) {
+                        // Already exists → convert to array if needed
+                        if (!Array.isArray(payload[f.name])) {
+                            payload[f.name] = [payload[f.name]];
+                        }
+                        payload[f.name].push(f.value);
+                    } else {
+                        payload[f.name] = f.value;
+                    }
+                });
 
                 // Else if masterId is present → user clicked an existing instance but may have changed recurrence or master data
                 if (masterId && formActionMode === 'updateMaster') {

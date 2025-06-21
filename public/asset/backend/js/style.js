@@ -6,20 +6,22 @@ $(document).ready(function () {
         );
     }
 
-    if(window.matchMedia('(max-width: 480px)').matches){
-        $('body').removeClass('show-sidebar').addClass('hide-sidebar')
+    if (window.matchMedia("(max-width: 480px)").matches) {
+        $("body").removeClass("show-sidebar").addClass("hide-sidebar");
     }
     // Define content_wrapper
-    var content_wrapper = $('.content-wrapper');
+    var content_wrapper = $(".content-wrapper");
 
-    $('.hide-menu').add('.backdrop').click(function (e) {
-        e.preventDefault();
-        $("body").hasClass("hide-sidebar")
-            ? $("body").removeClass("hide-sidebar").addClass("show-sidebar")
-            : $("body")
-                  .removeClass("show-sidebar")
-                  .addClass("hide-sidebar");
-    });
+    $(".hide-menu")
+        .add(".backdrop")
+        .click(function (e) {
+            e.preventDefault();
+            $("body").hasClass("hide-sidebar")
+                ? $("body").removeClass("hide-sidebar").addClass("show-sidebar")
+                : $("body")
+                      .removeClass("show-sidebar")
+                      .addClass("hide-sidebar");
+        });
 
     if (is_mobile()) {
         content_wrapper.on("click", function () {
@@ -61,7 +63,9 @@ function removeImage(button) {
 
 function previewMultipleImage(input) {
     const fileInput = input;
-    const imageWrapper = input.closest(".media_wrapper").querySelector(".image_wrapper");
+    const imageWrapper = input
+        .closest(".media_wrapper")
+        .querySelector(".image_wrapper");
 
     // Create a local array for each input to track selected files
     let selectedFiles = Array.from(fileInput.files);
@@ -85,7 +89,12 @@ function previewMultipleImage(input) {
                         <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
                     </svg>`;
             deleteButtonDiv.onclick = function () {
-                removeMultipleImage(mediaImagesDiv, file, fileInput, selectedFiles);
+                removeMultipleImage(
+                    mediaImagesDiv,
+                    file,
+                    fileInput,
+                    selectedFiles
+                );
             };
 
             // Create the image element
@@ -127,8 +136,12 @@ function updateFileInput(input, selectedFiles) {
 }
 
 // Hide alert after click on it
-    $(".alert").click(function showAlert() {
-        $(".alert").fadeTo(1000, 500).slideUp(500, function() {
-        $(".alert").slideUp(500);
+$(".alert").click(function showAlert() {
+    $(".alert")
+        .fadeTo(1000, 500)
+        .slideUp(500, function () {
+            $(".alert").slideUp(500);
         });
-    });
+});
+
+
