@@ -1168,4 +1168,43 @@ private function getTabContent($tabname, $propertyId, $property)
     //     return 'RESISQP' . str_pad($number, 7, '0', STR_PAD_LEFT);
     // }
 
+
+    /**
+     * AJAX method to list properties for a select2 dropdown.
+     */
+    // This method is used to fetch properties based on a search term.
+    // It returns a JSON response with the properties that match the search criteria.
+    // The properties are filtered by their reference number, name, or address line 1.
+    // The results are limited to 10 properties and formatted for use with select2.
+    public function ajaxList(Request $request)
+    {
+        $term = $request->input('q');
+
+        $query = Property::query();
+
+        if ($term) {
+            $query->where(function ($q) use ($term) {
+                $q->where('prop_ref_no', 'like', "%$term%")
+                ->orWhere('prop_name', 'like', "%$term%")
+                ->orWhere('line_1', 'like', "%$term%");
+            });
+        }
+
+        $properties = $query
+            ->select('id', 'prop_ref_no', 'prop_name', 'line_1', 'city')
+            ->orderBy('id', 'desc')
+            ->limit(10)
+            ->get();
+
+        $results = $properties->map(function ($prop) {
+            return [
+                'id' => $prop->id,
+                'text' => "{$prop->prop_ref_no} - {$prop->prop_name}, {$prop->line_1}, {$prop->city}",
+            ];
+        });
+
+        return response()->json(['results' => $results]);
+    }
+
+
 }

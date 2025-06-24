@@ -3,6 +3,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Backend\UserController;
 use App\Http\Controllers\Backend\EventController;
 use App\Http\Controllers\Backend\OfferController;
 use App\Http\Controllers\Backend\BranchController;
@@ -95,7 +96,19 @@ Route::middleware('auth')->group(function () {
 
             Route::get('/load-form', 'loadForm')->name('loadForm');
             Route::post('/save-form', 'saveForm')->name('saveForm');
+            
+            Route::get('/ajax', 'ajaxList')->name('ajax');
+        });
 
+        // User
+        Route::prefix('users')->name('users.')->controller(UserController::class)->group(function () {
+            Route::get('/', 'index')->name('index');  // List all users
+            Route::get('/create', 'create')->name('create');  // Show create form
+            Route::post('/store', 'store')->name('store');  // Store new user
+            Route::get('/edit/{user}', 'edit')->name('edit');  // Show edit form
+            Route::put('/update/{user}', 'update')->name('update');  // Update user
+            Route::delete('/delete/{user}', 'destroy')->name('destroy');  // Delete user
+            Route::get('/ajax', 'ajaxList')->name('ajax');  // AJAX endpoint to list users for a select dropdown
         });
 
         // Designation
@@ -242,6 +255,8 @@ Route::middleware('auth')->group(function () {
 
                 Route::get('/load-form', 'loadForm')->name('property_repairs.loadForm');
                 Route::post('/save-form', 'saveForm')->name('property_repairs.saveForm');
+
+                Route::get('/ajax', 'ajaxList')->name( 'property_repairs.ajax');  // AJAX endpoint to list property repairs for a select dropdown
             });
         });
 

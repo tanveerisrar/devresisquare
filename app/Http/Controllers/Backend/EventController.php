@@ -23,7 +23,7 @@ class EventController
         // Fetch events directly
         $events = Event::whereBetween('start_datetime', [$start, $end])
             ->where('status', '!=', 'Cancelled')
-            ->with('reminders', 'properties')
+            ->with('reminders', 'properties', 'repairs', 'users')
             ->get();
 
         $data = $events->map(function ($event) {
@@ -68,6 +68,20 @@ class EventController
                         'channel' => $r->channel,
                     ]),
                     'property_ids' => $event->properties->pluck('id')->toArray(),
+                    'properties' => $event->properties->map(fn($p) => [
+                        'id' => $p->id,
+                        'text' => $p->display_label,
+                    ]),
+                    'repair_ids' => $event->repairs->pluck('id')->toArray(),
+                    'repairs' => $event->repairs->map(fn($r) => [
+                        'id' => $r->id,
+                        'text' => $r->display_label,
+                    ]),
+                    'user_ids' => $event->users->pluck('id')->toArray(),
+                    'users' => $event->users->map(fn($u) => [
+                        'id' => $u->id,
+                        'text' => $u->display_name,
+                    ]),
 
                 ],
             ];
@@ -188,6 +202,9 @@ class EventController
                             'channel' => $r->channel,
                         ]);
                     }
+                    
+                    // attach polymorphic relations:
+                    $this->syncMorphRelations($child, $validated);
                 }
             }
 

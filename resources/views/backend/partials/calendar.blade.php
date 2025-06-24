@@ -183,27 +183,6 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                @php
-                    $propertyOptions = \App\Models\Property::optionsForSelect();
-                    $propertySelectMode = 'multi'; // or 'single'
-                    $maxProperties = 3;
-                    $multi = $propertySelectMode === 'multi';
-                    // @dd($propertyOptions);
-                @endphp
-
-                <select id="property-select"
-                    class="form-control"
-                    name="{{ $multi ? 'property_ids[]' : 'property_id' }}"
-                    data-mode="{{ $propertySelectMode }}"
-                    data-max="{{ $maxProperties }}"
-                    @if($multi) multiple @endif
-                >
-                    {{-- <option value="">— none —</option> --}}
-                    @foreach($propertyOptions as $id => $label)
-                        <option value="{{ $id }}">{{ $label }}</option>
-                    @endforeach
-                </select>
-
 
                     <div class="row g-3">
                         {{-- Master fields (updated) --}}
@@ -249,12 +228,12 @@
                             <div class="text-danger" data-error-for="status"></div>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Diary Owner</label>
+                            <label class="form-label">In Diary Of</label>
                             <input type="text" name="diary_owner" class="form-control" placeholder="Owner name">
                             <div class="text-danger" data-error-for="diary_owner"></div>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">On Behalf Of</label>
+                            <label class="form-label">Booked By</label>
                             <input type="text" name="on_behalf_of" class="form-control" placeholder="e.g. Client">
                             <div class="text-danger" data-error-for="on_behalf_of"></div>
                         </div>
@@ -298,11 +277,32 @@
                         <textarea name="exdates" id="exdatesInput" class="d-none">
                         </textarea>
 
+                        <div class="mb-3">
+                            <label class="form-label">Properties</label>
+                            <select id="property-select" class="form-control select-entity" data-entity="property"
+                                data-mode="multi" data-max="3" data-url="{{ route('admin.properties.ajax') }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Repairs</label>
+                            <select id="repair-select" class="form-control select-entity" data-entity="repair"
+                                data-mode="multi" data-max="5" data-url="{{ route('admin.property_repairs.ajax') }}">
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Users</label>
+                            <select id="user-select" class="form-control select-entity" data-entity="user"
+                                data-mode="single" data-max="1" data-url="{{ route('admin.users.ajax') }}">
+                            </select>
+                        </div>
+
                         <div class="col-12">
                             <label class="form-label">Description</label>
                             <textarea name="description" class="form-control" rows="3"
                                 placeholder="Add any notes…"></textarea>
                         </div>
+
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -354,44 +354,107 @@
         // console.log('✅ rrule loaded via Skypack:', typeof RRule);
     </script>
     <script>
-        function initPropertySelect() {
-            const $sel = $("#property-select");
-            const mode = $sel.data("mode");
-            const max = parseInt($sel.data("max"), 10);
-            // Step 1: Keep current selections
-            const selectedValues = $sel.val();
+        function initEntitySelect($sel) {
+            const mode = $sel.data("mode") || "single";
+            const max = parseInt($sel.data("max"), 10) || 1;
+            const ajaxUrl = $sel.data("url");
 
-            // Destroy if already initialized
             if ($sel.hasClass("select2-hidden-accessible")) {
                 $sel.select2("destroy");
             }
-            // Reset any selected value(s)
-            $sel.val(null).trigger("change");
 
-            // Update attributes before initializing
             if (mode === "multi") {
-                $sel.attr("multiple", "multiple").prop("name", "property_ids[]");
+                $sel.attr("multiple", "multiple").prop("name", `${$sel.data("entity")}_ids[]`);
             } else {
-                $sel.removeAttr("multiple").prop("name", "property_id");
+                $sel.removeAttr("multiple").prop("name", `${$sel.data("entity")}_id`);
             }
 
             $sel.select2({
-                dropdownParent: $('#eventModal'), // if inside modal
+                dropdownParent: $('#eventModal'),
                 placeholder: mode === "multi"
-                    ? `Select up to ${max} properties`
-                    : "Select one property",
+                    ? `Select up to ${max} ${$sel.data("entity")}s`
+                    : `Select one ${$sel.data("entity")}`,
                 allowClear: mode === "single",
                 maximumSelectionLength: mode === "multi" ? max : 1,
-                allowClear: true,
                 width: '100%',
+                ajax: {
+                    url: ajaxUrl,
+                    dataType: 'json',
+                    delay: 250,
+                    data: function (params) {
+                        return {
+                            q: params.term
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data.results
+                        };
+                    },
+                    cache: true
+                },
+                minimumInputLength: 0
             });
-            
-            // Step 5: Re-set the selected values
-            // if (selectedValues) {
-            //     $sel.val(selectedValues).trigger("change");
-            // }
-
         }
+
+
+            /*function initPropertySelect() {
+                const $sel = $("#property-select");
+                const mode = $sel.data("mode");
+                const max = parseInt($sel.data("max"), 10);
+
+                if ($sel.hasClass("select2-hidden-accessible")) {
+                    $sel.select2("destroy");
+                }
+
+                if (mode === "multi") {
+                    $sel.attr("multiple", "multiple").prop("name", "property_ids[]");
+                } else {
+                    $sel.removeAttr("multiple").prop("name", "property_id");
+                }
+
+                $sel.select2({
+                    dropdownParent: $('#eventModal'), // if inside modal
+                    placeholder: mode === "multi"
+                        ? `Select up to ${max} properties`
+                        : "Select one property",
+                    allowClear: mode === "single",
+                    maximumSelectionLength: mode === "multi" ? max : 1,
+                    width: '100%',
+                    ajax: {
+                        url: '{{ route("admin.properties.ajax") }}',
+        dataType: 'json',
+            delay: 250,
+                data: function (params) {
+                    return {
+                        q: params.term // search term
+                    };
+                },
+        processResults: function (data) {
+            return {
+                results: data.results
+            };
+        },
+        cache: true
+                    },
+        minimumInputLength: 0
+                });
+            }*/
+
+        function preselectSelect2($select, ids, items) {
+            $select.empty();
+            const lookup = (items || []).reduce((o, i) => {
+                o[i.id] = i.text;
+                return o;
+            }, {});
+            ids.forEach(id => {
+                const label = lookup[id] || `ID #${id}`;
+                const option = new Option(label, id, true, true);
+                $select.append(option);
+            });
+            $select.trigger('change');
+        }
+
 
         // $(document).ready(function () {
         //     initPropertySelect();
@@ -965,7 +1028,16 @@
 
                     // Clear previous reminders
                     $('#reminderList').empty();
-                    initPropertySelect();
+                    // initPropertySelect();
+
+                    $('.select-entity').each(function () {
+                        initEntitySelect($(this));
+                    });
+
+                    // initEntitySelect($('#property-select'));
+                    // initEntitySelect($('#repair-select'));
+                    // initEntitySelect($('#user-select'));
+
                     // eventModal.show();
                     $eventModal.modal('show');
                 },
@@ -973,15 +1045,35 @@
                     // When clicking an existing instance, load data into modal to “Edit Instance”
                     var inst = info.event.extendedProps;
                     console.log('✏️[eventClick] Instance data:', inst);
-                    initPropertySelect();
-                        
-                    // Preselect related properties
-                    $('#property-select').val(null).trigger('change'); // clear first
+                    // Re-init Select2
+                    // initPropertySelect();
+
+                    $('.select-entity').each(function () {
+                        initEntitySelect($(this));
+                    });
+
+                    // initEntitySelect($('#property-select'));
+                    // initEntitySelect($('#repair-select'));
+                    // initEntitySelect($('#user-select'));
+
+                    // IDs you want pre-selected
                     const propertyIds = inst.property_ids || [];
-                    if (propertyIds.length > 0) {
-                        $('#property-select').val(propertyIds).trigger('change'); // set values
+                    if (propertyIds.length) {
+                        preselectSelect2($('#property-select'), inst.property_ids, inst.properties);
                     }
-                    
+
+                    // IDs you want pre-selected
+                    const repairIds = inst.repair_ids || [];
+                    if (repairIds.length) {
+                        preselectSelect2($('#repair-select'), inst.repair_ids, inst.repairs);
+                    }
+
+                    // IDs you want pre-selected
+                    const userIds = inst.user_ids || [];
+                    if (userIds.length) {
+                        preselectSelect2($('#user-select'), inst.user_ids, inst.users);
+                    }
+
                     // If no recurrence → treat as a single
                     if (!inst.rrule) {
                         console.log('✏️[eventClick] Editing single instance:', inst.master_id);
