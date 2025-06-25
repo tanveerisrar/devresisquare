@@ -1311,6 +1311,47 @@
             });
         }
     });
+
+    // Filter submit
+    $(document).on('submit', '#appointments-filter-form', function (e) {
+        e.preventDefault();
+        fetchAppointments($(this).serialize());
+    });
+
+    // Pagination click
+    $(document).on('click', '#appointments-results .pagination a', function (e) {
+        e.preventDefault();
+        let url = $(this).attr('href');
+        let params = url.split('?')[1];
+        fetchAppointments(params);
+    });
+
+    // Common fetch function
+    function fetchAppointments(queryString) {
+        let propertyId = '{{ $propertyId ?? request("property_id") }}';
+        let finalQuery = `property_id=${propertyId}&tabname=appointments&ajax_only=1&${queryString}`;
+
+        $.ajax({
+            url: '{{ route("admin.properties.index") }}?' + finalQuery,
+            method: 'GET',
+            beforeSend: function () {
+                $('#appointments-results').html('<p>Loading...</p>');
+            },
+            success: function (res) {
+                $('#appointments-results').html(res.content);
+            },
+            error: function () {
+                $('#appointments-results').html('<p class="text-danger">Error loading appointments.</p>');
+            }
+        });
+    }
+
+    $(document).on('click', '#reset-appointments-filter', function () {
+        $('#appointments-filter-form')[0].reset(); // Clear form
+        fetchAppointments(''); // Reload unfiltered list
+    });
+
+
 </script>
 
 @endsection

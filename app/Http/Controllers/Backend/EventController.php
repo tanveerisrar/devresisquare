@@ -534,6 +534,7 @@ class EventController
                         // Step 3: Generate children from this new master
                         $this->generateChildInstances($instance, $validated);
 
+
                         \DB::commit();
                         return response()->json(['success' => true, 'message' => 'Future instances updated with new series.']);
                     }
@@ -636,7 +637,7 @@ class EventController
 
         $dtStart = Carbon::parse($validated['start_datetime']);
         $dtEnd = Carbon::parse($validated['end_datetime']);
-        $duration = $dtEnd->diffInSeconds($dtStart);
+        $duration = abs($dtEnd->diffInSeconds($dtStart));
 
         $rule = new RRule($rruleStr, $dtStart);
         $exdates = json_decode($validated['exdates'] ?? '[]', true);
@@ -681,8 +682,8 @@ class EventController
                 'reminder' => $master->reminder,
                 'start_datetime' => $occStart,
                 'end_datetime' => $occStart->copy()->addSeconds($duration),
-                'rrule' => null,
-                'exdates' => null,
+                'rrule' => $master->rrule,
+                'exdates' => $master->exdates,
                 'is_exception' => false,
                 'instance_status' => 'Scheduled',
             ]);
@@ -694,6 +695,7 @@ class EventController
                     'channel' => $r->channel,
                 ]);
             }
+            $this->syncMorphRelations($child, $validated);
         }
     }
 
