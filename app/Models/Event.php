@@ -127,7 +127,7 @@ class Event extends Model implements Auditable
     /**
      * All the Repairs attached to this Event.
      */
-    public function repairs()
+    public function repairIssues()
     {
         return $this->morphedByMany(RepairIssue::class, 'eventable');
     }

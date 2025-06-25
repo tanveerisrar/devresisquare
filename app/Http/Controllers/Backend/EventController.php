@@ -23,7 +23,7 @@ class EventController
         // Fetch events directly
         $events = Event::whereBetween('start_datetime', [$start, $end])
             ->where('status', '!=', 'Cancelled')
-            ->with('reminders', 'properties', 'repairs', 'users')
+            ->with('reminders', 'properties', 'repairIssues', 'users')
             ->get();
 
         $data = $events->map(function ($event) {
@@ -78,8 +78,8 @@ class EventController
                         'id' => $p->id,
                         'text' => $p->display_label,
                     ]),
-                    'repair_ids' => $event->repairs->pluck('id')->toArray(),
-                    'repairs' => $event->repairs->map(fn($r) => [
+                    'repair_ids' => $event->repairIssues->pluck('id')->toArray(),
+                    'repairs' => $event->repairIssues->map(fn($r) => [
                         'id' => $r->id,
                         'text' => $r->display_label,
                     ]),
@@ -119,9 +119,9 @@ class EventController
             'property_ids' => 'nullable|array',
             'property_ids.*' => 'exists:properties,id',
             'repair_ids' => 'nullable|array',
-            'repair_ids.*' => 'exists:repairs,id',
-            'contact_ids' => 'nullable|array',
-            'contact_ids.*' => 'exists:contacts,id',
+            'repair_ids.*' => 'exists:repair_issues,id',
+            // 'contact_ids' => 'nullable|array',
+            // 'contact_ids.*' => 'exists:contacts,id',
         ]);
 
         \DB::beginTransaction();
@@ -314,9 +314,9 @@ class EventController
             'property_ids' => 'nullable|array',
             'property_ids.*' => 'exists:properties,id',
             'repair_ids' => 'nullable|array',
-            'repair_ids.*' => 'exists:repairs,id',
-            'contact_ids' => 'nullable|array',
-            'contact_ids.*' => 'exists:contacts,id',
+            'repair_ids.*' => 'exists:repair_issues,id',
+            // 'contact_ids' => 'nullable|array',
+            // 'contact_ids.*' => 'exists:contacts,id',
         ]);
 
         \DB::beginTransaction();
@@ -854,8 +854,8 @@ class EventController
     protected function syncMorphRelations(Event $event, array $validated)
     {
         $event->properties()->sync($validated['property_ids'] ?? []);
-        $event->repairs()->sync($validated['repair_ids'] ?? []);
-        $event->contacts()->sync($validated['contact_ids'] ?? []);
+        $event->repairIssues()->sync($validated['repair_ids'] ?? []);
+        // $event->contacts()->sync($validated['contact_ids'] ?? []);
     }
 
 
