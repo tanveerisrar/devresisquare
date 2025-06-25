@@ -229,12 +229,14 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">In Diary Of</label>
-                            <input type="text" name="diary_owner" class="form-control" placeholder="Owner name">
+                            <select id="user-select" name="diary_owner" class="form-control select-entity" data-entity="diary_owner"
+                                data-mode="single" data-max="1" data-url="{{ route('admin.users.ajax') }}">
+                            </select>
                             <div class="text-danger" data-error-for="diary_owner"></div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Booked By</label>
-                            <input type="text" name="on_behalf_of" class="form-control" placeholder="e.g. Client">
+                            <select id="user-select2" name="on_behalf_of" class="form-control select-entity" data-entity="on_behalf_of" data-mode="single" data-max="1" data-url="{{ route('admin.users.ajax') }}"></select>
                             <div class="text-danger" data-error-for="on_behalf_of"></div>
                         </div>
                         <div class="col-md-6">
@@ -281,20 +283,12 @@
                             <label class="form-label">Properties</label>
                             <select id="property-select" class="form-control select-entity" data-entity="property"
                                 data-mode="multi" data-max="3" data-url="{{ route('admin.properties.ajax') }}">
+                            </select>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Repairs</label>
-                            <select id="repair-select" class="form-control select-entity" data-entity="repair"
-                                data-mode="multi" data-max="5" data-url="{{ route('admin.property_repairs.ajax') }}">
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Users</label>
-                            <select id="user-select" class="form-control select-entity" data-entity="user"
-                                data-mode="single" data-max="1" data-url="{{ route('admin.users.ajax') }}">
-                            </select>
+                            <select id="repair-select" class="form-control select-entity" data-entity="repair" data-mode="multi" data-max="5" data-url="{{ route('admin.property_repairs.ajax') }}"></select>
                         </div>
 
                         <div class="col-12">
@@ -363,10 +357,26 @@
                 $sel.select2("destroy");
             }
 
+            // if (mode === "multi") {
+            //     $sel.attr("multiple", "multiple").prop("name", `${$sel.data("entity")}_ids[]`);
+            // } else {
+            //     $sel.removeAttr("multiple").prop("name", `${$sel.data("entity")}_id`);
+            // }
+
             if (mode === "multi") {
-                $sel.attr("multiple", "multiple").prop("name", `${$sel.data("entity")}_ids[]`);
+                $sel.attr("multiple", "multiple");
+                
+                // Only set name if it's not already defined
+                if (!$sel.attr("name")) {
+                    $sel.prop("name", `${$sel.data("entity")}_ids[]`);
+                }
             } else {
-                $sel.removeAttr("multiple").prop("name", `${$sel.data("entity")}_id`);
+                $sel.removeAttr("multiple");
+                
+                // Only set name if it's not already defined
+                if (!$sel.attr("name")) {
+                    $sel.prop("name", `${$sel.data("entity")}_id`);
+                }
             }
 
             $sel.select2({
@@ -1069,9 +1079,19 @@
                     }
 
                     // IDs you want pre-selected
-                    const userIds = inst.user_ids || [];
-                    if (userIds.length) {
-                        preselectSelect2($('#user-select'), inst.user_ids, inst.users);
+                    // const userIds = inst.user_ids || [];
+                    // if (userIds.length) {
+                    //     preselectSelect2($('#user-select'), inst.user_ids, inst.users);
+                    // }
+
+                    // If you have a diary owner (e.g. for bookings)
+                    if (inst.diary_owner) {
+                        preselectSelect2($('#user-select'), [inst.diary_owner], inst.users);
+                    }
+
+                    // If you have a separate “on behalf of” user
+                    if (inst.on_behalf_of) {
+                        preselectSelect2($('#user-select2'), [inst.on_behalf_of], inst.users);
                     }
 
                     // If no recurrence → treat as a single

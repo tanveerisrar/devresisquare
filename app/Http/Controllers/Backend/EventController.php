@@ -52,8 +52,14 @@ class EventController
                     'master_id' => $event->parent_id ?? $event->id, // if no parent, use self
                     'event_status' => $event->status,
                     'office' => $event->office,
-                    'diary_owner' => $event->diary_owner,
-                    'on_behalf_of' => $event->on_behalf_of,
+                    // 'diary_owner' => $event->diary_owner,
+                    // 'on_behalf_of' => $event->on_behalf_of,
+                    'diary_owner' => optional($event->diaryOwner)->id,
+                    'on_behalf_of' => optional($event->onBehalfOf)->id,
+                    'users' => collect([$event->diaryOwner, $event->onBehalfOf])
+                        ->filter()
+                        ->map(fn($u) => ['id' => $u->id, 'text' => $u->display_label]),
+
                     'location' => $event->location,
                     'description' => $event->description,
                     'repeat_until_date' => $event->repeat_until_date,
@@ -77,11 +83,11 @@ class EventController
                         'id' => $r->id,
                         'text' => $r->display_label,
                     ]),
-                    'user_ids' => $event->users->pluck('id')->toArray(),
-                    'users' => $event->users->map(fn($u) => [
-                        'id' => $u->id,
-                        'text' => $u->display_name,
-                    ]),
+                    // 'user_ids' => $event->users->pluck('id')->toArray(),
+                    // 'users' => $event->users->map(fn($u) => [
+                    //     'id' => $u->id,
+                    //     'text' => $u->display_name,
+                    // ]),
 
                 ],
             ];
@@ -202,7 +208,7 @@ class EventController
                             'channel' => $r->channel,
                         ]);
                     }
-                    
+
                     // attach polymorphic relations:
                     $this->syncMorphRelations($child, $validated);
                 }
@@ -359,7 +365,7 @@ class EventController
                                 }
                             }
                         }
-                        
+
                         $this->syncMorphRelations($instance, $validated); // or $event
 
                         // Generate children from this new master
@@ -444,7 +450,7 @@ class EventController
                             }
                         }
                     }
-                    
+
                     $this->syncMorphRelations($event, $validated);
 
                     if ($rruleChanged) {

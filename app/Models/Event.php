@@ -147,4 +147,15 @@ class Event extends Model implements Auditable
     {
         return $this->morphedByMany(User::class, 'eventable');
     }
+
+    public function diaryOwner()
+    {
+        return $this->belongsTo(User::class, 'diary_owner');
+    }
+
+    public function onBehalfOf()
+    {
+        return $this->belongsTo(User::class, 'on_behalf_of');
+    }
+
 }
