@@ -332,6 +332,8 @@ Route::middleware('auth')->group(function () {
             // Delete an instance by ID[single, series, future].
             Route::post('/instances/delete/{id}', 'deleteInstance')->name('deleteInstance');
 
+            Route::post('/instances/change-status/{id}', 'changeStatus')->name('changeStatus');
+
         });
     });
 

@@ -176,12 +176,21 @@ class PropertyController
                     if ($search = $request->query('search')) {
                         $query->where(function ($q) use ($search) {
                             $q->where('title', 'like', "%$search%")
-                                ->orWhereHas('diaryOwner', fn($q2) => $q2->where('name', 'like', "%$search%"));
+                                ->orWhereHas('diaryOwner', fn($q2) => $q2->where('name', 'like', "%$search%"))
+                                ->orWhereHas('onBehalfOf', fn($q2) => $q2->where('name', 'like', "%$search%"));
                         });
                     }
 
                     if ($status = $request->query('status')) {
                         $query->where('status', $status);
+                    }
+                    
+                    if ($start = $request->query('start_date')) {
+                        $query->whereDate('start_datetime', '>=', $start);
+                    }
+
+                    if ($end = $request->query('end_date')) {
+                        $query->whereDate('start_datetime', '<=', $end);
                     }
                 }
 

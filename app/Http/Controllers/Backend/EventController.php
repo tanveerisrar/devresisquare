@@ -853,12 +853,22 @@ class EventController
         return response()->json(['success' => true, 'message' => 'Deletion successful.']);
     }
 
+    public function changeStatus(Request $request, $id)
+    {
+        $request->validate(['status' => 'required|in:confirmed,pending,cancelled,rescheduled,scheduled,completed']);
+
+        $event = Event::findOrFail($id);
+        $event->status = $request->status;
+        $event->save();
+
+        return response()->json(['success' => true]);
+    }
+
     protected function syncMorphRelations(Event $event, array $validated)
     {
         $event->properties()->sync($validated['property_ids'] ?? []);
         $event->repairIssues()->sync($validated['repair_ids'] ?? []);
         // $event->contacts()->sync($validated['contact_ids'] ?? []);
     }
-
 
 }
