@@ -608,10 +608,17 @@
 
                     // Clear previous reminders
                     $('#reminderList').empty();
-
+                    
+                    // Reset Select2s safely
                     $('.select-entity').each(function () {
-                        initEntitySelect($(this));
+                        $(this).val(null).trigger('change'); // clear value
+                        $(this).empty(); // clear previous options
+                        initEntitySelect($(this)); // reinitialize with placeholder etc.
                     });
+                    
+                    // $('.select-entity').each(function () {
+                    //     initEntitySelect($(this));
+                    // });
 
                     // initEntitySelect($('#property-select'));
                     // initEntitySelect($('#repair-select'));
