@@ -3,7 +3,9 @@
     <div class="container-fluid">
         <div class="frontend_top_header tw-ml-1">
             <div class="rs_logo">
-                <img src="{{ uploaded_asset(get_setting('header_logo')) }}" alt="Resisquare logo">
+                <a href="{{ route('home') }}" class="navbar-brand">
+                    <img src="{{ uploaded_asset(get_setting('header_logo')) }}" alt="Resisquare logo">
+                </a>
                 {{-- <img src="{{ asset('asset/images/resisquare-logo.svg') }}" alt="Resisquare logo"> --}}
             </div>
             <div class="navbar-nav ms-auto">    
