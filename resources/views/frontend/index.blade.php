@@ -49,10 +49,10 @@
                 </div>
                 <p class="hero_description">Streamline operations, enhance tenant satisfaction, and maximize returns with ResiSquare's innovative property management solutions.</p>
                 <div class="hero_btns">
-                    <button class="btn btn_primary">Get Started</button>
+                    <button id="hero_get_started_btn" class="btn btn_primary">Get Started</button>
                     {{-- <button class="btn btn_secondary">Book a Demo</button> --}}
                     <!-- Trigger Button -->
-                    <button type="button" class="btn btn_secondary" data-bs-toggle="modal" data-bs-target="#bookDemoModal">
+                    <button type="button" id="hero_book_demo_btn" class="btn btn_secondary" data-bs-toggle="modal" data-bs-target="#bookDemoModal">
                         Book a Demo
                     </button>
 
@@ -80,7 +80,7 @@
                 </div>
             </div>
             <div class="">
-                <img src="{{ static_asset('asset/img/hero_img.webp') }}" alt="Hero" class="img-fluid">
+                <img src="{{ static_asset('asset/img/hero_img.webp') }}" alt="Hero" class="hero_main_img | img-fluid">
             </div>
         </div>
         
@@ -111,11 +111,11 @@
         </div>
 </section>
 <section class="features_section">
-    <div class="features_item bg_white">
+    <div class="features_item item_left_1 bg_white">
         <div class="container">
             <div class="row">
                 <div class="col-md-6 col-12 mb-md-0 mb-3">
-                    <img src="{{ asset('asset/img/hero_img.webp') }}" alt="Feature" class="img-fluid">
+                    <img src="{{ asset('asset/img/hero_img.webp') }}" alt="Feature" class="features_img_left img-fluid">
                 </div>
                 <div class="col-md-6 col-12 mb-md-0 mb-3">
                     <div class="feature_card ">
@@ -126,7 +126,7 @@
             </div>
         </div>
     </div>
-    <div class="features_item">
+    <div class="features_item item_right">
         <div class="container">
             <div class="row">
                 <div class="col-md-6 col-12 mb-md-0 mb-3">
@@ -137,16 +137,16 @@
                     </div>
                 </div>
                 <div class="col-md-6 col-12 mb-md-0 mb-3">
-                    <img src="{{ asset('asset/img/hero_img.webp') }}" alt="Feature" class="img-fluid">
+                    <img src="{{ asset('asset/img/hero_img.webp') }}" alt="Feature" class="features_img_right img-fluid">
                 </div>
             </div>
         </div>
     </div>
-    <div class="features_item bg_white">
+    <div class="features_item item_left_2 bg_white">
         <div class="container">
             <div class="row">
                 <div class="col-md-6 col-12 mb-md-0 mb-3">
-                    <img src="{{ asset('asset/img/hero_img.webp') }}" alt="Feature" class="img-fluid">
+                    <img src="{{ asset('asset/img/hero_img.webp') }}" alt="Feature" class="features_img_left img-fluid">
                 </div>
                 <div class="col-md-6 col-12 mb-md-0 mb-3">
                     <div class="feature_card">
@@ -173,4 +173,8 @@
             </div>
     </div>
 </section>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" integrity="sha512-NcZdtrT77bJr4STcmsGAESr06BYGE8woZdSdEgqnpyqac7sugNO+Tr4bGwGF3MsnEkGKhU2KL2xh6Ec+BqsaHA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js" integrity="sha512-P2IDYZfqSwjcSjX0BKeNhwRUH8zRPGlgcWl5n6gBLzdi4Y5/0O4zaXrtO4K9TZK6Hn1BenYpKowuCavNandERg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="{{ static_asset('asset/js/gsap-animation.js') }}"></script>
+
 @endsection
