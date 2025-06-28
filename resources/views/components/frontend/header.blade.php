@@ -8,7 +8,7 @@
             </div>
             <div class="navbar-nav ms-auto">    
                 <div class="nav-item">
-                    <button class="btn btn_secondary pricing_btn">Book a demo</button>
+                    <button class="btn btn_secondary pricing_btn" data-bs-toggle="modal" data-bs-target="#bookDemoModal">Book a demo</button>
                 </div>           
                 <div class="nav-item">
                     <a class="nav-link" href="{{ route('pricing') }}">Pricing</a>
