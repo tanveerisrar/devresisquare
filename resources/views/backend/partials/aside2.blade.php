@@ -243,7 +243,7 @@
                 aria-expanded="{{ areActiveRoutes(['website.footer', 'website.header', 'website.appearance'], 'true') }}"
                 class="dropdown-toggle {{ areActiveRoutes(['website.footer', 'website.header', 'website.appearance']) }}">
                 {{-- <i class="las la-desktop aiz-side-nav-icon"></i> --}}
-                <span class="icon_wrapper"><i class="fa-solid fa-cog"></i>Website Setup</span>
+                <span class="icon_wrapper pb_25"><i class="fa-solid fa-cog"></i>Website Setup</span>
                 <i class="fa fa-angle-down"></i>
             </a>
             <ul class="nav-second-level list-unstyled collapse {{ areActiveRoutes(['website.footer', 'website.header', 'website.appearance'], 'show') }}"
@@ -311,7 +311,7 @@
                     'admin.job_types.index',
                     'admin.job_types.create'
                 ]) }}">
-                <span class="icon_wrapper"><i class="fa-solid fa-cogs"></i>Master Manage</span>
+                <span class="icon_wrapper pb_25"><i class="fa-solid fa-cogs"></i>Master Manage</span>
                 <i class="fa fa-angle-down"></i>
             </a>
             <ul class="nav-second-level list-unstyled collapse {{ areActiveRoutes([

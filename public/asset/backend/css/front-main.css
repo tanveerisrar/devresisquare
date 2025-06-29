@@ -6,7 +6,7 @@ body {
 }
 
 body.hide-sidebar:not(.show-sidebar) #menu {
-    margin-left: -250px;
+    margin-left: -291px;
     transition: margin-left 0.3s;
 }
 
@@ -38,6 +38,10 @@ body.show-sidebar #menu {
 #wrapper .container-fluid>.row {
     height: calc(100vh - 36px)
 } */
+
+.pb_25{
+    padding-bottom: 2.5rem;
+}
 
 #header {
     background: var(--white);
