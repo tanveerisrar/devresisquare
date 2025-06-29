@@ -2,6 +2,7 @@ html,
 body {
     height: 100%;
     color: var(--gray-800);
+    background-color: #F6F5FA;
 }
 
 body.hide-sidebar:not(.show-sidebar) #menu {
@@ -29,7 +30,8 @@ body.show-sidebar #menu {
     padding-left: 24px;
     width: 86vw;
     transition: margin-left 0.3s;
-    height: calc(100vh - 36px)
+    height: calc(100vh - 36px);
+    background-color: #FFFFFF;
 }
 
 /* #wrapper .container-fluid,
@@ -524,7 +526,7 @@ form {
     transition: width 0.3s;
     overflow-x: hidden;
     overflow-y: auto;
-    background-color: var(--primary-100) !important;
+    background-color:#F6F5FA !important;
 }
 
 .sidebar.collapsed {
