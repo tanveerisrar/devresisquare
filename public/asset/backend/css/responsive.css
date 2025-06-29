@@ -74,6 +74,9 @@
     .sidebar-list-item>ul.show {
         padding-right: 10px;
     }
+    #wrapper {
+        width: 94vw;
+    }
 }
 
 /* Mobile only screen */

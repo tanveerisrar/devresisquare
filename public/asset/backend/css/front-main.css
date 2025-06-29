@@ -26,9 +26,15 @@ body.show-sidebar #menu {
     transition: margin-left 0.3s;
 }
 
+body.hide-sidebar{
+    #wrapper {
+        width: 100%;
+    }
+}
 #wrapper {
     padding-left: 24px;
-    width: 86vw;
+    /* width: 86vw; */
+    width: 100%;
     transition: margin-left 0.3s;
     height: calc(100vh - 36px);
     background-color: #FFFFFF;
