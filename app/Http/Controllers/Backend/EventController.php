@@ -411,9 +411,9 @@ class EventController
                     \DB::commit();
                     return response()->json(['success' => true, 'message' => 'Single occurrence updated.']);
 
-                case 'series': {
-                    $oldStart = $event->start_datetime;
-                    $oldEnd = $event->end_datetime;
+                /*case 'series': {
+                    $oldStart = Carbon::parse($event->start_datetime);
+                    $oldEnd = Carbon::parse($event->end_datetime);
 
                     $newStart = Carbon::parse($validated['start_datetime']);
                     $newEnd = Carbon::parse($validated['end_datetime']);
@@ -489,6 +489,112 @@ class EventController
 
                             $this->syncMorphRelations($child, $validated);
                         }
+                    }
+
+                    DB::commit();
+                    return response()->json(['success' => true, 'message' => 'Series updated successfully.']);
+                }*/
+
+                case 'series': {
+
+                    // Determine new master datetimes from child edit
+                    if ($instance->parent_id != null) {
+                        $master = $instance->parent;
+
+                        $originalChildStart = Carbon::parse($instance->start_datetime);   // e.g. 2025-07-03 10:00
+                        $newChildStart = Carbon::parse($validated['start_datetime']);     // e.g. 2025-07-03 08:00
+                        $newChildEnd = Carbon::parse($validated['end_datetime']);         // e.g. 2025-07-03 11:00
+
+                        // Step 1: Get the time shift (difference) between old and new start
+                        $startShift = abs($newChildStart->diffInSeconds($originalChildStart, false)); // -7200 seconds (if moved from 10:00 to 08:00)
+
+                        // Step 2: Apply this shift to master start/end time
+                        $masterStart = Carbon::parse($master->start_datetime)->addSeconds($startShift);
+                        $duration = abs($newChildEnd->diffInSeconds($newChildStart));
+                        $masterEnd = $masterStart->copy()->addSeconds($duration);
+
+                        // Step 3: Update master with adjusted datetime and validated data
+                        $master->update([
+                            'start_datetime' => $masterStart,
+                            'end_datetime' => $masterEnd,
+                            'title' => $validated['title'],
+                            'type_id' => $validated['type_id'],
+                            'sub_type_id' => $validated['sub_type_id'],
+                            'office' => $validated['office'] ?? null,
+                            'status' => $validated['status'] ?? 'Confirmed',
+                            'diary_owner' => $validated['diary_owner'] ?? null,
+                            'on_behalf_of' => $validated['on_behalf_of'] ?? null,
+                            'location' => $validated['location'] ?? null,
+                            'description' => $validated['description'] ?? null,
+                            'reminder' => $validated['reminder'] ?? null,
+                            'rrule' => $validated['rrule'],
+                            'exdates' => $validated['exdates'] ?? '[]',
+                            'is_exception' => false,
+                            'instance_status' => 'Scheduled',
+                        ]);
+
+                        // Step 4: Update reminders
+                        $master->reminders()->delete();
+                        if ($request->filled('reminders')) {
+                            foreach ($validated['reminders'] as $r) {
+                                if (!empty($r['minutes_before']) && !empty($r['channel'])) {
+                                    $master->reminders()->create($r);
+                                }
+                            }
+                        }
+
+                        // Step 5: Sync relations
+                        $this->syncMorphRelations($master, $validated);
+
+                        // Step 6: Delete and regenerate children with updated time logic
+                        $master->children()->delete();
+
+                        // Important: use shifted master start time for recurrence
+                        $this->generateChildInstances($master, [
+                            ...$validated,
+                            'start_datetime' => $masterStart->toDateTimeString(),
+                            'end_datetime' => $masterEnd->toDateTimeString(),
+                        ]);
+                    } else {
+                        $master = $instance;
+
+                        // Always update non-time fields on master
+                        $master->update([
+                            'title' => $validated['title'],
+                            'type_id' => $validated['type_id'],
+                            'sub_type_id' => $validated['sub_type_id'],
+                            'office' => $validated['office'] ?? null,
+                            'status' => $validated['status'] ?? 'Confirmed',
+                            'diary_owner' => $validated['diary_owner'] ?? null,
+                            'on_behalf_of' => $validated['on_behalf_of'] ?? null,
+                            'start_datetime' => $validated['start_datetime'],
+                            'end_datetime' => $validated['end_datetime'],
+                            'location' => $validated['location'] ?? null,
+                            'description' => $validated['description'] ?? null,
+                            'reminder' => $validated['reminder'] ?? null,
+                            'rrule' => $validated['rrule'],
+                            'exdates' => $validated['exdates'] ?? '[]',
+                            'is_exception' => false,
+                            'instance_status' => 'Scheduled',
+                        ]);
+
+                        // Update master reminders
+                        $master->reminders()->delete();
+                        if ($request->filled('reminders')) {
+                            foreach ($validated['reminders'] as $r) {
+                                if (!empty($r['minutes_before']) && !empty($r['channel'])) {
+                                    $master->reminders()->create($r);
+                                }
+                            }
+                        }
+
+                        // Sync relations
+                        $this->syncMorphRelations($master, $validated);
+
+                        // If recurrence rule changed: delete and regenerate children
+                        $master->children()->delete();
+                        $this->generateChildInstances($master, $validated);
+
                     }
 
                     DB::commit();
@@ -739,10 +845,10 @@ class EventController
                 $master->children()
                     ->where('status', '!=', 'Cancelled')
                     ->update([
-                        'status' => 'Cancelled',
-                        'instance_status' => 'Cancelled',
-                        'is_exception' => true,
-                    ]);
+                            'status' => 'Cancelled',
+                            'instance_status' => 'Cancelled',
+                            'is_exception' => true,
+                        ]);
                 break;
 
             case 'future':
@@ -763,10 +869,10 @@ class EventController
                     ->where('start_datetime', '>=', $pivot)
                     ->where('status', '!=', 'Cancelled')
                     ->update([
-                        'status' => 'Cancelled',
-                        'instance_status' => 'Cancelled',
-                        'is_exception' => true,
-                    ]);
+                            'status' => 'Cancelled',
+                            'instance_status' => 'Cancelled',
+                            'is_exception' => true,
+                        ]);
                 break;
 
             default:
