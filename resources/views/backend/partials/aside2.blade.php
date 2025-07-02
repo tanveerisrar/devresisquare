@@ -299,6 +299,10 @@
                 'admin.tenancy_types.create',
                 'admin.tenancy_sub_statuses.index',
                 'admin.tenancy_sub_statuses.create',
+                    'backend.event_types.index', 
+                    'backend.event_types.create', 
+                    'backend.event_sub_types.index', 
+                    'backend.event_sub_types.create', 
                 'admin.job_types.index',
                 'admin.job_types.create'
                 ], 'true') }}" class="dropdown-toggle {{ areActiveRoutes([
@@ -308,6 +312,10 @@
                     'admin.tenancy_types.create',
                     'admin.tenancy_sub_statuses.index',
                     'admin.tenancy_sub_statuses.create',
+                    'backend.event_types.index', 
+                    'backend.event_types.create', 
+                    'backend.event_sub_types.index', 
+                    'backend.event_sub_types.create', 
                     'admin.job_types.index',
                     'admin.job_types.create'
                 ]) }}">
@@ -326,6 +334,10 @@
                 'admin.tenancy_types.create',
                 'admin.tenancy_sub_statuses.index',
                 'admin.tenancy_sub_statuses.create',
+                'backend.event_types.index', 
+                'backend.event_types.create', 
+                'backend.event_sub_types.index', 
+                'backend.event_sub_types.create',
                 'admin.job_types.index',
                 'admin.job_types.create'
             ], 'show') }}" id="masterManageSubmenu">
@@ -516,6 +528,54 @@
                                 Add
                             </a>
                         </li> --}}
+                    </ul>
+                </li>
+
+                <!-- Event Type Section -->
+                <li class="sidebar-sub-list-item submenu_wrapper">
+                    <a href="#eventTypeSubmenu" data-bs-toggle="collapse"
+                       aria-expanded="{{ areActiveRoutes(['backend.event_types.index', 'backend.event_types.create'], 'true') }}"
+                       class="dropdown-toggle {{ areActiveRoutes(['backend.event_types.index', 'backend.event_types.create']) }}">
+                        <i class="fa-solid fa-stream"></i> Event Type
+                    </a>
+                    <ul class="nav-third-level collapse list-unstyled {{ areActiveRoutes(['backend.event_types.index', 'backend.event_types.create'], 'show') }}"
+                        id="eventTypeSubmenu">
+                        <li class="sidebar-sub-sub-list-item">
+                            <a class="{{ areActiveRoutes(['backend.event_types.index']) }}"
+                               href="{{ route('backend.event_types.index') }}">
+                                <i class="fa-solid fa-eye"></i> View All
+                            </a>
+                        </li>
+                        <li class="sidebar-sub-sub-list-item">
+                            <a class="{{ areActiveRoutes(['backend.event_types.create']) }}"
+                               href="{{ route('backend.event_types.create') }}">
+                                <i class="fa-solid fa-plus"></i> Add
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- Event Sub Type Section -->
+                <li class="sidebar-sub-list-item submenu_wrapper">
+                    <a href="#eventSubTypeSubmenu" data-bs-toggle="collapse"
+                       aria-expanded="{{ areActiveRoutes(['backend.event_sub_types.index', 'backend.event_sub_types.create'], 'true') }}"
+                       class="dropdown-toggle {{ areActiveRoutes(['backend.event_sub_types.index', 'backend.event_sub_types.create']) }}">
+                        <i class="fa-solid fa-stream"></i> Event Sub Type
+                    </a>
+                    <ul class="nav-third-level collapse list-unstyled {{ areActiveRoutes(['backend.event_sub_types.index', 'backend.event_sub_types.create'], 'show') }}"
+                        id="eventSubTypeSubmenu">
+                        <li class="sidebar-sub-sub-list-item">
+                            <a class="{{ areActiveRoutes(['backend.event_sub_types.index']) }}"
+                               href="{{ route('backend.event_sub_types.index') }}">
+                                <i class="fa-solid fa-eye"></i> View All
+                            </a>
+                        </li>
+                        <li class="sidebar-sub-sub-list-item">
+                            <a class="{{ areActiveRoutes(['backend.event_sub_types.create']) }}"
+                               href="{{ route('backend.event_sub_types.create') }}">
+                                <i class="fa-solid fa-plus"></i> Add
+                            </a>
+                        </li>
                     </ul>
                 </li>
 

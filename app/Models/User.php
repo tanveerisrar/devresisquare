@@ -25,4 +25,14 @@ class User extends Authenticatable
         });
     }
 
+    public function getDisplayLabelAttribute(): string
+    {
+        return "{$this->name} — {$this->email}";
+    }
+
+    public static function optionsForSelect(): array
+    {
+        return self::all()->pluck('display_label', 'id')->toArray();
+    }
+
 }

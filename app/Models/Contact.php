@@ -119,4 +119,9 @@ class Contact extends Model
     {
         return $this->morphMany(Document::class, 'documentable');
     }
+    public function events()
+    {
+        return $this->morphToMany(Event::class, 'eventable');
+    }
+
 }

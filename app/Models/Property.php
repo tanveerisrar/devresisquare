@@ -149,4 +149,36 @@ class Property extends Model
         // assuming your properties table has local_authority FK
         return $this->belongsTo(LocalAuthority::class, 'local_authority');
     }
+
+    public function events()
+    {
+        return $this->morphToMany(Event::class, 'eventable');
+    }
+
+    /**
+     * Return an array of [id => “PropRef — Address…”, …]
+     * suitable for a <select> dropdown.
+     */
+    // public static function optionsForSelect(): array
+    // {
+    //     return self::query()
+    //         ->orderBy('prop_ref_no')
+    //         ->get()
+    //         ->mapWithKeys(function(self $p){
+    //             $label = "{$p->prop_ref_no} — {$p->line_1}, {$p->city}";
+    //             return [$p->getKey() => $label];
+    //         })
+    //         ->toArray();
+    // }
+    public function getDisplayLabelAttribute(): string
+    {
+        return "{$this->prop_ref_no} — {$this->line_1}, {$this->line_2}, {$this->city}";
+    }
+
+    public static function optionsForSelect(): array
+    {
+        return self::all()->pluck('display_label', 'id')->toArray();
+    }
+
+
 }
