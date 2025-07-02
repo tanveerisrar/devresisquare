@@ -1,37 +1,40 @@
 <?php
 // routes/backend.php
 
-use App\Http\Controllers\Backend\AuthenticateController;
-use App\Http\Controllers\Backend\BankDetailController;
-use App\Http\Controllers\Backend\BranchController;
-use App\Http\Controllers\Backend\BusinessSettingsController;
-use App\Http\Controllers\Backend\ComplianceController;
-use App\Http\Controllers\Backend\ContactCategoryController;
-use App\Http\Controllers\Backend\ContactController;
-use App\Http\Controllers\Backend\DashboardController;
-use App\Http\Controllers\Backend\DesignationController;
-use App\Http\Controllers\Backend\DocumentsController;
-use App\Http\Controllers\Backend\DocumentTypeController;
-use App\Http\Controllers\Backend\EstateChargeController;
-use App\Http\Controllers\Backend\EstateChargeItemController;
-use App\Http\Controllers\Backend\InvoiceController;
-use App\Http\Controllers\Backend\JobTypeController;
-use App\Http\Controllers\Backend\NotesController;
-use App\Http\Controllers\Backend\NoteTypeController;
-use App\Http\Controllers\Backend\OfferController;
-use App\Http\Controllers\Backend\OwnerGroupController;
-use App\Http\Controllers\Backend\PropertyController;
-use App\Http\Controllers\Backend\PropertyRepairController;
-use App\Http\Controllers\Backend\TenancyController;
-use App\Http\Controllers\Backend\TenancySubStatusController;
-use App\Http\Controllers\Backend\TenancyTypeController;
-use App\Http\Controllers\Backend\WebsiteController;
-use App\Http\Controllers\Backend\WorkOrderController;
 use App\Models\Upload;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
-
+use Illuminate\Support\Facades\Artisan;
+use App\Http\Controllers\Backend\UserController;
+use App\Http\Controllers\Backend\EventController;
+use App\Http\Controllers\Backend\NotesController;
+use App\Http\Controllers\Backend\OfferController;
+use App\Http\Controllers\Backend\BranchController;
+use App\Http\Controllers\Backend\ContactController;
+use App\Http\Controllers\Backend\InvoiceController;
+use App\Http\Controllers\Backend\JobTypeController;
+use App\Http\Controllers\Backend\TenancyController;
+use App\Http\Controllers\Backend\WebsiteController;
+use App\Http\Controllers\Backend\NoteTypeController;
+use App\Http\Controllers\Backend\PropertyController;
+use App\Http\Controllers\Backend\DashboardController;
+use App\Http\Controllers\Backend\DocumentsController;
+use App\Http\Controllers\Backend\EventTypeController;
+use App\Http\Controllers\Backend\WorkOrderController;
+use App\Http\Controllers\Backend\BankDetailController;
+use App\Http\Controllers\Backend\ComplianceController;
+use App\Http\Controllers\Backend\OwnerGroupController;
+use App\Http\Controllers\Backend\DesignationController;
+use App\Http\Controllers\Backend\TenancyTypeController;
+use App\Http\Controllers\Backend\AuthenticateController;
+use App\Http\Controllers\Backend\DocumentTypeController;
+use App\Http\Controllers\Backend\EstateChargeController;
+use App\Http\Controllers\Backend\EventSubTypeController;
+use App\Http\Controllers\Backend\PropertyRepairController;
+use App\Http\Controllers\Backend\ContactCategoryController;
+use App\Http\Controllers\Backend\BusinessSettingsController;
+use App\Http\Controllers\Backend\EstateChargeItemController;
+use App\Http\Controllers\Backend\TenancySubStatusController;
 
 
 // Login Routes
@@ -101,6 +104,19 @@ Route::middleware('auth')->group(function () {
 
             Route::get('/load-form', 'loadForm')->name('loadForm');
             Route::post('/save-form', 'saveForm')->name('saveForm');
+            
+            Route::get('/ajax', 'ajaxList')->name('ajax');
+        });
+
+        // User
+        Route::prefix('users')->name('users.')->controller(UserController::class)->group(function () {
+            Route::get('/', 'index')->name('index');  // List all users
+            Route::get('/create', 'create')->name('create');  // Show create form
+            Route::post('/store', 'store')->name('store');  // Store new user
+            Route::get('/edit/{user}', 'edit')->name('edit');  // Show edit form
+            Route::put('/update/{user}', 'update')->name('update');  // Update user
+            Route::delete('/delete/{user}', 'destroy')->name('destroy');  // Delete user
+            Route::get('/ajax', 'ajaxList')->name('ajax');  // AJAX endpoint to list users for a select dropdown
         });
 
         // Designation
@@ -304,6 +320,8 @@ Route::middleware('auth')->group(function () {
 
                 Route::get('/load-form', 'loadForm')->name('property_repairs.loadForm');
                 Route::post('/save-form', 'saveForm')->name('property_repairs.saveForm');
+
+                Route::get('/ajax', 'ajaxList')->name( 'property_repairs.ajax');  // AJAX endpoint to list property repairs for a select dropdown
             });
         });
 
@@ -345,6 +363,74 @@ Route::middleware('auth')->group(function () {
         });
     });
 
+    /*Route::group(['prefix' => 'calendar', 'as' => 'backend.events.'], function () {
+        Route::controller(EventController::class)->group(function () {
+            Route::get('/events', 'index')->name('index');
+            Route::get('/events/create', 'create')->name('create');
+            Route::post('/events/store', 'store')->name('store');
+            Route::get('/events/{event}', 'show')->name('show');
+            Route::get('/events/edit/{event}', 'edit')->name('edit');
+            Route::get('/api/subtypes/{typeId}', 'subtypes')->name('subtypes');
+            Route::put('/events/update/{event}', 'update')->name('update');
+            Route::delete('/events/delete/{event}', 'destroy')->name('destroy');
+        });
+    });*/
+
+    Route::group(['prefix' => 'calendar', 'as' => 'backend.events.'], function () {
+        Route::controller(EventController::class)->group(function () {
+            
+            // Fetch all instances in a given date range for FullCalendar.
+            Route::get('/instances', 'index')->name('index');
+
+            // Create new event or master event.
+            Route::post('/instances/store', 'store')->name('store');
+
+            // “updateInstance” for instance drag/drop.
+            Route::post('/instances/update/{instance}', 'updateInstance')->name('updateInstance');
+
+            // Endpoints for master-level edits (e.g. change recurrence rule):
+            Route::put('/master/update/{event}', 'updateMaster')->name('updateMaster');
+
+            // Cancel an instance by ID.
+            Route::post('/instances/cancel/{id}', 'cancelInstance')->name('cancelInstance');
+
+            // Delete an instance by ID[single, series, future].
+            Route::post('/instances/delete/{id}', 'deleteInstance')->name('deleteInstance');
+
+            Route::post('/instances/change-status/{id}', 'changeStatus')->name('changeStatus');
+
+        });
+    });
+
+    // Event Types CRUD
+    Route::group(['prefix'=>'', 'as'=>'backend.'], function() {
+        Route::resource('event-types', EventTypeController::class)
+            ->names([
+                'index'   => 'event_types.index',
+                'create'  => 'event_types.create',
+                'store'   => 'event_types.store',
+                'show'    => 'event_types.show',
+                'edit'    => 'event_types.edit',
+                'update'  => 'event_types.update',
+                'destroy' => 'event_types.destroy'
+            ]);
+
+        Route::resource('event-sub-types', EventSubTypeController::class)
+            ->names([
+                'index'   => 'event_sub_types.index',
+                'create'  => 'event_sub_types.create',
+                'store'   => 'event_sub_types.store',
+                'show'    => 'event_sub_types.show',
+                'edit'    => 'event_sub_types.edit',
+                'update'  => 'event_sub_types.update',
+                'destroy' => 'event_sub_types.destroy'
+            ]);
+
+        // AJAX route to fetch subtypes by type ID:
+        Route::get('api/event-sub-types/{typeId}', [EventSubTypeController::class, 'byType'])
+            ->name('api.event_sub_types.byType');
+    });
+    
     // website setting
     Route::group(['prefix' => 'website', 'as' => 'website.'], function () {
         Route::controller(WebsiteController::class)->group(function () {

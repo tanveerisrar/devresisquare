@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ea8964eaead2eb6ba7bb717ffd4291cb",
+    "content-hash": "43021683611c7eb1aa6a5ad6bc1ee9c3",
     "packages": [
         {
             "name": "brick/math",
@@ -2938,6 +2938,90 @@
             "time": "2025-05-08T08:14:37+00:00"
         },
         {
+            "name": "owen-it/laravel-auditing",
+            "version": "v14.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/owen-it/laravel-auditing.git",
+                "reference": "f92602d1b3f53df29ddd577290e9d735ea707c53"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/owen-it/laravel-auditing/zipball/f92602d1b3f53df29ddd577290e9d735ea707c53",
+                "reference": "f92602d1b3f53df29ddd577290e9d735ea707c53",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "illuminate/console": "^11.0|^12.0",
+                "illuminate/database": "^11.0|^12.0",
+                "illuminate/filesystem": "^11.0|^12.0",
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "mockery/mockery": "^1.5.1",
+                "orchestra/testbench": "^9.0|^10.0",
+                "phpunit/phpunit": "^11.0"
+            },
+            "type": "package",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "OwenIt\\Auditing\\AuditingServiceProvider"
+                    ]
+                },
+                "branch-alias": {
+                    "dev-master": "v14-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "OwenIt\\Auditing\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Antério Vieira",
+                    "email": "anteriovieira@gmail.com"
+                },
+                {
+                    "name": "Raphael França",
+                    "email": "raphaelfrancabsb@gmail.com"
+                },
+                {
+                    "name": "Morten D. Hansen",
+                    "email": "morten@visia.dk"
+                }
+            ],
+            "description": "Audit changes of your Eloquent models in Laravel",
+            "homepage": "https://laravel-auditing.com",
+            "keywords": [
+                "Accountability",
+                "Audit",
+                "auditing",
+                "changes",
+                "eloquent",
+                "history",
+                "laravel",
+                "log",
+                "logging",
+                "lumen",
+                "observer",
+                "record",
+                "revision",
+                "tracking"
+            ],
+            "support": {
+                "issues": "https://github.com/owen-it/laravel-auditing/issues",
+                "source": "https://github.com/owen-it/laravel-auditing"
+            },
+            "time": "2025-02-26T16:40:54+00:00"
+        },
+        {
             "name": "paragonie/random_compat",
             "version": "v9.99.100",
             "source": {
@@ -3764,6 +3848,55 @@
                 }
             ],
             "time": "2024-04-27T21:32:50+00:00"
+        },
+        {
+            "name": "rlanvin/php-rrule",
+            "version": "v2.6.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/rlanvin/php-rrule.git",
+                "reference": "2a389a9fa67dda58bc5a569a3264555152db3c49"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/rlanvin/php-rrule/zipball/2a389a9fa67dda58bc5a569a3264555152db3c49",
+                "reference": "2a389a9fa67dda58bc5a569a3264555152db3c49",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.6.0"
+            },
+            "require-dev": {
+                "phpmd/phpmd": "@stable",
+                "phpunit/phpunit": "^5.7|^6.5|^8.0"
+            },
+            "suggest": {
+                "ext-intl": "Intl extension is needed for humanReadable()"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "RRule\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Lightweight and fast recurrence rules for PHP (RFC 5545)",
+            "homepage": "https://github.com/rlanvin/php-rrule",
+            "keywords": [
+                "date",
+                "ical",
+                "recurrence",
+                "recurring",
+                "rrule"
+            ],
+            "support": {
+                "issues": "https://github.com/rlanvin/php-rrule/issues",
+                "source": "https://github.com/rlanvin/php-rrule/tree/v2.6.0"
+            },
+            "time": "2025-04-25T07:40:09+00:00"
         },
         {
             "name": "setasign/fpdi",

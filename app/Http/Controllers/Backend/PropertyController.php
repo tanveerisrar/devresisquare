@@ -29,91 +29,92 @@ use Illuminate\Support\Facades\Validator;
 class PropertyController
 {
     public function index(Request $request)
-{
-    // Fetch all properties
-    // $properties = Property::all();
-    // Fetch all properties in descending order
-    $properties = Property::orderBy('id', 'desc')->get();
-    
-    // Redirect to 'quick' if there are no properties
-    if ($properties->isEmpty()) {
-        flash("You don't have any properties yet!")->error();
-        return redirect()->route('admin.properties.quick');
-    }
+    {
+        // Fetch all properties
+        // $properties = Property::all();
+        // Fetch all properties in descending order
+        $properties = Property::orderBy('id', 'desc')->get();
 
-    // Get property_id and tabname from query parameters
-    $propertyId = $request->query('property_id');
-    $tabName = $request->query('tabname', 'property'); // Default to 'property' if no tab is specified
-
-    // Check if the property_id is provided, otherwise, select the first property or handle it gracefully
-    // $property = $propertyId ? Property::findOrFail($propertyId) : $properties->first(); // Use the first property if none is selected
-    $property = $propertyId ? Property::find($propertyId) : null; // Use null if no property is selected
-
-    if (!$property) {
-        // Get the first property that is NOT soft-deleted
-        $firstProperty = Property::withoutTrashed()->orderBy('id', 'desc')->first();
-
-        if (!$firstProperty) {
+        // Redirect to 'quick' if there are no properties
+        if ($properties->isEmpty()) {
             flash("You don't have any properties yet!")->error();
             return redirect()->route('admin.properties.quick');
         }
 
-        $propertyId = $firstProperty->id;
-        $property = $firstProperty;
+        // Get property_id and tabname from query parameters
+        $propertyId = $request->query('property_id');
+        $tabName = $request->query('tabname', 'property'); // Default to 'property' if no tab is specified
 
-        // flash("The selected property does not exist or has been deleted. Showing another one instead.")->error();
+        // Check if the property_id is provided, otherwise, select the first property or handle it gracefully
+        // $property = $propertyId ? Property::findOrFail($propertyId) : $properties->first(); // Use the first property if none is selected
+        $property = $propertyId ? Property::find($propertyId) : null; // Use null if no property is selected
 
+        if (!$property) {
+            // Get the first property that is NOT soft-deleted
+            $firstProperty = Property::withoutTrashed()->orderBy('id', 'desc')->first();
+
+            if (!$firstProperty) {
+                flash("You don't have any properties yet!")->error();
+                return redirect()->route('admin.properties.quick');
+            }
+
+            $propertyId = $firstProperty->id;
+            $property = $firstProperty;
+
+            // flash("The selected property does not exist or has been deleted. Showing another one instead.")->error();
+
+        }
+
+        // Get tabs for properties (you can customize the tabs as per your needs)
+        $tabs = [
+            ['name' => 'Property'],
+            ['name' => 'Owners'],
+            ['name' => 'Compliance'],
+            ['name' => 'Media'],
+            ['name' => 'Offers'],
+            ['name' => 'Tenancy'],
+            ['name' => 'APS'],
+            ['name' => 'Teams'],
+            ['name' => 'Documents'],
+            // ['name' => 'Contractor'],
+            // ['name' => 'Work Offer'],
+            ['name' => 'Notes'],
+            ['name' => 'Appointments']
+        ];
+
+        // Retrieve the content for the selected tab and property
+        $content = $this->getTabContent($tabName, $propertyId, $property); // Dynamically get content for the tab and property
+
+        // Check if the request is via AJAX (this handles dynamic content loading)
+        if ($request->ajax()) {
+            // If the request is via AJAX, return only the content
+            return response()->json(['content' => $content]);
+        }
+
+        // Pass data to the view
+        return view('backend.properties.index', compact('properties', 'tabs', 'propertyId', 'tabName', 'content', 'property'));
     }
 
-    // Get tabs for properties (you can customize the tabs as per your needs)
-    $tabs = [
-        ['name' => 'Property'],
-        ['name' => 'Owners'],
-        ['name' => 'Compliance'],
-        ['name' => 'Media'],
-        ['name' => 'Offers'],
-        ['name' => 'Tenancy'],
-        ['name' => 'APS'],
-        ['name' => 'Teams'],
-        ['name' => 'Documents'],
-        // ['name' => 'Contractor'],
-        // ['name' => 'Work Offer'],
-        ['name' => 'Notes']
-    ];
+    private function getTabContent($tabname, $propertyId, $property)
+    {
+        switch (strtolower($tabname)) {
+            case 'property':
 
-    // Retrieve the content for the selected tab and property
-    $content = $this->getTabContent($tabName, $propertyId, $property); // Dynamically get content for the tab and property
+                // Fetch all station names and school names
+                $allstations = StationName::select('id', 'name')->get();  // Fetch all station names
+                $allschools = SchoolName::select('id', 'name')->get();    // Fetch all school names
 
-    // Check if the request is via AJAX (this handles dynamic content loading)
-    if ($request->ajax()) {
-        // If the request is via AJAX, return only the content
-        return response()->json(['content' => $content]);
-    }
+                // Get the nearest station IDs and nearest school IDs from the property (these will be comma-separated strings)
+                $stationIds = explode(',', $property->nearest_station);  // Convert to an array
+                $schoolIds = explode(',', $property->nearest_school);    // Convert to an array
 
-    // Pass data to the view
-    return view('backend.properties.index', compact('properties', 'tabs', 'propertyId', 'tabName', 'content', 'property'));
-}
+                // Fetch the station and school names using the IDs
+                $stations = StationName::whereIn('id', $stationIds)->pluck('name', 'id');
+                $schools = SchoolName::whereIn('id', $schoolIds)->pluck('name', 'id');
 
-private function getTabContent($tabname, $propertyId, $property)
-{
-    switch (strtolower($tabname)) {
-        case 'property':
-            
-            // Fetch all station names and school names
-            $allstations = StationName::select('id', 'name')->get();  // Fetch all station names
-            $allschools = SchoolName::select('id', 'name')->get();    // Fetch all school names
-
-            // Get the nearest station IDs and nearest school IDs from the property (these will be comma-separated strings)
-            $stationIds = explode(',', $property->nearest_station);  // Convert to an array
-            $schoolIds = explode(',', $property->nearest_school);    // Convert to an array
-
-            // Fetch the station and school names using the IDs
-            $stations = StationName::whereIn('id', $stationIds)->pluck('name', 'id');
-            $schools = SchoolName::whereIn('id', $schoolIds)->pluck('name', 'id');
-            
-            // Pass only the selected property details
-            return view('backend.properties.tabs.property', compact('propertyId', 'tabname', 'property', 'allstations', 'allschools', 'stations', 'schools'))->render();
-        case 'owners':
+                // Pass only the selected property details
+                return view('backend.properties.tabs.property', compact('propertyId', 'tabname', 'property', 'allstations', 'allschools', 'stations', 'schools'))->render();
+            case 'owners':
                 // Fetch the owner groups for the given propertyId, along with related contacts and properties.
                 // $ownerGroups = OwnerGroup::with(['contact', 'property'])
                 // ->where('property_id', $propertyId)
@@ -121,102 +122,136 @@ private function getTabContent($tabname, $propertyId, $property)
 
                 // Fetch the owner groups for the given propertyId, along with related contacts and properties.
                 $ownerGroups = OwnerGroup::with(['ownerGroupContacts.contact', 'property'])
-                ->where('property_id', $propertyId)
-                ->get();
+                    ->where('property_id', $propertyId)
+                    ->get();
 
-            return view('backend.properties.tabs.owners', compact('propertyId', 'ownerGroups'))->render();
-        case 'offers':
+                return view('backend.properties.tabs.owners', compact('propertyId', 'ownerGroups'))->render();
+            case 'offers':
 
-            // Fetch all offers for the specific property
-            $offers = Offer::where('property_id', $propertyId)->get();
+                // Fetch all offers for the specific property
+                $offers = Offer::where('property_id', $propertyId)->get();
 
-            // Decode tenant details for each offer
-            foreach ($offers as $offer) {
-                $offer->tenant_details = json_decode($offer->tenant_details, true);
-            }
+                // Decode tenant details for each offer
+                foreach ($offers as $offer) {
+                    $offer->tenant_details = json_decode($offer->tenant_details, true);
+                }
 
-            return view('backend.properties.tabs.offers', compact('propertyId', 'offers'))->render();
-        case 'compliance':
-            // Fetch compliance types
-            $complianceTypes = ComplianceType::all();
+                return view('backend.properties.tabs.offers', compact('propertyId', 'offers'))->render();
+            case 'compliance':
+                // Fetch compliance types
+                $complianceTypes = ComplianceType::all();
 
-            // Fetch compliance records for the specific property and group them by compliance type
-            $complianceRecords = $property->complianceRecords()
-                ->with('complianceType', 'complianceDetails') // Eager load relationships
-                ->where('property_id', $propertyId) // Filter by property ID
-                ->latest()
-                ->get()
-                ->groupBy('compliance_type_id'); // Group by compliance type
+                // Fetch compliance records for the specific property and group them by compliance type
+                $complianceRecords = $property->complianceRecords()
+                    ->with('complianceType', 'complianceDetails') // Eager load relationships
+                    ->where('property_id', $propertyId) // Filter by property ID
+                    ->latest()
+                    ->get()
+                    ->groupBy('compliance_type_id'); // Group by compliance type
 
-            return view('backend.properties.tabs.compliance', compact('propertyId', 'complianceTypes', 'complianceRecords'))->render();
+                return view('backend.properties.tabs.compliance', compact('propertyId', 'complianceTypes', 'complianceRecords'))->render();
 
-        case 'tenancy':
-            // Fetch tenancies for all statuses
-            $tenancies = Tenancy::where('property_id', $propertyId)
-                                ->get(); // Fetch all tenancies for the property
+            case 'tenancy':
+                // Fetch tenancies for all statuses
+                $tenancies = Tenancy::where('property_id', $propertyId)
+                    ->get(); // Fetch all tenancies for the property
 
-            // Get distinct status types for filtering
-            // $statuses = ['Active', 'Inactive', 'Terminated', 'Archived'];
-            $statuses = ['Active', 'Archived'];
-            return view('backend.properties.tabs.tenancy2', compact('statuses','tenancies', 'propertyId'))->render();
+                // Get distinct status types for filtering
+                // $statuses = ['Active', 'Inactive', 'Terminated', 'Archived'];
+                $statuses = ['Active', 'Archived'];
+                return view('backend.properties.tabs.tenancy2', compact('statuses', 'tenancies', 'propertyId'))->render();
 
             // case 'tenancy':
 
-        //     // Fetch active tenancies and order them by move_in date (latest first)
-        //     // $tenancies = Tenancy::where('property_id', $propertyId)
-        //     // ->where('status', 'Active')   // Filter by active status
-        //     // ->orderBy('move_in', 'desc')  // Order by move_in date (latest first)
-        //     // ->first()->get();
+            //     // Fetch active tenancies and order them by move_in date (latest first)
+            //     // $tenancies = Tenancy::where('property_id', $propertyId)
+            //     // ->where('status', 'Active')   // Filter by active status
+            //     // ->orderBy('move_in', 'desc')  // Order by move_in date (latest first)
+            //     // ->first()->get();
 
-        //     $tenancies = Tenancy::where('property_id', $propertyId)
-        //             ->where('status', 'Active')   // Filter by active status
-        //             ->get(); // Always get a collection (empty or with one or more records)
+            //     $tenancies = Tenancy::where('property_id', $propertyId)
+            //             ->where('status', 'Active')   // Filter by active status
+            //             ->get(); // Always get a collection (empty or with one or more records)
 
 
-        //     // $tenancies = Tenancy::where('property_id', $propertyId)
-        //     //             ->where('status', 'Active')   // Filter by active status
-        //     //             ->first(); // Get only the first (latest) record
+            //     // $tenancies = Tenancy::where('property_id', $propertyId)
+            //     //             ->where('status', 'Active')   // Filter by active status
+            //     //             ->first(); // Get only the first (latest) record
 
-        //     // Pass the data to the tenancy view
-        //     return view('backend.properties.tabs.tenancy', compact('tenancies', 'propertyId'))->render();
+            //     // Pass the data to the tenancy view
+            //     return view('backend.properties.tabs.tenancy', compact('tenancies', 'propertyId'))->render();
 
-        case 'aps':
-            return view('backend.properties.tabs.aps', compact('propertyId', 'property'))->render();
-        case 'media':
-            return view('backend.properties.tabs.media', compact('propertyId', 'property'))->render();
-        case 'teams':
-            return view('backend.properties.tabs.teams', compact('propertyId'))->render();
-        case 'documents':
-            
-            $documents = $property->documents()->with('documentType')->orderByDesc('updated_at')->paginate(5);
+            case 'aps':
+                return view('backend.properties.tabs.aps', compact('propertyId', 'property'))->render();
+            case 'media':
+                return view('backend.properties.tabs.media', compact('propertyId', 'property'))->render();
+            case 'teams':
+                return view('backend.properties.tabs.teams', compact('propertyId'))->render();
+            case 'documents':
 
-            // Ensure it's an empty collection if no documents are found
-            if ($documents->isEmpty()) {
-                $documents = collect();  // Make sure it's an empty collection, not null
-            }
-            $documentTypes = DocumentType::all();
-            return view('backend.properties.tabs.documents', compact('propertyId', 'property', 'documentTypes', 'documents'))->render();
-        // case 'contractor':
-        //     return view('backend.properties.tabs.contractor', compact('propertyId'))->render();
-        // case 'work offer':
-        //     return view('backend.properties.tabs.work_offer', compact('propertyId'))->render();
-        case 'notes':
-            // Fetch the notes related to the specific property by property ID
-            // $notes = Notes::where('property_id', $propertyId)->orderBy('updated_at', 'desc')->get();
-            $notes = $property->notes()->with('noteType')->orderByDesc('updated_at')->paginate(5);
+                $documents = $property->documents()->with('documentType')->orderByDesc('updated_at')->paginate(5);
 
-            // Ensure it's an empty collection if no notes are found
-            if ($notes->isEmpty()) {
-                $notes = collect();  // Make sure it's an empty collection, not null
-            }
-            $noteTypes = NoteType::all();
-            // Return the view and pass the notes data (null or the notes collection)
-            return view('backend.properties.tabs.notes', compact('propertyId', 'property', 'notes', 'noteTypes'))->render();        
-        default:
-            return 'Tab content not found';
+                // Ensure it's an empty collection if no documents are found
+                if ($documents->isEmpty()) {
+                    $documents = collect();  // Make sure it's an empty collection, not null
+                }
+                $documentTypes = DocumentType::all();
+                return view('backend.properties.tabs.documents', compact('propertyId', 'property', 'documentTypes', 'documents'))->render();
+            // case 'contractor':
+            //     return view('backend.properties.tabs.contractor', compact('propertyId'))->render();
+            // case 'work offer':
+            //     return view('backend.properties.tabs.work_offer', compact('propertyId'))->render();
+            case 'notes':
+                // Fetch the notes related to the specific property by property ID
+                // $notes = Notes::where('property_id', $propertyId)->orderBy('updated_at', 'desc')->get();
+                $notes = $property->notes()->with('noteType')->orderByDesc('updated_at')->paginate(5);
+
+                // Ensure it's an empty collection if no notes are found
+                if ($notes->isEmpty()) {
+                    $notes = collect();  // Make sure it's an empty collection, not null
+                }
+                $noteTypes = NoteType::all();
+                // Return the view and pass the notes data (null or the notes collection)
+                return view('backend.properties.tabs.notes', compact('propertyId', 'property', 'notes', 'noteTypes'))->render();
+
+            case 'appointments':
+                $query = $property->events()->with(['diaryOwner', 'onBehalfOf'])->orderBy('start_datetime', 'desc');
+
+                if ($request = request()) {
+                    if ($search = $request->query('search')) {
+                        $query->where(function ($q) use ($search) {
+                            $q->where('title', 'like', "%$search%")
+                                ->orWhereHas('diaryOwner', fn($q2) => $q2->where('name', 'like', "%$search%"))
+                                ->orWhereHas('onBehalfOf', fn($q2) => $q2->where('name', 'like', "%$search%"));
+                        });
+                    }
+
+                    if ($status = $request->query('status')) {
+                        $query->where('status', $status);
+                    }
+
+                    if ($start = $request->query('start_date')) {
+                        $query->whereDate('start_datetime', '>=', $start);
+                    }
+
+                    if ($end = $request->query('end_date')) {
+                        $query->whereDate('start_datetime', '<=', $end);
+                    }
+                }
+
+                $events = $query->paginate(10); // 👈 paginate instead of get()
+
+                // If AJAX just return table partial
+                if (request()->ajax() && request()->query('ajax_only') == 1) {
+                    return view('backend.properties.tabs.component._appointments_table', compact('events'))->render();
+                }
+
+                return view('backend.properties.tabs.appointments', compact('propertyId', 'property', 'events'))->render();
+
+            default:
+                return 'Tab content not found';
+        }
     }
-}
-
 
     // Show the form for creating a new property.
     public function create()
@@ -295,9 +330,9 @@ private function getTabContent($tabname, $propertyId, $property)
             // Remove responsibilities that are not in the submitted IDs
             if (!empty($submitted_ids)) {
                 PropertyResponsibility::where('property_id', $property_id)
-                ->whereNotIn('id', $submitted_ids)
-                ->whereNull('deleted_at')  // Ensure we're only soft-deleting active records
-                ->update(['deleted_by' => Auth::id()]); // Set 'deleted_by' to the authenticated user
+                    ->whereNotIn('id', $submitted_ids)
+                    ->whereNull('deleted_at')  // Ensure we're only soft-deleting active records
+                    ->update(['deleted_by' => Auth::id()]); // Set 'deleted_by' to the authenticated user
 
                 // Soft delete the records
                 PropertyResponsibility::where('property_id', $property_id)
@@ -397,7 +432,7 @@ private function getTabContent($tabname, $propertyId, $property)
             // Load the next step view
             // return view('backend.properties.form_components.step' . ($request->step + 1));
             // return view('backend.properties.form_components.step' . ($request->step + 1))->withInput();
-            return view('backend.properties.form_components.step' . ($request->step + 1), compact('property', 'allstations', 'allschools', 'stations', 'schools', 'users', 'designations', 'branches', 'PropertyResponsibility' ,'propertyResponsibilityIds'));
+            return view('backend.properties.form_components.step' . ($request->step + 1), compact('property', 'allstations', 'allschools', 'stations', 'schools', 'users', 'designations', 'branches', 'PropertyResponsibility', 'propertyResponsibilityIds'));
         } else {
             // If no step is present, return a message (optional)
             return response()->json(['message' => 'Invalid step.']);
@@ -504,7 +539,7 @@ private function getTabContent($tabname, $propertyId, $property)
         // $countries = Country::where('status', 1)->orderBy('name')->get();
         // Check if the step is valid
         if ($step > 0 && $step <= $totalSteps) {
-            return view('backend.properties.quick_form_components.step' . $step, compact('property','countries')); // Return the corresponding Blade view
+            return view('backend.properties.quick_form_components.step' . $step, compact('property', 'countries')); // Return the corresponding Blade view
         } else {
             // Return a view with an error message if the step is invalid
             return view('backend.properties.quick_form_components.error', ['message' => 'Invalid step.']);
@@ -562,32 +597,32 @@ private function getTabContent($tabname, $propertyId, $property)
 
         // Check if the request step is 6
         // if ($property->step == 5) {
-            // Fetch all station names and school names
-            $allstations = StationName::select('id', 'name')->get();  // Fetch all station names
-            $allschools = SchoolName::select('id', 'name')->get();    // Fetch all school names
+        // Fetch all station names and school names
+        $allstations = StationName::select('id', 'name')->get();  // Fetch all station names
+        $allschools = SchoolName::select('id', 'name')->get();    // Fetch all school names
 
-            // Get the nearest station IDs and nearest school IDs from the property (these will be comma-separated strings)
-            $stationIds = explode(',', $property->nearest_station);  // Convert to an array
-            $schoolIds = explode(',', $property->nearest_school);    // Convert to an array
+        // Get the nearest station IDs and nearest school IDs from the property (these will be comma-separated strings)
+        $stationIds = explode(',', $property->nearest_station);  // Convert to an array
+        $schoolIds = explode(',', $property->nearest_school);    // Convert to an array
 
-            // Fetch the station and school names using the IDs
-            $stations = StationName::whereIn('id', $stationIds)->pluck('name', 'id');
-            $schools = SchoolName::whereIn('id', $schoolIds)->pluck('name', 'id');
+        // Fetch the station and school names using the IDs
+        $stations = StationName::whereIn('id', $stationIds)->pluck('name', 'id');
+        $schools = SchoolName::whereIn('id', $schoolIds)->pluck('name', 'id');
 
-            // Fetch required data for dropdowns
-            $users = User::select('id', 'name')->get(); // Fetch all users
-            $designations = Designation::select('id', 'title')->get(); // Fetch all designations
-            $branches = Branch::select('id', 'name')->get(); // Fetch all branches
+        // Fetch required data for dropdowns
+        $users = User::select('id', 'name')->get(); // Fetch all users
+        $designations = Designation::select('id', 'title')->get(); // Fetch all designations
+        $branches = Branch::select('id', 'name')->get(); // Fetch all branches
 
-            // Fetch PropertyResponsibility related to the current property
-            // $PropertyResponsibility = PropertyResponsibility::where('property_id', $property->id)
-            // ->select('id', 'responsibility')
-            // ->get();
+        // Fetch PropertyResponsibility related to the current property
+        // $PropertyResponsibility = PropertyResponsibility::where('property_id', $property->id)
+        // ->select('id', 'responsibility')
+        // ->get();
 
-            $PropertyResponsibility = PropertyResponsibility::where('property_id', $property->id)->get();
-            $propertyResponsibilityIds = $PropertyResponsibility->pluck('id')->implode(',');
-            // Return the edit view with the property data, stations, and schools
-            return view('backend.properties.edit', compact('property', 'allstations', 'allschools', 'stations', 'schools', 'users', 'designations', 'branches', 'PropertyResponsibility' ,'propertyResponsibilityIds'));
+        $PropertyResponsibility = PropertyResponsibility::where('property_id', $property->id)->get();
+        $propertyResponsibilityIds = $PropertyResponsibility->pluck('id')->implode(',');
+        // Return the edit view with the property data, stations, and schools
+        return view('backend.properties.edit', compact('property', 'allstations', 'allschools', 'stations', 'schools', 'users', 'designations', 'branches', 'PropertyResponsibility', 'propertyResponsibilityIds'));
         // }
 
         // If step is not 6, just return the property edit view
@@ -708,13 +743,13 @@ private function getTabContent($tabname, $propertyId, $property)
     {
         $property = Property::find($request->property_id);
         $formType = $request->form_type;
-    
+
         if (!$property) {
             return response()->json(['error' => 'Property not found'], 404);
         }
-    
+
         $viewPath = "backend.properties.popup_forms.$formType";
-    
+
         // Check if the form view exists
         if (!view()->exists($viewPath)) {
             return response()->json(['error' => 'Invalid form type'], 400);
@@ -727,7 +762,7 @@ private function getTabContent($tabname, $propertyId, $property)
         //     $note = $property->notes()->findOrFail($request->note_id);
         //     $extraData['note'] = $note;
         // }
-        $html = view($viewPath, array_merge(['property' => $property],['editMode' => true], $extraData))->render();
+        $html = view($viewPath, array_merge(['property' => $property], ['editMode' => true], $extraData))->render();
 
         // Render the form with additional data
         // $html = view($viewPath, [
@@ -741,11 +776,11 @@ private function getTabContent($tabname, $propertyId, $property)
 
         // Render the form and return it
         // $html = view($viewPath, ['property' => $property, 'editMode' => true])->render();
-        
+
         return response()->json(['success' => true, 'form_html' => $html]);
     }
-    
-    
+
+
     public function saveForm(Request $request)
     {
         $property = Property::find($request->input('property_id'));
@@ -760,12 +795,27 @@ private function getTabContent($tabname, $propertyId, $property)
         switch ($formType) {
             case 'availability_pricing':
                 $data = $request->only([
-                    'available_from', 'local_authority', 'tenure', 'length_of_lease', 'estate_charge', 'ground_rent', 'service_charge', 'miscellaneous_charge', 'price', 'letting_price', 'annual_council_tax', 'council_tax_band'
+                    'available_from',
+                    'local_authority',
+                    'tenure',
+                    'length_of_lease',
+                    'estate_charge',
+                    'ground_rent',
+                    'service_charge',
+                    'miscellaneous_charge',
+                    'price',
+                    'letting_price',
+                    'annual_council_tax',
+                    'council_tax_band'
                 ]);
                 break;
             case 'property_info':
                 $data = $request->only([
-                    'property_type', 'transaction_type', 'specific_property_type', 'sales_status_description','letting_status_description'
+                    'property_type',
+                    'transaction_type',
+                    'specific_property_type',
+                    'sales_status_description',
+                    'letting_status_description'
                 ]);
                 break;
             case 'property_accessibility':
@@ -773,7 +823,7 @@ private function getTabContent($tabname, $propertyId, $property)
                 //     'access_arrangement', 'key_highlights', 'nearest_station', 'nearest_school', 'nearest_places', 'useful_information'
                 // ]);
                 // $extraData = $this->getFormTypeExtras($formType, $property);
-                        
+
                 // 1. Pull only the simple fields
                 $data = $request->only([
                     'access_arrangement',
@@ -782,7 +832,7 @@ private function getTabContent($tabname, $propertyId, $property)
                     'nearest_school',
                     'useful_information',
                 ]);
-                
+
                 // 2. Grab the raw, interleaved array
                 $raw = $request->input('nearest_places', []);
 
@@ -792,7 +842,7 @@ private function getTabContent($tabname, $propertyId, $property)
                     // if this entry has a name, start a new pair
                     if (isset($item['name'])) {
                         $merged[] = [
-                            'name'     => trim($item['name']),
+                            'name' => trim($item['name']),
                             'distance' => null,
                         ];
                     }
@@ -803,7 +853,7 @@ private function getTabContent($tabname, $propertyId, $property)
                 }
 
                 // 4. Filter out any incomplete or blank pairs, then re-index
-                $placesList = array_values(array_filter($merged, function($e) {
+                $placesList = array_values(array_filter($merged, function ($e) {
                     return $e['name'] !== '' && $e['distance'] !== null;
                 }));
 
@@ -811,8 +861,8 @@ private function getTabContent($tabname, $propertyId, $property)
                 Validator::make(
                     ['nearest_places' => $placesList],
                     [
-                        'nearest_places'            => 'required|array|min:1',
-                        'nearest_places.*.name'     => 'required|string',
+                        'nearest_places' => 'required|array|min:1',
+                        'nearest_places.*.name' => 'required|string',
                         'nearest_places.*.distance' => 'required|numeric|min:0',
                     ]
                 )->validate();
@@ -823,29 +873,59 @@ private function getTabContent($tabname, $propertyId, $property)
                     $assocPlaces[$entry['name']] = $entry['distance'];
                 }
                 $data['nearest_places'] = json_encode($assocPlaces);
-                
+
                 break;
             case 'property_compliance':
                 $data = $request->only([
-                    'epc_required', 'epc_rating', 'gas_safe_acknowledged', 'is_gas', 'market_on']);
+                    'epc_required',
+                    'epc_rating',
+                    'gas_safe_acknowledged',
+                    'is_gas',
+                    'market_on'
+                ]);
                 break;
             case 'property_media':
                 $data = $request->only([
-                    'photos', 'floor_plan', 'view_360','video_url','instagram_url', 'youtube_url']);
+                    'photos',
+                    'floor_plan',
+                    'view_360',
+                    'video_url',
+                    'instagram_url',
+                    'youtube_url'
+                ]);
                 break;
             case 'property_features':
                 $data = $request->only([
-                    'furniture', 'kitchen', 'heating_cooling', 'safety', 'other', 'bedroom', 'bathroom', 'reception', 'floor', 'balcony', 'garden', 'aspects', 'collecting_rent', 'square_feet', 'square_meter'
+                    'furniture',
+                    'kitchen',
+                    'heating_cooling',
+                    'safety',
+                    'other',
+                    'bedroom',
+                    'bathroom',
+                    'reception',
+                    'floor',
+                    'balcony',
+                    'garden',
+                    'aspects',
+                    'collecting_rent',
+                    'square_feet',
+                    'square_meter'
                 ]);
                 break;
             case 'property_services':
                 $data = $request->only([
-                    'parking', 'parking_location', 'service', 'pets_allow'
+                    'parking',
+                    'parking_location',
+                    'service',
+                    'pets_allow'
                 ]);
                 break;
             case 'property_status':
                 $data = $request->only([
-                    'sales_current_status', 'letting_current_status'
+                    'sales_current_status',
+                    'letting_current_status',
+                    'status_description'
                 ]);
                 break;
             case 'notes':
@@ -868,7 +948,7 @@ private function getTabContent($tabname, $propertyId, $property)
                     // Update existing
                     // $note = Notes::where('property_id', $property->id)
                     //             ->findOrFail($data['note_id']);
-                    
+
                     // Update existing note belonging to this property
                     $note = $property->notes()->where('id', $data['note_id'])->firstOrFail();
                     $note->update([
@@ -896,50 +976,52 @@ private function getTabContent($tabname, $propertyId, $property)
         //     // Handle other form types dynamically
         //     $property->some_field = $request->input('some_field');
         // }
-    
+
         $property->update($data);
-    
+
         // 🛠️ Fix: Re-fetch related data like school/station names
         $extraData = $this->getFormTypeExtras($formType, $property);
 
         // Render updated section
         $updatedView = view("backend.properties.popup_forms.$formType", array_merge(['property' => $property], $extraData))->render();
         // $updatedView = view("backend.properties.popup_forms.$formType", compact('property'))->render();
-    
+
         return response()->json([
-            'success' => 'Form updated successfully', 
+            'success' => 'Form updated successfully',
             'updated_html' => $updatedView,
             'status' => true,
-            'message'  => 'Updated successfully',
+            'message' => 'Updated successfully',
         ]);
     }
-    
+
     private function getFormTypeExtras($formType, $property, $noteId = null)
     {
         if ($formType === 'property_accessibility') {
             // Fetch all stations and schools
             $allstations = StationName::select('id', 'name')->get();
             $allschools = SchoolName::select('id', 'name')->get();
-        
+
             // Get the nearest station and school IDs from the property (comma-separated)
             $stationIds = explode(',', $property->nearest_station);
             $schoolIds = explode(',', $property->nearest_school);
-        
+
             // Fetch names using IDs
             $stations = StationName::whereIn('id', $stationIds)->pluck('name', 'id');
             $schools = SchoolName::whereIn('id', $schoolIds)->pluck('name', 'id');
 
             return compact('allstations', 'allschools', 'stations', 'schools');
-        }elseif ($formType === 'availability_pricing') {
+        } elseif ($formType === 'availability_pricing') {
             // $authorities = LocalAuthority::with('group')
             // ->get()
             // ->mapWithKeys(function($auth){
             //     return [$auth->id => $auth->display_name];
             // });
             // return compact('authorities');
-            $groups = \App\Models\LocalAuthorityGroup::with(['authorities' => function($q){
-                $q->orderBy('name');
-            }])->orderBy('name')->get();
+            $groups = \App\Models\LocalAuthorityGroup::with([
+                'authorities' => function ($q) {
+                    $q->orderBy('name');
+                }
+            ])->orderBy('name')->get();
             return compact('groups');
         }
         /*elseif ($formType === 'notes_tab') {
@@ -1333,5 +1415,44 @@ private function getTabContent($tabname, $propertyId, $property)
     //     // Format the new reference number (e.g., RESISQP0000001)
     //     return 'RESISQP' . str_pad($number, 7, '0', STR_PAD_LEFT);
     // }
+
+
+    /**
+     * AJAX method to list properties for a select2 dropdown.
+     */
+    // This method is used to fetch properties based on a search term.
+    // It returns a JSON response with the properties that match the search criteria.
+    // The properties are filtered by their reference number, name, or address line 1.
+    // The results are limited to 10 properties and formatted for use with select2.
+    public function ajaxList(Request $request)
+    {
+        $term = $request->input('q');
+
+        $query = Property::query();
+
+        if ($term) {
+            $query->where(function ($q) use ($term) {
+                $q->where('prop_ref_no', 'like', "%$term%")
+                    ->orWhere('prop_name', 'like', "%$term%")
+                    ->orWhere('line_1', 'like', "%$term%");
+            });
+        }
+
+        $properties = $query
+            ->select('id', 'prop_ref_no', 'prop_name', 'line_1', 'city')
+            ->orderBy('id', 'desc')
+            ->limit(10)
+            ->get();
+
+        $results = $properties->map(function ($prop) {
+            return [
+                'id' => $prop->id,
+                'text' => "{$prop->prop_ref_no} - {$prop->prop_name}, {$prop->line_1}, {$prop->city}",
+            ];
+        });
+
+        return response()->json(['results' => $results]);
+    }
+
 
 }

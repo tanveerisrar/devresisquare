@@ -983,4 +983,35 @@ class PropertyRepairController
 
         return [];
     }
+
+    public function ajaxList(Request $request)
+    {
+        $term = $request->input('q');
+
+        $query = RepairIssue::query();
+
+        if ($term) {
+            $query->where(function ($q) use ($term) {
+                $q->where('reference_number', 'like', "%$term%")
+                ->orWhere('description', 'like', "%$term%")
+                ->orWhere('status', 'like', "%$term%");
+            });
+        }
+
+        $repairIssues = $query
+            ->select('id', 'reference_number', 'description', 'status')
+            ->orderBy('id', 'desc')
+            ->limit(10)
+            ->get();
+
+        $results = $repairIssues->map(function ($issue) {
+            $shortDesc = mb_strimwidth($issue->description, 0, 15, '...');
+            return [
+                'id' => $issue->id,
+                'text' => "{$issue->reference_number} - {$shortDesc}, {$issue->status}",
+            ];
+        });
+
+        return response()->json(['results' => $results]);
+    }
 }

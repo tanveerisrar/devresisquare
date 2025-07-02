@@ -1,6 +1,6 @@
 <!-- Use asset() to generate the correct URL for JS files -->
 <script src="{{ asset('asset/js/jquery.min.js') }}"></script>
-<script src="{{ asset('asset/js/bootstrap.bundle.min.js') }}"></script>
+{{-- <script src="{{ asset('asset/js/bootstrap.bundle.min.js') }}"></script> --}}
 <script src="{{ asset('asset/js/jquery.dataTables.min.js') }}"></script>
 <script src="{{ asset('asset/js/toastr.min.js') }}"></script>
 <script src="{{ asset('asset/js/jquery.validate.min.js') }}"></script>

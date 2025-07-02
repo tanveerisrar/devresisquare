@@ -116,4 +116,28 @@ class RepairIssue extends Model
     {
         return $this->hasOneThrough(Invoice::class, WorkOrder::class, 'repair_issue_id', 'work_order_id');
     }
+
+    public function events()
+    {
+        return $this->morphToMany(Event::class, 'eventable');
+    }
+    
+    /**
+     * Get the display label for the repair issue.
+     * This is used in dropdowns and other UI elements.
+     */
+    public function getDisplayLabelAttribute(): string
+    {
+        return "{$this->reference_number}";
+    }
+    
+    /**
+     * Return an array of [id => “RefNo, …]
+     * suitable for a <select> dropdown.
+     */
+    public static function optionsForSelect(): array
+    {
+        return self::all()->pluck('display_label', 'id')->toArray();
+    }
+
 }
