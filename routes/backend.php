@@ -1,40 +1,40 @@
 <?php
 // routes/backend.php
 
-use App\Models\Upload;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Artisan;
-use App\Http\Controllers\Backend\UserController;
-use App\Http\Controllers\Backend\EventController;
-use App\Http\Controllers\Backend\NotesController;
-use App\Http\Controllers\Backend\OfferController;
+use App\Http\Controllers\Backend\AuthenticateController;
+use App\Http\Controllers\Backend\BankDetailController;
 use App\Http\Controllers\Backend\BranchController;
+use App\Http\Controllers\Backend\BusinessSettingsController;
+use App\Http\Controllers\Backend\ComplianceController;
+use App\Http\Controllers\Backend\ContactCategoryController;
 use App\Http\Controllers\Backend\ContactController;
+use App\Http\Controllers\Backend\DashboardController;
+use App\Http\Controllers\Backend\DesignationController;
+use App\Http\Controllers\Backend\DocumentTypeController;
+use App\Http\Controllers\Backend\DocumentsController;
+use App\Http\Controllers\Backend\EstateChargeController;
+use App\Http\Controllers\Backend\EstateChargeItemController;
+use App\Http\Controllers\Backend\EventController;
+use App\Http\Controllers\Backend\EventSubTypeController;
+use App\Http\Controllers\Backend\EventTypeController;
 use App\Http\Controllers\Backend\InvoiceController;
 use App\Http\Controllers\Backend\JobTypeController;
-use App\Http\Controllers\Backend\TenancyController;
-use App\Http\Controllers\Backend\WebsiteController;
 use App\Http\Controllers\Backend\NoteTypeController;
-use App\Http\Controllers\Backend\PropertyController;
-use App\Http\Controllers\Backend\DashboardController;
-use App\Http\Controllers\Backend\DocumentsController;
-use App\Http\Controllers\Backend\EventTypeController;
-use App\Http\Controllers\Backend\WorkOrderController;
-use App\Http\Controllers\Backend\BankDetailController;
-use App\Http\Controllers\Backend\ComplianceController;
+use App\Http\Controllers\Backend\NotesController;
+use App\Http\Controllers\Backend\OfferController;
 use App\Http\Controllers\Backend\OwnerGroupController;
-use App\Http\Controllers\Backend\DesignationController;
-use App\Http\Controllers\Backend\TenancyTypeController;
-use App\Http\Controllers\Backend\AuthenticateController;
-use App\Http\Controllers\Backend\DocumentTypeController;
-use App\Http\Controllers\Backend\EstateChargeController;
-use App\Http\Controllers\Backend\EventSubTypeController;
+use App\Http\Controllers\Backend\PropertyController;
 use App\Http\Controllers\Backend\PropertyRepairController;
-use App\Http\Controllers\Backend\ContactCategoryController;
-use App\Http\Controllers\Backend\BusinessSettingsController;
-use App\Http\Controllers\Backend\EstateChargeItemController;
+use App\Http\Controllers\Backend\TenancyController;
 use App\Http\Controllers\Backend\TenancySubStatusController;
+use App\Http\Controllers\Backend\TenancyTypeController;
+use App\Http\Controllers\Backend\UserController;
+use App\Http\Controllers\Backend\WebsiteController;
+use App\Http\Controllers\Backend\WorkOrderController;
+use App\Models\Upload;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Route;
 
 
 // Login Routes
