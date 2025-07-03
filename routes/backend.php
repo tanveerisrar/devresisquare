@@ -380,6 +380,7 @@ Route::middleware('auth')->group(function () {
         Route::controller(EventController::class)->group(function () {
             
             // Fetch all instances in a given date range for FullCalendar.
+            Route::get('/', 'view')->name('calendar');
             Route::get('/instances', 'index')->name('index');
 
             // Create new event or master event.

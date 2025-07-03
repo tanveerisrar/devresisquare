@@ -15,6 +15,10 @@ use RRule\RRule;
 class EventController
 {
 
+    public function view(){
+        return view('backend.events.calendar');
+    }
+
     public function index(Request $request)
     {
         $start = Carbon::parse($request->query('start'));

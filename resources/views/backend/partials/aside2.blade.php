@@ -6,6 +6,13 @@
                 <span class="icon_wrapper"><i class="fa-solid fa-tachometer-alt"></i>Dashboard</span>
             </a>
         </li>
+
+        <li class="sidebar-list-item submenu_wrapper">
+            <a class="{{ request()->routeIs('backend.events.calendar') ? 'active' : '' }}"
+                href="{{ route('backend.events.calendar') }}">
+                <span class="icon_wrapper"><i class="fa-solid fa-tachometer-alt"></i>Calendar</span>
+            </a>
+        </li>
         
         <li class="sidebar-list-item submenu_wrapper">
             <a href="#propertiesSubmenu" data-bs-toggle="collapse"

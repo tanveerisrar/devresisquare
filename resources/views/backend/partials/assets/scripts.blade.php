@@ -9,7 +9,7 @@
 <!-- Tagify JS -->
 <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.min.js"></script>
 <script src="{{ asset('asset/backend/js/style.js') }}"></script>
-<!-- <script src="{{ asset('asset/js/dataTables.bootstrap5.min.js') }}"></script> -->
+<script src="{{ asset('asset/js/dataTables.bootstrap5.min.js') }}"></script>
 <script>
     var AIZ = AIZ || {};
     AIZ.local = {
