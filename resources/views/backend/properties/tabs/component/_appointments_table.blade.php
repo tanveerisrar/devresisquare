@@ -15,7 +15,7 @@
         </thead>
         <tbody>
             @foreach ($events as $event)
-                <tr>
+                <tr data-id="{{ $event->id }}" data-start="{{ $event->start_datetime }}">
                     <td>{{ $event->title }}</td>
                     <td>{{ formatDateTime($event->start_datetime) }}</td>
                     <td>{{ formatDateTime($event->end_datetime) }}</td>
@@ -28,8 +28,8 @@
                                 {{ ucfirst($event->status) }}
                             </button>
                             <ul class="dropdown-menu">
-                                @foreach (['confirmed', 'pending', 'cancelled'] as $status)
-                                    @if ($status !== $event->status)
+                                @foreach (['confirmed', 'pending', 'cancelled', 'schedule', 'completed'] as $status)
+                                    @if (ucfirst($status) !== $event->status)
                                         <li>
                                             <a class="dropdown-item change-status-btn" href="#"
                                                 data-id="{{ $event->id }}" data-status="{{ $status }}">
@@ -43,7 +43,17 @@
                     </td>
                     <td>
                         <button class="btn btn-sm btn-info btn-edit" data-id="{{ $event->id }}">Edit</button>
-                        <button class="btn btn-sm btn-danger btn-delete" data-url="{{ route('backend.events.deleteInstance', $event->id) }}" data-id="{{ $event->id }}">Delete</button>
+                        {{-- <button class="btn btn-sm btn-danger btn-delete" data-url="{{ route('backend.events.deleteInstance', $event->id) }}" data-id="{{ $event->id }}">Delete</button> --}}
+                        <div class="dropdown">
+                            <button class="btn btn-danger btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                Delete
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item delete-option" href="#" data-label="single" data-type="single">Delete This</a></li>
+                                <li><a class="dropdown-item delete-option" href="#" data-label="series" data-type="series">Delete Series</a></li>
+                                <li><a class="dropdown-item delete-option" href="#" data-label="this and future" data-type="future">Delete Future</a></li>
+                            </ul>
+                        </div>
                     </td>
                 </tr>
             @endforeach

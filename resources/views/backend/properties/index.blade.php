@@ -265,6 +265,7 @@
 
     <!-- Include the Modal Component -->
     @include('backend.components.modal')
+    @include('backend.events.modal')
 @endsection
 @push('styles')
 <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-bs5.min.css" rel="stylesheet">
@@ -1543,6 +1544,7 @@ var_dump($propertyId);
         });
 
         $(document).on('click', '#confirmStatusChangeBtn', function(e) {
+            console.log(1);
             e.preventDefault();
             $.ajax({
                 url: `{{ route('backend.events.changeStatus', ':id') }}`.replace(
@@ -1561,5 +1563,51 @@ var_dump($propertyId);
                 }
             });
         });
+
+        let deleteType = '';
+        let deleteId = '';
+        let deleteStart = '';
+
+        $(document).on('click', '.delete-option', function (e) {
+            e.preventDefault();
+
+            const row = $(this).closest('tr');
+            deleteLabel = $(this).data('label');
+            // deleteType = $(this).data('type');
+            deleteId = $(this).data('id');
+            deleteStart = $(this).data('start');
+
+            // $('#deleteTypeLabel').text(deleteType.toUpperCase());
+            $('#deleteTypeLabel').text(deleteLabel.toUpperCase());
+            $('#deleteEventId').val(deleteId);
+            $('#deleteOccurrenceStart').val(deleteStart);
+            $('#deleteChoiceAction').val(deleteType);
+
+            const modal = new bootstrap.Modal(document.getElementById('deleteConfirmEventModal'));
+            modal.show();
+        });
+
+        $('#deleteForm').on('submit', function (e) {
+            e.preventDefault();
+
+            $.ajax({
+                url: '/events/delete-instance/' + deleteId,
+                method: 'POST',
+                data: $(this).serialize(),
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                success: function (res) {
+                    if (res.success) {
+                        alert(res.message);
+                        location.reload();
+                    } else {
+                        alert('Error: ' + res.message);
+                    }
+                },
+                error: function (xhr) {
+                    alert('Something went wrong');
+                }
+            });
+        });
+
     </script>
 @endsection
