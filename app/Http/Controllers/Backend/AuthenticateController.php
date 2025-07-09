@@ -7,47 +7,67 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthenticateController
 {
+   /**
+     * Show login form or redirect authenticated users.
+     */
     public function index()
     {
-        // Check if the user is already authenticated
         if (Auth::check()) {
-            // Redirect based on user role
             $user = Auth::user();
-            if (in_array($user->role_id, [1, 2, 3])) { // Admin roles
+
+            // Backend‑eligible roles
+            $backendRoles = [
+                'Super Admin',
+                'Owner',
+                'Property Manager',
+                'Landlord',
+            ];
+
+            if ($user->hasAnyRole($backendRoles)) {
                 return redirect()->route('backend.dashboard');
-            } else {
-                return redirect()->route('home');
             }
+
+            return redirect()->route('home');
         }
 
-        // If not authenticated, show the login view
         return view('backend.login');
     }
 
+    /**
+     * Handle login submission.
+     */
     public function login(Request $request)
     {
-        // Validate the request
         $request->validate([
-            'email' => 'required|email',
+            'email'    => 'required|email',
             'password' => 'required',
         ]);
 
-        // Attempt to log the user in
-        if (Auth::attempt($request->only('email', 'password'))) {
+        if (Auth::attempt($request->only('email','password'), $request->boolean('remember'))) {
             $user = Auth::user();
 
-            // Redirect based on user role
-            if (in_array($user->role_id, [1, 2, 3])) { // Assuming role_ids 1, 2, 3 are for admin roles
+            $backendRoles = [
+                'Super Admin',
+                'Owner',
+                'Property Manager',
+                'Landlord',
+            ];
+
+            if ($user->hasAnyRole($backendRoles)) {
                 return redirect()->route('backend.dashboard');
-            } else {
-                return redirect()->route('home'); // Redirect non-admin roles to home
             }
+
+            return redirect()->route('home');
         }
 
-        // Redirect back with an error message if login fails
-        return redirect()->route('backend.login')->with('error', 'The provided credentials do not match our records.')->withInput();
+        return back()
+            ->with('error', 'The provided credentials do not match our records.')
+            ->withInput();
     }
 
+    /**
+     * Log the user out.
+     */
     public function logout()
     {
         Auth::logout();

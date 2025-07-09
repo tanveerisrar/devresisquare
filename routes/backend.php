@@ -1,40 +1,42 @@
 <?php
 // routes/backend.php
 
-use App\Http\Controllers\Backend\AuthenticateController;
-use App\Http\Controllers\Backend\BankDetailController;
-use App\Http\Controllers\Backend\BranchController;
-use App\Http\Controllers\Backend\BusinessSettingsController;
-use App\Http\Controllers\Backend\ComplianceController;
-use App\Http\Controllers\Backend\ContactCategoryController;
-use App\Http\Controllers\Backend\ContactController;
-use App\Http\Controllers\Backend\DashboardController;
-use App\Http\Controllers\Backend\DesignationController;
-use App\Http\Controllers\Backend\DocumentTypeController;
-use App\Http\Controllers\Backend\DocumentsController;
-use App\Http\Controllers\Backend\EstateChargeController;
-use App\Http\Controllers\Backend\EstateChargeItemController;
-use App\Http\Controllers\Backend\EventController;
-use App\Http\Controllers\Backend\EventSubTypeController;
-use App\Http\Controllers\Backend\EventTypeController;
-use App\Http\Controllers\Backend\InvoiceController;
-use App\Http\Controllers\Backend\JobTypeController;
-use App\Http\Controllers\Backend\NoteTypeController;
-use App\Http\Controllers\Backend\NotesController;
-use App\Http\Controllers\Backend\OfferController;
-use App\Http\Controllers\Backend\OwnerGroupController;
-use App\Http\Controllers\Backend\PropertyController;
-use App\Http\Controllers\Backend\PropertyRepairController;
-use App\Http\Controllers\Backend\TenancyController;
-use App\Http\Controllers\Backend\TenancySubStatusController;
-use App\Http\Controllers\Backend\TenancyTypeController;
-use App\Http\Controllers\Backend\UserController;
-use App\Http\Controllers\Backend\WebsiteController;
-use App\Http\Controllers\Backend\WorkOrderController;
 use App\Models\Upload;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
+use App\Http\Controllers\Backend\RoleController;
+use App\Http\Controllers\Backend\StaffController;
+use App\Http\Controllers\Backend\UserController;
+use App\Http\Controllers\Backend\EventController;
+use App\Http\Controllers\Backend\NotesController;
+use App\Http\Controllers\Backend\OfferController;
+use App\Http\Controllers\Backend\BranchController;
+use App\Http\Controllers\Backend\ContactController;
+use App\Http\Controllers\Backend\InvoiceController;
+use App\Http\Controllers\Backend\JobTypeController;
+use App\Http\Controllers\Backend\TenancyController;
+use App\Http\Controllers\Backend\WebsiteController;
+use App\Http\Controllers\Backend\NoteTypeController;
+use App\Http\Controllers\Backend\PropertyController;
+use App\Http\Controllers\Backend\DashboardController;
+use App\Http\Controllers\Backend\DocumentsController;
+use App\Http\Controllers\Backend\EventTypeController;
+use App\Http\Controllers\Backend\WorkOrderController;
+use App\Http\Controllers\Backend\BankDetailController;
+use App\Http\Controllers\Backend\ComplianceController;
+use App\Http\Controllers\Backend\OwnerGroupController;
+use App\Http\Controllers\Backend\DesignationController;
+use App\Http\Controllers\Backend\TenancyTypeController;
+use App\Http\Controllers\Backend\AuthenticateController;
+use App\Http\Controllers\Backend\DocumentTypeController;
+use App\Http\Controllers\Backend\EstateChargeController;
+use App\Http\Controllers\Backend\EventSubTypeController;
+use App\Http\Controllers\Backend\PropertyRepairController;
+use App\Http\Controllers\Backend\ContactCategoryController;
+use App\Http\Controllers\Backend\BusinessSettingsController;
+use App\Http\Controllers\Backend\EstateChargeItemController;
+use App\Http\Controllers\Backend\TenancySubStatusController;
 
 
 // Login Routes
@@ -446,6 +448,22 @@ Route::middleware('auth')->group(function () {
         Route::post('/business-settings/update', 'update')->name('business_settings.update');
     });
 
+    
+    // Staff Roles
+    Route::resource('roles', RoleController::class);
+    Route::controller(RoleController::class)->group(function () {
+        Route::get('/roles/edit/{id}', 'edit')->name('roles.edit');
+        Route::get('/roles/destroy/{id}', 'destroy')->name('roles.destroy');
+
+        // Add Permissiom
+        Route::post('/roles/add_permission', 'add_permission')->name('roles.permission');
+    });
+
+    // Staff
+    Route::resource('staffs', StaffController::class);
+    Route::get('/staffs/destroy/{id}', [StaffController::class, 'destroy'])->name('staffs.destroy');
+
+    
     Route::post('/upload-note-image', function (Request $request) {
         if ($request->hasFile('file')) {
             $upload = Upload::storeFile($request->file('file'));

@@ -22,9 +22,16 @@ class DashboardController
         // Get the authenticated user
         $user = Auth::user();
 
-        // Check if the authenticated user has the correct role (e.g., admin roles with role_id 1, 2, or 3)
-        if (!in_array($user->role_id, [1, 2, 3])) {
-            return redirect()->route('login');  // Redirect non-admin users to the homepage
+        // Check if the authenticated user has the correct role (e.g., admin roles)
+        if (!$user->hasAnyRole([
+            'Super Admin',
+            'Owner',
+            'Property Manager',
+            'Landlord',       // include any roles that should see the dashboard
+            'Estate Agent',
+            // etc.
+        ])) {
+            abort(403, 'Unauthorized.');
         }
 
         // Fetch all users with their roles (assuming the role relationship is defined in the User model)

@@ -10,7 +10,7 @@
         <li class="sidebar-list-item submenu_wrapper">
             <a class="{{ request()->routeIs('backend.events.calendar') ? 'active' : '' }}"
                 href="{{ route('backend.events.calendar') }}">
-                <span class="icon_wrapper"><i class="fa-solid fa-tachometer-alt"></i>Calendar</span>
+                <span class="icon_wrapper"><i class="fa-solid fa-calendar-check"></i>Calendar</span>
             </a>
         </li>
         
@@ -613,7 +613,50 @@
                 </li>
             </ul>
         </li>
-
+        @php
+        $user = Auth::user();
+        $role = $user->roles->first(); // Example: 'landlord'
+        echo($role->name);
+        @endphp
+        <!-- Staffs -->
+        @canany(['view all staffs','view staff roles'])
+            <li class="aiz-side-nav-item">
+                <a href="#" class="aiz-side-nav-link">
+                    <div class="aiz-side-nav-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                            <g id="Group_28314" data-name="Group 28314" transform="translate(-19299 2175)">
+                                <path id="Path_40774" data-name="Path 40774" d="M87.867,3.07H84.133V1.72A.716.716,0,0,0,83.422,1H80.578a.716.716,0,0,0-.711.72V3.07H76.133A2.149,2.149,0,0,0,74,5.229V14.84A2.149,2.149,0,0,0,76.133,17H87.867A2.149,2.149,0,0,0,90,14.84V5.229A2.149,2.149,0,0,0,87.867,3.07Zm-6.578-.63h1.422V3.79a.711.711,0,1,1-1.422,0Zm7.289,12.4a.716.716,0,0,1-.711.72H76.133a.716.716,0,0,1-.711-.72V5.229a.716.716,0,0,1,.711-.72h3.856a2.124,2.124,0,0,0,4.022,0h3.856a.716.716,0,0,1,.711.72Z" transform="translate(19225 -2176)" fill="#575b6a"/>
+                                <g id="Group_28312" data-name="Group 28312" transform="translate(19305.07 -2169.197)">
+                                <path id="Path_40775" data-name="Path 40775" d="M199.864,197.932a1.932,1.932,0,1,0-1.932,1.932A1.934,1.934,0,0,0,199.864,197.932Zm-1.932.644a.644.644,0,1,1,.644-.644A.645.645,0,0,1,197.932,198.576Z" transform="translate(-196 -196)" fill="#575b6a"/>
+                                </g>
+                                <g id="Group_28313" data-name="Group 28313" transform="translate(19303.779 -2165)">
+                                <path id="Path_40776" data-name="Path 40776" d="M160.508,316h-2.576A1.934,1.934,0,0,0,156,317.932v1.288a.644.644,0,1,0,1.288,0v-1.288a.645.645,0,0,1,.644-.644h2.576a.645.645,0,0,1,.644.644v1.288a.644.644,0,1,0,1.288,0v-1.288A1.934,1.934,0,0,0,160.508,316Z" transform="translate(-156 -316)" fill="#575b6a"/>
+                                </g>
+                            </g>
+                        </svg>
+                    </div>
+                    <span class="aiz-side-nav-text">Staffs</span>
+                    <span class="aiz-side-nav-arrow"></span>
+                </a>
+                <ul class="aiz-side-nav-list level-2">
+                    @can('view all staffs')
+                        <li class="aiz-side-nav-item">
+                            <a href="{{ route('staffs.index') }}" class="aiz-side-nav-link {{ areActiveRoutes(['staffs.index', 'staffs.create', 'staffs.edit'])}}">
+                                <span class="aiz-side-nav-text">All staffs</span>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('view staff roles')
+                        <li class="aiz-side-nav-item">
+                            <a href="{{route('roles.index')}}" class="aiz-side-nav-link {{ areActiveRoutes(['roles.index', 'roles.create', 'roles.edit'])}}">
+                                <span class="aiz-side-nav-text">Staff permissions</span>
+                            </a>
+                        </li>
+                    @endcan
+                </ul>
+            </li>
+        @endcanany
+        
         <li class="sidebar-list-item submenu_wrapper">
             <a href="#">
                 <span class="icon_wrapper"><i class="fa-solid fa-users"></i>Users</span> 
@@ -640,5 +683,15 @@
             </form>
         </li>
     </ul>
+
+
+@hasrole('Super Admin')
+    <p>You have full access to the system.</p>
+@endhasrole
+
+@hasanyrole(['Landlord', 'Estate Agent'])
+    <div>This section is for landlords or estate agents only.</div>
+@endhasanyrole
+
 </aside>
 <div class="backdrop"></div>

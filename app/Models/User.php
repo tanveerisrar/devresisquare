@@ -4,15 +4,18 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
     use Notifiable;
+    
+    use HasRoles;
 
-    protected $fillable = ['name', 'email', 'password', 'role_id'];
+    protected $fillable = ['name', 'email', 'password'];
     protected $hidden = ['password', 'remember_token'];
 
-    public function role()
+    /*public function role()
     {
         return $this->belongsTo(Role::class);
     }
@@ -33,6 +36,24 @@ class User extends Authenticatable
     public static function optionsForSelect(): array
     {
         return self::all()->pluck('display_label', 'id')->toArray();
+    }*/
+
+    // If you still want a helper to fetch users of a given role:
+    public function scopeRoleName($query, string $roleName)
+    {
+        return $query->whereHas('roles', fn($q) => $q->where('name', $roleName));
     }
 
+    public function getDisplayLabelAttribute(): string
+    {
+        return "{$this->name} — {$this->email}";
+    }
+
+    public static function optionsForSelect(): array
+    {
+        // If you want to filter by role, you can now do:
+        // return self::roleName('Landlord')->pluck('display_label', 'id')->toArray();
+
+        return self::all()->pluck('display_label', 'id')->toArray();
+    }
 }

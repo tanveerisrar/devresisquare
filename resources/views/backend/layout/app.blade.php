@@ -84,7 +84,7 @@
             </div>
         </div>
     </main>
-
+@stack('modal')
     {{-- Include the scripts partial to push these scripts to the 'scripts' stack --}}
     @include('backend.partials.assets.scripts')
     {{-- This will render all JS pushed to the "scripts" stack --}}

@@ -166,3 +166,101 @@ button.close {
         height: auto;
     }
 }
+
+
+/*switch*/
+.aiz-switch input:empty {
+    height: 0;
+    width: 0;
+    overflow: hidden;
+    position: absolute;
+    opacity: 0;
+}
+
+.aiz-switch input:empty~span {
+    display: inline-block;
+    position: relative;
+    text-indent: 0;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    line-height: 24px;
+    height: 21px;
+    width: 40px;
+    border-radius: 12px;
+}
+
+.aiz-switch input:empty~span:after,
+.aiz-switch input:empty~span:before {
+    position: absolute;
+    display: block;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    content: " ";
+    -webkit-transition: all 0.1s ease-in;
+    transition: all 0.1s ease-in;
+    width: 40px;
+    border-radius: 12px;
+}
+
+.aiz-switch input:empty~span:before {
+    background-color: #e8ebf1;
+}
+
+.aiz-switch input:empty~span:after {
+    height: 17px;
+    width: 17px;
+    line-height: 20px;
+    top: 2px;
+    bottom: 2px;
+    margin-left: 2px;
+    font-size: 0.8em;
+    text-align: center;
+    vertical-align: middle;
+    color: #f8f9fb;
+    background-color: #fff;
+}
+
+.aiz-switch input:checked~span:after {
+    background-color: var(--primary);
+    margin-left: 20px;
+}
+
+.aiz-switch-secondary input:checked~span:after {
+    background-color: var(--secondary);
+}
+
+.aiz-switch-success input:checked~span:after {
+    background-color: var(--success);
+}
+
+.aiz-switch-info input:checked~span:after {
+    background-color: var(--info);
+}
+
+.aiz-switch-warning input:checked~span:after {
+    background-color: var(--warning);
+}
+
+.aiz-switch-secondary-base input:checked~span:after {
+    background-color: var(--secondary-base);
+}
+
+.aiz-switch-danger input:checked~span:after {
+    background-color: var(--danger);
+}
+
+.aiz-switch-light input:checked~span:after {
+    background-color: var(--light);
+}
+
+.aiz-switch-dark input:checked~span:after {
+    background-color: var(--dark);
+}
+
+.aiz-switch-blue input:checked~span:after {
+    background-color: var(--blue);
+}

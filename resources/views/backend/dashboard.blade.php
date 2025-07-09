@@ -36,6 +36,7 @@
         </div>
 
         {{-- Properties --}}
+        @canany(['view properties', 'edit properties'])
         <div class="col-md-6 col-xl-4">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body d-flex align-items-center">
@@ -49,7 +50,9 @@
                 </div>
             </div>
         </div>
+        @endcanany
 
+        @can('view invoices')
         {{-- Invoices --}}
         <div class="col-md-6 col-xl-4">
             <div class="card shadow-sm border-0 h-100">
@@ -64,7 +67,8 @@
                 </div>
             </div>
         </div>
-
+        @endcan
+        
         {{-- Work Orders --}}
         <div class="col-md-6 col-xl-4">
             <div class="card shadow-sm border-0 h-100">
