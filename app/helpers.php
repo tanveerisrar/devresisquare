@@ -11,11 +11,23 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 if (!function_exists('getPoundSymbol')) {
     function getPoundSymbol()
     {
         return '£';
+    }
+}
+
+if (!function_exists('flashValidationErrors')) {
+    function flashValidationErrors(ValidationException $e)
+    {
+        foreach ($e->errors() as $fieldErrors) {
+            foreach ($fieldErrors as $message) {
+                flash()->error($message);
+            }
+        }
     }
 }
 

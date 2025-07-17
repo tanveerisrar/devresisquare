@@ -12,4 +12,14 @@ class Branch extends Model
     protected $fillable = [
         'name', 'address', 'city', 'postcode', 'country', 'contact_email', 'contact_phone',
     ];
+
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
 }

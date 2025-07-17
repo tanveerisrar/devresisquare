@@ -92,7 +92,7 @@ class RoleAndPermissionSeeder extends Seeder
             'send notifications',
             'view communication log',
 
-            'view all staff',
+            'view all staffs',
             'add staff',
             'edit staff',
             'delete staff',

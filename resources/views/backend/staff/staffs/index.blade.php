@@ -27,7 +27,7 @@
                     <th data-breakpoints="lg" width="10%">#</th>
                     <th>Name</th>
                     <th data-breakpoints="lg">Email</th>
-                    <th data-breakpoints="lg">Phone</th>
+                    {{-- <th data-breakpoints="lg">Phone</th> --}}
                     <th data-breakpoints="lg">Role</th>
                     <th width="10%" class="text-right">Options</th>
                 </tr>
@@ -39,10 +39,10 @@
                             <td>{{ ($key+1) + ($staffs->currentPage() - 1)*$staffs->perPage() }}</td>
                             <td>{{$staff->user->name}}</td>
                             <td>{{$staff->user->email}}</td>
-                            <td>{{$staff->user->phone}}</td>
+                            {{-- <td>{{$staff->user->phone}}</td> --}}
                             <td>
 								@if ($staff->role != null)
-									{{ $staff->role->getTranslation('name') }}
+									{{ $staff->role->name }}
 								@endif
 							</td>
                             <td class="text-right">

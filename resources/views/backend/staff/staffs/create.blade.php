@@ -23,12 +23,12 @@
                             <input type="text" placeholder="Email" id="email" name="email" class="form-control" required>
                         </div>
                     </div>
-                    <div class="form-group row">
+                    {{-- <div class="form-group row">
                         <label class="col-sm-3 col-from-label" for="mobile">Phone</label>
                         <div class="col-sm-9">
                             <input type="text" placeholder="Phone" id="mobile" name="mobile" class="form-control" required>
                         </div>
-                    </div>
+                    </div> --}}
                     <div class="form-group row">
                         <label class="col-sm-3 col-from-label" for="password">Password</label>
                         <div class="col-sm-9">
@@ -38,7 +38,7 @@
                     <div class="form-group row">
                         <label class="col-sm-3 col-from-label" for="name">Role</label>
                         <div class="col-sm-9">
-                            <select name="role_id" required class="form-control aiz-selectpicker">
+                            <select name="role_id" required class="form-control select2">
                                 @foreach($roles as $role)
                                     <option value="{{$role->id}}">{{$role->name}}</option>
                                 @endforeach
@@ -55,4 +55,10 @@
     </div>
 </div>
 
+@endsection
+@include('backend.partials.assets.select2')
+@section('page.scripts')
+    <script>
+        initSelect2('.select2');
+    </script>
 @endsection

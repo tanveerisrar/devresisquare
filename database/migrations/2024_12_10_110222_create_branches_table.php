@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('branches', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('company_id')->constrained()->onDelete('cascade');
             $table->string('name')->nullable();
             $table->string('address')->nullable();
             $table->string('city')->nullable();
@@ -20,6 +21,7 @@ return new class extends Migration
             $table->string('country')->default('UK');
             $table->string('contact_email')->nullable();
             $table->string('contact_phone')->nullable();
+            $table->foreignId('created_by')->constrained('users')->onDelete('set null');
             $table->timestamps();
         });
     }

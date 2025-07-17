@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Backend;
 
-use Illuminate\Http\Request;
-use App\Models\Staff;
+use Hash;
 use App\Models\Role;
 use App\Models\User;
-use Hash;
+use App\Models\Staff;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class StaffController extends Controller
 {
@@ -19,119 +21,127 @@ class StaffController extends Controller
         $this->middleware(['permission:delete staff'])->only('destroy');
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
         $staffs = Staff::paginate(10);
-        return response(view('backend.staff.staffs.index', compact('staffs')));
+        return view('backend.staff.staffs.index', compact('staffs'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
         $roles = Role::where('id','!=',1)->orderBy('id', 'desc')->get();
-        return response(view('backend.staff.staffs.create', compact('roles')));
+        return view('backend.staff.staffs.create', compact('roles'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
-        if(User::where('email', $request->email)->first() == null){
-            $user = new User;
-            $user->name = $request->name;
-            $user->email = $request->email;
-            $user->phone = $request->mobile;
-            $user->user_type = "staff";
-            $user->password = Hash::make($request->password);
-            if($user->save()){
-                $staff = new Staff;
-                $staff->user_id = $user->id;
-                $staff->role_id = $request->role_id;
-                $user->assignRole(Role::findOrFail($request->role_id)->name);
-                if($staff->save()){
-                    flash('Staff has been inserted successfully')->success();
-                    return redirect()->route('staffs.index');
-                }
-            }
+        try {
+            $data = $request->validate([
+                'name'      => 'required|string|max:255',
+                'email'     => 'required|email|unique:users,email',
+                'password'  => 'required',
+                'role_id'   => 'required|exists:roles,id',
+            ]);
+        } catch (ValidationException $e) {
+            flashValidationErrors($e);
+            return back()->withInput();
         }
 
-        flash('Email already used')->error();
-        return response(back());
+        // 2) Wrap in transaction
+        DB::beginTransaction();
+        try {
+            // 3) Create User
+            $user = User::create([
+                'name'           => $data['name'],
+                'email'          => $data['email'],
+                // 'phone'          => $data['mobile'] ?? null,
+                'user_type'      => 'staff',
+                'password'       => Hash::make($data['password']),
+            ]);
+
+            // 4) Assign Spatie role
+            $roleName = Role::findOrFail($data['role_id'])->name;
+            $user->assignRole($roleName);
+
+            // 5) Create Staff record
+            Staff::create([
+                'user_id' => $user->id,
+                'role_id' => $data['role_id'],
+            ]);
+
+            DB::commit();
+
+            flash()->success('Staff has been added successfully');
+            return redirect()->route('staffs.index');
+        }
+        catch (\Throwable $e) {
+            DB::rollBack();
+            flash()->error('Failed to add staff: '.$e->getMessage());
+            return back();
+        }
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function edit($id)
     {
         $staff = Staff::findOrFail(decrypt($id));
         $roles = $roles = Role::where('id','!=',1)->orderBy('id', 'desc')->get();
-        return response(view('backend.staff.staffs.edit', compact('staff', 'roles')));
+        return view('backend.staff.staffs.edit', compact('staff', 'roles'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
+        // 1) Retrieve staff
         $staff = Staff::findOrFail($id);
-        $user = $staff->user;
-        $user->name = $request->name;
-        $user->email = $request->email;
-        $user->phone = $request->mobile;
-        if(strlen($request->password) > 0){
-            $user->password = Hash::make($request->password);
-        }
-        if($user->save()){
-            $staff->role_id = $request->role_id;
-            if($staff->save()){
-                $user->syncRoles(Role::findOrFail($request->role_id)->name);
-                flash('Staff has been updated successfully')->success();
-                return response(redirect()->route('staffs.index'));
-            }
-        }
 
-        flash('Something went wrong')->error();
-        return response(back());
+        // 2) Validate inputs and flash errors with AIZ notify
+        try {
+            $data = $request->validate([
+                'name'      => 'required|string|max:255',
+                'email'     => "required|email|unique:users,email,{$staff->user->id}",
+                // 'mobile' => 'nullable|string|max:20',
+                'password'  => 'nullable',
+                'role_id'   => 'required|exists:roles,id',
+            ]);
+        } catch (ValidationException $e) {
+            flashValidationErrors($e);
+            return back()->withInput();
+        }
+        // 3) Wrap in transaction
+        DB::beginTransaction();
+        try {
+            $user  = $staff->user;
+
+            // 4) Update User fields
+            $user->name  = $data['name'];
+            $user->email = $data['email'];
+            // $user->phone = $data['mobile'] ?? null;
+
+            if (!empty($data['password'])) {
+                $user->password = Hash::make($data['password']);
+            }
+
+            $user->save();
+
+            // 5) Update Staff.role_id
+            $staff->role_id = $data['role_id'];
+            $staff->save();
+
+            // 6) Sync Spatie roles
+            $roleName = Role::findOrFail($data['role_id'])->name;
+            $user->syncRoles($roleName);
+
+            DB::commit();
+
+            flash()->success('Staff has been updated successfully');
+            return redirect()->route('staffs.index');
+        }
+        catch (\Throwable $e) {
+            DB::rollBack();
+            flash()->error('Failed to update staff: '.$e->getMessage());
+            return back();
+        }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
         User::destroy(Staff::findOrFail($id)->user->id);
@@ -139,8 +149,7 @@ class StaffController extends Controller
             flash('Staff has been deleted successfully')->success();
             return response(redirect()->route('staffs.index'));
         }
-
-        flash('Something went wrong')->error();
-        return response(back());
+        flash()->error('Something went wrong');
+        return back();
     }
 }

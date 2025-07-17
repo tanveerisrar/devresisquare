@@ -31,7 +31,8 @@ class RoleController extends Controller
 
     public function create()
     {
-        return view('backend.staff.staff_roles.create');
+        $permissions = Permission::all();
+        return view('backend.staff.staff_roles.create', compact('permissions'));
     }
 
     /**
@@ -41,14 +42,28 @@ class RoleController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {
-        // dd($request->permissions);
-        $role = Role::create(['name' => $request->name]);
-        $role->givePermissionTo($request->permissions);
+{
+    $request->validate([
+        'name'          => 'required|string|unique:roles,name',
+        'permissions'   => 'required|array',
+        'permissions.*' => 'exists:permissions,id',
+    ]);
 
-        flash('New Role has been added successfully')->success();
-        return redirect()->route('roles.index');
-    }
+    $role = Role::create([
+        'name'       => $request->name,
+        'guard_name' => 'web',
+    ]);
+
+    // Fetch the Permission models
+    $perms = Permission::whereIn('id', $request->permissions)->get();
+
+    // Sync by passing the collection of Permission models
+    $role->syncPermissions($perms);
+
+    flash('New role has been added successfully')->success();
+    return redirect()->route('roles.index');
+}
+
 
     /**
      * Display the specified resource.
@@ -56,10 +71,10 @@ class RoleController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
-    {
-        //
-    }
+    // public function show($id)
+    // {
+    //     //
+    // }
 
     /**
      * Show the form for editing the specified resource.
@@ -67,11 +82,13 @@ class RoleController extends Controller
      * @param  int  $id
      * //@return \Illuminate\Http\Response
      */
-    public function edit(Request $request, $id)
+    public function edit($id)
     {
-        $lang = $request->lang;
-        $role = Role::findOrFail($id);
-        return view('backend.staff.staff_roles.edit', compact('role', 'lang'));
+        $role        = Role::findOrFail($id);
+        $permissions = Permission::all();
+        $rolePerms   = $role->permissions->pluck('id')->toArray();
+
+        return view('backend.staff.staff_roles.edit', compact('role', 'permissions', 'rolePerms'));
     }
 
     /**
@@ -82,18 +99,25 @@ class RoleController extends Controller
      * //@return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
-    {
-        $role = Role::findOrFail($id);
-        if ($request->lang == env("DEFAULT_LANGUAGE")) {
-            $role->name = $request->name;
-        }
-        $role->syncPermissions($request->permissions);
-        $role->save();
+{
+    $request->validate([
+        'name'          => "required|string|unique:roles,name,{$id}",
+        'permissions'   => 'required|array',
+        'permissions.*' => 'exists:permissions,id',
+    ]);
 
-        flash('Role has been updated successfully')->success();
-        return back();
-        // return redirect()->route('roles.index');
-    }
+    $role = Role::findOrFail($id);
+    $role->update(['name' => $request->name]);
+
+    // Fetch the Permission models
+    $perms = Permission::whereIn('id', $request->permissions)->get();
+
+    // Sync them
+    $role->syncPermissions($perms);
+
+    flash('Role has been updated successfully')->success();
+    return redirect()->route('roles.index');
+}
 
     /**
      * Remove the specified resource from storage.
@@ -115,7 +139,7 @@ class RoleController extends Controller
 
     public function add_permission(Request $request)
     {
-        $permission = Permission::create(['name' => $request->name, 'section' => $request->parent]);
+        $permission = Permission::create(['name' => $request->name]);
         return redirect()->route('roles.index');
     }
 

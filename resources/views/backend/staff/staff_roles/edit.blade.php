@@ -10,13 +10,12 @@
         <div class="card-body p-0">
             <form class="p-4" action="{{ route('roles.update', $role->id) }}" method="POST">
                 <input name="_method" type="hidden" value="PATCH">
-                <input type="hidden" name="lang" value="{{ $lang }}">
             	   @csrf
                 <div class="form-group row">
                     <label class="col-md-3 col-from-label" for="name">Name<i class="las la-language text-danger" title="Translatable"></i></label>
                     <div class="col-md-9">
                         @php $roleForTranslation = \App\Models\Role::where('id',$role->id)->first(); @endphp
-                        <input type="text" placeholder="Name" id="name" name="name" class="form-control" value="{{ $roleForTranslation->name }}" required>
+                        <input readonly type="text" placeholder="Name" id="name" name="name" class="form-control" value="{{ $roleForTranslation->name }}" required>
                     </div>
                 </div>
                 <div class="card-header">
