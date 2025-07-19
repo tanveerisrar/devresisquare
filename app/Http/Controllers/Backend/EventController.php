@@ -124,8 +124,8 @@ class EventController
             'property_ids.*' => 'exists:properties,id',
             'repair_ids' => 'nullable|array',
             'repair_ids.*' => 'exists:repair_issues,id',
-            // 'contact_ids' => 'nullable|array',
-            // 'contact_ids.*' => 'exists:contacts,id',
+            // 'user_ids' => 'nullable|array',
+            // 'user_ids.*' => 'exists:users,id',
         ]);
 
         \DB::beginTransaction();
@@ -319,8 +319,8 @@ class EventController
             'property_ids.*' => 'exists:properties,id',
             'repair_ids' => 'nullable|array',
             'repair_ids.*' => 'exists:repair_issues,id',
-            // 'contact_ids' => 'nullable|array',
-            // 'contact_ids.*' => 'exists:contacts,id',
+            // 'user_ids' => 'nullable|array',
+            // 'user_ids.*' => 'exists:users,id',
         ]);
 
         \DB::beginTransaction();
@@ -978,7 +978,7 @@ class EventController
     {
         $event->properties()->sync($validated['property_ids'] ?? []);
         $event->repairIssues()->sync($validated['repair_ids'] ?? []);
-        // $event->contacts()->sync($validated['contact_ids'] ?? []);
+        // $event->users()->sync($validated['user_ids'] ?? []);
     }
 
 }

@@ -3,7 +3,6 @@
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Upload;
-use App\Models\Contact;
 use App\Models\Property;
 use Illuminate\Http\Request;
 use App\Models\BusinessSetting;
@@ -537,28 +536,28 @@ if (!function_exists('getFormattedRepairNavigation')) {
     }
 }
 
-if (!function_exists('get_contacts_by_property_and_category')) {
+if (!function_exists('get_users_by_property_and_category')) {
     /**
-     * Fetch contacts by property ID and category ID.
+     * Fetch users by property ID and category ID.
      *
      * @param int $propertyId
      * @param int $categoryId
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    function get_contacts_by_property_and_category($propertyId, $categoryId)
+    function get_users_by_property_and_category($propertyId, $categoryId)
     {
-        return Cache::rememberForever("contacts_{$propertyId}_{$categoryId}", function () use ($propertyId, $categoryId) {
-            return Contact::where('category_id', $categoryId)
+        return Cache::rememberForever("users_{$propertyId}_{$categoryId}", function () use ($propertyId, $categoryId) {
+            return User::where('category_id', $categoryId)
                 ->whereRaw('JSON_CONTAINS(selected_properties, ?)', [$propertyId])
-                ->get(['id', 'full_name', 'address_line_1', 'address_line_2', 'postcode', 'city', 'country', 'email', 'phone'])
-                ->map(function ($contact) {
-                    return array_merge($contact->toArray(), [
+                ->get(['id', 'name', 'address_line_1', 'address_line_2', 'postcode', 'city', 'country', 'email', 'phone'])
+                ->map(function ($user) {
+                    return array_merge($user->toArray(), [
                         'full_address' => implode(', ', array_filter([
-                            $contact->address_line_1,
-                            $contact->address_line_2,
-                            $contact->postcode,
-                            $contact->city,
-                            $contact->country
+                            $user->address_line_1,
+                            $user->address_line_2,
+                            $user->postcode,
+                            $user->city,
+                            $user->country
                         ]))
                     ]);
                 });
@@ -566,48 +565,48 @@ if (!function_exists('get_contacts_by_property_and_category')) {
     }
 }
 
-if (!function_exists('get_contact_address_name_by_id')) {
+if (!function_exists('get_user_address_name_by_id')) {
     /**
-     * Fetch a contact's full address by its ID.
+     * Fetch a user's full address by its ID.
      *
-     * @param int $contactId
+     * @param int $userId
      * @return string
      */
-    function get_contact_address_name_by_id($contactId)
+    function get_user_address_name_by_id($userId)
     {
-        return Cache::rememberForever("contacts_{$contactId}", function () use ($contactId) {
-            $contact = Contact::find($contactId, [
-                'full_name', 'address_line_1', 'address_line_2', 'postcode', 'city', 'country', 'email', 'phone'
+        return Cache::rememberForever("users_{$userId}", function () use ($userId) {
+            $user = User::find($userId, [
+                'name', 'address_line_1', 'address_line_2', 'postcode', 'city', 'country', 'email', 'phone'
             ]);
 
-            if (!$contact) {
+            if (!$user) {
                 return 'N/A';
             }
 
             // Filter out empty address fields
             $addressParts = array_filter([
-                $contact->address_line_1,
-                $contact->address_line_2,
-                $contact->postcode,
-                $contact->city,
-                $contact->country
+                $user->address_line_1,
+                $user->address_line_2,
+                $user->postcode,
+                $user->city,
+                $user->country
             ]);
 
             // If all address fields are empty, set a default message
             $fullAddress = !empty($addressParts) ? implode(', ', $addressParts) : 'Address not available';
 
             // Handle empty email and phone separately
-            $email = !empty($contact->email) ? "Email: {$contact->email}" : '';
-            $phone = !empty($contact->phone) ? "Phone: {$contact->phone}" : '';
+            $email = !empty($user->email) ? "Email: {$user->email}" : '';
+            $phone = !empty($user->phone) ? "Phone: {$user->phone}" : '';
 
             // Ensure email or phone is displayed, otherwise show a default message
-            $contactInfo = trim($email . '<br>' . $phone);
-            if (empty($contactInfo)) {
-                $contactInfo = 'Contact details not available';
+            $userInfo = trim($email . '<br>' . $phone);
+            if (empty($userInfo)) {
+                $userInfo = 'User details not available';
             }
 
-            // Return formatted contact details as a string
-            return "<strong>{$contact->full_name}</strong><br>{$fullAddress}<br>{$contactInfo}";
+            // Return formatted user details as a string
+            return "<strong>{$user->name}</strong><br>{$fullAddress}<br>{$userInfo}";
         });
     }
 
@@ -646,9 +645,9 @@ if (!function_exists('get_tenants_by_property')) {
                 $propertyAddress = $defaultAddress;  // If no property is found
             }
 
-            return Contact::whereHas('tenantMembers.tenancy', function ($query) use ($propertyId) {
+            return User::whereHas('tenantMembers.tenancy', function ($query) use ($propertyId) {
                 $query->where('property_id', $propertyId);
-            })->get(['id', 'full_name', 'email', 'phone'])->map(function ($tenant) use ($propertyAddress) {
+            })->get(['id', 'name', 'email', 'phone'])->map(function ($tenant) use ($propertyAddress) {
                 return array_merge($tenant->toArray(), [
                     'full_address' => $propertyAddress
                 ]);

@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Models\OwnerGroup;
-use App\Models\OwnerGroupContact;
-use App\Models\Contact;
+use App\Models\OwnerGroupUser;
+use App\Models\User;
 use App\Models\Property;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -27,20 +27,20 @@ class OwnerGroupController
      */
     public function create()
     {
-        // $contacts = Contact::all();
-        // Fetch contacts where category_id is 1
-        $contacts = Contact::where('category_id', 1)->get();
+        // $users = User::all();
+        // Fetch users where category_id is 1
+        $users = User::where('category_id', 1)->get();
         $properties = Property::all();
-        return view('backend.owner_groups.create', compact('contacts', 'properties'));
+        return view('backend.owner_groups.create', compact('users', 'properties'));
     }
 
     public function createGroup()
     {
-        // $contacts = Contact::all();
-        // Fetch contacts where category_id is 1
-        $contacts = Contact::where('category_id', 1)->get();
+        // $users = User::all();
+        // Fetch users where category_id is 1
+        $users = User::where('category_id', 1)->get();
         $properties = Property::all();
-        return view('backend.owner_groups.create-group', compact('contacts', 'properties'));
+        return view('backend.owner_groups.create-group', compact('users', 'properties'));
     }
 
     /**
@@ -49,7 +49,7 @@ class OwnerGroupController
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'contact_id' => 'required|exists:contacts,id',
+            'user_id' => 'required|exists:users,id',
             'property_id' => 'required|exists:properties,id',
             'purchased_date' => 'required|date',
             'sold_date' => 'nullable|date',
@@ -67,9 +67,9 @@ class OwnerGroupController
         // Validate the request data
         $validated = $request->validate([
             'property_id' => 'required|exists:properties,id',
-            'contact_id' => 'required|array|min:1', // Ensure at least one contact is selected
-            'contact_id.*' => 'exists:contacts,id', // Validate each contact ID exists
-            'is_main' => 'required', // Ensure main contact is one of the selected contacts
+            'user_id' => 'required|array|min:1', // Ensure at least one user is selected
+            'user_id.*' => 'exists:users,id', // Validate each user ID exists
+            'is_main' => 'required', // Ensure main user is one of the selected users
             'purchased_date' => 'required|date',
             'sold_date' => 'nullable|date|after_or_equal:purchased_date', // Optional, must be after purchased date
             'archived_date' => 'nullable|date|after_or_equal:purchased_date', // Optional, must be after purchased date
@@ -115,19 +115,19 @@ class OwnerGroupController
             'added_by' => $userId,
         ]);
 
-        // Loop through selected contacts and create OwnerGroupContact records
-        foreach ($validated['contact_id'] as $contactId) {
-            // Debugging the contact ID and is_main value
-            // dd($contactId, $validated['is_main']); // This will help confirm the values you're comparing
+        // Loop through selected users and create OwnerGroupUser records
+        foreach ($validated['user_id'] as $userId) {
+            // Debugging the user ID and is_main value
+            // dd($userId, $validated['is_main']); // This will help confirm the values you're comparing
 
             // Ensure type matching by casting to integer
-            $isMain = (intval($contactId) === intval($validated['is_main'])) ? 1 : 0; // Set `is_main` for the selected main contact
+            $isMain = (intval($userId) === intval($validated['is_main'])) ? 1 : 0; // Set `is_main` for the selected main user
             // dd($isMain);
 
-            OwnerGroupContact::create([
+            OwnerGroupUser::create([
                 'owner_group_id' => $ownerGroup->id,
-                'contact_id' => $contactId,
-                'is_main' => $isMain, // Assign 1 if it's the main contact, 0 otherwise
+                'user_id' => $userId,
+                'is_main' => $isMain, // Assign 1 if it's the main user, 0 otherwise
                 'added_by' => $userId,
             ]);
         }
@@ -149,7 +149,7 @@ class OwnerGroupController
      */
     public function show($id)
     {
-        $ownerGroup = OwnerGroup::with('contact', 'property', 'estateCharges')->findOrFail($id);
+        $ownerGroup = OwnerGroup::with('user', 'property', 'estateCharges')->findOrFail($id);
         return view('backend.owner_groups.show', compact('ownerGroup'));
     }
 
@@ -158,24 +158,24 @@ class OwnerGroupController
      */
     public function edit($id)
     {
-        $ownerGroup = OwnerGroup::with('ownerGroupContacts.contact')->findOrFail($id);
-        $contacts = Contact::all(); // Retrieve all contacts for the dropdown
-        $selectedContacts = $ownerGroup->ownerGroupContacts->pluck('contact_id')->toArray(); // Get the selected contact IDs
+        $ownerGroup = OwnerGroup::with('ownerGroupUsers.user')->findOrFail($id);
+        $users = User::all(); // Retrieve all users for the dropdown
+        $selectedUsers = $ownerGroup->ownerGroupUsers->pluck('user_id')->toArray(); // Get the selected user IDs
 
-        return view('backend.owner_groups.edit-group',compact('ownerGroup', 'contacts', 'selectedContacts'));
+        return view('backend.owner_groups.edit-group',compact('ownerGroup', 'users', 'selectedUsers'));
     }
     // public function edit($id)
     // {
-    //     $ownerGroup = OwnerGroup::with('ownerGroupContacts.contact')->findOrFail($id);
+    //     $ownerGroup = OwnerGroup::with('ownerGroupUsers.user')->findOrFail($id);
     //     return view('backend.owner_groups.edit', compact('ownerGroup'));
     // }
 
     // public function edit($id)
     // {
     //     $ownerGroup = OwnerGroup::findOrFail($id);
-    //     $contacts = Contact::all();
+    //     $users = User::all();
     //     $properties = Property::all();
-    //     return view('backend.owner_groups.edit', compact('ownerGroup', 'contacts', 'properties'));
+    //     return view('backend.owner_groups.edit', compact('ownerGroup', 'users', 'properties'));
     // }
 
     public function updateGroup(Request $request)
@@ -183,9 +183,9 @@ class OwnerGroupController
         // Validate the request data
         $validator = Validator::make($request->all(), [
             'property_id' => 'required|exists:properties,id',
-            'contact_id' => 'required|array|min:1', // Ensure at least one contact is selected
-            'contact_id.*' => 'exists:contacts,id', // Validate each contact ID exists
-            'is_main' => 'required', // Ensure main contact is one of the selected contacts
+            'user_id' => 'required|array|min:1', // Ensure at least one user is selected
+            'user_id.*' => 'exists:users,id', // Validate each user ID exists
+            'is_main' => 'required', // Ensure main user is one of the selected users
             'purchased_date' => 'required|date',
             'sold_date' => 'nullable|date|after_or_equal:purchased_date', // Optional, must be after purchased date
             'archived_date' => 'nullable|date|after_or_equal:purchased_date', // Optional, must be after purchased date
@@ -287,50 +287,50 @@ class OwnerGroupController
             'updated_by' => $userId,
         ]);
 
-        // Get the existing contacts in the owner group
-        $existingContacts = $ownerGroup->ownerGroupContacts->pluck('contact_id')->toArray();
+        // Get the existing users in the owner group
+        $existingUsers = $ownerGroup->ownerGroupUsers->pluck('user_id')->toArray();
 
-        // Determine which contacts are to be kept (new + existing ones in the request)
-        $newContacts = $validated['contact_id'];
+        // Determine which users are to be kept (new + existing ones in the request)
+        $newUsers = $validated['user_id'];
 
-        // Find contacts that need to be removed (existing but not in the request)
-        $contactsToRemove = array_diff($existingContacts, $newContacts);
+        // Find users that need to be removed (existing but not in the request)
+        $usersToRemove = array_diff($existingUsers, $newUsers);
 
-        // Force delete contacts that are in the group but not in the request
-        if (!empty($contactsToRemove)) {
-            OwnerGroupContact::where('owner_group_id', $ownerGroup->id)
-                ->whereIn('contact_id', $contactsToRemove)
+        // Force delete users that are in the group but not in the request
+        if (!empty($usersToRemove)) {
+            OwnerGroupUser::where('owner_group_id', $ownerGroup->id)
+                ->whereIn('user_id', $usersToRemove)
                 ->forceDelete(); //permanently delete
                 // ->delete(); //soft delete if used
         }
 
-        // Reset the `is_main` flag for all contacts in the group
-        OwnerGroupContact::where('owner_group_id', $ownerGroup->id)
+        // Reset the `is_main` flag for all users in the group
+        OwnerGroupUser::where('owner_group_id', $ownerGroup->id)
             ->update([
                 'is_main' => 0,
                 'updated_by' => $userId,
             ]);
 
-        // Merge the existing and new contacts
-        $mergedContacts = array_unique(array_merge($existingContacts, $newContacts));
+        // Merge the existing and new users
+        $mergedUsers = array_unique(array_merge($existingUsers, $newUsers));
 
-        // Loop through the merged contacts and either update or insert
-        foreach ($mergedContacts as $contactId) {
-            // Determine if the current contact should be marked as 'is_main'
-            $isMain = (intval($contactId) === intval($validated['is_main'])) ? 1 : 0;
+        // Loop through the merged users and either update or insert
+        foreach ($mergedUsers as $userId) {
+            // Determine if the current user should be marked as 'is_main'
+            $isMain = (intval($userId) === intval($validated['is_main'])) ? 1 : 0;
 
-            // If the contact already exists, update it
-            if (in_array($contactId, $existingContacts)) {
-                OwnerGroupContact::where('owner_group_id', $ownerGroup->id)
-                    ->where('contact_id', $contactId)
+            // If the user already exists, update it
+            if (in_array($userId, $existingUsers)) {
+                OwnerGroupUser::where('owner_group_id', $ownerGroup->id)
+                    ->where('user_id', $userId)
                     ->update([
                         'is_main' => $isMain,
                     ]);
             } else {
-                // Otherwise, create a new contact association
-                OwnerGroupContact::create([
+                // Otherwise, create a new user association
+                OwnerGroupUser::create([
                     'owner_group_id' => $ownerGroup->id,
-                    'contact_id' => $contactId,
+                    'user_id' => $userId,
                     'is_main' => $isMain,
                     'added_by' => $userId,
                 ]);
@@ -356,7 +356,7 @@ class OwnerGroupController
     //     $ownerGroup = OwnerGroup::findOrFail($id);
 
     //     $validatedData = $request->validate([
-    //         'contact_id' => 'required|exists:contacts,id',
+    //         'user_id' => 'required|exists:users,id',
     //         'property_id' => 'required|exists:properties,id',
     //         'purchased_date' => 'required|date',
     //         'sold_date' => 'nullable|date',
@@ -409,12 +409,12 @@ class OwnerGroupController
         // Find the OwnerGroup record by ID or fail if not found
         $ownerGroup = OwnerGroup::findOrFail($id);
 
-        // Soft delete the related OwnerGroupContact records (soft delete instead of permanent delete)
-        foreach ($ownerGroup->ownerGroupContacts as $contact) {
-            // Soft delete each associated contact
-            $contact->deleted_by = $userId; // Log who deleted the contact
-            $contact->save(); // Save to update the deleted_by field
-            $contact->delete(); // Soft delete the contact
+        // Soft delete the related OwnerGroupUser records (soft delete instead of permanent delete)
+        foreach ($ownerGroup->ownerGroupUsers as $user) {
+            // Soft delete each associated user
+            $user->deleted_by = $userId; // Log who deleted the user
+            $user->save(); // Save to update the deleted_by field
+            $user->delete(); // Soft delete the user
         }
 
         // Soft delete the OwnerGroup itself
@@ -423,7 +423,7 @@ class OwnerGroupController
         $ownerGroup->delete(); // Soft delete the OwnerGroup
 
         // Flash a success message
-        flash("Owner Group and associated contacts deleted successfully!")->success();
+        flash("Owner Group and associated users deleted successfully!")->success();
 
         // Redirect back to the previous page (or any other page as needed)
         return back();
@@ -435,7 +435,7 @@ class OwnerGroupController
     {
         // Validate the incoming request
         $validated = $request->validate([
-            'contact_id' => 'required|exists:contacts,id', // Ensure the contact ID exists in the contacts table
+            'user_id' => 'required|exists:users,id', // Ensure the user ID exists in the users table
             'owner_group_id' => 'required|exists:owner_group,id', // Validate that the owner_group_id exists
         ]);
 
@@ -452,8 +452,8 @@ class OwnerGroupController
         // Get the current logged-in user
         $userId = Auth::id();
 
-        // Get the contact ID from the validated data
-        $contactId = $validated['contact_id'];
+        // Get the user ID from the validated data
+        $userId = $validated['user_id'];
 
         // Get the owner_group_id from the request (this can be useful for logging or extra validation)
         $ownerGroupId = $validated['owner_group_id'];
@@ -466,8 +466,8 @@ class OwnerGroupController
             ]);
         }
 
-        // Reset all other contacts in this owner group to not be main
-        $updateMain = OwnerGroupContact::where('owner_group_id', $ownerGroup->id)
+        // Reset all other users in this owner group to not be main
+        $updateMain = OwnerGroupUser::where('owner_group_id', $ownerGroup->id)
             ->update([
                 'is_main' => 0,
                 'updated_by' => $userId,
@@ -476,25 +476,25 @@ class OwnerGroupController
         if ($updateMain === false) {
             return response()->json([
                 'status' => false,
-                'notification' => 'Failed to reset other contacts to non-main.',
+                'notification' => 'Failed to reset other users to non-main.',
             ]);
         }
 
-        // Set the selected contact as the main contact
-        $contactUpdated = OwnerGroupContact::where('owner_group_id', $ownerGroup->id)
-            ->where('id', $contactId)
+        // Set the selected user as the main user
+        $userUpdated = OwnerGroupUser::where('owner_group_id', $ownerGroup->id)
+            ->where('id', $userId)
             ->update(['is_main' => 1]);
 
-        // Check if the contact was successfully updated
-        if ($contactUpdated) {
+        // Check if the user was successfully updated
+        if ($userUpdated) {
             return response()->json([
                 'status' => true,
-                'notification' => 'Owner Group Main contact updated successfully!',
+                'notification' => 'Owner Group Main user updated successfully!',
             ]);
         } else {
             return response()->json([
                 'status' => false,
-                'notification' => 'Failed to update the main contact!',
+                'notification' => 'Failed to update the main user!',
             ]);
         }
     }

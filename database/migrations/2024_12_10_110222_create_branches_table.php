@@ -19,8 +19,8 @@ return new class extends Migration
             $table->string('city')->nullable();
             $table->string('postcode')->nullable();
             $table->string('country')->default('UK');
-            $table->string('contact_email')->nullable();
-            $table->string('contact_phone')->nullable();
+            $table->string('user_email')->nullable();
+            $table->string('user_phone')->nullable();
             $table->foreignId('created_by')->constrained('users')->onDelete('set null');
             $table->timestamps();
         });

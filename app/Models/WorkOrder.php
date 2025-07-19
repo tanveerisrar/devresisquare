@@ -38,9 +38,9 @@ class WorkOrder extends Model
         return $this->belongsTo(RepairIssue::class);
     }
 
-    public function contact()
+    public function user()
     {
-        return $this->belongsTo(Contact::class, 'invoice_to_id');
+        return $this->belongsTo(User::class, 'invoice_to_id');
     }
     
     public function quoteAttachment()

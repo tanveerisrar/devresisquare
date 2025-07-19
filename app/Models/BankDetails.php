@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class BankDetails extends Model
 {
     protected $fillable = [
-        'contact_id',
+        'user_id',
         'account_name',
         'account_no',
         'sort_code',
@@ -17,9 +17,9 @@ class BankDetails extends Model
         'is_primary',
     ];
 
-    public function contact()
+    public function user()
     {
-        return $this->belongsTo(Contact::class);
+        return $this->belongsTo(User::class);
     }
 
 }

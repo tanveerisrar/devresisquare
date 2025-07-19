@@ -20,21 +20,6 @@
             </div>
         </div>
 
-        {{-- Contacts --}}
-        <div class="col-md-6 col-xl-4">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-body d-flex align-items-center">
-                    <div class="me-3 text-success">
-                        <i class="bi bi-person-lines-fill fs-1"></i>
-                    </div>
-                    <div>
-                        <h6 class="mb-1 text-muted">Contacts</h6>
-                        <h4 class="mb-0">{{ $contactsCount }}</h4>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         {{-- Properties --}}
         @canany(['view properties', 'edit properties'])
         <div class="col-md-6 col-xl-4">

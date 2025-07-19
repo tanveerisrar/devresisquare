@@ -2,21 +2,20 @@
 
 namespace App\Http\Controllers\Backend;
 
-use App\Models\Contact;
+use App\Models\User;
 use App\Models\Invoice;
 use App\Models\JobType;
 use App\Models\RepairAssignment;
 use App\Models\RepairCategory;
 use App\Models\RepairHistory;
 use App\Models\RepairIssue;
-use App\Models\RepairIssueContact;
+use App\Models\RepairIssueUser;
 use App\Models\RepairIssueContractorAssignment;
 use App\Models\RepairIssuePropertyManager;
 use App\Models\RepairPhoto;
 use App\Models\TaxRates;
 use App\Models\Tenancy;
 use App\Models\TenantMember;
-use App\Models\User;
 use App\Models\WorkOrder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -116,7 +115,7 @@ class PropertyRepairController
             'property',
             'repairAssignments',
             'repairHistories',
-            'repairIssueContacts',
+            'repairIssueUsers',
             'repairPhotos',
             'repairCategory',
             'repairIssuePropertyManagers',
@@ -128,10 +127,10 @@ class PropertyRepairController
         ]);
         $categories = RepairCategory::all();
         $maxLevel = RepairCategory::max('level');
-        $propertyManagers = Contact::whereHas('category', callback: function ($query) {
+        $propertyManagers = User::whereHas('category', callback: function ($query) {
         $query->where('id', 2);
         })->get();
-        $contractors = Contact::whereHas('category', callback: function ($query) {
+        $contractors = User::whereHas('category', callback: function ($query) {
             $query->where('name', 'Contractor');
         })->get();
         $jobTypes = JobType::getHierarchy();
@@ -214,19 +213,19 @@ class PropertyRepairController
         $repairIssue = RepairIssue::with([
             'repairAssignments',
             'repairHistories',
-            'repairIssueContacts',
+            'repairIssueUsers',
             'repairPhotos',
             'property',  // Eager load the related property
             'invoice',
         ])->findOrFail($id);
         $categories = RepairCategory::all();
         $maxLevel = RepairCategory::max('level');
-        $propertyManagers = Contact::whereHas('category', callback: function ($query) {
+        $propertyManagers = User::whereHas('category', callback: function ($query) {
         $query->where('id', 2);
         })->get();
         $assignedManagers = RepairIssuePropertyManager::where('repair_issue_id', $id)->pluck('property_manager_id')->toArray();
         $contractorAssignments = RepairIssueContractorAssignment::where('repair_issue_id', $id)->get();
-        $contractors = Contact::whereHas('category', callback: function ($query) {
+        $contractors = User::whereHas('category', callback: function ($query) {
             $query->where('name', 'Contractor');
         })->get();
         $jobTypes = JobType::getHierarchy();
@@ -264,7 +263,7 @@ class PropertyRepairController
      *         $repairIssue = RepairIssue::with([
      *             'repairAssignments',
      *             'repairHistories',
-     *             'repairIssueContacts',
+     *             'repairIssueUsers',
      *             'repairPhotos',
      *             'property' // Eager load the related property
      *         ])->findOrFail($id);
@@ -284,7 +283,7 @@ class PropertyRepairController
         $repairIssue = RepairIssue::with([
             'repairAssignments',
             'repairHistories',
-            'repairIssueContacts',
+            'repairIssueUsers',
             'repairPhotos',
             'property',
             'workOrder'
@@ -296,7 +295,7 @@ class PropertyRepairController
         // Get the maximum level in the table
         $maxLevel = RepairCategory::max('level');
         // $propertyManagers = User::ofRole('property_manager')->get();
-        $propertyManagers = Contact::whereHas('category', callback: function ($query) {
+        $propertyManagers = User::whereHas('category', callback: function ($query) {
             $query->where('id', 2);
         })->get();
 
@@ -304,7 +303,7 @@ class PropertyRepairController
 
         $assignedManagers = RepairIssuePropertyManager::where('repair_issue_id', $id)->pluck('property_manager_id')->toArray();
         $contractorAssignments = RepairIssueContractorAssignment::where('repair_issue_id', $id)->get();
-        $contractors = Contact::whereHas('category', callback: function ($query) {
+        $contractors = User::whereHas('category', callback: function ($query) {
             $query->where('name', 'Contractor');
         })->get();
         // $contractors = User::whereHas('role', function ($query) {
@@ -363,7 +362,7 @@ class PropertyRepairController
             'tenant_id' => 'nullable',
             'repair_photos' => 'nullable|string',  // The input is a string of IDs
             'repair_photos.*' => 'nullable|integer|exists:uploads,id',  // Validate each ID
-            'final_contractor_id' => 'nullable|integer|exists:contacts,id',
+            'final_contractor_id' => 'nullable|integer|exists:users,id',
             // Note: Contractor assignments are validated via dynamic rules.
         ]);
 
@@ -655,26 +654,26 @@ class PropertyRepairController
             ->pluck('id')
             ->toArray();
 
-        // Retrieve tenant members associated with those tenancies, with their contact details.
+        // Retrieve tenant members associated with those tenancies, with their user details.
         $tenantMembers = TenantMember::whereIn('tenancy_id', $tenancyIds)
-            ->with('contact')
+            ->with('user')
             ->get();
 
         // Map the results to a unique list of tenants.
         $tenants = $tenantMembers
             ->map(function ($member) {
-                if ($member->contact) {
+                if ($member->user) {
                     return [
-                        'id' => $member->contact->id,
-                        'full_name' => $member->contact->full_name,
-                        'email' => $member->contact->email,
-                        'phone' => $member->contact->phone,
+                        'id' => $member->user->id,
+                        'full_name' => $member->user->full_name,
+                        'email' => $member->user->email,
+                        'phone' => $member->user->phone,
                     ];
                 }
                 return null;
             })
             ->filter()  // Remove any null entries.
-            ->unique('id')  // Ensure unique tenant contacts.
+            ->unique('id')  // Ensure unique tenant users.
             ->values();  // Reset the keys.
 
         return response()->json($tenants);
@@ -713,7 +712,7 @@ class PropertyRepairController
 
         // Fetch necessary data
         $jobTypes = JobType::getHierarchy();
-        $contacts = Contact::all();
+        $users = User::all();
         $taxRates = TaxRates::all();
 
         // Contractor assignment details
@@ -725,7 +724,7 @@ class PropertyRepairController
         $quoteAttachment = $contractorAssignment->quote_attachment ?? null;
 
         // Pass data to the view
-        return view('backend.repair.workorder-invoice', compact('repairIssue', 'workorder', 'invoice', 'contacts', 'taxRates', 'jobTypes', 'contractorCost', 'quoteAttachment', 'mode'));
+        return view('backend.repair.workorder-invoice', compact('repairIssue', 'workorder', 'invoice', 'users', 'taxRates', 'jobTypes', 'contractorCost', 'quoteAttachment', 'mode'));
     }
 
     public function loadForm(Request $request)
@@ -738,7 +737,7 @@ class PropertyRepairController
             'repairIssuePropertyManagers',
             'repairIssueContractorAssignments',
             'repairHistories',
-            'repairIssueContacts',
+            'repairIssueUsers',
             'finalContractor',
             'tenant',
             'workOrder',

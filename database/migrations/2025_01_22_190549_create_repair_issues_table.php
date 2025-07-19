@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('repair_category_id')->constrained('repair_categories');
             $table->json('repair_navigation');
             $table->longText('description');
-            $table->foreignId('tenant_id')->constrained('contacts');
+            $table->foreignId('tenant_id')->constrained('users');
 
             // Preferred availability for repair by Tenant/Owner
             $table->timestamp('tenant_availability')->nullable();
@@ -34,7 +34,7 @@ return new class extends Migration
             $table->enum('priority', ['low', 'medium', 'high', 'critical']);
             $table->string('sub_status');
             $table->string('status');
-            $table->foreignId('final_contractor_id')->constrained('contacts');
+            $table->foreignId('final_contractor_id')->constrained('users');
             $table->string('reference_number', 255);
 
             $table->timestamps();

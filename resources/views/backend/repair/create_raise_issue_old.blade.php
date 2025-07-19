@@ -50,7 +50,7 @@
                             $headers = ['id' => 'id', 'Address', 'Type', 'Availability'];
                             $rows = []; // Start with an empty array of rows
                         @endphp
-                        <x-backend.dynamic-table :headers="$headers" :rows="$rows" class='contact_add_property' />
+                        <x-backend.dynamic-table :headers="$headers" :rows="$rows" class='user_add_property' />
                     </div>
                 </div>
             </div>

@@ -8,9 +8,9 @@ class Nationality extends Model
 {
     protected $fillable = ['name'];
 
-    public function contactDetails()
+    public function userDetails()
     {
-        return $this->hasMany(ContactDetail::class);
+        return $this->hasMany(UserDetail::class);
     }
 
 }

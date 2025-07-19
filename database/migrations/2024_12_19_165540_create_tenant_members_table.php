@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('tenant_members', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('tenancy_id')->nullable(); // Explicitly define type
-            $table->unsignedBigInteger('contact_id')->nullable(); // Explicitly define type
+            $table->unsignedBigInteger('user_id')->nullable(); // Explicitly define type
             // $table->string('name')->nullable();
             // $table->string('email')->nullable();
             // $table->string('phone')->nullable();
@@ -27,7 +27,7 @@ return new class extends Migration
             $table->string('group_id', 255)->nullable(); // Grouping family members
             $table->timestamps();
             $table->foreign('tenancy_id')->references('id')->on('tenancies')->onDelete('set null');
-            $table->foreign('contact_id')->references('id')->on('contacts')->onDelete('set null');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
         });
     }
 

@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('contacts', function (Blueprint $table) {
+        Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('category_id')->constrained('contacts_categories');
+            $table->foreignId('category_id')->constrained('users_categories');
             $table->json('selected_properties')->nullable();
             $table->string('first_name', 55)->nullable();
             $table->string('middle_name', 55)->nullable();
@@ -38,6 +38,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('contacts');
+        Schema::dropIfExists('users');
     }
 };

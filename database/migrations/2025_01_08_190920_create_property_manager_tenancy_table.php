@@ -20,7 +20,7 @@ return new class extends Migration
 
             // Foreign key constraints
             $table->foreign('tenancy_id')->references('id')->on('tenancies')->onDelete('cascade');
-            $table->foreign('property_manager_id')->references('id')->on('contacts')->onDelete('cascade');
+            $table->foreign('property_manager_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('property_id')->references('id')->on('properties')->onDelete('cascade');  // Reference property_id
         });
     }

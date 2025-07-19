@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Backend;
 use App\Models\Tenancy;
 use App\Models\Property;
 use App\Models\Offer;
-use App\Models\Contact;
+use App\Models\User;
 use App\Models\TenantMember;
 use App\Models\TenancyType;
 use App\Models\TenancySubStatus;
@@ -29,11 +29,11 @@ class TenancyController
     // Show the form for creating a new tenancy
     public function create()
     {
-        // Get contacts where category_id is 3 (Tenant)
-        $tenants = Contact::where('category_id', 3)->get();
+        // Get users where category_id is 3 (Tenant)
+        $tenants = User::where('category_id', 3)->get();
 
-        // Get contacts where category_id is 2 (Property Manager)
-        $property_managers = Contact::where('category_id', 2)->get();
+        // Get users where category_id is 2 (Property Manager)
+        $property_managers = User::where('category_id', 2)->get();
 
         // Fetch all tenancy types (if they're stored in a model TenancyType)
         $tenancyTypes = TenancyType::all();
@@ -72,12 +72,12 @@ class TenancyController
             // 'renewal_exempt' => 'nullable|boolean', // Assuming it's a boolean field
             'term_months' => 'nullable|integer',
             'term_days' => 'nullable|integer',
-            'contact_id' => 'required|array', // Validate that the contact_id is an array
-            'contact_id.*' => 'exists:contacts,id', // Ensure each contact_id exists in the contacts table
+            'user_id' => 'required|array', // Validate that the user_id is an array
+            'user_id.*' => 'exists:users,id', // Ensure each user_id exists in the users table
 
-            'is_main_person' => 'required|exists:contacts,id', // Ensure main person is a valid contact ID
+            'is_main_person' => 'required|exists:users,id', // Ensure main person is a valid user ID
             'property_manager' => 'nullable|array', // Ensure property_manager is an array (nullable)
-            'property_manager.*' => 'exists:contacts,id', // Ensure each property manager exists in the contacts table
+            'property_manager.*' => 'exists:users,id', // Ensure each property manager exists in the users table
         ]);
 
         // Manually convert checkbox field
@@ -111,12 +111,12 @@ class TenancyController
         $groupId = 'GROUP_' . $tenancy->id;
 
         // Store multiple TenantMember records
-        foreach ($request->contact_id as $contactId) {
-            // Determine if the contact is the main person
-            $isMainPerson = $contactId == $request->is_main_person;
+        foreach ($request->user_id as $userId) {
+            // Determine if the user is the main person
+            $isMainPerson = $userId == $request->is_main_person;
             TenantMember::create([
                 'tenancy_id' => $tenancy->id,
-                'contact_id' => $contactId,
+                'user_id' => $userId,
                 'is_main_person' => $isMainPerson,
                 // 'is_main_person' => false, // Default or based on logic, set is_main_person flag
                 'group_id' => $groupId, // Set group_id if necessary
@@ -145,11 +145,11 @@ class TenancyController
 
         // Fetch related data needed for the edit form
 
-        // Get all tenants (contacts where category_id is 3)
-        $tenants = Contact::where('category_id', 3)->get();
+        // Get all tenants (users where category_id is 3)
+        $tenants = User::where('category_id', 3)->get();
 
-        // Get all property managers (contacts where category_id is 2)
-        $property_managers = Contact::where('category_id', 2)->get();
+        // Get all property managers (users where category_id is 2)
+        $property_managers = User::where('category_id', 2)->get();
 
         // Fetch all tenancy types
         $tenancyTypes = TenancyType::all();
@@ -164,7 +164,7 @@ class TenancyController
         $tenantMembers = TenantMember::where('tenancy_id', $id)->get();
 
         // Find the main person from the tenant members
-        $mainPersonId = $tenantMembers->where('is_main_person', true)->pluck('contact_id')->first();
+        $mainPersonId = $tenantMembers->where('is_main_person', true)->pluck('user_id')->first();
 
         // Pass all data to the edit view
         return view('backend.tenancies.edit', compact(
@@ -206,12 +206,12 @@ class TenancyController
             'deposit_scheme' => 'nullable|string|max:155',
             'term_months' => 'nullable|integer',
             'term_days' => 'nullable|integer',
-            'contact_id' => 'required|array', // Validate that the contact_id is an array
-            'contact_id.*' => 'exists:contacts,id', // Ensure each contact_id exists in the contacts table
+            'user_id' => 'required|array', // Validate that the user_id is an array
+            'user_id.*' => 'exists:users,id', // Ensure each user_id exists in the users table
 
-            'is_main_person' => 'required|exists:contacts,id', // Ensure main person is a valid contact ID
+            'is_main_person' => 'required|exists:users,id', // Ensure main person is a valid user ID
             'property_manager' => 'nullable|array', // Ensure property_manager is an array (nullable)
-            'property_manager.*' => 'exists:contacts,id', // Ensure each property manager exists in the contacts table
+            'property_manager.*' => 'exists:users,id', // Ensure each property manager exists in the users table
         ]);
 
         // Manually convert checkbox field
@@ -246,12 +246,12 @@ class TenancyController
 
         // Store new TenantMember records
         $groupId = 'GROUP_' . $tenancy->id; // Regenerate group_id
-        foreach ($request->contact_id as $contactId) {
-            // Determine if the contact is the main person
-            $isMainPerson = $contactId == $request->is_main_person;
+        foreach ($request->user_id as $userId) {
+            // Determine if the user is the main person
+            $isMainPerson = $userId == $request->is_main_person;
             TenantMember::create([
                 'tenancy_id' => $tenancy->id,
-                'contact_id' => $contactId,
+                'user_id' => $userId,
                 'is_main_person' => $isMainPerson,
                 'group_id' => $groupId, // Set group_id if necessary
             ]);

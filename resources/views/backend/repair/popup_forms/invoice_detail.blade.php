@@ -12,17 +12,17 @@
                     </div>
         
                     @php
-                        $contact = $invoice->contact ?? null;
+                        $user = $invoice->user ?? null;
                     @endphp
         
                     @if($repairIssue->workOrder->invoice_to === 'Landlord' || $repairIssue->workOrder->invoice_to === 'Tenant' || $repairIssue->workOrder->invoice_to === 'Company')
                     <div class="col-6">
                         <div class="mb-3">
                             <h6>Bill To</h6>
-                            <p><strong>Name:</strong> {{ $contact->name ?? '-' }}</p>
-                            <p><strong>Address:</strong> {{ $contact->address ?? '-' }}</p>
-                            <p><strong>Email:</strong> {{ $contact->email ?? '-' }}</p>
-                            <p><strong>Phone:</strong> {{ $contact->phone ?? '-' }}</p>
+                            <p><strong>Name:</strong> {{ $user->name ?? '-' }}</p>
+                            <p><strong>Address:</strong> {{ $user->address ?? '-' }}</p>
+                            <p><strong>Email:</strong> {{ $user->email ?? '-' }}</p>
+                            <p><strong>Phone:</strong> {{ $user->phone ?? '-' }}</p>
                         </div>
                     </div>
                     @endif

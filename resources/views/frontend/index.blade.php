@@ -26,7 +26,7 @@
             'details' => "Simplify tenancy agreements, track lease terms, and handle renewals seamlessly. Our platform ensures all tenant information is organized and accessible.",
         ],
         [
-            'title' => 'Manage Contacts',
+            'title' => 'Manage Users',
             'details' => "Maintain a comprehensive database of tenants, landlords, and service providers. Efficient communication tools keep everyone informed and connected.",
         ],
         [
@@ -72,7 +72,7 @@
                                 <div class="modal-body">
                                     {{-- Include your reusable form component --}}
                                     <x-form-component action="{{ route('form.submit', 'book_demo') }}" formId="bookDemoForm"
-                                        submitText="Book Now" successMessage="Thank you! We will contact you shortly." />
+                                        submitText="Book Now" successMessage="Thank you! We will user you shortly." />
                                 </div>
                             </div>
                         </div>

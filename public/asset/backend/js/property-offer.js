@@ -441,7 +441,7 @@
         $(document).on('click', '.make-main-btn', function () {
             const id = $(this).data('id');
             const member = $(this).data('member');
-            const contactId = $(this).data('contactid');
+            const userId = $(this).data('userid');
 
             // Send AJAX request to update the main person
             $.ajax({
@@ -450,7 +450,7 @@
                 data: {
                     _token: $('meta[name="csrf-token"]').attr('content'), // CSRF token
                     member: member,
-                    contactId: contactId,
+                    userId: userId,
                 },
                 success: function (response) {
                     if (response.status) {

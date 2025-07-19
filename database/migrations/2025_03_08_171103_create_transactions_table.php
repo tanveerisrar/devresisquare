@@ -18,8 +18,8 @@ return new class extends Migration
             $table->foreignId('invoice_id')->nullable()->constrained('invoices')->onDelete('cascade');
             $table->foreignId('transaction_category_id')->nullable()->constrained('transaction_categories')->onDelete('set null'); // Salary, Advance Payment, Utility, etc.
             $table->foreignId('property_id')->nullable()->constrained('properties')->onDelete('set null');
-            $table->foreignId('payer_id')->nullable()->constrained('contacts')->onDelete('set null'); // Tenant/Landlord/Company
-            $table->foreignId('payee_id')->nullable()->constrained('contacts')->onDelete('set null'); // Contractor/Supplier
+            $table->foreignId('payer_id')->nullable()->constrained('users')->onDelete('set null'); // Tenant/Landlord/Company
+            $table->foreignId('payee_id')->nullable()->constrained('users')->onDelete('set null'); // Contractor/Supplier
 
             $table->date('transaction_date');
 

@@ -14,7 +14,7 @@
 @section('workorder_to')
     <strong class="fw-bold">Bill To:</strong>
     <address class="text-muted">
-        {!! get_contact_address_name_by_id($workorder->repairIssue->finalContractor->id) !!}
+        {!! get_user_address_name_by_id($workorder->repairIssue->finalContractor->id) !!}
     </address>
 @endsection
 {{-- {{ dd($workorder->repairIssue->finalContractor->id) }} --}}

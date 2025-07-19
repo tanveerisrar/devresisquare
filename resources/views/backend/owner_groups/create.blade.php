@@ -12,13 +12,13 @@
               <input type="hidden" name="property_id" class="form-control" value="">
 
               <div class="form-group">
-                <button type="button" class="btn btn-outline-primary btn-sm" id="addContactBtn">
-                  Add New Contact
+                <button type="button" class="btn btn-outline-primary btn-sm" id="addUserBtn">
+                  Add New User
                 </button>
-                <label for="contact_id">Contact</label>
-                <select name="contact_id" id="contact_id" class="form-control" required>
-                  @foreach($contacts as $contact)
-                    <option value="{{ $contact->id }}">{{ $contact->full_name }}</option>
+                <label for="user_id">User</label>
+                <select name="user_id" id="user_id" class="form-control" required>
+                  @foreach($users as $user)
+                    <option value="{{ $user->id }}">{{ $user->full_name }}</option>
                   @endforeach
                 </select>
               </div>
@@ -61,24 +61,24 @@
             </form>
           </div>
 
-          <!-- Add Contact Form (Step 2) -->
-          <div id="addContactFormContainer" style="display: none;">
-            <form id="addContactForm">
+          <!-- Add User Form (Step 2) -->
+          <div id="addUserFormContainer" style="display: none;">
+            <form id="addUserForm">
               @csrf
               <input type="hidden" class="form-control" id="category_id" name="category_id" value="1">
               <div class="mb-3">
-                    <label for="contact_name" class="form-label">Full Name</label>
-                    <input type="text" class="form-control" id="contact_name" name="full_name" required>
+                    <label for="user_name" class="form-label">Full Name</label>
+                    <input type="text" class="form-control" id="user_name" name="full_name" required>
                 </div>
                 <div class="mb-3">
-                    <label for="contact_email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="contact_email" name="email" required>
+                    <label for="user_email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="user_email" name="email" required>
                 </div>
                 <div class="mb-3">
-                    <label for="contact_phone" class="form-label">Phone</label>
-                    <input type="text" class="form-control" id="contact_phone" name="phone" required>
+                    <label for="user_phone" class="form-label">Phone</label>
+                    <input type="text" class="form-control" id="user_phone" name="phone" required>
                 </div>
-              <button type="submit" class="btn btn-primary">Save Contact</button>
+              <button type="submit" class="btn btn-primary">Save User</button>
               <button type="button" class="btn btn-secondary" id="backToMainForm">Back</button>
             </form>
           </div>

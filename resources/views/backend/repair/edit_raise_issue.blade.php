@@ -63,7 +63,7 @@
                                 // $headers = ['Address', 'Type', 'Availability', 'Actions'];
                                 $rows = []; // Initially empty
                             @endphp
-                            <x-backend.dynamic-table :headers="$headers" :rows="$rows" :actionBtn="False" class="contact_add_property" />
+                            <x-backend.dynamic-table :headers="$headers" :rows="$rows" :actionBtn="False" class="user_add_property" />
                         </div>
                     </div>
                 </div>
@@ -570,20 +570,20 @@
 
         function loadInvoiceToDetails(invoiceTo, propertyId) {
             let categoryId = null;
-            $("#contactDetails").hide();
+            $("#userDetails").hide();
             let existingInvoiceToId = $("#existingInvoiceToId").val(); // Get preselected invoice_to_id
             // console.log('Existing ID: ' + existingInvoiceToId);
 
             if (invoiceTo === "Landlord") {
                 categoryId = 4; // Landlord
-                var endpoint = "{{ route('admin.getContactsByProperty', ['propertyId' => 'PROPERTYID', 'categoryId' => 'CATEGORYID']) }}";
+                var endpoint = "{{ route('admin.getUsersByProperty', ['propertyId' => 'PROPERTYID', 'categoryId' => 'CATEGORYID']) }}";
                 endpoint = endpoint.replace('PROPERTYID', propertyId).replace('CATEGORYID', categoryId);
             } else if (invoiceTo === "Tenant") {
                 var endpoint = "{{ route('admin.getTenantsByProperty', ['propertyId' => 'PROPERTYID']) }}";
                 endpoint = endpoint.replace('PROPERTYID', propertyId);
             } else {
                 $("#invoiceToContainer").html('');
-                $("#contactDetails").hide();
+                $("#userDetails").hide();
                 return;
             }
 
@@ -642,7 +642,7 @@
             updateStatusOptions(selectedInvoiceTo);
         }
 
-        // Show Contact Details When a Contact is Selected
+        // Show User Details When a User is Selected
         $(document).on("change", "#invoiceToSelect", function () {
             var selectedOption = $(this).find(':selected');
             // var name = selectedOption.data('name');
@@ -651,12 +651,12 @@
             var email = selectedOption.data('email');
 
             if (address) {
-                $('#contactAddress').text(address);
-                $('#contactPhone').text(phone);
-                $('#contactEmail').text(email);
-                $('#contactDetails').show();
+                $('#userAddress').text(address);
+                $('#userPhone').text(phone);
+                $('#userEmail').text(email);
+                $('#userDetails').show();
             } else {
-                $('#contactDetails').hide();
+                $('#userDetails').hide();
             }
         });
 
@@ -805,7 +805,7 @@
         // Function to fetch property details by IDs .. <td><button class="btn btn-danger remove-btn">Remove</button></td>
         function searchPropertiesByIds(propertyIds) {
             $.ajax({
-                url: '{{ route('admin.contacts.properties.search') }}',
+                url: '{{ route('admin.users.properties.search') }}',
                 method: 'GET',
                 data: { ids: propertyIds },
                 success: function(response) {

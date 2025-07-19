@@ -91,10 +91,10 @@
 					
 					<td class="text-right" style="line-height:22px;">
 					  <p style="font-size:18px; color:#c38127; padding-bottom:20px; line-height:40px;"><b>Atfleurs</b></p>
-					  <p style="padding-top:30px;"><b>{{  translate('GSTIN') }}:</b> {{ get_setting('contact_gst') }}</p>
-					  <p><b>{{  translate('CIN No') }}:</b> {{ get_setting('contact_cin') }}</p>
-					  <p><b>{{  translate('PAN') }}:</b> {{ get_setting('contact_pan') }}</p>
-					  <p><b>{{  translate('Email') }}:</b> {{ get_setting('contact_email') }}</p>
+					  <p style="padding-top:30px;"><b>{{  translate('GSTIN') }}:</b> {{ get_setting('user_gst') }}</p>
+					  <p><b>{{  translate('CIN No') }}:</b> {{ get_setting('user_cin') }}</p>
+					  <p><b>{{  translate('PAN') }}:</b> {{ get_setting('user_pan') }}</p>
+					  <p><b>{{  translate('Email') }}:</b> {{ get_setting('user_email') }}</p>
 					</td>
 				</tr>
 			</table>

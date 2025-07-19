@@ -3,26 +3,26 @@
         @csrf
         <input type="hidden" name="property_id" class="form-control" value="{{ old('property_id', $ownerGroup->property_id) }}">
 
-        <button type="button" class="d-flex float-end btn btn-outline-primary btn-sm" id="addContactBtn">Add New Contact</button>
+        <button type="button" class="d-flex float-end btn btn-outline-primary btn-sm" id="addUserBtn">Add New User</button>
 
         <div class="form-group">
-            <label for="contact_id">Contacts</label>
-            <select name="contact_id[]" id="contact_id" class="form-control select2" multiple="multiple" required>
-                @foreach($contacts as $contact)
-                    <option value="{{ $contact->id }}"
-                        @if(in_array($contact->id, $selectedContacts)) selected @endif>
-                        {{ $contact->full_name }}
+            <label for="user_id">Users</label>
+            <select name="user_id[]" id="user_id" class="form-control select2" multiple="multiple" required>
+                @foreach($users as $user)
+                    <option value="{{ $user->id }}"
+                        @if(in_array($user->id, $selectedUsers)) selected @endif>
+                        {{ $user->full_name }}
                     </option>
                 @endforeach
             </select>
         </div>
 
-        <div id="contact-options" class="mt-3">
-            @foreach($ownerGroup->ownerGroupContacts as $ownerGroupContact)
+        <div id="user-options" class="mt-3">
+            @foreach($ownerGroup->ownerGroupUsers as $ownerGroupUser)
                 <div class="form-check">
-                    <input type="radio" name="is_main" value="{{ $ownerGroupContact->contact->id }}" id="is_main_{{ $ownerGroupContact->contact->id }}" class="form-check-input"
-                    @if($ownerGroupContact->is_main) checked @endif>
-                    <label for="is_main_{{ $ownerGroupContact->contact->id }}" class="form-check-label">{{ $ownerGroupContact->contact->full_name }}</label>
+                    <input type="radio" name="is_main" value="{{ $ownerGroupUser->user->id }}" id="is_main_{{ $ownerGroupUser->user->id }}" class="form-check-input"
+                    @if($ownerGroupUser->is_main) checked @endif>
+                    <label for="is_main_{{ $ownerGroupUser->user->id }}" class="form-check-label">{{ $ownerGroupUser->user->full_name }}</label>
                 </div>
             @endforeach
         </div>
@@ -65,23 +65,23 @@
     </form>
 </div>
 
-<div id="addContactFormContainer" style="display: none;">
-    <form id="addContactForm">
+<div id="addUserFormContainer" style="display: none;">
+    <form id="addUserForm">
         @csrf
         <input type="hidden" class="form-control" id="category_id" name="category_id" value="1">
         <div class="mb-3">
-            <label for="contact_name" class="form-label">Full Name</label>
-            <input type="text" class="form-control" id="contact_name" name="full_name" required>
+            <label for="user_name" class="form-label">Full Name</label>
+            <input type="text" class="form-control" id="user_name" name="full_name" required>
         </div>
         <div class="mb-3">
-            <label for="contact_email" class="form-label">Email</label>
-            <input type="email" class="form-control" id="contact_email" name="email" required>
+            <label for="user_email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="user_email" name="email" required>
         </div>
         <div class="mb-3">
-            <label for="contact_phone" class="form-label">Phone</label>
-            <input type="text" class="form-control" id="contact_phone" name="phone" required>
+            <label for="user_phone" class="form-label">Phone</label>
+            <input type="text" class="form-control" id="user_phone" name="phone" required>
         </div>
-        <button type="submit" class="btn btn-primary">Save Contact</button>
+        <button type="submit" class="btn btn-primary">Save User</button>
         <button type="button" class="btn btn-secondary" id="backToMainForm">Back</button>
     </form>
 </div>
@@ -95,7 +95,7 @@
         // confirmEdit();
         if ($('input[name="is_main"]:checked').length === 0) {
             e.preventDefault(); // Prevent form submission
-            alert('Please select a main contact.'); // Show alert message
+            alert('Please select a main user.'); // Show alert message
         }
     });
 

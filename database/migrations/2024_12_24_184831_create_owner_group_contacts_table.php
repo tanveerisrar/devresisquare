@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('owner_group_contacts', function (Blueprint $table) {
+        Schema::create('owner_group_users', function (Blueprint $table) {
             $table->id();
             $table->foreignId('owner_group_id')->constrained('owner_group')->onDelete('cascade');
-            $table->unsignedBigInteger('contact_id')->nullable(); // Ensure it is nullable
-            $table->foreign('contact_id')->references('id')->on('contacts')->onDelete('set null'); // Manual foreign key definition
+            $table->unsignedBigInteger('user_id')->nullable(); // Ensure it is nullable
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('set null'); // Manual foreign key definition
             $table->boolean('is_main')->default(false);
             $table->timestamps();
 
@@ -42,7 +42,7 @@ return new class extends Migration
         Schema::table('owner_group', function (Blueprint $table) {
             // Drop foreign key constraints before dropping the table
             $table->dropForeign(['owner_group_id']);
-            $table->dropForeign(['contact_id']);
+            $table->dropForeign(['user_id']);
 
             $table->dropForeign(['added_by']);
             $table->dropForeign(['updated_by']);
@@ -58,6 +58,6 @@ return new class extends Migration
 
         });
 
-        Schema::dropIfExists('owner_group_contacts');
+        Schema::dropIfExists('owner_group_users');
     }
 };

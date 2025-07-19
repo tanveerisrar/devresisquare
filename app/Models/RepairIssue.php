@@ -87,19 +87,19 @@ class RepairIssue extends Model
         return $this->hasMany(RepairHistory::class);
     }
 
-    public function repairIssueContacts()
+    public function repairIssueUsers()
     {
-        return $this->hasMany(RepairIssueContact::class);
+        return $this->hasMany(RepairIssueUser::class);
     }
 
     public function finalContractor()
     {
-        return $this->belongsTo(Contact::class, 'final_contractor_id');
+        return $this->belongsTo(User::class, 'final_contractor_id');
     }
 
     public function tenant()
     {
-        return $this->belongsTo(Contact::class, 'tenant_id')
+        return $this->belongsTo(User::class, 'tenant_id')
             ->where('category_id', 3);
     }
     // public function workOrders()

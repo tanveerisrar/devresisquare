@@ -133,14 +133,6 @@ class Event extends Model implements Auditable
     }
 
     /**
-     * All the Contacts attached to this Event.
-     */
-    public function contacts()
-    {
-        return $this->morphedByMany(Contact::class, 'eventable');
-    }
-
-    /**
      * All the Users attached to this Event.
      */
     public function users()

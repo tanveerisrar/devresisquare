@@ -78,7 +78,7 @@
 
         <div class="col-12">
             <div class="form-success-message mt-2 text-success d-none">
-                {{ $successMessage ?? 'Thank you! We will contact you soon.' }}
+                {{ $successMessage ?? 'Thank you! We will user you soon.' }}
             </div>
         </div>
     </div>

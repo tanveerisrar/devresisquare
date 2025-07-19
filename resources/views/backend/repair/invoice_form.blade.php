@@ -34,15 +34,15 @@
                 <div class="col-6">
                     <!-- Hidden Fields -->
                     <input type="hidden" id="existingInvoiceToId"
-                        value="{{ old('contact_id', $invoice->contact_id ?? '') }}">
+                        value="{{ old('user_id', $invoice->user_id ?? '') }}">
 
-                    <!-- Contact Details (Hidden Initially) -->
-                    <div id="contactDetails" class="mt-3" style="display: none;">
+                    <!-- User Details (Hidden Initially) -->
+                    <div id="userDetails" class="mt-3" style="display: none;">
                         <h6>Bill To</h6>
-                        <p><strong>Name:</strong> <span id="contactName"></span></p>
-                        <p><strong>Address:</strong> <span id="contactAddress"></span></p>
-                        <p><strong>Email:</strong> <span id="contactEmail"></span></p>
-                        <p><strong>Phone:</strong> <span id="contactPhone"></span></p>
+                        <p><strong>Name:</strong> <span id="userName"></span></p>
+                        <p><strong>Address:</strong> <span id="userAddress"></span></p>
+                        <p><strong>Email:</strong> <span id="userEmail"></span></p>
+                        <p><strong>Phone:</strong> <span id="userPhone"></span></p>
                     </div>
                 </div>
             </div>

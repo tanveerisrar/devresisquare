@@ -47,11 +47,11 @@ class OwnerGroup extends Model
     }
 
     /**
-     * Relationship with the ownerGroupContacts model.
-     * An OwnerGroup can have many ownerGroupContacts.
+     * Relationship with the ownerGroupUsers model.
+     * An OwnerGroup can have many ownerGroupUsers.
     */
-    public function ownerGroupContacts(): HasMany
+    public function ownerGroupUsers(): HasMany
     {
-        return $this->hasMany(OwnerGroupContact::class);
+        return $this->hasMany(OwnerGroupUser::class);
     }
 }

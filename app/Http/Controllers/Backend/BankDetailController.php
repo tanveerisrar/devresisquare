@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Models\BankDetails;
-use App\Models\Contact;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class BankDetailController 
@@ -14,7 +14,7 @@ class BankDetailController
     public function store(Request $request)
     {
         $data = $request->validate([
-            'contact_id'    => 'required|exists:contacts,id',
+            'user_id'    => 'required|exists:users,id',
             'account_name'  => 'required|string|max:255',
             'account_no'    => 'required|string|max:255',
             'sort_code'     => 'required|string|max:255',
@@ -29,13 +29,13 @@ class BankDetailController
         $data['is_primary'] = $request->has('is_primary');
 
         if (!empty($data['is_primary'])) {
-            // Set all others as non-primary for the contact
-            BankDetails::where('contact_id', $data['contact_id'])->update(['is_primary' => false]);
+            // Set all others as non-primary for the user
+            BankDetails::where('user_id', $data['user_id'])->update(['is_primary' => false]);
         }
 
         if ($data['bank_detail_id'] ?? false) {
             // Update existing bank detail
-            $bank = BankDetails::where('contact_id', $data['contact_id'])
+            $bank = BankDetails::where('user_id', $data['user_id'])
                     ->findOrFail($data['bank_detail_id']);
             $bank->update($data);
         } else {

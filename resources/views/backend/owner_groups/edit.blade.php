@@ -11,11 +11,11 @@
         <input type="hidden" name="property_id" class="form-control" value="{{ $ownerGroup->property_id }}">
 
         <div class="form-group">
-            <label for="contact_id">Contact</label>
-            <select name="contact_id" id="contact_id" class="form-control" required>
-                @foreach($contacts as $contact)
-                    <option value="{{ $contact->id }}" {{ $contact->id == $ownerGroup->contact_id ? 'selected' : '' }}>
-                        {{ $contact->full_name }}
+            <label for="user_id">User</label>
+            <select name="user_id" id="user_id" class="form-control" required>
+                @foreach($users as $user)
+                    <option value="{{ $user->id }}" {{ $user->id == $ownerGroup->user_id ? 'selected' : '' }}>
+                        {{ $user->full_name }}
                     </option>
                 @endforeach
             </select>

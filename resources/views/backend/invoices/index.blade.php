@@ -8,7 +8,7 @@
     <form method="GET" action="{{ route('admin.invoices.index') }}" class="mb-3">
         <div class="row justify-content-end">
             {{-- <div class="col-md-4">
-                <input type="text" name="search" class="form-control" placeholder="Search Invoice No, Contact, Property..." 
+                <input type="text" name="search" class="form-control" placeholder="Search Invoice No, User, Property..." 
                        value="{{ request('search') }}">
             </div> --}}
             <div class="col-md-4">
@@ -36,7 +36,7 @@
                 <th>Invoice No</th>
                 <th>Work Order</th>
                 <th>Property</th>
-                <th>Contact</th>
+                <th>User</th>
                 <th>Total Amount</th>
                 <th>Status</th>
                 <th>Action</th>
@@ -48,7 +48,7 @@
                 <td>{{ $invoice->invoice_number }}</td>
                 <td>{{ optional($invoice->workOrder)->works_order_no }}</td>
                 <td>{{ getPropertyDetails($invoice->property_id, ['prop_ref_no', 'prop_name', 'line_1', 'line_2', 'city', 'country']) }}</td>
-                <td>{{ optional($invoice->contact)->full_name ?? 'N/A' }}</td>
+                <td>{{ optional($invoice->user)->full_name ?? 'N/A' }}</td>
                 <td>£{{ number_format($invoice->total_amount, 2) }}</td>
                 <td>
                     @php

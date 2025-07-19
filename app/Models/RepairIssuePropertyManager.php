@@ -30,6 +30,6 @@ class RepairIssuePropertyManager extends Model
      */
     public function propertyManager()
     {
-        return $this->belongsTo(Contact::class, 'property_manager_id');
+        return $this->belongsTo(User::class, 'property_manager_id');
     }
 }

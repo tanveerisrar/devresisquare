@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('contact_details', function (Blueprint $table) {
+        Schema::create('user_details', function (Blueprint $table) {
             $table->id(); // Primary Key
-            $table->unsignedBigInteger('contact_id'); // Foreign key to contacts table
+            $table->unsignedBigInteger('user_id'); // Foreign key to users table
             $table->string('employment_status')->nullable(); // Employment Status
             $table->string('business_name')->nullable(); // Business Name (if applicable)
             $table->string('registered_address')->nullable(); // Business Name (if applicable)
@@ -44,7 +44,7 @@ return new class extends Migration
             $table->string('pi_reference_number')->nullable()->after('pi_insurance');
             $table->string('pi_certificate')->nullable()->after('pi_reference_number');
 
-            // contact compliance fields
+            // user compliance fields
             $table->unsignedBigInteger('nationality_id')->nullable();
             $table->date('visa_expiry')->nullable();
             $table->string('passport_no')->nullable();
@@ -56,7 +56,7 @@ return new class extends Migration
             $table->timestamps();
 
             // Foreign key constraint
-            $table->foreign('contact_id')->references('id')->on('contacts')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('checked_by_user')->references('id')->on('users')->onDelete('set null');
             $table->foreign('nationality_id')->references('id')->on('nationalities')->onDelete('set null');
         });
@@ -67,6 +67,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('contact_details');
+        Schema::dropIfExists('user_details');
     }
 };

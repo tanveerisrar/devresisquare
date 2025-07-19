@@ -5,13 +5,13 @@
         <input type="hidden" name="property_id" class="form-control" value="">
 
         <div class="form-group">
-            <button type="button" class="btn btn-outline-primary btn-sm" id="addContactBtn">
+            <button type="button" class="btn btn-outline-primary btn-sm" id="addUserBtn">
                 Quick Add New Tenant
             </button>
             <label for="tenant_id">Select Tenants</label>
-            <select name="contact_id[]" id="tenant_id" multiple class="form-control select2" required>
-                @foreach ($tenants as $contact)
-                    <option value="{{ $contact->id }}">{{ $contact->full_name }}</option>
+            <select name="user_id[]" id="tenant_id" multiple class="form-control select2" required>
+                @foreach ($tenants as $user)
+                    <option value="{{ $user->id }}">{{ $user->full_name }}</option>
                 @endforeach
             </select>
         </div>
@@ -222,24 +222,24 @@
     </form>
 </div>
 
-<!-- Add Contact Form (Step 2) -->
-<div id="addContactFormContainer" style="display: none;">
-    <form id="addContactForm">
+<!-- Add User Form (Step 2) -->
+<div id="addUserFormContainer" style="display: none;">
+    <form id="addUserForm">
         @csrf
         <input type="hidden" class="form-control" id="category_id" name="category_id" value="3">
         <div class="mb-3">
-            <label for="contact_name" class="form-label">Full Name</label>
-            <input type="text" class="form-control" id="contact_name" name="full_name" required>
+            <label for="user_name" class="form-label">Full Name</label>
+            <input type="text" class="form-control" id="user_name" name="full_name" required>
         </div>
         <div class="mb-3">
-            <label for="contact_email" class="form-label">Email</label>
-            <input type="email" class="form-control" id="contact_email" name="email" required>
+            <label for="user_email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="user_email" name="email" required>
         </div>
         <div class="mb-3">
-            <label for="contact_phone" class="form-label">Phone</label>
-            <input type="text" class="form-control" id="contact_phone" name="phone" required>
+            <label for="user_phone" class="form-label">Phone</label>
+            <input type="text" class="form-control" id="user_phone" name="phone" required>
         </div>
-        <button type="submit" class="btn btn-primary">Save Contact</button>
+        <button type="submit" class="btn btn-primary">Save User</button>
         <button type="button" class="btn btn-secondary" id="backToMainForm">Back</button>
     </form>
 </div>
@@ -251,7 +251,7 @@
     $('form').on('submit', function(e) {
         if ($('input[name="is_main_person"]:checked').length === 0) {
             e.preventDefault(); // Prevent form submission
-            alert('Please select a main contact.'); // Show alert message
+            alert('Please select a main user.'); // Show alert message
         }
     });
     $(document).on('change', '#depositService', function () {

@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -9,10 +8,34 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
     use Notifiable;
-    
     use HasRoles;
 
-    protected $fillable = ['name', 'email', 'password'];
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'category_id',
+        'selected_properties',
+        'first_name',
+        'middle_name',
+        'last_name',
+        'phone',
+        'email',
+        'address_line_1',
+        'address_line_2',
+        'postcode',
+        'city',
+        'country',
+        'status',
+        'quick_step',
+        'company_id',
+        'branch_id',
+        'designation_id',
+        'can_login',
+        'created_by',
+        'updated_by',
+    ];
+
     protected $hidden = ['password', 'remember_token'];
 
     /*public function role()
@@ -77,8 +100,93 @@ class User extends Authenticatable
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function parent()
+    // public function parent()
+    // {
+    //     return $this->belongsTo(User::class, 'parent_id');
+    // }
+
+    // Relationship with UserCategory model
+    public function category()
     {
-        return $this->belongsTo(User::class, 'parent_id');
+        return $this->belongsTo(UserCategory::class, 'category_id');
+    }
+
+    // Relationship with UserAttribute model
+    public function details()
+    {
+        return $this->hasOne(UserDetail::class);
+    }
+
+    // Define the many-to-many relationship with Tenancy
+    public function tenancies()
+    {
+        return $this->belongsToMany(Tenancy::class, 'property_manager_tenancy', 'property_manager_id', 'tenancy_id');
+    }
+
+    public function repairIssues()
+    {
+        return $this->hasMany(RepairIssue::class, 'final_contractor_id');
+    }
+
+    public function tenantMembers()
+    {
+        return $this->hasMany(TenantMember::class, 'user_id');
+    }
+
+    // whenever first_name is set, rebuild name
+    public function setFirstNameAttribute($value)
+    {
+        $this->attributes['first_name'] = $value;
+        $this->rebuildName();
+    }
+
+    // same for middle name
+    public function setMiddleNameAttribute($value)
+    {
+        $this->attributes['middle_name'] = $value;
+        $this->rebuildName();
+    }
+
+    // and last name
+    public function setLastNameAttribute($value)
+    {
+        $this->attributes['last_name'] = $value;
+        $this->rebuildName();
+    }
+
+    // helper to trim and set name
+    protected function rebuildName()
+    {
+        $parts = [
+            $this->attributes['first_name'] ?? '',
+            $this->attributes['middle_name'] ?? '',
+            $this->attributes['last_name'] ?? '',
+        ];
+        $this->attributes['name'] = trim(implode(' ', array_filter($parts)));
+    }
+
+    public function bankDetails()
+    {
+        return $this->hasMany(BankDetails::class);
+    }
+
+    // public function notes()
+    // {
+    //     return $this->hasMany(Notes::class);
+    // }
+
+    public function notes()
+    {
+        return $this->morphMany(Notes::class, 'noteable');
+    }
+
+    public function documents()
+    {
+        return $this->morphMany(Document::class, 'documentable');
+    }
+
+    public function events()
+    {
+        return $this->morphToMany(Event::class, 'eventable');
     }
 }

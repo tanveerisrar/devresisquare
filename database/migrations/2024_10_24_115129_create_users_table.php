@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('password');
             $table->rememberToken();
 
-            $table->foreignId('category_id')->constrained('contacts_categories')->onDelete('set null');
+            $table->foreignId('category_id')->constrained('users_categories')->onDelete('set null');
             $table->json('selected_properties')->nullable();
             $table->string('first_name', 55)->nullable();
             $table->string('middle_name', 55)->nullable();

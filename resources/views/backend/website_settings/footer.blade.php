@@ -19,7 +19,7 @@
     <div class="card-body">
         <div class="row gutters-10">
             <div class="col-lg-6">
-                <!-- Contact Info Widget -->
+                <!-- User Info Widget -->
                 <div class="card shadow-none bg-light mb-3">
                     <div class="card-header bg-secondary text-white">
                         <h6 class="mb-0">Invoice Info Widget</h6>
@@ -28,23 +28,23 @@
                         <form action="{{ route('business_settings.update') }}" method="POST" enctype="multipart/form-data">
                             @csrf
 
-                            <!-- Contact Address -->
+                            <!-- User Address -->
                             <div class="form-group mb-3">
-                                <label for="company_address">Contact Address</label>
+                                <label for="company_address">User Address</label>
                                 <input type="hidden" name="types[]" value="company_address">
                                 <input type="text" class="form-control" id="company_address" placeholder="Address" name="company_address" value="{{ get_setting('company_address', null) }}">
                             </div>
 
-                            <!-- Contact Phone -->
+                            <!-- User Phone -->
                             <div class="form-group mb-3">
-                                <label for="company_phone">Contact Phone</label>
+                                <label for="company_phone">User Phone</label>
                                 <input type="hidden" name="types[]" value="company_phone">
                                 <input type="text" class="form-control" id="company_phone" placeholder="Phone" name="company_phone" value="{{ get_setting('company_phone') }}">
                             </div>
 
-                            <!-- Contact Email -->
+                            <!-- User Email -->
                             <div class="form-group mb-3">
-                                <label for="company_email">Contact Email</label>
+                                <label for="company_email">User Email</label>
                                 <input type="hidden" name="types[]" value="company_email">
                                 <input type="text" class="form-control" id="company_email" placeholder="Email" name="company_email" value="{{ get_setting('company_email') }}">
                             </div>
@@ -58,34 +58,34 @@
                 </div>
             </div>
             <div class="col-lg-6">
-                <!-- Contact Info Widget -->
+                <!-- User Info Widget -->
                 <div class="card shadow-none bg-light mb-3">
                     <div class="card-header bg-secondary text-white">
-                        <h6 class="mb-0">Contact Info Widget</h6>
+                        <h6 class="mb-0">User Info Widget</h6>
                     </div>
                     <div class="card-body">
                         <form action="{{ route('business_settings.update') }}" method="POST" enctype="multipart/form-data">
                             @csrf
 
-                            <!-- Contact Address -->
+                            <!-- User Address -->
                             <div class="form-group mb-3">
-                                <label for="contact_address">Contact Address</label>
-                                <input type="hidden" name="types[]" value="contact_address">
-                                <input type="text" class="form-control" id="contact_address" placeholder="Address" name="contact_address" value="{{ get_setting('contact_address', null) }}">
+                                <label for="user_address">User Address</label>
+                                <input type="hidden" name="types[]" value="user_address">
+                                <input type="text" class="form-control" id="user_address" placeholder="Address" name="user_address" value="{{ get_setting('user_address', null) }}">
                             </div>
 
-                            <!-- Contact Phone -->
+                            <!-- User Phone -->
                             <div class="form-group mb-3">
-                                <label for="contact_phone">Contact Phone</label>
-                                <input type="hidden" name="types[]" value="contact_phone">
-                                <input type="text" class="form-control" id="contact_phone" placeholder="Phone" name="contact_phone" value="{{ get_setting('contact_phone') }}">
+                                <label for="user_phone">User Phone</label>
+                                <input type="hidden" name="types[]" value="user_phone">
+                                <input type="text" class="form-control" id="user_phone" placeholder="Phone" name="user_phone" value="{{ get_setting('user_phone') }}">
                             </div>
 
-                            <!-- Contact Email -->
+                            <!-- User Email -->
                             <div class="form-group mb-3">
-                                <label for="contact_email">Contact Email</label>
-                                <input type="hidden" name="types[]" value="contact_email">
-                                <input type="text" class="form-control" id="contact_email" placeholder="Email" name="contact_email" value="{{ get_setting('contact_email') }}">
+                                <label for="user_email">User Email</label>
+                                <input type="hidden" name="types[]" value="user_email">
+                                <input type="text" class="form-control" id="user_email" placeholder="Email" name="user_email" value="{{ get_setting('user_email') }}">
                             </div>
 
                             <!-- Submit Button -->

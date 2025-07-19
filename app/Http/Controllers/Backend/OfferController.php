@@ -6,8 +6,8 @@ use App\Models\Offer;
 use App\Models\Property;
 use App\Models\Tenancy;
 use App\Models\TenantMember;
-use App\Models\Contact;
-use App\Models\ContactDetail;
+use App\Models\User;
+use App\Models\UserDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -55,8 +55,8 @@ class OfferController
         $tenantIndex = 1;
 
         while ($request->has("tenantName_{$tenantIndex}")) {
-            // Create a new contact for each tenant
-            $contact = Contact::create([
+            // Create a new user for each tenant
+            $user = User::create([
                 'category_id' => 3,
                 'full_name' => $request->input("tenantName_{$tenantIndex}"),
                 'phone' => $request->input("tenantPhone_{$tenantIndex}"),
@@ -66,9 +66,9 @@ class OfferController
                 'added_by' => Auth::id(),    // Assuming authenticated user adds the record
             ]);
 
-            // Create corresponding contact details (tenancy related information)
-            ContactDetail::create([
-                'contact_id' => $contact->id,
+            // Create corresponding user details (tenancy related information)
+            UserDetail::create([
+                'user_id' => $user->id,
                 'employment_status' => $request->input("employmentStatus_{$tenantIndex}"),
                 'business_name' => $request->input("businessName_{$tenantIndex}"),
                 'guarantee' => convert_to_boolean($request->input("guarantee_{$tenantIndex}")),
@@ -76,9 +76,9 @@ class OfferController
                 'poor_credit' => convert_to_boolean($request->input("poorCredit_{$tenantIndex}")),
             ]);
 
-            // Add the contact ID to the $contactIds array, with mainPerson flag as true/false
+            // Add the user ID to the $userIds array, with mainPerson flag as true/false
             $isMainPerson = $request->input("mainPerson_{$tenantIndex}") == 'on' ? true : false;
-            $contactIds[$contact->id] = $isMainPerson;
+            $userIds[$user->id] = $isMainPerson;
 
             // $tenantDetails[] = [
             //     'tenantName' => $request->input("tenantName_{$tenantIndex}"),
@@ -102,7 +102,7 @@ class OfferController
             'deposit' => $request->input('deposit'),
             'term' => $request->input('term'),
             'move_in_date' => $request->input('moveInDate'),
-            'tenant_details' => json_encode($contactIds),  // Store tenant details as JSON
+            'tenant_details' => json_encode($userIds),  // Store tenant details as JSON
             // 'tenant_details' => json_encode($tenantDetails),  // Store tenant details as JSON
             'status' => 'Pending',  // Default status for the offer
         ]);
@@ -155,21 +155,21 @@ class OfferController
         // Decode tenant details stored as JSON in the 'tenant_details' field
         $tenantDetails = collect(json_decode($offer->tenant_details, true));
 
-        // Ensure that the 'member' key is provided in the request and contains the 'contactId'
-        if (!$request->has('contactId')) {
-            return response()->json(['status' => false, 'message' => 'Contact ID is missing in the request.']);
+        // Ensure that the 'member' key is provided in the request and contains the 'userId'
+        if (!$request->has('userId')) {
+            return response()->json(['status' => false, 'message' => 'User ID is missing in the request.']);
         }
 
-        // The provided 'contactId' will be used to identify the tenant
-        $contactId = $request->contactId;
+        // The provided 'userId' will be used to identify the tenant
+        $userId = $request->userId;
 
-        // Update main person flag based on the provided contact ID
+        // Update main person flag based on the provided user ID
         foreach ($tenantDetails as $key => $isMain) {
             // Reset all mainPerson flags to false first
             $tenantDetails[$key] = false;
 
-            // Set mainPerson flag to true for the tenant whose contact ID matches
-            if ($key == $contactId) {
+            // Set mainPerson flag to true for the tenant whose user ID matches
+            if ($key == $userId) {
                 $tenantDetails[$key] = true;
             }
         }
@@ -208,14 +208,14 @@ class OfferController
     //         $groupId = 'GROUP_' . $tenancy->id;
 
     //         // Now insert tenant members from tenantDetails
-    //         foreach ($tenantDetails as $contactId => $isMainPerson) {
-    //             // Retrieve the contact using contact_id stored in tenantDetails
-    //             $contact = Contact::findOrFail($contactId);
+    //         foreach ($tenantDetails as $userId => $isMainPerson) {
+    //             // Retrieve the user using user_id stored in tenantDetails
+    //             $user = User::findOrFail($userId);
 
     //             // Create the TenantMember record for each tenant
     //             TenantMember::create([
     //                 'tenancy_id' => $tenancy->id,  // Link the tenant to the created tenancy
-    //                 'contact_id' => $contact->id,  // Link to the correct Contact model
+    //                 'user_id' => $user->id,  // Link to the correct User model
     //                 'is_main_person' => $isMainPerson ? 1 : 0,  // Set the main person flag (1 for true, 0 for false)
     //                 'group_id' => $groupId,  // Link tenant to the group ID
     //             ]);
@@ -283,20 +283,20 @@ class OfferController
             $groupId = 'GROUP_' . $tenancy->id;
 
             // Now insert/update tenant members from tenantDetails
-            foreach ($tenantDetails as $contactId => $isMainPerson) {
-                // Retrieve the contact using contact_id stored in tenantDetails
-                $contact = Contact::findOrFail($contactId);
+            foreach ($tenantDetails as $userId => $isMainPerson) {
+                // Retrieve the user using user_id stored in tenantDetails
+                $user = User::findOrFail($userId);
 
                 // Check if the TenantMember record already exists
                 $tenantMember = TenantMember::where('tenancy_id', $tenancy->id)
-                                            ->where('contact_id', $contact->id)
+                                            ->where('user_id', $user->id)
                                             ->first();
 
                 if (!$tenantMember) {
                     // If the tenant member doesn't exist, create a new one
                     TenantMember::create([
                         'tenancy_id' => $tenancy->id,  // Link the tenant to the created tenancy
-                        'contact_id' => $contact->id,  // Link to the correct Contact model
+                        'user_id' => $user->id,  // Link to the correct User model
                         'is_main_person' => $isMainPerson ? 1 : 0,  // Set the main person flag (1 for true, 0 for false)
                         'group_id' => $groupId,  // Link tenant to the group ID
                     ]);

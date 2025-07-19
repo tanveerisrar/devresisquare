@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Backend;
 
-use App\Models\Contact;
+use App\Models\User;
 use App\Models\Invoice;
 use App\Models\TaxRates;
 use App\Models\WorkOrder;
@@ -19,7 +19,7 @@ class InvoiceController
     */
     public function index(Request $request)
     {
-        $query = Invoice::with(['workOrder.repairIssue.property', 'contact']);
+        $query = Invoice::with(['workOrder.repairIssue.property', 'user']);
 
         // Apply filters if provided
         if ($request->has('status')) {
@@ -37,7 +37,7 @@ class InvoiceController
         // if ($request->has('search')) {
         //     $query->where(function ($q) use ($request) {
         //         $q->where('invoice_number', 'LIKE', "%{$request->search}%")
-        //           ->orWhereHas('contact', function ($q) use ($request) {
+        //           ->orWhereHas('user', function ($q) use ($request) {
         //               $q->where('full_name', 'LIKE', "%{$request->search}%");
         //           })
         //           ->orWhereHas('workOrder.repairIssue.property', function ($q) use ($request) {
@@ -101,7 +101,7 @@ class InvoiceController
             'invoice_number' => $invoiceNumber,
             'work_order_id' => $workOrder->id,
             'property_id' => $propertyId,
-            'contact_id' => $workOrder->invoice_to_id,
+            'user_id' => $workOrder->invoice_to_id,
             'invoice_date' => now(),
             'due_date' => now()->addDays(30), // Default 30 days due
             'subtotal' => $subtotal,
@@ -145,7 +145,7 @@ class InvoiceController
      */
     public function show($invoiceId)
     {
-        $invoice = Invoice::with(['workOrder.repairIssue.property', 'contact', 'items'])->findOrFail($invoiceId);
+        $invoice = Invoice::with(['workOrder.repairIssue.property', 'user', 'items'])->findOrFail($invoiceId);
         return view('backend.invoices.show', compact('invoice'));
     }
 
@@ -154,7 +154,7 @@ class InvoiceController
      */
     public function download($invoiceId)
     {
-        $invoice = Invoice::with('items', 'contact')->findOrFail($invoiceId);
+        $invoice = Invoice::with('items', 'user')->findOrFail($invoiceId);
     
         // if (Language::where('code', $language_code)->first()->rtl == 1) {
         //     $direction = 'rtl';
@@ -197,10 +197,10 @@ class InvoiceController
     public function edit($invoiceId)
     {
         $invoice = Invoice::with('items')->findOrFail($invoiceId);
-        $contacts = Contact::all(); // Fetch clients
+        $users = User::all(); // Fetch clients
         $taxRates = TaxRates::all(); // Fetch all tax rates from the database
 
-        return view('backend.invoices.edit', compact('invoice', 'contacts', 'taxRates'));
+        return view('backend.invoices.edit', compact('invoice', 'users', 'taxRates'));
     }
 
     public function update(Request $request, $invoiceId)
@@ -210,8 +210,8 @@ class InvoiceController
             'invoice_date' => 'required|date',
             'due_date' => 'required|date',
             'invoice_to' => 'required|string|max:255',
-            // 'invoice_to_id' => 'required|exists:contacts,id',
-            'contact_id' => 'required|exists:contacts,id',
+            // 'invoice_to_id' => 'required|exists:users,id',
+            'user_id' => 'required|exists:users,id',
             'items' => 'required|array',
             'items.*.title' => 'required|string|max:255',
             'items.*.description' => 'nullable|string|max:255',
@@ -257,7 +257,7 @@ class InvoiceController
             'invoice_number' => $request->invoice_number,
             'invoice_date' => $request->invoice_date,
             'due_date' => $request->due_date,
-            'contact_id' => $request->contact_id,
+            'user_id' => $request->user_id,
             'notes' => $request->notes,
             'subtotal' => $subtotal,
             'tax_amount' => $taxTotal,

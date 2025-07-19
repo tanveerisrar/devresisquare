@@ -31,10 +31,10 @@
                 <!-- Group Name -->
                 <td>
                     @php
-                        $contacts = $ownerGroup->ownerGroupContacts->pluck('contact.full_name')->toArray();
-                        $groupName = count($contacts) > 2
-                            ? implode(' & ', array_slice($contacts, 0, 2)) . ' and others'
-                            : implode(' & ', $contacts);
+                        $users = $ownerGroup->ownerGroupUsers->pluck('user.full_name')->toArray();
+                        $groupName = count($users) > 2
+                            ? implode(' & ', array_slice($users, 0, 2)) . ' and others'
+                            : implode(' & ', $users);
                     @endphp
                     <span class="group-name" style="cursor: pointer;" data-toggle="collapse" data-target="#details-{{ $ownerGroup->id }}" aria-expanded="false" aria-controls="details-{{ $ownerGroup->id }}">
                         {{ $groupName }}
@@ -60,7 +60,7 @@
                 </td>
             </tr>
 
-            <!-- Expandable Row for Contact Details -->
+            <!-- Expandable Row for User Details -->
             <tr class="collapse" id="details-{{ $ownerGroup->id }}">
                 <td colspan="5">
                     <table class="table table-sm table-striped">
@@ -76,37 +76,37 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($ownerGroup->ownerGroupContacts as $contactIndex => $contact)
+                            @foreach($ownerGroup->ownerGroupUsers as $userIndex => $user)
                                 <tr>
                                     <!-- Sr No -->
-                                    <td>{{ $contactIndex + 1 }}</td>
+                                    <td>{{ $userIndex + 1 }}</td>
 
                                     <!-- Name -->
                                     <td>
-                                        {{ $contact->contact->full_name }}
-                                        @if($contact->is_main)
+                                        {{ $user->user->full_name }}
+                                        @if($user->is_main)
                                             <span class="badge text-bg-success">Main</span>
                                         @endif
                                     </td>
 
                                     <!-- Position -->
                                     <td>
-                                        {{ optional($contact->contact->category)->name ?? 'N/A' }}
+                                        {{ optional($user->user->category)->name ?? 'N/A' }}
                                     </td>
 
                                     <!-- Phone -->
-                                    <td>{{ $contact->contact->phone }}</td>
+                                    <td>{{ $user->user->phone }}</td>
 
                                     <!-- Email -->
-                                    <td>{{ $contact->contact->email }}</td>
+                                    <td>{{ $user->user->email }}</td>
 
                                     <!-- City -->
-                                    <td>{{ $contact->contact->city }}</td>
+                                    <td>{{ $user->user->city }}</td>
 
                                     <!-- Actions -->
                                     <td>
-                                        @if(!$contact->is_main)
-                                        <button class="btn btn-sm btn_secondary" onclick="setAsMain({{ $contact->id }}, {{ $ownerGroup->id }})">
+                                        @if(!$user->is_main)
+                                        <button class="btn btn-sm btn_secondary" onclick="setAsMain({{ $user->id }}, {{ $ownerGroup->id }})">
                                             Set as Main
                                         </button>
                                         @endif
@@ -124,8 +124,8 @@
 <!-- JavaScript functions -->
 <script>
 
-    function setAsMain(contactId, groupId) {
-        if (confirm('Are you sure you want to set this contact as the main contact?')) {
+    function setAsMain(userId, groupId) {
+        if (confirm('Are you sure you want to set this user as the main user?')) {
             // The URL for the update
             var actionUrlTemplate = "{{ route('admin.owner-groups.updateMain', ['id' => ':groupId']) }}";
 
@@ -137,7 +137,7 @@
             // Prepare the form data
             var formData = new FormData();
             formData.append('owner_group_id', groupId);
-            formData.append('contact_id', contactId);
+            formData.append('user_id', userId);
             formData.append('_token', csrfToken); // CSRF token for security
 
             // Perform the AJAX request directly with the URL and form data
@@ -168,10 +168,10 @@
 
 
 
-    // function setAsMain(contactId, groupId) {
-    //     if (confirm('Are you sure you want to set this contact as the main contact?')) {
+    // function setAsMain(userId, groupId) {
+    //     if (confirm('Are you sure you want to set this user as the main user?')) {
     //         // Perform the action via AJAX or redirect
-    //         alert('Contact ID: ' + contactId + ' set as Main for Group ID: ' + groupId);
+    //         alert('User ID: ' + userId + ' set as Main for Group ID: ' + groupId);
     //     }
     // }
 </script>

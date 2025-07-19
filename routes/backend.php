@@ -12,7 +12,6 @@ use App\Http\Controllers\Backend\EventController;
 use App\Http\Controllers\Backend\NotesController;
 use App\Http\Controllers\Backend\OfferController;
 use App\Http\Controllers\Backend\BranchController;
-use App\Http\Controllers\Backend\ContactController;
 use App\Http\Controllers\Backend\InvoiceController;
 use App\Http\Controllers\Backend\JobTypeController;
 use App\Http\Controllers\Backend\TenancyController;
@@ -33,7 +32,7 @@ use App\Http\Controllers\Backend\DocumentTypeController;
 use App\Http\Controllers\Backend\EstateChargeController;
 use App\Http\Controllers\Backend\EventSubTypeController;
 use App\Http\Controllers\Backend\PropertyRepairController;
-use App\Http\Controllers\Backend\ContactCategoryController;
+use App\Http\Controllers\Backend\UserCategoryController;
 use App\Http\Controllers\Backend\BusinessSettingsController;
 use App\Http\Controllers\Backend\EstateChargeItemController;
 use App\Http\Controllers\Backend\TenancySubStatusController;
@@ -72,9 +71,9 @@ Route::middleware('auth')->group(function () {
         return searchProperties($request);
     })->name('properties.search');
 
-    Route::get('/get_contacts_info_by_property/{propertyId}/contacts/{categoryId}', function ($propertyId, $categoryId) {
-        return response()->json(get_contacts_by_property_and_category($propertyId, $categoryId));
-    })->name('admin.getContactsByProperty');
+    Route::get('/get_users_info_by_property/{propertyId}/users/{categoryId}', function ($propertyId, $categoryId) {
+        return response()->json(get_users_by_property_and_category($propertyId, $categoryId));
+    })->name('admin.getUsersByProperty');
 
     Route::get('/get_tenants_by_property/{propertyId}', function ($propertyId) {
         return response()->json(get_tenants_by_property($propertyId));
@@ -83,7 +82,7 @@ Route::middleware('auth')->group(function () {
     // Dashboard Route
     Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('backend.dashboard');
 
-    Route::resource('contact-categories', ContactCategoryController::class);
+    Route::resource('user-categories', UserCategoryController::class);
 
     Route::name('admin.')->group(function () {
         // Property
@@ -108,17 +107,6 @@ Route::middleware('auth')->group(function () {
             Route::post('/save-form', 'saveForm')->name('saveForm');
             
             Route::get('/ajax', 'ajaxList')->name('ajax');
-        });
-
-        // User
-        Route::prefix('users')->name('users.')->controller(UserController::class)->group(function () {
-            Route::get('/', 'index')->name('index');  // List all users
-            Route::get('/create', 'create')->name('create');  // Show create form
-            Route::post('/store', 'store')->name('store');  // Store new user
-            Route::get('/edit/{user}', 'edit')->name('edit');  // Show edit form
-            Route::put('/update/{user}', 'update')->name('update');  // Update user
-            Route::delete('/delete/{user}', 'destroy')->name('destroy');  // Delete user
-            Route::get('/ajax', 'ajaxList')->name('ajax');  // AJAX endpoint to list users for a select dropdown
         });
 
         // Designation
@@ -163,21 +151,23 @@ Route::middleware('auth')->group(function () {
             Route::delete('/delete/{id}', 'destroy')->name('destroy'); // Delete note type
         });
 
-        // Contacts
-        Route::prefix('contacts')->name('contacts.')->controller(ContactController::class)->group(function () {
-            Route::get('/', 'index')->name('index');  // List all contacts
+        // Users
+        Route::prefix('users')->name('users.')->controller(UserController::class)->group(function () {
+            Route::get('/', 'index')->name('index');  // List all users
             Route::get('/create', 'create')->name('create');  // Show create form
-            Route::get('/contact_step/{step}', 'getQuickStepView')->name('contact_step');  // Get quick step view
-            Route::post('/store', 'contactStore')->name('store');  // Store contact
-            Route::post('/quick-store-contact', 'quicklyStoreContact')->name('quick_contact_store');  // Quick store contact
+            Route::get('/user_step/{step}', 'getQuickStepView')->name('user_step');  // Get quick step view
+            Route::post('/store', 'userStore')->name('store');  // Store user
+            Route::post('/quick-store-user', 'quicklyStoreUser')->name('quick_user_store');  // Quick store user
             Route::get('/properties/search', 'searchProperties')->name('properties.search');  // Search properties
-            Route::get('/show/{id}', 'show')->name('show');  // Show individual contact
+            Route::get('/show/{id}', 'show')->name('show');  // Show individual user
             Route::get('/edit/{id}', 'edit')->name('edit');  // Show edit form
-            Route::post('/update/{id}', 'update')->name('update');  // Update contact
-            Route::post('/delete/{id}', 'delete')->name('delete');  // Delete contact
+            Route::post('/update/{id}', 'update')->name('update');  // Update user
+            Route::post('/delete/{id}', 'delete')->name('delete');  // Delete user
             
             Route::get('/load-form', 'loadForm')->name('loadForm');
             Route::post('/save-form', 'saveForm')->name('saveForm');
+
+            Route::get('/ajax', 'ajaxList')->name('ajax');  // AJAX endpoint to list users for a select dropdown
         });
 
         // Estate Charges

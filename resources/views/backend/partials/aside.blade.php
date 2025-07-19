@@ -58,41 +58,41 @@
         </li>
 
         <li class="sidebar-list-item submenu_wrapper">
-            <a href="#contactsSubmenu" data-bs-toggle="collapse"
-                aria-expanded="{{ request()->routeIs('admin.contacts.index') || request()->routeIs('contacts.create') ? 'true' : 'false' }}"
-                class="dropdown-toggle {{ request()->routeIs('admin.contacts.index') || request()->routeIs('contacts.create') ? 'active' : '' }}">
-                <img src="{{ asset('asset/images/svg/dashboard.svg') }}" alt="contacts">
-                Contacts
+            <a href="#usersSubmenu" data-bs-toggle="collapse"
+                aria-expanded="{{ request()->routeIs('admin.users.index') || request()->routeIs('users.create') ? 'true' : 'false' }}"
+                class="dropdown-toggle {{ request()->routeIs('admin.users.index') || request()->routeIs('users.create') ? 'active' : '' }}">
+                <img src="{{ asset('asset/images/svg/dashboard.svg') }}" alt="users">
+                Users
             </a>
-            <ul class="nav-second-level collapse list-unstyled {{ request()->routeIs('admin.contacts.index') || request()->routeIs('contacts.create') ? 'show' : '' }}"
-                id="contactsSubmenu">
+            <ul class="nav-second-level collapse list-unstyled {{ request()->routeIs('admin.users.index') || request()->routeIs('users.create') ? 'show' : '' }}"
+                id="usersSubmenu">
                 <li class="sidebar-sub-list-item py-0 mb-0">
-                    <a href="{{ route('admin.contacts.index') }}"
-                        class="{{ request()->routeIs('admin.contacts.index') && !request()->has('category') ? 'active' : '' }}">
+                    <a href="{{ route('admin.users.index') }}"
+                        class="{{ request()->routeIs('admin.users.index') && !request()->has('category') ? 'active' : '' }}">
                         All
                     </a>
                 </li>
                 <li class="sidebar-sub-list-item py-0 mb-0">
-                    <a href="{{ route('admin.contacts.index', ['category' => 1]) }}"
+                    <a href="{{ route('admin.users.index', ['category' => 1]) }}"
                         class="{{ request()->category == 1 ? 'active' : '' }}">
                         <img src="{{ asset('asset/images/svg/owners.svg') }}" alt="owners">
                         Owners
                     </a>
                 </li>
                 <li class="sidebar-sub-list-item py-0 mb-0">
-                    <a href="{{ route('admin.contacts.index', ['category' => 2]) }}"
+                    <a href="{{ route('admin.users.index', ['category' => 2]) }}"
                         class="{{ request()->category == 2 ? 'active' : '' }}">
                         Property Managers
                     </a>
                 </li>
                 <li class="sidebar-sub-list-item py-0 mb-0">
-                    <a href="{{ route('admin.contacts.index', ['category' => 3]) }}"
+                    <a href="{{ route('admin.users.index', ['category' => 3]) }}"
                         class="{{ request()->category == 3 ? 'active' : '' }}">
                         Tenants
                     </a>
                 </li>
                 <li class="sidebar-sub-list-item py-0 mb-0">
-                    <a href="{{ route('admin.contacts.index', ['category' => 4]) }}"
+                    <a href="{{ route('admin.users.index', ['category' => 4]) }}"
                         class="{{ request()->category == 4 ? 'active' : '' }}">
                         Landlords
                     </a>
@@ -109,13 +109,13 @@
                 {{-- <img src="{{ asset('asset/images/svg/master-manage.svg') }}" alt="master-manage"> --}}
                 Master Manage
             </a>
-            <ul class="nav-second-level collapse list-unstyled {{ request()->routeIs('contact-categories.index') || request()->routeIs('admin.branches.index') || request()->routeIs('admin.designations.index') || request()->routeIs('admin.tenancy_types.index') || request()->routeIs('admin.tenancy_types.create') || request()->routeIs('admin.tenancy_sub_statuses.index') || request()->routeIs('admin.tenancy_sub_statuses.create') ? 'show' : '' }}"
+            <ul class="nav-second-level collapse list-unstyled {{ request()->routeIs('user-categories.index') || request()->routeIs('admin.branches.index') || request()->routeIs('admin.designations.index') || request()->routeIs('admin.tenancy_types.index') || request()->routeIs('admin.tenancy_types.create') || request()->routeIs('admin.tenancy_sub_statuses.index') || request()->routeIs('admin.tenancy_sub_statuses.create') ? 'show' : '' }}"
                 id="masterManageSubmenu">
 
                 <li class="sidebar-list-item submenu_wrapper ">
-                    <a class="{{ request()->routeIs('contact-categories.index') ? 'active' : '' }}"
-                        href="{{ route('contact-categories.index') }}">
-                        <img src="{{ asset('asset/images/svg/contacts.svg') }}" alt="contacts">
+                    <a class="{{ request()->routeIs('user-categories.index') ? 'active' : '' }}"
+                        href="{{ route('user-categories.index') }}">
+                        <img src="{{ asset('asset/images/svg/users.svg') }}" alt="users">
                         Categories
                     </a>
                 </li>
@@ -123,7 +123,7 @@
                 <li class="sidebar-list-item submenu_wrapper">
                     <a class="{{ request()->routeIs('admin.branches.index') ? 'active' : '' }}"
                         href="{{ route('admin.branches.index') }}">
-                        <img src="{{ asset('asset/images/svg/contacts.svg') }}" alt="branches">
+                        <img src="{{ asset('asset/images/svg/users.svg') }}" alt="branches">
                         Branches
                     </a>
                 </li>
@@ -131,7 +131,7 @@
                 <li class="sidebar-list-item submenu_wrapper">
                     <a class="{{ request()->routeIs('admin.designations.index') ? 'active' : '' }}"
                         href="{{ route('admin.designations.index') }}">
-                        <img src="{{ asset('asset/images/svg/contacts.svg') }}" alt="branches">
+                        <img src="{{ asset('asset/images/svg/users.svg') }}" alt="branches">
                         Designation
                     </a>
                 </li>

@@ -59,7 +59,7 @@
                 <div class="col-md-6 text-md-end">
                     <strong class="fw-bold">To</strong>
                     <address class="text-muted">
-                        {!! get_contact_address_name_by_id($invoice->contact_id) !!}
+                        {!! get_user_address_name_by_id($invoice->user_id) !!}
                     </address>
 
                     <!-- Invoice Dates -->

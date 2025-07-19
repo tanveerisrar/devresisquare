@@ -23,15 +23,15 @@
 </div>
 
 <div class="form-group">
-    <label for="contact_email">Contact Email</label>
-    <input type="email" name="contact_email" id="contact_email" class="form-control"
-        value="{{ old('contact_email', $branch->contact_email ?? '') }}" >
+    <label for="user_email">User Email</label>
+    <input type="email" name="user_email" id="user_email" class="form-control"
+        value="{{ old('user_email', $branch->user_email ?? '') }}" >
 </div>
 
 <div class="form-group">
-    <label for="contact_phone">Contact Phone</label>
-    <input type="text" name="contact_phone" id="contact_phone" class="form-control"
-        value="{{ old('contact_phone', $branch->contact_phone ?? '') }}" >
+    <label for="user_phone">User Phone</label>
+    <input type="text" name="user_phone" id="user_phone" class="form-control"
+        value="{{ old('user_phone', $branch->user_phone ?? '') }}" >
 </div>
 
 <button type="submit" class="btn btn_secondary">{{ $buttonText ?? 'Save' }}</button>

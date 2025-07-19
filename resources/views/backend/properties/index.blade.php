@@ -650,20 +650,20 @@ var_dump($propertyId);
             isExpanded = !isExpanded; // Toggle state
         });
 
-            // Step 1: Event listener for clicks on the document for the "Add New Contact" button
-            $(document).on('click', '#addContactBtn', function() {
+            // Step 1: Event listener for clicks on the document for the "Add New User" button
+            $(document).on('click', '#addUserBtn', function() {
                 $('#mainForm').hide(); // Hide the main form
-                $('#addContactFormContainer').show(); // Show the Add Contact form
+                $('#addUserFormContainer').show(); // Show the Add User form
             });
 
             // Step 2: Event listener for clicks on the document for the "Back" button
             $(document).on('click', '#backToMainForm', function() {
-                $('#addContactFormContainer').hide(); // Hide the Add Contact form
+                $('#addUserFormContainer').hide(); // Hide the Add User form
                 $('#mainForm').show(); // Show the main form
             });
 
-            // Step 3: Handle the form submission for adding a new contact via AJAX
-            $(document).on('submit', '#addContactForm', function(event) {
+            // Step 3: Handle the form submission for adding a new user via AJAX
+            $(document).on('submit', '#addUserForm', function(event) {
                 event.preventDefault(); // Prevent normal form submission
 
                 // Clear any previous error messages
@@ -673,28 +673,28 @@ var_dump($propertyId);
                 var formData = $(this).serialize(); // Serialize the form data
 
                 $.ajax({
-                    url: '{{ route('admin.contacts.quick_contact_store') }}', // Make sure this route exists for adding contacts
+                    url: '{{ route('admin.users.quick_user_store') }}', // Make sure this route exists for adding users
                     method: 'POST',
                     data: formData,
                     success: function(response) {
-                        // Assuming the response contains the new contact's ID and full name
+                        // Assuming the response contains the new user's ID and full name
                         if (response.success) {
-                            // Add the new contact to the dropdown in the main form
-                            $('#contact_id').append(
-                                `<option value="${response.contact.id}">${response.contact.full_name}</option>`
+                            // Add the new user to the dropdown in the main form
+                            $('#user_id').append(
+                                `<option value="${response.user.id}">${response.user.full_name}</option>`
                             );
 
-                            // Optionally, select the new contact
-                            // $('#contact_id').val(response.contact.id);
+                            // Optionally, select the new user
+                            // $('#user_id').val(response.user.id);
 
-                            // Hide the Add Contact form and show the Main Form
-                            $('#addContactFormContainer').hide();
+                            // Hide the Add User form and show the Main Form
+                            $('#addUserFormContainer').hide();
                             $('#mainForm').show();
 
-                            // Reset the Add Contact form
-                            $('#addContactForm')[0].reset();
+                            // Reset the Add User form
+                            $('#addUserForm')[0].reset();
                         } else {
-                            alert('Failed to add contact.');
+                            alert('Failed to add user.');
                         }
                     },
                     error: function(xhr) {
@@ -711,7 +711,7 @@ var_dump($propertyId);
                             // Loop through the errors and display them in the form
                             $.each(errors, function(field, messages) {
                                 // Check if the field exists in the form
-                                var input = $('#contact_' + field);
+                                var input = $('#user_' + field);
 
                                 if (input.length >
                                     0) { // Make sure the input field exists
@@ -730,7 +730,7 @@ var_dump($propertyId);
                                 }
                             });
                         } else {
-                            alert('An error occurred while adding the contact.');
+                            alert('An error occurred while adding the user.');
                         }
                     }
 
@@ -887,29 +887,29 @@ var_dump($propertyId);
                     $("input[name='property_id']").val(propertyId);
                     initSelect2('.select2');
 
-                    const contactSelect = $('#contact_id');
-                    const contactOptionsContainer = $('#contact-options');
+                    const userSelect = $('#user_id');
+                    const userOptionsContainer = $('#user-options');
 
-                    // Listen for changes in the contact dropdown
-                    contactSelect.on('change', function() {
-                        const selectedContacts = contactSelect.val() || [];
-                        contactOptionsContainer.empty();
+                    // Listen for changes in the user dropdown
+                    userSelect.on('change', function() {
+                        const selectedUsers = userSelect.val() || [];
+                        userOptionsContainer.empty();
 
-                        if (selectedContacts.length > 0) {
+                        if (selectedUsers.length > 0) {
                             // Add default label
-                            contactOptionsContainer.append(`
-                            <label class="mb-2">Select Main Contact</label>
+                            userOptionsContainer.append(`
+                            <label class="mb-2">Select Main User</label>
                         `);
 
-                            // Add radio buttons for each selected contact
-                            selectedContacts.forEach(contactId => {
-                                const contactName = contactSelect.find(
-                                        `option[value="${contactId}"]`)
+                            // Add radio buttons for each selected user
+                            selectedUsers.forEach(userId => {
+                                const userName = userSelect.find(
+                                        `option[value="${userId}"]`)
                                     .text(); // Get the name from the option
-                                contactOptionsContainer.append(`
+                                userOptionsContainer.append(`
                                 <div class="form-check">
-                                    <input type="radio" name="is_main" value="${contactId}" id="is_main_${contactId}" class="form-check-input">
-                                    <label for="is_main_${contactId}" class="form-check-label">${contactName}</label>
+                                    <input type="radio" name="is_main" value="${userId}" id="is_main_${userId}" class="form-check-input">
+                                    <label for="is_main_${userId}" class="form-check-label">${userName}</label>
                                 </div>
                             `);
                             });
@@ -937,52 +937,52 @@ var_dump($propertyId);
                     $("input[name='property_id']").val(propertyId);
                     initSelect2('.select2');
 
-                    const contactSelect2 = $('#contact_id');
-                    const contactOptionsContainer2 = $('#contact-options');
+                    const userSelect2 = $('#user_id');
+                    const userOptionsContainer2 = $('#user-options');
 
-                    // Store the previously selected main contact
-                    let previouslySelectedMainContact = $('input[name="is_main"]:checked').val() ||
+                    // Store the previously selected main user
+                    let previouslySelectedMainUser = $('input[name="is_main"]:checked').val() ||
                         null;
 
-                    // Listen for changes in the contact dropdown
-                    contactSelect2.on('change', function() {
-                        const selectedContacts = contactSelect2.val() || [];
-                        contactOptionsContainer2.empty();
+                    // Listen for changes in the user dropdown
+                    userSelect2.on('change', function() {
+                        const selectedUsers = userSelect2.val() || [];
+                        userOptionsContainer2.empty();
 
-                        if (selectedContacts.length > 0) {
+                        if (selectedUsers.length > 0) {
                             // Add default label
-                            contactOptionsContainer2.append(`
-                            <label class="mb-2">Select Main Contact</label>
+                            userOptionsContainer2.append(`
+                            <label class="mb-2">Select Main User</label>
                         `);
 
-                            // Add radio buttons for each selected contact
-                            selectedContacts.forEach(contactId => {
-                                const contactName = contactSelect2.find(
-                                        `option[value="${contactId}"]`)
+                            // Add radio buttons for each selected user
+                            selectedUsers.forEach(userId => {
+                                const userName = userSelect2.find(
+                                        `option[value="${userId}"]`)
                                     .text(); // Get the name from the option
-                                const isChecked = previouslySelectedMainContact ===
-                                    contactId ? 'checked' :
-                                    ''; // Preserve previously selected main contact
-                                contactOptionsContainer2.append(`
+                                const isChecked = previouslySelectedMainUser ===
+                                    userId ? 'checked' :
+                                    ''; // Preserve previously selected main user
+                                userOptionsContainer2.append(`
                                 <div class="form-check">
-                                    <input type="radio" name="is_main" value="${contactId}" id="is_main_${contactId}" class="form-check-input" ${isChecked}>
-                                    <label for="is_main_${contactId}" class="form-check-label">${contactName}</label>
+                                    <input type="radio" name="is_main" value="${userId}" id="is_main_${userId}" class="form-check-input" ${isChecked}>
+                                    <label for="is_main_${userId}" class="form-check-label">${userName}</label>
                                 </div>
                             `);
                             });
 
-                            // Check if the previously selected main contact is no longer in the selected contacts
-                            if (!selectedContacts.includes(previouslySelectedMainContact)) {
-                                // Reset previously selected main contact
-                                previouslySelectedMainContact = null;
-                                // alert('Please reselect the main contact as the previous one is no longer selected.');
+                            // Check if the previously selected main user is no longer in the selected users
+                            if (!selectedUsers.includes(previouslySelectedMainUser)) {
+                                // Reset previously selected main user
+                                previouslySelectedMainUser = null;
+                                // alert('Please reselect the main user as the previous one is no longer selected.');
                             }
                         }
                     });
 
-                    // Update the stored value when a main contact is selected
+                    // Update the stored value when a main user is selected
                     $(document).on('change', 'input[name="is_main"]', function() {
-                        previouslySelectedMainContact = $(this).val();
+                        previouslySelectedMainUser = $(this).val();
                     });
 
 
@@ -1044,29 +1044,29 @@ var_dump($propertyId);
                 $("input[name='property_id']").val(propertyId);
                 initSelect3('.select2');
 
-                const contactSelect3 = $('#tenant_id');
-                const contactOptionsContainer3 = $('#tenant-options');
+                const userSelect3 = $('#tenant_id');
+                const userOptionsContainer3 = $('#tenant-options');
 
-                // Listen for changes in the contact dropdown
-                contactSelect3.on('change', function() {
-                    const selectedContacts = contactSelect3.val() || [];
-                    contactOptionsContainer3.empty();
+                // Listen for changes in the user dropdown
+                userSelect3.on('change', function() {
+                    const selectedUsers = userSelect3.val() || [];
+                    userOptionsContainer3.empty();
 
-                    if (selectedContacts.length > 0) {
+                    if (selectedUsers.length > 0) {
                         // Add default label
-                        contactOptionsContainer3.append(`
-                            <label class="mb-2">Select Main Contact</label>
+                        userOptionsContainer3.append(`
+                            <label class="mb-2">Select Main User</label>
                         `);
 
-                        // Add radio buttons for each selected contact
-                        selectedContacts.forEach(contactId => {
-                            const contactName = contactSelect3.find(
-                                    `option[value="${contactId}"]`)
+                        // Add radio buttons for each selected user
+                        selectedUsers.forEach(userId => {
+                            const userName = userSelect3.find(
+                                    `option[value="${userId}"]`)
                                 .text(); // Get the name from the option
-                            contactOptionsContainer3.append(`
+                            userOptionsContainer3.append(`
                                 <div class="form-check">
-                                    <input type="radio" name="is_main_person" value="${contactId}" id="is_main_${contactId}" class="form-check-input">
-                                    <label for="is_main_${contactId}" class="form-check-label">${contactName}</label>
+                                    <input type="radio" name="is_main_person" value="${userId}" id="is_main_${userId}" class="form-check-input">
+                                    <label for="is_main_${userId}" class="form-check-label">${userName}</label>
                                 </div>
                             `);
                         });
@@ -1094,47 +1094,47 @@ var_dump($propertyId);
                 $("input[name='property_id']").val(propertyId);
                 initSelect3('.select2');
 
-                const contactSelect4 = $('#tenant_id');
-                const contactOptionsContainer4 = $('#tenant-options');
+                const userSelect4 = $('#tenant_id');
+                const userOptionsContainer4 = $('#tenant-options');
 
-                // Store the previously selected main contact
+                // Store the previously selected main user
                 let previouslySelectedMainTenant = $('input[name="is_main_person"]:checked').val() || null;
 
-                // Listen for changes in the contact dropdown
-                contactSelect4.on('change', function() {
-                    const selectedContacts = contactSelect4.val() || [];
-                    contactOptionsContainer4.empty();
+                // Listen for changes in the user dropdown
+                userSelect4.on('change', function() {
+                    const selectedUsers = userSelect4.val() || [];
+                    userOptionsContainer4.empty();
 
-                    if (selectedContacts.length > 0) {
+                    if (selectedUsers.length > 0) {
                         // Add default label
-                        contactOptionsContainer4.append(`
-                            <label class="mb-2">Select Main Contact</label>
+                        userOptionsContainer4.append(`
+                            <label class="mb-2">Select Main User</label>
                         `);
 
-                        // Add radio buttons for each selected contact
-                        selectedContacts.forEach(contactId => {
-                            const contactName = contactSelect4.find(
-                                    `option[value="${contactId}"]`)
+                        // Add radio buttons for each selected user
+                        selectedUsers.forEach(userId => {
+                            const userName = userSelect4.find(
+                                    `option[value="${userId}"]`)
                                 .text(); // Get the name from the option
-                            const isChecked = previouslySelectedMainTenant === contactId ?
-                                'checked' : ''; // Preserve previously selected main contact
-                            contactOptionsContainer4.append(`
+                            const isChecked = previouslySelectedMainTenant === userId ?
+                                'checked' : ''; // Preserve previously selected main user
+                            userOptionsContainer4.append(`
                                 <div class="form-check">
-                                    <input type="radio" name="is_main_person" value="${contactId}" id="is_main_${contactId}" class="form-check-input" ${isChecked}>
-                                    <label for="is_main_${contactId}" class="form-check-label">${contactName}</label>
+                                    <input type="radio" name="is_main_person" value="${userId}" id="is_main_${userId}" class="form-check-input" ${isChecked}>
+                                    <label for="is_main_${userId}" class="form-check-label">${userName}</label>
                                 </div>
                             `);
                         });
 
-                        // Check if the previously selected main contact is no longer in the selected contacts
-                        if (!selectedContacts.includes(previouslySelectedMainTenant)) {
-                            // Reset previously selected main contact
+                        // Check if the previously selected main user is no longer in the selected users
+                        if (!selectedUsers.includes(previouslySelectedMainTenant)) {
+                            // Reset previously selected main user
                             previouslySelectedMainTenant = null;
                         }
                     }
                 });
 
-                // Update the stored value when a main contact is selected
+                // Update the stored value when a main user is selected
                 $(document).on('change', 'input[name="is_main_person"]', function() {
                     previouslySelectedMainTenant = $(this).val();
                 });

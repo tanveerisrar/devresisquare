@@ -26,13 +26,13 @@
             <input type="date" name="due_date" class="form-control" value="{{ old('due_date', $invoice->due_date) }}" required>
         </div>
 
-        <!-- Contact (Client) -->
+        <!-- User (Client) -->
         <div class="mb-3">
             <label class="form-label">Client</label>
-            <select name="contact_id" class="form-control">
-                @foreach($contacts as $contact)
-                    <option value="{{ $contact->id }}" {{ $invoice->contact_id == $contact->id ? 'selected' : '' }}>
-                        {{ $contact->full_name }} ({{ $contact->email }})
+            <select name="user_id" class="form-control">
+                @foreach($users as $user)
+                    <option value="{{ $user->id }}" {{ $invoice->user_id == $user->id ? 'selected' : '' }}>
+                        {{ $user->full_name }} ({{ $user->email }})
                     </option>
                 @endforeach
             </select>

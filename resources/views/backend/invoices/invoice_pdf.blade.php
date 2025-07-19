@@ -13,7 +13,7 @@
 @section('invoice_to')
     <strong class="fw-bold">Bill To:</strong>
     <address class="text-muted">
-        {!! get_contact_address_name_by_id($invoice->contact_id) !!}
+        {!! get_user_address_name_by_id($invoice->user_id) !!}
     </address>
 @endsection
 @section('invoice_status')

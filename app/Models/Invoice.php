@@ -14,7 +14,7 @@ class Invoice extends Model
         'invoice_number',
         'work_order_id',
         'property_id',
-        'contact_id',
+        'user_id',
         'invoice_date',
         'due_date',
         'subtotal',
@@ -47,8 +47,8 @@ class Invoice extends Model
         return $this->belongsTo(InvoiceStatuses::class);
     }
 
-    public function contact()
+    public function user()
     {
-        return $this->belongsTo(Contact::class);
+        return $this->belongsTo(User::class);
     }
 }

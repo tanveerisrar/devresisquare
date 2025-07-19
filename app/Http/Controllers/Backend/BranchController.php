@@ -34,8 +34,8 @@ class BranchController
             'address' => 'nullable|string|max:255',
             'city' => 'nullable|string|max:255',
             'postcode' => 'nullable|string|max:20',
-            'contact_email' => 'nullable|email|max:255',
-            'contact_phone' => 'nullable|string|max:20',
+            'user_email' => 'nullable|email|max:255',
+            'user_phone' => 'nullable|string|max:20',
         ]);
 
         Branch::create($request->all());
@@ -69,8 +69,8 @@ class BranchController
             'address' => 'nullable|string|max:255',
             'city' => 'nullable|string|max:255',
             'postcode' => 'nullable|string|max:20',
-            'contact_email' => 'nullable|email|max:255',
-            'contact_phone' => 'nullable|string|max:20',
+            'user_email' => 'nullable|email|max:255',
+            'user_phone' => 'nullable|string|max:20',
         ]);
 
         // Update the branch with the validated data

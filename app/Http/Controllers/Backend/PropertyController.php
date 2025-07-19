@@ -115,13 +115,13 @@ class PropertyController
                 // Pass only the selected property details
                 return view('backend.properties.tabs.property', compact('propertyId', 'tabname', 'property', 'allstations', 'allschools', 'stations', 'schools'))->render();
             case 'owners':
-                // Fetch the owner groups for the given propertyId, along with related contacts and properties.
-                // $ownerGroups = OwnerGroup::with(['contact', 'property'])
+                // Fetch the owner groups for the given propertyId, along with related users and properties.
+                // $ownerGroups = OwnerGroup::with(['user', 'property'])
                 // ->where('property_id', $propertyId)
                 // ->get();
 
-                // Fetch the owner groups for the given propertyId, along with related contacts and properties.
-                $ownerGroups = OwnerGroup::with(['ownerGroupContacts.contact', 'property'])
+                // Fetch the owner groups for the given propertyId, along with related users and properties.
+                $ownerGroups = OwnerGroup::with(['ownerGroupUsers.user', 'property'])
                     ->where('property_id', $propertyId)
                     ->get();
 

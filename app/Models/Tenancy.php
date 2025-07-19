@@ -68,9 +68,9 @@ class Tenancy extends Model
         return $this->belongsTo(TenancyType::class, 'tenancy_type_id');
     }
 
-    // Define a many-to-many relationship with PropertyManager (via Contact)
+    // Define a many-to-many relationship with PropertyManager (via User)
     public function propertyManagers()
     {
-        return $this->belongsToMany(Contact::class, 'property_manager_tenancy', 'tenancy_id', 'property_manager_id');
+        return $this->belongsToMany(User::class, 'property_manager_tenancy', 'tenancy_id', 'property_manager_id');
     }
 }

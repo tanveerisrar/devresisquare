@@ -9,7 +9,7 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    // merge contacts into users
+    // merge users into users
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
@@ -18,8 +18,8 @@ return new class extends Migration
             $table->foreignId('branch_id')->nullable()->after('company_id')->constrained('branches')->onDelete('set null');
             $table->foreignId('designation_id')->nullable()->after('branch_id')->constrained('designations')->onDelete('set null');
 
-            // Add all contact-related fields
-            $table->foreignId('category_id')->nullable()->after('remember_token')->constrained('contacts_categories')->onDelete('set null');
+            // Add all user-related fields
+            $table->foreignId('category_id')->nullable()->after('remember_token')->constrained('users_categories')->onDelete('set null');
             $table->json('selected_properties')->nullable();
             $table->string('first_name', 55)->nullable();
             $table->string('middle_name', 55)->nullable();

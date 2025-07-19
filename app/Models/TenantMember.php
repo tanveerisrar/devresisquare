@@ -12,7 +12,7 @@ class TenantMember extends Model
 
     protected $fillable = [
         'tenancy_id',
-        'contact_id',
+        'user_id',
         // 'name',
         // 'email',
         // 'phone',
@@ -30,8 +30,8 @@ class TenantMember extends Model
         return $this->belongsTo(Tenancy::class);
     }
 
-    public function contact()
+    public function user()
     {
-        return $this->belongsTo(Contact::class);
+        return $this->belongsTo(User::class);
     }
 }

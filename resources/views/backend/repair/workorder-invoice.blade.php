@@ -40,8 +40,8 @@
 
             <!-- Invoice Tab -->
             <div class="tab-pane fade" id="invoice">
-                @include('backend.repair.invoice_form', ['invoice' => $invoice, 'contacts' => $contacts, 'taxRates' => $taxRates])
-                {{-- @include('backend.invoices.edit', ['invoice' => $invoice, 'contacts' => $contacts, 'taxRates' =>
+                @include('backend.repair.invoice_form', ['invoice' => $invoice, 'users' => $users, 'taxRates' => $taxRates])
+                {{-- @include('backend.invoices.edit', ['invoice' => $invoice, 'users' => $users, 'taxRates' =>
                 $taxRates]) --}}
             </div>
         </div>
@@ -207,20 +207,20 @@
 
             function loadInvoiceToDetails(invoiceTo, propertyId) {
                 let categoryId = null;
-                $("#contactDetails").hide();
+                $("#userDetails").hide();
                 let existingInvoiceToId = $("#existingInvoiceToId").val(); // Get preselected invoice_to_id
                 // console.log('Existing ID: ' + existingInvoiceToId);
 
                 if (invoiceTo === "Landlord") {
                     categoryId = 4; // Landlord
-                    var endpoint = "{{ route('admin.getContactsByProperty', ['propertyId' => 'PROPERTYID', 'categoryId' => 'CATEGORYID']) }}";
+                    var endpoint = "{{ route('admin.getUsersByProperty', ['propertyId' => 'PROPERTYID', 'categoryId' => 'CATEGORYID']) }}";
                     endpoint = endpoint.replace('PROPERTYID', propertyId).replace('CATEGORYID', categoryId);
                 } else if (invoiceTo === "Tenant") {
                     var endpoint = "{{ route('admin.getTenantsByProperty', ['propertyId' => 'PROPERTYID']) }}";
                     endpoint = endpoint.replace('PROPERTYID', propertyId);
                 } else {
                     $("#invoiceToContainer").html('');
-                    $("#contactDetails").hide();
+                    $("#userDetails").hide();
                     return;
                 }
 
@@ -232,7 +232,7 @@
                     success: function (response) {
                         var dropdown = '<div class="form-group">';
                         dropdown += '<label class="form-label">Select ' + invoiceTo + '</label>';
-                        dropdown += '<select name="contact_id" id="invoiceToSelect" class="form-control">';
+                        dropdown += '<select name="user_id" id="invoiceToSelect" class="form-control">';
                         dropdown += '<option value="">Select ' + invoiceTo + '</option>';
 
                         $.each(response, function (index, item) {
@@ -279,7 +279,7 @@
                 updateStatusOptions(selectedInvoiceTo);
             }
 
-            // Show Contact Details When a Contact is Selected
+            // Show User Details When a User is Selected
             $(document).on("change", "#invoiceToSelect", function () {
                 var selectedOption = $(this).find(':selected');
                 var name = selectedOption.data('name');
@@ -288,13 +288,13 @@
                 var email = selectedOption.data('email');
 
                 if (address) {
-                    $('#contactName').text(name);
-                    $('#contactAddress').text(address);
-                    $('#contactPhone').text(phone);
-                    $('#contactEmail').text(email);
-                    $('#contactDetails').show();
+                    $('#userName').text(name);
+                    $('#userAddress').text(address);
+                    $('#userPhone').text(phone);
+                    $('#userEmail').text(email);
+                    $('#userDetails').show();
                 } else {
-                    $('#contactDetails').hide();
+                    $('#userDetails').hide();
                 }
             });
 

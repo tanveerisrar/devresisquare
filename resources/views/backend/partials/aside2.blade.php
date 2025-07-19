@@ -67,61 +67,61 @@
         </li>
 
         <li class="sidebar-list-item submenu_wrapper">
-            <a href="#contactsSubmenu" data-bs-toggle="collapse"
-                aria-expanded="{{ request()->routeIs('admin.contacts.index') || request()->routeIs('contacts.create') ? 'true' : 'false' }}"
-                class="dropdown-toggle {{ request()->routeIs('admin.contacts.index') || request()->routeIs('contacts.create') ? 'active' : '' }}">
-                <span class="icon_wrapper"><i class="fa-solid fa-address-book"></i>Contacts</span>
+            <a href="#usersSubmenu" data-bs-toggle="collapse"
+                aria-expanded="{{ request()->routeIs('admin.users.index') || request()->routeIs('users.create') ? 'true' : 'false' }}"
+                class="dropdown-toggle {{ request()->routeIs('admin.users.index') || request()->routeIs('users.create') ? 'active' : '' }}">
+                <span class="icon_wrapper"><i class="fa-solid fa-address-book"></i>Users</span>
                 <i class="fa fa-angle-down"></i>
             </a>
-            <ul class="nav-second-level collapse list-unstyled {{ request()->routeIs('admin.contacts.index') || request()->routeIs('contacts.create') ? 'show' : '' }}"
-                id="contactsSubmenu">
+            <ul class="nav-second-level collapse list-unstyled {{ request()->routeIs('admin.users.index') || request()->routeIs('users.create') ? 'show' : '' }}"
+                id="usersSubmenu">
                 @component('components.backend.common.sidebar-sublink')
-                    @slot('class') {{ request()->routeIs('admin.contacts.index') && !request()->has('category') ? 'active' : '' }} @endslot
-                    @slot('link') {{ route('admin.contacts.index') }} @endslot
+                    @slot('class') {{ request()->routeIs('admin.users.index') && !request()->has('category') ? 'active' : '' }} @endslot
+                    @slot('link') {{ route('admin.users.index') }} @endslot
                     @slot('link_name') All @endslot
                 @endcomponent
                 @component('components.backend.common.sidebar-sublink')
                     @slot('class') {{ request()->category == 1 ? 'active' : '' }} @endslot
-                    @slot('link') {{ route('admin.contacts.index', ['category' => 1]) }} @endslot
+                    @slot('link') {{ route('admin.users.index', ['category' => 1]) }} @endslot
                     @slot('link_name') Owners @endslot
                 @endcomponent
                 @component('components.backend.common.sidebar-sublink')
                     @slot('class') {{ request()->category == 2 ? 'active' : '' }} @endslot
-                    @slot('link') {{ route('admin.contacts.index', ['category' => 2]) }} @endslot
+                    @slot('link') {{ route('admin.users.index', ['category' => 2]) }} @endslot
                     @slot('link_name') Property Managers @endslot
                 @endcomponent
                 @component('components.backend.common.sidebar-sublink')
                     @slot('class') {{ request()->category == 3 ? 'active' : '' }} @endslot
-                    @slot('link') {{ route('admin.contacts.index', ['category' => 3]) }} @endslot
+                    @slot('link') {{ route('admin.users.index', ['category' => 3]) }} @endslot
                     @slot('link_name') Tenants @endslot
                 @endcomponent
 {{--                 
                 <li class="sidebar-sub-list-item py-0 mb-0">
-                    <a href="{{ route('admin.contacts.index') }}"
-                        class="{{ request()->routeIs('admin.contacts.index') && !request()->has('category') ? 'active' : '' }}">
+                    <a href="{{ route('admin.users.index') }}"
+                        class="{{ request()->routeIs('admin.users.index') && !request()->has('category') ? 'active' : '' }}">
                         All
                     </a>
                 </li>
                 <li class="sidebar-sub-list-item py-0 mb-0">
-                    <a href="{{ route('admin.contacts.index', ['category' => 1]) }}"
+                    <a href="{{ route('admin.users.index', ['category' => 1]) }}"
                         class="{{ request()->category == 1 ? 'active' : '' }}">
                         Owners
                     </a>
                 </li>
                 <li class="sidebar-sub-list-item py-0 mb-0">
-                    <a href="{{ route('admin.contacts.index', ['category' => 2]) }}"
+                    <a href="{{ route('admin.users.index', ['category' => 2]) }}"
                         class="{{ request()->category == 2 ? 'active' : '' }}">
                         Property Managers
                     </a>
                 </li>
                 <li class="sidebar-sub-list-item py-0 mb-0">
-                    <a href="{{ route('admin.contacts.index', ['category' => 3]) }}"
+                    <a href="{{ route('admin.users.index', ['category' => 3]) }}"
                         class="{{ request()->category == 3 ? 'active' : '' }}">
                         Tenants
                     </a>
                 </li>
                 <li class="sidebar-sub-list-item py-0 mb-0">
-                    <a href="{{ route('admin.contacts.index', ['category' => 4]) }}"
+                    <a href="{{ route('admin.users.index', ['category' => 4]) }}"
                         class="{{ request()->category == 4 ? 'active' : '' }}">
                         Landlords
                     </a>
@@ -337,7 +337,7 @@
                 <i class="fa fa-angle-down"></i>
             </a>
             <ul class="nav-second-level list-unstyled collapse {{ areActiveRoutes([
-                'contact-categories.index',
+                'user-categories.index',
                 'admin.branches.index',
                 'admin.designations.index',
                 'admin.note-types.index',
@@ -357,8 +357,8 @@
             ], 'show') }}" id="masterManageSubmenu">
 
                 @component('components.backend.common.sidebar-sublink')
-                    @slot('class') {{ areActiveRoutes(['contact-categories.index']) }} @endslot
-                    @slot('link') {{ route('contact-categories.index') }} @endslot
+                    @slot('class') {{ areActiveRoutes(['user-categories.index']) }} @endslot
+                    @slot('link') {{ route('user-categories.index') }} @endslot
                     @slot('link_name') Categories
                     @endslot
                 @endcomponent
@@ -375,8 +375,8 @@
                     @endslot
                 @endcomponent
                 {{-- <li class="sidebar-sub-sub-list-item submenu_wrapper">
-                    <a class="{{ areActiveRoutes(['contact-categories.index']) }}"
-                        href="{{ route('contact-categories.index') }}">
+                    <a class="{{ areActiveRoutes(['user-categories.index']) }}"
+                        href="{{ route('user-categories.index') }}">
                         Categories
                     </a>
                 </li>

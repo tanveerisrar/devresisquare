@@ -16,28 +16,28 @@
         // Check if tenant_details is already an array or string
         $tenantDetails = is_string($offer->tenant_details) ? json_decode($offer->tenant_details, true) : $offer->tenant_details;
 
-        // Collect the contact IDs
-        $contactIds = array_keys($tenantDetails);  // This gives an array of contact IDs (e.g., [12, 15, 18])
+        // Collect the user IDs
+        $userIds = array_keys($tenantDetails);  // This gives an array of user IDs (e.g., [12, 15, 18])
 
-        // Retrieve the contacts from the database using the contact IDs
-        $contacts = \App\Models\Contact::whereIn('id', $contactIds)->get();
+        // Retrieve the users from the database using the user IDs
+        $users = \App\Models\User::whereIn('id', $userIds)->get();
 
-        // Find the main tenant (the contact with main_person flag set to true)
+        // Find the main tenant (the user with main_person flag set to true)
         $mainPersonId = null;
-        foreach ($tenantDetails as $contactId => $isMain) {
+        foreach ($tenantDetails as $userId => $isMain) {
             if ($isMain) {
-                $mainPersonId = $contactId;
+                $mainPersonId = $userId;
                 break;
             }
         }
 
-        $mainPerson = $contacts->firstWhere('id', $mainPersonId);
+        $mainPerson = $users->firstWhere('id', $mainPersonId);
 
         // Get the other members (excluding the main tenant)
         $otherMembers = [];
-        foreach ($contacts as $contact) {
-            if ($contact->id != $mainPersonId) {
-                $otherMembers[] = $contact;
+        foreach ($users as $user) {
+            if ($user->id != $mainPersonId) {
+                $otherMembers[] = $user;
             }
         }
     @endphp
@@ -112,7 +112,7 @@
                                     <td>{{ $offer->term }}</td>
                                     @if ($offer->status !== 'Accepted' && $offer->status !== 'Rejected')
                                     <td>
-                                        <button class="btn btn-primary btn-sm make-main-btn" data-id="{{ $offer->id }}" data-contactid="{{ $member->details['contact_id'] }}"  data-member="{{ json_encode($member) }}">Set as Main</button>
+                                        <button class="btn btn-primary btn-sm make-main-btn" data-id="{{ $offer->id }}" data-userid="{{ $member->details['user_id'] }}"  data-member="{{ json_encode($member) }}">Set as Main</button>
                                     </td>
                                     @endif
                                 </tr>

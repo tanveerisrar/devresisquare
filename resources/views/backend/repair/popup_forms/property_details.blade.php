@@ -64,7 +64,7 @@
                         // $headers = ['Address', 'Type', 'Availability', 'Actions'];
                         $rows = []; // Initially empty
                     @endphp
-                    <x-backend.dynamic-table :headers="$headers" :rows="$rows" :actionBtn="False" class="contact_add_property" />
+                    <x-backend.dynamic-table :headers="$headers" :rows="$rows" :actionBtn="False" class="user_add_property" />
                 </div>
             </div>
         </div>

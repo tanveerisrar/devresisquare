@@ -44,12 +44,12 @@ class Transaction extends Model
 
     public function payer()
     {
-        return $this->belongsTo(Contact::class, 'payer_id');
+        return $this->belongsTo(User::class, 'payer_id');
     }
 
     public function payee()
     {
-        return $this->belongsTo(Contact::class, 'payee_id');
+        return $this->belongsTo(User::class, 'payee_id');
     }
 
     public function category()

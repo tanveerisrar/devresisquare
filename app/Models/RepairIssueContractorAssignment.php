@@ -33,7 +33,7 @@ class RepairIssueContractorAssignment extends Model
      */
     public function contractor()
     {
-        return $this->belongsTo(Contact::class, 'contractor_id')
+        return $this->belongsTo(User::class, 'contractor_id')
                     ->where('category_id', 6); // Only contractors with category_id = 6
     }
 

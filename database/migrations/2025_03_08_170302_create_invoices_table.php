@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('invoice_number')->unique();
             $table->foreignId('work_order_id')->nullable()->constrained('work_orders')->onDelete('cascade');
             $table->foreignId('property_id')->nullable()->constrained('properties')->onDelete('set null');
-            $table->foreignId('contact_id')->nullable()->constrained('contacts')->onDelete('set null');
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
 
             $table->date('invoice_date');
             $table->date('due_date')->nullable();

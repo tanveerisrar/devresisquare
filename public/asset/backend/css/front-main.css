@@ -1376,11 +1376,11 @@ input[type="radio"]:checked+label::before {
 
 
 /* ========================================
-          Contacts
+          Users
 ==========================================*/
 
-/* ---------- Add Contact ------------ */
-.contact_add_property {
+/* ---------- Add User ------------ */
+.user_add_property {
     .td-2 {
         max-width: 100px;
         overflow: hidden;
@@ -1390,8 +1390,8 @@ input[type="radio"]:checked+label::before {
     }
 }
 
-/* ---------- View Contact ------------ */
-.contact_content_Detail {
+/* ---------- View User ------------ */
+.user_content_Detail {
     margin-top: 30px;
 
     .dataTables_wrapper {

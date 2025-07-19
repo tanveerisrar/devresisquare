@@ -15,14 +15,14 @@ return new class extends Migration {
             $table->string('works_order_no')->unique();
             $table->foreignId('repair_issue_id')->constrained()->onDelete('cascade');
             // $table->foreignId('supplier_id')->nullable()->constrained('suppliers')->onDelete('set null');
-            // $table->foreignId('supplier_id')->nullable()->constrained('contacts')->onDelete('set null');
+            // $table->foreignId('supplier_id')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('job_type_id')->nullable()->constrained('job_types')->onDelete('set null');
             $table->foreignId('job_sub_type_id')->nullable()->constrained('job_types')->onDelete('set null');
             $table->string('job_status')->nullable();
             $table->text('job_scope')->nullable();
             $table->dateTime('date_time')->nullable();
             $table->string('invoice_to')->nullable();
-            $table->foreignId('invoice_to_id')->nullable()->constrained('contacts')->onDelete('set null');
+            $table->foreignId('invoice_to_id')->nullable()->constrained('users')->onDelete('set null');
             $table->date('tentative_start_date')->nullable();
             $table->date('tentative_end_date')->nullable();
             $table->date('booked_date')->nullable();

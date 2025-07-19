@@ -66,12 +66,12 @@ class RoleAndPermissionSeeder extends Seeder
             'update maintenance status',
             'complete maintenance tasks',
 
-            // Contacts
-            'view contacts',
-            'create contacts',
-            'edit contacts',
-            'delete contacts',
-            'manage contact categories',
+            // Users
+            'view users',
+            'create users',
+            'edit users',
+            'delete users',
+            'manage user categories',
 
             // Documents
             'upload documents',
@@ -213,8 +213,8 @@ class RoleAndPermissionSeeder extends Seeder
                         'edit invoices',
                         'mark invoice paid',
 
-                        'view contacts',
-                        'manage contact categories',
+                        'view users',
+                        'manage user categories',
                         'view reports',
 
                         'send notifications',
@@ -241,7 +241,7 @@ class RoleAndPermissionSeeder extends Seeder
                 //         'assign maintenance tasks',
                 //         'update maintenance status',
                 //         'complete maintenance tasks',
-                //         'view contacts',
+                //         'view users',
                 //     ]);
                 //     break;
 
