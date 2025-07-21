@@ -655,8 +655,16 @@
                 </ul>
             </li>
         @endcanany
-
         
+        {{-- @if(!auth()->user()->hasAnyRole(['Super Admin', 'Property Manager']))
+            <li class="sidebar-list-item submenu_wrapper">
+                <a href="{{ route('user.profile') }}">
+                    <span class="icon_wrapper"><i class="fa-solid fa-user"></i>Profile</span>
+                </a>
+            </li>
+        @endif --}}
+
+        @hasanyrole('Super Admin|Property Manager')
         <li class="sidebar-list-item submenu_wrapper">
             <a href="#">
                 <span class="icon_wrapper"><i class="fa-solid fa-users"></i>Users</span> 
@@ -682,6 +690,7 @@
                 </a>
             </form>
         </li>
+        @endhasanyrole
     </ul>
 </aside>
 <div class="backdrop"></div>
