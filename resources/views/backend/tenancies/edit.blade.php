@@ -45,7 +45,7 @@
                 @foreach ($tenants as $user)
                     <option value="{{ $user->id }}"
                         {{ in_array($user->id, $tenancy->tenantMembers->pluck('user_id')->toArray()) ? 'selected' : '' }}>
-                        {{ $user->full_name }}
+                        {{ $user->name }}
                     </option>
                 @endforeach
             </select>
@@ -58,7 +58,7 @@
                         id="is_main_person{{ $tenantMembersUser->user->id }}" class="form-check-input"
                         @if ($tenantMembersUser->is_main_person) checked @endif>
                     <label for="is_main_person{{ $tenantMembersUser->user->id }}"
-                        class="form-check-label">{{ $tenantMembersUser->user->full_name }}</label>
+                        class="form-check-label">{{ $tenantMembersUser->user->name }}</label>
                 </div>
             @endforeach
         </div>
@@ -284,7 +284,7 @@
                     required>
                     @foreach ($property_managers as $property_manager)
                         <option value="{{ $property_manager->id }}" @if (in_array($property_manager->id, $currentPropertyManagers)) selected @endif>
-                            {{ $property_manager->full_name }}
+                            {{ $property_manager->name }}
                         </option>
                     @endforeach
                 </select>
@@ -303,7 +303,7 @@
         <input type="hidden" class="form-control" id="category_id" name="category_id" value="3">
         <div class="mb-3">
             <label for="user_name" class="form-label">Full Name</label>
-            <input type="text" class="form-control" id="user_name" name="full_name" required>
+            <input type="text" class="form-control" id="user_name" name="name" required>
         </div>
         <div class="mb-3">
             <label for="user_email" class="form-label">Email</label>

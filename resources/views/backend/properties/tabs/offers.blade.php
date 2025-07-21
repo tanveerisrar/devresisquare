@@ -45,7 +45,7 @@
     <div class="accordion-item">
         <h2 class="accordion-header" id="heading-{{ $offer->id }}">
             <button class="accordion-button {{ $key > 0 ? 'collapsed' : '' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ $offer->id }}" aria-expanded="{{ $key == 0 ? 'true' : 'false' }}" aria-controls="collapse-{{ $offer->id }}">
-                Offer #{{ $key + 1 }} - {{ $offer->status }} (Main Tenant: {{ $mainPerson->full_name ?? 'N/A' }})
+                Offer #{{ $key + 1 }} - {{ $offer->status }} (Main Tenant: {{ $mainPerson->name ?? 'N/A' }})
             </button>
         </h2>
         <div id="collapse-{{ $offer->id }}" class="accordion-collapse collapse {{ $key == 0 ? 'show' : '' }}" aria-labelledby="heading-{{ $offer->id }}" data-bs-parent="#offersAccordion">
@@ -68,7 +68,7 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>{{ $mainPerson->full_name }}</td>
+                                    <td>{{ $mainPerson->name }}</td>
                                     <td>{{ $mainPerson->phone }}</td>
                                     <td>{{ $mainPerson->email }}</td>
                                     <td>{{ $mainPerson->details->employment_status ?? 'N/A' }}</td>
@@ -103,7 +103,7 @@
                             <tbody>
                                 @foreach($otherMembers as $member)
                                 <tr>
-                                    <td>{{ $member->full_name }}</td>
+                                    <td>{{ $member->name }}</td>
                                     <td>{{ $member->phone }}</td>
                                     <td>{{ $member->email }}</td>
                                     <td>{{ $member->details->employment_status ?? 'N/A' }}</td>

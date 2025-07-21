@@ -11,7 +11,7 @@
                 @foreach($users as $user)
                     <option value="{{ $user->id }}"
                         @if(in_array($user->id, $selectedUsers)) selected @endif>
-                        {{ $user->full_name }}
+                        {{ $user->name }}
                     </option>
                 @endforeach
             </select>
@@ -22,7 +22,7 @@
                 <div class="form-check">
                     <input type="radio" name="is_main" value="{{ $ownerGroupUser->user->id }}" id="is_main_{{ $ownerGroupUser->user->id }}" class="form-check-input"
                     @if($ownerGroupUser->is_main) checked @endif>
-                    <label for="is_main_{{ $ownerGroupUser->user->id }}" class="form-check-label">{{ $ownerGroupUser->user->full_name }}</label>
+                    <label for="is_main_{{ $ownerGroupUser->user->id }}" class="form-check-label">{{ $ownerGroupUser->user->name }}</label>
                 </div>
             @endforeach
         </div>
@@ -71,7 +71,7 @@
         <input type="hidden" class="form-control" id="category_id" name="category_id" value="1">
         <div class="mb-3">
             <label for="user_name" class="form-label">Full Name</label>
-            <input type="text" class="form-control" id="user_name" name="full_name" required>
+            <input type="text" class="form-control" id="user_name" name="name" required>
         </div>
         <div class="mb-3">
             <label for="user_email" class="form-label">Email</label>

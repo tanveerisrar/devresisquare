@@ -302,7 +302,7 @@
                             <select name="property_managers[]" id="property_managers" class="form-control select2"
                                 multiple>
                                 @foreach($propertyManagers as $manager)
-                                    <option value="{{ $manager->id }}" {{ in_array($manager->id, $assignedManagers) ? 'selected' : '' }}>{{ $manager->full_name }} ({{ $manager->email }})</option>
+                                    <option value="{{ $manager->id }}" {{ in_array($manager->id, $assignedManagers) ? 'selected' : '' }}>{{ $manager->name }} ({{ $manager->email }})</option>
                                 @endforeach
                             </select>
                         </div>
@@ -320,7 +320,7 @@
                             <select name="final_contractor_id" id="final_contractor" class="form-control">
                                 <option value="">-- Select Contractor --</option>
                                 @foreach ($contractorAssignments as $assignment)
-                                    <option value="{{ $assignment->contractor_id }}" {{ $repairIssue->final_contractor_id == $assignment->contractor_id ? 'selected' : '' }}>{{  $assignment->contractor->full_name }} ({{ $assignment->contractor->email }})</option>
+                                    <option value="{{ $assignment->contractor_id }}" {{ $repairIssue->final_contractor_id == $assignment->contractor_id ? 'selected' : '' }}>{{  $assignment->contractor->name }} ({{ $assignment->contractor->email }})</option>
                                 @endforeach
                             </select>
                         </div>
@@ -605,9 +605,9 @@
                         dropdown += `<option value="${item.id}" ${isSelected} 
                                     data-email="${item.email}" 
                                     data-phone="${item.phone}" 
-                                    data-name="${item.full_name}" 
+                                    data-name="${item.name}" 
                                     data-address="${item.full_address || ''}">
-                                    ${item.full_name}
+                                    ${item.name}
                                     </option>`;
                     });
 
@@ -968,7 +968,7 @@
                         options += `<option value="${tenant.id}"
                             data-email="${tenant.email}"
                             data-phone="${tenant.phone}"
-                            data-address="${tenant.address}">${tenant.full_name}</option>`;
+                            data-address="${tenant.address}">${tenant.name}</option>`;
                     });
                     $('#tenant-select').html(options);
                     if (typeof callback === 'function') {
@@ -1315,7 +1315,7 @@
                     <label>Contractor</label>
                     <select name="contractor_assignments[__index__][contractor_id]" class="form-control contractor-id">
                         @foreach($contractors as $contractor)
-                            <option value="{{ $contractor->id }}">{{ $contractor->full_name }} ({{ $contractor->email }})</option>
+                            <option value="{{ $contractor->id }}">{{ $contractor->name }} ({{ $contractor->email }})</option>
                         @endforeach
                     </select>
                 </div>

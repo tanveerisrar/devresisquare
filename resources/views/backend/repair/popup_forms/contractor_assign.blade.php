@@ -10,7 +10,7 @@
                         </p>
                         <div class="row mb-2">
                             <div class="col-sm-3 fw-bold">Contractor</div>
-                            <div class="col-sm-9">{{ $assignment->contractor->full_name ?? 'N/A' }}</div>
+                            <div class="col-sm-9">{{ $assignment->contractor->name ?? 'N/A' }}</div>
                         </div>
                         <div class="row mb-2">
                             <div class="col-sm-3 fw-bold">Cost Price</div>

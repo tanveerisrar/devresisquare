@@ -11,7 +11,7 @@
             <label for="tenant_id">Select Tenants</label>
             <select name="user_id[]" id="tenant_id" multiple class="form-control select2" required>
                 @foreach ($tenants as $user)
-                    <option value="{{ $user->id }}">{{ $user->full_name }}</option>
+                    <option value="{{ $user->id }}">{{ $user->name }}</option>
                 @endforeach
             </select>
         </div>
@@ -211,7 +211,7 @@
                         <select name="property_manager[]" id="property_manager" multiple class="form-control select2"
                             required>
                             @foreach ($property_managers as $property_manager)
-                                <option value="{{ $property_manager->id }}">{{ $property_manager->full_name }}</option>
+                                <option value="{{ $property_manager->id }}">{{ $property_manager->name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -229,7 +229,7 @@
         <input type="hidden" class="form-control" id="category_id" name="category_id" value="3">
         <div class="mb-3">
             <label for="user_name" class="form-label">Full Name</label>
-            <input type="text" class="form-control" id="user_name" name="full_name" required>
+            <input type="text" class="form-control" id="user_name" name="name" required>
         </div>
         <div class="mb-3">
             <label for="user_email" class="form-label">Email</label>

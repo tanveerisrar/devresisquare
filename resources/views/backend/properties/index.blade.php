@@ -681,7 +681,7 @@ var_dump($propertyId);
                         if (response.success) {
                             // Add the new user to the dropdown in the main form
                             $('#user_id').append(
-                                `<option value="${response.user.id}">${response.user.full_name}</option>`
+                                `<option value="${response.user.id}">${response.user.name}</option>`
                             );
 
                             // Optionally, select the new user
@@ -811,7 +811,7 @@ var_dump($propertyId);
                         btn.css("pointer-events", "inherit");
 
                         if (response.status) {
-                            toastr.success(response.notification, "Success");
+                            AIZ.plugins.notify('success', response.notification);
                             // Close the modal on success
                             $('#smallModal').modal('hide');
                             setTimeout(function() {
@@ -822,9 +822,7 @@ var_dump($propertyId);
                             if (response.errors) {
                                 // Loop through each error and display it
                                 $.each(response.errors, function(field, messages) {
-                                    // For each field with errors, show them
-                                    toastr.error(messages.join(', '), field.charAt(0)
-                                        .toUpperCase() + field.slice(1));
+                                    AIZ.plugins.notify('danger', messages.join(', ')); // ✅ replaced toastr
                                 });
                             }
                             // Check if the response is asking for confirmation
@@ -849,18 +847,38 @@ var_dump($propertyId);
                                     submitOwnerGroupForm(e);
                                 }
                             } else {
-                                toastr.error(response.notification, "Error");
+                                AIZ.plugins.notify('danger', response.notification);
                             }
                         }
                     },
-                    error: function() {
-                        // toastr.error(response.notification, 'Error')
+                    error: function(xhr, status, error) {
                         btn.html(btn_text);
                         btn.css("opacity", "1");
                         btn.css("pointer-events", "inherit");
-                        toastr.error("There was an error with the form submission. Please try again.",
-                            "Error");
+
+                        let defaultMessage = "There was an error with the form submission. Please try again.";
+
+                        try {
+                            const response = xhr.responseJSON || JSON.parse(xhr.responseText);
+
+                            // Show detailed field errors if available
+                            if (response.errors) {
+                                $.each(response.errors, function(field, messages) {
+                                    // Show each field's error message(s)
+                                    AIZ.plugins.notify('danger', messages.join(', '));
+                                });
+                            } else if (response.message) {
+                                // Show general message if no field-level errors
+                                AIZ.plugins.notify('danger', response.message);
+                            } else {
+                                AIZ.plugins.notify('danger', defaultMessage);
+                            }
+                        } catch (e) {
+                            // JSON parsing failed or unexpected response
+                            AIZ.plugins.notify('danger', defaultMessage);
+                        }
                     }
+
                 });
             }
 

@@ -31,7 +31,7 @@
                 <!-- Group Name -->
                 <td>
                     @php
-                        $users = $ownerGroup->ownerGroupUsers->pluck('user.full_name')->toArray();
+                        $users = $ownerGroup->ownerGroupUsers->pluck('user.name')->toArray();
                         $groupName = count($users) > 2
                             ? implode(' & ', array_slice($users, 0, 2)) . ' and others'
                             : implode(' & ', $users);
@@ -50,7 +50,7 @@
                 <!-- Action -->
                 <td>
                     <div class="d-flex justify-content-end">
-                        <button class="btn btn-sm btn-outline-warning editNote editForm me-1" title="Edit Owner Group" data-url="{{ route('admin.owner-groups.edit', $ownerGroup->id) }}">
+                        <button class="btn btn-sm btn-outline-warning popup-tab-owner-group-edit me-1" title="Edit Owner Group" data-url="{{ route('admin.owner-groups.edit', $ownerGroup->id) }}">
                             <i class="bi bi-pencil">Edit</i>
                         </button>
                         <button class="btn btn-sm btn-outline-danger me-1" title="Delete Owner Group" onclick="confirmModal('{{ route('admin.owner-groups.delete_group', $ownerGroup->id) }}', responseHandler)">
@@ -83,7 +83,7 @@
 
                                     <!-- Name -->
                                     <td>
-                                        {{ $user->user->full_name }}
+                                        {{ $user->user->name }}
                                         @if($user->is_main)
                                             <span class="badge text-bg-success">Main</span>
                                         @endif

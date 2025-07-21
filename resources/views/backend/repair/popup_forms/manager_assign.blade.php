@@ -10,7 +10,7 @@
                 </p>
                 <p class="mb-1 fs-6">
                     <span class="fw-semibold">Manager:</span>
-                    {{ $assignment->propertyManager->full_name ?? 'N/A' }}
+                    {{ $assignment->propertyManager->name ?? 'N/A' }}
                 </p>
                 <p class="mb-1 fs-6 text-muted">
                     {{ $assignment->propertyManager->email ?? 'N/A' }}

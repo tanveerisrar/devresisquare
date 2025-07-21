@@ -75,6 +75,25 @@ class OwnerGroupController
             'archived_date' => 'nullable|date|after_or_equal:purchased_date', // Optional, must be after purchased date
             'status' => 'required|in:active,inactive,archived',
         ]);
+        
+        // Check if validation fails
+        if ($request->fails()) {
+            return response()->json([
+                'status' => false,
+                'errors' => $request->errors(),
+                'message' => 'Validation failed. Please check the inputs and try again.',
+            ]);
+        }
+
+        if ($validated['status'] === 'active' && $request->filled('archived_date')) {
+            return response()->json([
+                'status' => false,
+                'errors' => [
+                    'archived_date' => ['Archived date cannot be set when status is active.']
+                ],
+                'message' => 'Invalid data provided.',
+            ]);
+        }
 
 
         // Check if the status is 'active'
@@ -188,7 +207,7 @@ class OwnerGroupController
             'is_main' => 'required', // Ensure main user is one of the selected users
             'purchased_date' => 'required|date',
             'sold_date' => 'nullable|date|after_or_equal:purchased_date', // Optional, must be after purchased date
-            'archived_date' => 'nullable|date|after_or_equal:purchased_date', // Optional, must be after purchased date
+            'archived_date' => 'nullable|date', // Optional, must be after purchased date
             'status' => 'required|in:active,inactive,archived',
         ]);
 
@@ -200,7 +219,38 @@ class OwnerGroupController
                 'errors' => $validator->errors(),
             ]);
         }
+        
+        // Add custom logic
+        $validator->after(function ($validator) use ($request) {
+            $archivedDate = $request->archived_date;
+            $purchasedDate = $request->purchased_date;
 
+            if ($request->status === 'active' && $request->filled('archived_date')) {
+                $validator->errors()->add('archived_date', 'Archived date cannot be set when status is active.');
+            }
+
+            if ($request->status === 'archived') {
+                if (!$request->filled('archived_date')) {
+                    $validator->errors()->add('archived_date', 'Archived date is required when status is archived.');
+                } elseif ($purchasedDate && $archivedDate && strtotime($archivedDate) < strtotime($purchasedDate)) {
+                    $validator->errors()->add('archived_date', 'Archived date must be after or equal to purchased date.');
+                }
+            }
+
+            // Optional: Also validate date logic if status is inactive but date is provided
+            if ($request->status === 'inactive' && $archivedDate && $purchasedDate && strtotime($archivedDate) < strtotime($purchasedDate)) {
+                $validator->errors()->add('archived_date', 'Archived date must be after or equal to purchased date.');
+            }
+        });
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'notification' => 'Validation failed. Please check the inputs and try again.',
+                'errors' => $validator->errors(),
+            ]);
+        }
+        
         // Get the current logged-in user
         $userId = Auth::id();
 

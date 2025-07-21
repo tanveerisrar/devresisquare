@@ -18,7 +18,7 @@
                 <label for="user_id">User</label>
                 <select name="user_id" id="user_id" class="form-control" required>
                   @foreach($users as $user)
-                    <option value="{{ $user->id }}">{{ $user->full_name }}</option>
+                    <option value="{{ $user->id }}">{{ $user->name }}</option>
                   @endforeach
                 </select>
               </div>
@@ -68,7 +68,7 @@
               <input type="hidden" class="form-control" id="category_id" name="category_id" value="1">
               <div class="mb-3">
                     <label for="user_name" class="form-label">Full Name</label>
-                    <input type="text" class="form-control" id="user_name" name="full_name" required>
+                    <input type="text" class="form-control" id="user_name" name="name" required>
                 </div>
                 <div class="mb-3">
                     <label for="user_email" class="form-label">Email</label>

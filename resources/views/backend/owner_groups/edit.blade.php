@@ -15,7 +15,7 @@
             <select name="user_id" id="user_id" class="form-control" required>
                 @foreach($users as $user)
                     <option value="{{ $user->id }}" {{ $user->id == $ownerGroup->user_id ? 'selected' : '' }}>
-                        {{ $user->full_name }}
+                        {{ $user->name }}
                     </option>
                 @endforeach
             </select>

@@ -33,14 +33,13 @@
                         @foreach ($users as $user)
                             @php
                                 $nameParts = array_filter([
-                                    $user['full_name'] ?? '',
                                     $user['first_name'] ?? '',
                                     $user['middle_name'] ?? '',
                                     $user['last_name'] ?? '',
                                 ]);
 
-                                $fullName = !empty($user['full_name'])
-                                    ? $user['full_name']
+                                $fullName = !empty($user['name'])
+                                    ? $user['name']
                                     : implode(' ', $nameParts);
                             @endphp
 

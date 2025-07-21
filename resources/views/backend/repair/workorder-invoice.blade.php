@@ -242,9 +242,9 @@
                             dropdown += `<option value="${item.id}" ${isSelected} 
                                             data-email="${item.email}" 
                                             data-phone="${item.phone}" 
-                                            data-name="${item.full_name}" 
+                                            data-name="${item.name}" 
                                             data-address="${item.full_address || ''}">
-                                            ${item.full_name}
+                                            ${item.name}
                                             </option>`;
                         });
 

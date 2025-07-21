@@ -113,7 +113,7 @@
                             <tr>
                                 <td>{{ $index + 1 }}</td>
                                 <td>
-                                    {{ $assignment->propertyManager->full_name ?? 'N/A' }}
+                                    {{ $assignment->propertyManager->name ?? 'N/A' }}
                                     ({{ $assignment->propertyManager->email ?? 'N/A' }})
                                 </td>
                                 <td>{{ \Carbon\Carbon::parse($assignment->assigned_at)->format('d M Y, H:i') }}</td>
@@ -149,7 +149,7 @@
                         @foreach($repairIssue->repairIssueContractorAssignments as $index => $assignment)
                             <tr>
                                 <td>{{ $index + 1 }}</td>
-                                <td>{{ $assignment->contractor->full_name ?? 'N/A' }}</td>
+                                <td>{{ $assignment->contractor->name ?? 'N/A' }}</td>
                                 <td>{{ $assignment->cost_price }}</td>
                                 <td>{{ $assignment->contractor_preferred_availability }}</td>
                                 <td>{{ $assignment->status }}</td>
@@ -177,7 +177,7 @@
         </div>
         <div class="card-body">
             @if ($repairIssue->final_contractor_id && $repairIssue->finalContractor)
-                <p><strong>Name:</strong> {{ $repairIssue->finalContractor->full_name }}</p>
+                <p><strong>Name:</strong> {{ $repairIssue->finalContractor->name }}</p>
                 <p><strong>Email:</strong> {{ $repairIssue->finalContractor->email }}</p>
                 <p><strong>Phone:</strong> {{ $repairIssue->finalContractor->phone }}</p>
             @else

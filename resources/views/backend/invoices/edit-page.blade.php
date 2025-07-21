@@ -32,7 +32,7 @@
             <select name="user_id" class="form-control">
                 @foreach($users as $user)
                     <option value="{{ $user->id }}" {{ $invoice->user_id == $user->id ? 'selected' : '' }}>
-                        {{ $user->full_name }} ({{ $user->email }})
+                        {{ $user->name }} ({{ $user->email }})
                     </option>
                 @endforeach
             </select>

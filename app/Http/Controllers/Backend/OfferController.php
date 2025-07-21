@@ -58,7 +58,7 @@ class OfferController
             // Create a new user for each tenant
             $user = User::create([
                 'category_id' => 3,
-                'full_name' => $request->input("tenantName_{$tenantIndex}"),
+                'name' => $request->input("tenantName_{$tenantIndex}"),
                 'phone' => $request->input("tenantPhone_{$tenantIndex}"),
                 'email' => $request->input("tenantEmail_{$tenantIndex}"),
                 'status' => 1,  // You can adjust the status accordingly

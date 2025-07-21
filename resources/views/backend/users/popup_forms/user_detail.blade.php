@@ -53,8 +53,8 @@
     {{-- NAMES --}}
     <div class="mb-3">
         <strong>Full Name:</strong>
-        {{ $user->full_name
-            ? $user->full_name
+        {{ $user->name
+            ? $user->name
             : implode(' ', array_filter([$user->first_name, $user->middle_name, $user->last_name])) }}
     </div>
 

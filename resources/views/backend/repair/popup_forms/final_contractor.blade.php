@@ -2,7 +2,7 @@
     <!-- Display View Mode -->
     <div class="my-3 px-2">    
         @if ($repairIssue->final_contractor_id && $repairIssue->finalContractor)
-            <p><strong>Name:</strong> {{ $repairIssue->finalContractor->full_name }}</p>
+            <p><strong>Name:</strong> {{ $repairIssue->finalContractor->name }}</p>
             <p><strong>Email:</strong> {{ $repairIssue->finalContractor->email }}</p>
             <p><strong>Phone:</strong> {{ $repairIssue->finalContractor->phone }}</p>
         @else

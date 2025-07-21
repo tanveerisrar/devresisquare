@@ -665,7 +665,7 @@ class PropertyRepairController
                 if ($member->user) {
                     return [
                         'id' => $member->user->id,
-                        'full_name' => $member->user->full_name,
+                        'name' => $member->user->name,
                         'email' => $member->user->email,
                         'phone' => $member->user->phone,
                     ];

@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 // use App\Http\Controllers\Backend\NotesController;
+use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Backend\BankDetailController;
 
 class UserController
@@ -371,11 +372,12 @@ class UserController
 
         // Create a new user
         $user = User::create([
-            'category_id' => $request->category_id ?? 9,
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'phone' => $validated['phone'],
-            'added_by' => Auth::id(),
+            'category_id'   => $request->category_id ?? 9,
+            'name'          => $validated['name'],
+            'email'         => $validated['email'],
+            'phone'         => $validated['phone'],
+            'created_by'    => Auth::id(),
+            'password'      => Hash::make('password'),
         ]);
 
         // Return the user data as a JSON response
