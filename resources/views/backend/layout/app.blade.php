@@ -131,7 +131,7 @@
             // Check if there are validation errors
             @if ($errors->any())
                 @foreach ($errors->all() as $error)
-                    AIZ.plugins.notify('error', "{{ $error }}", {
+                    AIZ.plugins.notify('danger', "{{ $error }}", {
                         "closeButton": true,
                         "progressBar": true,
                         "positionClass": "toast-top-right",
@@ -143,7 +143,7 @@
 
             // Check if a custom error message is present
             @if (session('error'))
-                AIZ.plugins.notify('error', "{{ session('error') }}", {
+                AIZ.plugins.notify('danger', "{{ session('error') }}", {
                     "closeButton": true,
                     "progressBar": true,
                     "positionClass": "toast-top-right",

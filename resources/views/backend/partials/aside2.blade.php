@@ -1,4 +1,32 @@
 <aside id="menu" class="sidebar bg-light sidebar">
+      <div class="dropdown">
+        <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <img src="https://via.placeholder.com/40" class="rounded-circle" alt="Profile" />
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+            <li class="profile-header">
+                <img src="https://via.placeholder.com/40" alt="Profile" />
+                <div class="user-info">
+                    <strong>{{ auth()->user()->name }}</strong>
+                    <small>{{ auth()->user()->email }}</small>
+                </div>
+            </li>
+            <li>
+                <hr class="dropdown-divider">
+            </li>
+            <li><a class="dropdown-item" href="{{ route('admin.users.profile.show') }}"><i class="fas fa-user"></i>My Profile</a></li>
+            <li><a class="dropdown-item" href="{{ route('admin.users.profile.edit') }}"><i class="fas fa-edit"></i>Edit Profile</a></li>
+            <li>
+                <form action="{{ route('logout') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="dropdown-item border-0 bg-transparent w-100 text-start">
+                        <i class="fa-solid fa-sign-out-alt me-2"></i> Logout
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </div>
+
     <div class="pt-3 px-3">
         <div class="input-group mb-2">
             <input type="text" id="menu-search" placeholder="Search menu..." class="form-control">

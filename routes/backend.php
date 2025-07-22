@@ -168,6 +168,10 @@ Route::middleware('auth')->group(function () {
             Route::post('/save-form', 'saveForm')->name('saveForm');
 
             Route::get('/ajax', 'ajaxList')->name('ajax');  // AJAX endpoint to list users for a select dropdown
+            Route::get('/profile', 'profile')->name('profile.show');  // Show user profile
+            Route::get('/profile/edit', 'profileEdit')->name('profile.edit');  // Show user profile edit form
+            Route::post('/profile/update', 'profileUpdate')->name('profile.update');  // Update user profile
+            Route::post('/profile/password', 'profilePasswordUpdate')->name('profile.password');  // Update user password
         });
 
         // Estate Charges

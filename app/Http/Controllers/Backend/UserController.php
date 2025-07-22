@@ -18,6 +18,83 @@ use App\Http\Controllers\Backend\BankDetailController;
 
 class UserController
 {
+    public function profile()
+    {
+        $user = auth()->user();
+        return view('backend.users.profile.show', compact('user'));
+    }
+    
+    public function profileEdit()
+    {
+        $user = auth()->user();
+        $categories = UserCategory::all();
+        return view('backend.users.profile.edit', compact('user', 'categories'));
+    }
+
+    public function profileUpdate(Request $request)
+    {
+        $user = auth()->user();
+
+        $validatedData = $request->validate([
+            'first_name' => 'required|string|max:55',
+            'middle_name' => 'nullable|string|max:55',
+            'last_name' => 'required|string|max:55',
+            'phone' => 'required|string|max:20',
+            'email' => 'required|email|max:55|unique:users,email,' . $user->id,
+            'address_line_1' => 'required|string|max:255',
+            'address_line_2' => 'nullable|string|max:255',
+            'postcode' => 'required|string|max:15',
+            'city' => 'required|string|max:55',
+            'country' => 'required|string|max:55',
+            'category_id' => 'required|exists:users_categories,id',
+        ]);
+
+        $fullName = trim($request->input('first_name') . ' ' . $request->input('middle_name') . ' ' . $request->input('last_name'));
+
+        $user->update([
+            'first_name' => $validatedData['first_name'],
+            'middle_name' => $validatedData['middle_name'],
+            'last_name' => $validatedData['last_name'],
+            'name' => $fullName,
+            'phone' => $validatedData['phone'],
+            'email' => $validatedData['email'],
+            'address_line_1' => $validatedData['address_line_1'],
+            'address_line_2' => $validatedData['address_line_2'],
+            'postcode' => $validatedData['postcode'],
+            'city' => $validatedData['city'],
+            'country' => $validatedData['country'],
+            'category_id' => $validatedData['category_id'],
+            'updated_by' => auth()->id(),
+        ]);
+
+        flash('Profile updated successfully!')->success();
+        return redirect()->route('admin.users.profile');
+    }
+
+    public function profilePasswordUpdate(Request $request)
+    {
+        $user = auth()->user();
+
+        $validatedData = $request->validate([
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:8|confirmed',
+        ]);
+
+        // Check if the current password is correct
+        if (!Hash::check($validatedData['current_password'], $user->password)) {
+            flash('Current password is incorrect.')->error();
+            return back();
+        }
+
+        // Update the password
+        $user->update([
+            'password' => Hash::make($validatedData['new_password']),
+        ]);
+
+        flash('Password updated successfully!')->success();
+        return redirect()->route('admin.users.profile');
+    }
+
     /**
      * Display a listing of the resource.
      */
