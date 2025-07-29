@@ -13,7 +13,7 @@ class AuthenticateController
     public function index()
     {
         if (Auth::check()) {
-            $user = Auth::user();
+            $user = User::find(Auth::id());
 
             // Backend‑eligible roles
             $backendRoles = [
@@ -21,6 +21,7 @@ class AuthenticateController
                 'Owner',
                 'Property Manager',
                 'Landlord',
+                'Staff'
             ];
 
             if ($user->hasAnyRole($backendRoles)) {
@@ -44,13 +45,14 @@ class AuthenticateController
         ]);
 
         if (Auth::attempt($request->only('email','password'), $request->boolean('remember'))) {
-            $user = Auth::user();
+            $user = User::find(Auth::id());
 
             $backendRoles = [
                 'Super Admin',
                 'Owner',
                 'Property Manager',
                 'Landlord',
+                'Staff'
             ];
 
             if ($user->hasAnyRole($backendRoles)) {

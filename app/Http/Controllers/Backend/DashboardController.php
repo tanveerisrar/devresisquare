@@ -7,9 +7,10 @@ use App\Models\Property;
 use App\Models\WorkOrder;
 use App\Models\RepairIssue;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 
-class DashboardController
+class DashboardController extends Controller
 {
     public function dashboard()
     {
@@ -17,30 +18,34 @@ class DashboardController
         if (!Auth::check()) {
             return redirect()->route('login');  // Redirect to the login page if not authenticated
         }
+        
+        $this->authorize('view dashboard');
+        // $this->middleware(middleware: 'auth'); // Ensure the user is authenticated
+        // $this->middleware('can:view dashboard'); // Optional: Ensure the user has permission to view the dashboard
 
-        // Get the authenticated user
         $user = Auth::user();
 
-        // Check if the authenticated user has the correct role (e.g., admin roles)
-        if (!$user->hasAnyRole([
-            'Super Admin',
-            'Owner',
-            'Property Manager',
-            'Landlord',       // include any roles that should see the dashboard
-            'Estate Agent',
-            // etc.
-        ])) {
-            abort(403, 'Unauthorized.');
+        if (!$user->hasAnyRole(['Super Admin', 'Landlord', 'Staff', 'Property Manager', 'Estate Agent'])) {
+            abort(403);
         }
 
-        // Fetch all users with their roles (assuming the role relationship is defined in the User model)
-        // $users = User::with('role')->get();
-        $usersCount = User::count();
-        $propertiesCount = Property::count();
-        $invoicesCount = Invoice::count();
-        $workOrdersCount = WorkOrder::count();
-        $repairIssuesCount = RepairIssue::count();
-        // Pass users to the view
+        if ($user->hasAnyRole(['Landlord','Property Manager','Estate Agent','Staff'])) {
+            // dd('User is a Landlord, Property Manager, Estate Agent, or Staff');
+            $usersCount = User::where('created_by', $user->id)->count();
+            $propertiesCount = Property::where('created_by', $user->id)->count();
+            $invoicesCount = Invoice::where('created_by', $user->id)->count();
+            $workOrdersCount = WorkOrder::where('created_by', $user->id)->count();
+            $repairIssuesCount = RepairIssue::where('created_by', $user->id)->count();
+           
+        } else {
+            // dd('User is not a Landlord, Property Manager, Estate Agent, or Staff');
+            $usersCount = User::count();
+            $propertiesCount = Property::count();
+            $invoicesCount = Invoice::count();
+            $workOrdersCount = WorkOrder::count();
+            $repairIssuesCount = RepairIssue::count();
+        }
+
         return view('backend.dashboard', compact(
             // 'users',
             'usersCount',
@@ -50,6 +55,5 @@ class DashboardController
             'repairIssuesCount'
         ));
     }
-
 
 }

@@ -37,6 +37,12 @@ return new class extends Migration
             $table->foreignId('final_contractor_id')->constrained('users');
             $table->string('reference_number', 255);
 
+            $table->unsignedBigInteger('created_by')->nullable()->after('reference_number');
+            $table->unsignedBigInteger('updated_by')->nullable()->after('created_by');
+
+            $table->foreign('created_by')->references('id')->on('users')->onDelete('set null');
+            $table->foreign('updated_by')->references('id')->on('users')->onDelete('set null');
+
             $table->timestamps();
         });
     }
@@ -46,6 +52,11 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('repair_issues', function (Blueprint $table) {
+            $table->dropForeign(['created_by']);
+            $table->dropForeign(['updated_by']);
+            $table->dropColumn(['created_by', 'updated_by']);
+        });
         Schema::dropIfExists('repair_issues');
     }
 };

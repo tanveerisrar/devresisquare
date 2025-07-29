@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\TracksUser;
 
 class RepairIssue extends Model
 {
-    use HasFactory;
+    use HasFactory, TracksUser;
 
     protected $fillable = [
         'repair_category_id',
@@ -24,7 +25,9 @@ class RepairIssue extends Model
         'property_id',
         'tenant_id',
         'final_contractor_id',
-        'reference_number'
+        'reference_number',
+        'created_by',
+        'updated_by',
     ];
 
     // protected $casts = [

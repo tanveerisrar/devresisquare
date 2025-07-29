@@ -7,10 +7,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes; // Import SoftDeletes
+use App\Traits\TracksUser;
 
 class Property extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, TracksUser;
 
     // Define the fillable properties
     protected $fillable = [
@@ -89,7 +90,7 @@ class Property extends Model
         // 'commission_amount',
         'step',
         'quick_step',
-        'added_by',
+        'created_by',
         'deleted_by',
     ];
     protected $casts = [

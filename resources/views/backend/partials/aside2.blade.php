@@ -1,3 +1,6 @@
+@php
+    $roles = auth()->user()->getRoleNames();
+@endphp
 <aside id="menu" class="sidebar bg-light sidebar">
       <div class="dropdown">
         <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -8,7 +11,11 @@
                 <img src="https://via.placeholder.com/40" alt="Profile" />
                 <div class="user-info">
                     <strong>{{ auth()->user()->name }}</strong>
-                    <small>{{ auth()->user()->email }}</small>
+                    <small>{{ auth()->user()->email }}</small>                                        
+                    <small class="text-muted">
+                        {{ $roles->count() === 1 ? 'Role' : 'Roles' }}:
+                        {{ $roles->implode(', ') }}
+                    </small>
                 </div>
             </li>
             <li>
@@ -49,6 +56,8 @@
             </a>
         </li>
         
+        @canany(['view properties', 'edit properties', 'create properties'])
+        {{-- Users --}}
         <li class="sidebar-list-item submenu_wrapper">
             <a href="#propertiesSubmenu" data-bs-toggle="collapse"
                 aria-expanded="{{ request()->routeIs('admin.properties.index') || request()->routeIs('admin.properties.soft_deleted') || request()->routeIs('admin.properties.create') ? 'true' : 'false' }} "
@@ -58,21 +67,29 @@
             </a>
             <ul class="nav-second-level collapse list-unstyled {{ request()->routeIs('admin.properties.index') || request()->routeIs('admin.properties.quick') || request()->routeIs('admin.properties.soft_deleted') || request()->routeIs('admin.properties.create') ? 'show' : '' }}"
                 id="propertiesSubmenu">
+                @can('view properties')
                 @component('components.backend.common.sidebar-sublink')
                     @slot('class') {{ request()->routeIs('admin.properties.index') ? 'active' : '' }} @endslot
                     @slot('link') {{ route('admin.properties.index') }} @endslot
                     @slot('link_name') View Properties @endslot
                 @endcomponent
+                @endcan
+                @can('create properties')
                 @component('components.backend.common.sidebar-sublink')
                     @slot('class') {{ request()->routeIs('admin.properties.quick') ? 'active' : '' }} @endslot
                     @slot('link') {{ route('admin.properties.quick') }} @endslot
                     @slot('link_name') Add Property @endslot
                 @endcomponent
+                @endcan
+                @can('view deleted properties')
                 @component('components.backend.common.sidebar-sublink')
                     @slot('class') {{ request()->routeIs('admin.properties.soft_deleted') ? 'active' : '' }} @endslot
                     @slot('link') {{ route('admin.properties.soft_deleted') }} @endslot
                     @slot('link_name') Deleted Properties @endslot
                 @endcomponent
+                @endcan
+                {{-- <li class="sidebar-sub-list-item py-0 mb-0">
+                    <a class="{{ request
                 {{-- <li class="sidebar-sub-list-item py-0 mb-0">
                     <a class="{{ request()->routeIs('admin.properties.index') ? 'active' : '' }}"
                         href="{{ route('admin.properties.index') }}">
@@ -93,6 +110,7 @@
                 </li> --}}
             </ul>
         </li>
+        @endcanany
 
         <li class="sidebar-list-item submenu_wrapper">
             <a href="#usersSubmenu" data-bs-toggle="collapse"
@@ -163,6 +181,7 @@
             </a>
         </li>
 
+        @canany(['view property repairs', 'edit property repairs', 'create property repairs'])
         <li class="sidebar-list-item submenu_wrapper">
             <a href="#repairSubmenu" data-bs-toggle="collapse"
                 aria-expanded="{{ request()->routeIs('admin.property_repairs.*') ? 'true' : 'false' }}"
@@ -173,11 +192,13 @@
             <ul class="nav-second-level collapse list-unstyled {{ request()->routeIs('admin.property_repairs.*') ? 'show' : '' }}"
                 id="repairSubmenu">
                 <!-- Raise Repair Issue -->
+                @can('create property repairs')
                 @component('components.backend.common.sidebar-sublink')
                     @slot('class') {{ request()->routeIs('admin.property_repairs.create') || request()->routeIs('admin.property_repairs.edit') ? 'active' : '' }} @endslot
                     @slot('link') {{ route('admin.property_repairs.create') }} @endslot
                     @slot('link_name') Raise Repair Issue @endslot
                 @endcomponent
+                @endcan
                 {{-- <li class="sidebar-sub-list-item py-0 mb-0">
                     <a class="{{ request()->routeIs('admin.property_repairs.create') || request()->routeIs('admin.property_repairs.edit') ? 'active' : '' }}"
                         href="{{ route('admin.property_repairs.create') }}">
@@ -185,6 +206,7 @@
                     </a>
                 </li> --}}
 
+                @can('view property repairs')
                 <!-- Repair Issues Section -->
                 <li class="sidebar-sub-list-item py-0 mb-0 submenu_wrapper">
                     <a href="#repairIssuesSubmenu" data-bs-toggle="collapse"
@@ -232,9 +254,12 @@
                         @endforeach
                     </ul>
                 </li>
+                @endcan
             </ul>
         </li>
+        @endcanany
 
+        @can('view invoices')
         @php
             $invoiceStatuses = [
                 'all' => 'All Invoices',
@@ -271,6 +296,7 @@
                 @endforeach
             </ul>
         </li>
+        @endcan
 
         <li class="sidebar-list-item submenu_wrapper">
             <a href="#">

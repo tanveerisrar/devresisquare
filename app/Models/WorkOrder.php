@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Upload;
+use App\Traits\TracksUser;
 
 class WorkOrder extends Model
 {
-    use HasFactory;
+    use HasFactory, TracksUser;
 
     protected $fillable = [
         'works_order_no',
@@ -30,6 +31,8 @@ class WorkOrder extends Model
         'status',
         'extra_notes',
         'date_time',
+        'created_by',
+        'updated_by',
     ];
 
     // Relationship with RepairIssue
@@ -73,5 +76,5 @@ class WorkOrder extends Model
     // {
     //     return $this->belongsTo(Supplier::class);
     // }
-}
 
+}

@@ -2,12 +2,14 @@
 
 namespace App\Providers;
 
+use OwenIt\Auditing\Auditor;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use OwenIt\Auditing\Contracts\Auditor as AuditorContract;
-use OwenIt\Auditing\Auditor;
+use Spatie\Permission\Models\Permission;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -30,5 +32,15 @@ class AppServiceProvider extends ServiceProvider
         Schema::defaultStringLength(191);
         Paginator::useBootstrapFive();
         //Paginator::useBootstrap(); // Enables Bootstrap 4 styling
+
+        // $permissions = cache()->remember('all_permissions', 3600, fn() => Permission::all());
+        $permissions = cache()->rememberForever('all_permissions', fn() => Permission::all());
+
+        foreach ($permissions as $permission) {
+            Gate::define($permission->name, function ($user) use ($permission) {
+                return $user->hasPermissionTo($permission->name);
+            });
+        }
+        
     }
 }
