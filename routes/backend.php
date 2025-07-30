@@ -71,9 +71,13 @@ Route::middleware('auth')->group(function () {
         return searchProperties($request);
     })->name('properties.search');
 
-    Route::get('/get_users_info_by_property/{propertyId}/users/{categoryId}', function ($propertyId, $categoryId) {
-        return response()->json(get_users_by_property_and_category($propertyId, $categoryId));
+    // Route::get('/get_users_info_by_property/{propertyId}/users/{categoryId}', function ($propertyId, $categoryId) {
+    //     return response()->json(get_users_by_property_and_category($propertyId, $categoryId));
+    // })->name('admin.getUsersByProperty');
+    Route::get('/get_users_info_by_property/{propertyId}/users/{roleId}', function ($propertyId, $roleId) {
+        return response()->json(get_users_by_property_and_role($propertyId, $roleId));
     })->name('admin.getUsersByProperty');
+
 
     Route::get('/get_tenants_by_property/{propertyId}', function ($propertyId) {
         return response()->json(get_tenants_by_property($propertyId));

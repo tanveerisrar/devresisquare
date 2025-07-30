@@ -36,11 +36,13 @@ $stepNames = [
         </div>
     </div>
 </div>
-
+@include('backend.partials.assets.select2')
 
 @section('page.scripts')
 <script>
 $(document).ready(function() {
+
+    initSelect2('.select2');
 
     // General function to handle sending form data and navigating steps
     function handleStepChange(currentStep, targetStep, previous = null) {
@@ -95,6 +97,10 @@ $(document).ready(function() {
             contentType: false,
             success: function(response) {
                 $('.render_blade').html(response);
+                if(step == 1){
+                    // If step 1, initialize select2 for the roles
+                    initSelect2('.select2');
+                }
                 if(step == 2){
                     initSelectedProperties();
                 }

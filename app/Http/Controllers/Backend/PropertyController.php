@@ -33,8 +33,31 @@ class PropertyController
         // Fetch all properties
         // $properties = Property::all();
         // Fetch all properties in descending order
-        $properties = Property::orderBy('id', 'desc')->get();
+        // $properties = Property::orderBy('id', 'desc')->get();
 
+        // Get logged-in user
+        $user = auth()->user();
+
+        // Fetch properties based on role
+        if ($user->hasRole('Property Manager')) {
+            // Property managers see all properties
+            $properties = Property::orderBy('id', 'desc')->get();
+        } elseif ($user->hasRole('Landlord')) {
+            // Landlords see only properties they created
+            $properties = Property::where('created_by', $user->id)
+                ->orderBy('id', 'desc')
+                ->get();
+        } elseif ($user->hasRole('Estate Agent')) {
+            // Estate agents see properties created by them or their sub-users
+            $createdUserIds = User::where('created_by', $user->id)->pluck('id');
+            $properties = Property::whereIn('created_by', $createdUserIds->push($user->id))
+                ->orderBy('id', 'desc')
+                ->get();
+        } else {
+            // Default: no access
+            $properties = collect(); // empty collection
+        }
+        
         // Redirect to 'quick' if there are no properties
         if ($properties->isEmpty()) {
             flash("You don't have any properties yet!")->error();
@@ -49,7 +72,7 @@ class PropertyController
         // $property = $propertyId ? Property::findOrFail($propertyId) : $properties->first(); // Use the first property if none is selected
         $property = $propertyId ? Property::find($propertyId) : null; // Use null if no property is selected
 
-        if (!$property) {
+        /*if (!$property) {
             // Get the first property that is NOT soft-deleted
             $firstProperty = Property::withoutTrashed()->orderBy('id', 'desc')->first();
 
@@ -63,6 +86,26 @@ class PropertyController
 
             // flash("The selected property does not exist or has been deleted. Showing another one instead.")->error();
 
+        }*/
+                    
+        if ($property) {
+            // Check if user can access this property
+            $user = auth()->user();
+
+            $isAuthorized = $user->hasRole('Property Manager') ||
+                $user->hasRole('Landlord') && $property->created_by === $user->id ||
+                $user->hasRole('Estate Agent') && (
+                    $property->created_by === $user->id ||
+                    $user->createdUsers()->pluck('id')->contains($property->created_by)
+                );
+
+            if (! $isAuthorized) {
+                abort(403, 'Unauthorized to view this property.');
+            }
+        } else {
+            // If property not found, fallback
+            $property = $properties->first();
+            $propertyId = $property->id;
         }
 
         // Get tabs for properties (you can customize the tabs as per your needs)

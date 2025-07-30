@@ -4,11 +4,13 @@ namespace App\Models;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
+use App\Traits\TracksUser;
 
 class User extends Authenticatable
 {
     use Notifiable;
     use HasRoles;
+    use TracksUser;
 
     protected $fillable = [
         'name',
@@ -37,6 +39,18 @@ class User extends Authenticatable
     ];
 
     protected $hidden = ['password', 'remember_token'];
+
+    // Optional: define the roles() relationship manually (if needed elsewhere)
+    public function roles()
+    {
+        return $this->belongsToMany(
+            \Spatie\Permission\Models\Role::class,
+            'model_has_roles',
+            'model_id',
+            'role_id'
+        );
+    }
+
 
     /*public function role()
     {

@@ -57,7 +57,7 @@ class OfferController
         while ($request->has("tenantName_{$tenantIndex}")) {
             // Create a new user for each tenant
             $user = User::create([
-                'category_id' => 3,
+                // 'category_id' => 3,
                 'name' => $request->input("tenantName_{$tenantIndex}"),
                 'phone' => $request->input("tenantPhone_{$tenantIndex}"),
                 'email' => $request->input("tenantEmail_{$tenantIndex}"),
@@ -66,6 +66,9 @@ class OfferController
                 'added_by' => Auth::id(),    // Assuming authenticated user adds the record
             ]);
 
+            // ✅ Assign Spatie role instead of using category_id
+            $user->assignRole('Tenant');
+            
             // Create corresponding user details (tenancy related information)
             UserDetail::create([
                 'user_id' => $user->id,

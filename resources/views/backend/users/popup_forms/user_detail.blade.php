@@ -1,4 +1,8 @@
 @php
+    use Illuminate\Support\Str;
+    $userRoles = $user->getRoleNames(); // Collection of role names
+@endphp
+@php
     $email = $user->email ?? '';
     $phone = $user->phone ?? '';
     // Normalize category name
@@ -47,7 +51,8 @@
 
     {{-- CATEGORY --}}
     <div class="mb-3">
-        <strong>Category:</strong> {{ $user->category->name ?? '—' }}
+        {{-- <strong>Category:</strong> {{ $user->category->name ?? '—' }} --}}
+        <strong>{{ Str::plural('Role', $userRoles->count()) }}:</strong>{{ $userRoles->isNotEmpty() ? $userRoles->implode(', ') : '—' }}
     </div>
 
     {{-- NAMES --}}
@@ -106,16 +111,17 @@
     {{-- CONSENTS --}}
     <div class="mb-3">
         <strong>Allow:</strong>
-        Email: {{ optional($d)->allow_email === 1 ? 'Yes' : 'No' }} |
-        Post: {{ optional($d)->allow_post === 1 ? 'Yes' : 'No' }} |
-        Text: {{ optional($d)->allow_text === 1 ? 'Yes' : 'No' }} |
-        Call: {{ optional($d)->allow_call === 1 ? 'Yes' : 'No' }}
+        Email: {{ booleanToYesNo(optional($d)->allow_email) }} |
+        Post: {{ booleanToYesNo(optional($d)->allow_post) }} |
+        Text: {{ booleanToYesNo(optional($d)->allow_text) }} |
+        Call: {{ booleanToYesNo(optional($d)->allow_call) }}
     </div>
+
 
     {{-- OCCUPATION & COMPANY, REGISTERED ADDRESS & VAT --}}
     <div class="mb-3">
         <strong>Occupation:</strong> {{ $d->occupation ?? '—' }}<br>
-        <strong>Company Name:</strong> {{ $d->business_name ?? '—' }}
+        <strong>Company Name:</strong> {{ $d->business_name ?? '—' }}<br>
         <strong>Registered Address:</strong><br>
         {{ $d->registered_address ?? '—' }}<br>
         <strong>VAT Number:</strong> {{ $d->vat_number ?? '—' }}
@@ -209,7 +215,7 @@
         <input type="hidden" name="form_type" value="user_detail">
 
         {{-- CATEGORY --}}
-        <div class="mb-3">
+        {{-- <div class="mb-3">
             <label for="category_id" class="form-label">Category</label>
             <select name="category_id" id="category_id" class="form-select">
                 @foreach ($categories as $catOption)
@@ -219,7 +225,28 @@
                     </option>
                 @endforeach
             </select>
+        </div> --}}
+                
+        {{-- ROLES --}}
+        <div class="mb-3">
+            <label for="role_ids" class="form-label">Roles</label>
+            <select name="role_ids[]" id="role_ids" class="form-select select2" multiple required>
+                @foreach($roles as $role)
+                    <option value="{{ $role->id }}"
+                        @if($user->roles->pluck('id')->contains($role->id)) selected @endif
+                    >
+                        {{ $role->name }}
+                    </option>
+                @endforeach
+            </select>
+            @error('role_ids')
+                <div class="text-danger">{{ $message }}</div>
+            @enderror
+            @error('role_ids.*')
+                <div class="text-danger">{{ $message }}</div>
+            @enderror
         </div>
+
 
         {{-- NAMES --}}
         <div class="row mb-3">
@@ -443,7 +470,7 @@
         </div>
         <div class="mb-3">
             <label for="vat_number" class="form-label">VAT Number</label>
-            <input type="text" name="vat_number" id="vat_number" class="form-control"
+            <input type="number" name="vat_number" id="vat_number" class="form-control"
                 value="{{ old('vat_number', $d->vat_number ?? '') }}">
         </div>
 

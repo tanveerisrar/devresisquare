@@ -30,10 +30,16 @@ class TenancyController
     public function create()
     {
         // Get users where category_id is 3 (Tenant)
-        $tenants = User::where('category_id', 3)->get();
+        // $tenants = User::where('category_id', 3)->get();
 
         // Get users where category_id is 2 (Property Manager)
-        $property_managers = User::where('category_id', 2)->get();
+        // $property_managers = User::where('category_id', 2)->get();
+        
+        // Get all tenants (users with role 'tenant')
+        $tenants = User::role('Tenant')->get();
+
+        // Get all property managers (users with role 'property_manager')
+        $property_managers = User::role('Property Manager')->get();
 
         // Fetch all tenancy types (if they're stored in a model TenancyType)
         $tenancyTypes = TenancyType::all();
@@ -146,10 +152,16 @@ class TenancyController
         // Fetch related data needed for the edit form
 
         // Get all tenants (users where category_id is 3)
-        $tenants = User::where('category_id', 3)->get();
+        // $tenants = User::where('category_id', 3)->get();
 
         // Get all property managers (users where category_id is 2)
-        $property_managers = User::where('category_id', 2)->get();
+        // $property_managers = User::where('category_id', 2)->get();
+
+        // Get all tenants (users with role 'tenant')
+        $tenants = User::role('Tenant')->get();
+
+        // Get all property managers (users with role 'property_manager')
+        $property_managers = User::role('Property Manager')->get();
 
         // Fetch all tenancy types
         $tenancyTypes = TenancyType::all();

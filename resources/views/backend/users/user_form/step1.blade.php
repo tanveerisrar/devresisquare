@@ -5,8 +5,11 @@
         <div class="col-md-6 col-12 left_col">
             <div class="left_content_wrapper">
                 <div class="left_title">
-                    What is<br /> <span class="secondary-color">Category </span>for</br>this user?
+                    What is<br /> <span class="secondary-color">Role </span>for</br>this user?
                 </div>
+                {{-- <div class="left_title">
+                    What is<br /> <span class="secondary-color">Category </span>for</br>this user?
+                </div> --}}
             </div>
         </div>
         <div class="col-md-6 col-12 right_col">
@@ -16,7 +19,7 @@
                 <input type="hidden" id="user_id" class="user_id" name="user_id" value="{{ (isset($user) ? $user->id : '') }}">
                 <div class="right_content_wrapper w-100">
                     <div class="row">
-                        <div class="form-group col-12">
+                        {{-- <div class="form-group col-12">
                             <select name="category_id" class="form-select" required>
                                 @foreach ($categories as $category)
                                     <option value="{{ $category->id }}"
@@ -27,6 +30,32 @@
                             </select>
                             @error('category_id')
                                 <div class="text-danger">{{ $message }}</div>
+                            @enderror
+                        </div> --}}
+                        {{-- <div class="form-group col-12">
+                            <select name="role_id" class="form-select" required>
+                                <option value="">Select Role</option>
+                                @foreach ($roles as $role)
+                                    <option value="{{ $role->id }}" @if(isset($user) && $user->roles->pluck('id')->contains($role->id)) selected @endif >{{ $role->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('role_id')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
+                        </div> --}}
+                        <div class="form-group col-12">
+                            <select name="role_ids[]" class="form-select select2" multiple required>
+                                @foreach ($roles as $role)
+                                <option value="{{ $role->id }}" @if(isset($user) && $user->roles->pluck('id')->contains($role->id)) selected @endif >
+                                    {{ $role->name }}
+                                </option>
+                                @endforeach
+                            </select>
+                            @error('role_ids')
+                            <div class="text-danger">{{ $message }}</div>
+                            @enderror
+                            @error('role_ids.*')
+                            <div class="text-danger">{{ $message }}</div>
                             @enderror
                         </div>
                     </div>

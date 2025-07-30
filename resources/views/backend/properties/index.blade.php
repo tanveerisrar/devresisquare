@@ -1370,6 +1370,18 @@ var_dump($propertyId);
                     },
                     error: function(xhr, status, error) {
                         console.error('Error loading tab content:', error);
+
+                        let message = "Something went wrong.";
+
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            message = xhr.responseJSON.message;
+                        }
+
+                        // AIZ Notify (or switch to toastr or SweetAlert if needed)
+                        AIZ.plugins.notify('danger', message);
+
+                        // Optional: fallback content or redirect
+                        $('.pv_content_detail').html('<div class="alert alert-danger">' + message + '</div>');
                     }
                 });
             }

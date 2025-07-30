@@ -10,9 +10,10 @@ use App\Models\Nationality;
 use App\Models\DocumentType;
 use App\Models\UserCategory;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
 // use App\Http\Controllers\Backend\NotesController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Backend\BankDetailController;
 
@@ -46,7 +47,8 @@ class UserController
             'postcode' => 'required|string|max:15',
             'city' => 'required|string|max:55',
             'country' => 'required|string|max:55',
-            'category_id' => 'required|exists:users_categories,id',
+            // 'category_id' => 'required|exists:users_categories,id',
+            // 'role' => 'required|exists:roles,name',
         ]);
 
         $fullName = trim($request->input('first_name') . ' ' . $request->input('middle_name') . ' ' . $request->input('last_name'));
@@ -63,9 +65,12 @@ class UserController
             'postcode' => $validatedData['postcode'],
             'city' => $validatedData['city'],
             'country' => $validatedData['country'],
-            'category_id' => $validatedData['category_id'],
+            // 'category_id' => $validatedData['category_id'],
             'updated_by' => auth()->id(),
         ]);
+            
+        // Sync new role (removes old ones and assigns the new one)
+        // $user->syncRoles([$validatedData['role']]);
 
         flash('Profile updated successfully!')->success();
         return redirect()->route('admin.users.profile');
@@ -101,11 +106,13 @@ class UserController
     public function index(Request $request)
     {
         // Fetch categories for your filter dropdown
-        $categories = UserCategory::all();
+        // $categories = UserCategory::all();
+        $roles = Role::whereNotIn('name', ['Staff', 'Super Admin'])->get();
 
         // Build base users query, eager‑loading all relationships
         $usersQuery = User::with([
-            'category',
+            // 'category',
+            'roles',
             'details',
             'tenancies',
             'repairIssues',
@@ -114,10 +121,15 @@ class UserController
         ]);
 
         // Apply a category filter if provided
-        if ($request->filled('category')) {
-            $usersQuery->where('category_id', $request->category);
-        }
+        // if ($request->filled('category')) {
+        //     $usersQuery->where('category_id', $request->category);
+        // }
 
+        // 🔍 Apply role filter if provided
+        if ($request->filled('role')) {
+            $usersQuery->role($request->role); // Spatie's `role()` scope
+        }
+        
         // Fetch all users (newest first)
         $users = $usersQuery->orderBy('id', 'desc')->get();
 
@@ -161,7 +173,8 @@ class UserController
             return response()->json(['content' => $content, 'tabName' => $tabName]);
         }
 
-        return view('backend.users.index', compact('users', 'categories','tabs', 'tabName', 'userId', 'user', 'content'));
+        return view('backend.users.index', compact('users', 'roles','tabs', 'tabName', 'userId', 'user', 'content'));
+        // return view('backend.users.index', compact('users', 'categories','tabs', 'tabName', 'userId', 'user', 'content'));
     }
     private function getTabContent($tabname, $userId, $user)
     {
@@ -248,8 +261,10 @@ class UserController
      */
     public function create(User $user)
     {
-        $categories = UserCategory::all();
-        return view('backend.users.create', compact('user', 'categories'));
+        $roles = Role::whereNotIn('name', ['Staff', 'Super Admin'])->get();
+        return view('backend.users.create', compact('user', 'roles'));
+        // $categories = UserCategory::all();
+        // return view('backend.users.create', compact('user', 'categories'));
         // return view('backend.users.create'); // Return the create user view
     }
 
@@ -278,7 +293,7 @@ class UserController
                 if ($user) {
                     // Log the data before updating
                     Log::info('Updating user with ID ' . $user_id, $validatedData);
-
+                    
                     // Merge new selected properties if provided
                     if ($request->has('selected_properties')) {
                         $validatedData['selected_properties'] = $request->selected_properties;
@@ -295,11 +310,19 @@ class UserController
                 if (empty($user_id)) {
                     $validatedData['quick_step'] = $request->step;
                     Log::info('Creating new user', $validatedData);
-
                     $user = User::create(array_merge($validatedData, ['added_by' => Auth::id()]));
-
                 }
             }
+            
+            // Attach roles
+            if ($request->filled('role_ids')) {
+                // Fetch the names of each selected role
+                $roles = Role::whereIn('id', $request->role_ids)->pluck('name')->toArray();
+                
+                // Sync the user’s roles (removes any roles not in this array)
+                $user->syncRoles($roles);
+            }
+            
             // Get total number of steps
             $totalSteps = $this->getTotalQuickSteps();
 
@@ -323,7 +346,10 @@ class UserController
         switch ($step) {
             case 1:
                 return [
-                    'category_id' => 'required',
+                    // 'category_id' => 'required',
+                    // 'role_id' => 'required|exists:roles,id',
+                    'role_ids'   => 'required|array|min:1',
+                    'role_ids.*' => 'integer|exists:roles,id',
                 ];
             case 2:
                 return [
@@ -393,8 +419,7 @@ class UserController
         }));
     }
 
-
-
+    
     // public function searchProperties(Request $request)
     // {
     //     // Get the search query from the request
@@ -424,14 +449,16 @@ class UserController
         // Get user_id from the session or request
         $user_id = $request->user_id;
         $user = User::find($user_id);
-        $categories = UserCategory::all();
+        // $categories = UserCategory::all();
+        $roles = Role::whereNotIn('name', ['Staff', 'Super Admin'])->get();
         $selectedProperties = $selectedProperties = json_decode($user->selected_properties, true);
         // Get the total number of steps dynamically
         $totalSteps = $this->getTotalQuickSteps();
 
         // Check if the step is valid
         if ($step > 0 && $step <= $totalSteps) {
-            return view('backend.users.user_form.step' . $step, compact('user','categories', 'selectedProperties')); // Return the corresponding Blade view
+            return view('backend.users.user_form.step' . $step, compact('user','roles', 'selectedProperties')); // Return the corresponding Blade view
+            // return view('backend.users.user_form.step' . $step, compact('user','categories', 'selectedProperties')); // Return the corresponding Blade view
         } else {
             // Return a view with an error message if the step is invalid
             return view('backend.users.user_form.error', ['message' => 'Invalid step.']);
@@ -445,11 +472,12 @@ class UserController
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'phone' => 'required|string|max:20',
+            'role' => 'nullable|exists:roles,name',
         ]);
 
         // Create a new user
         $user = User::create([
-            'category_id'   => $request->category_id ?? 9,
+            // 'category_id'   => $request->category_id ?? 9,
             'name'          => $validated['name'],
             'email'         => $validated['email'],
             'phone'         => $validated['phone'],
@@ -457,6 +485,10 @@ class UserController
             'password'      => Hash::make('password'),
         ]);
 
+        // Assign default role if not provided
+        $role = $request->input('role', 'User'); // Use a sensible fallback
+        $user->assignRole($role);
+        
         // Return the user data as a JSON response
         return response()->json([
             'success' => true,
@@ -481,14 +513,15 @@ class UserController
             'city' => 'required|string|max:55',
             'country' => 'required|string|max:55',
             'status' => 'required|in:0,1',
+            'role' => 'required|exists:roles,name',
         ]);
 
         // Concatenate first, middle, and last names to create name
         $fullName = trim($request->first_name . ' ' . $request->middle_name . ' ' . $request->last_name);
-        $Category_id = $request->category_id;
+        // $Category_id = $request->category_id;
         // Store the user
-        User::create([
-            'category_id' => $Category_id,
+        $user = User::create([
+            // 'category_id' => $Category_id,
             'first_name' => $validatedData['first_name'],
             'middle_name' => $validatedData['middle_name'],
             'last_name' => $validatedData['last_name'],
@@ -503,7 +536,7 @@ class UserController
             'status' => $validatedData['status'],
             'updated_by' => Auth::user()->id,
         ]);
-
+        $user->assignRole($validatedData['role']);
         // Redirect or return a response
         flash("User Added Successfully!")->success();
         return redirect()->route('admin.users.index');
@@ -517,9 +550,11 @@ class UserController
      public function edit($id)
      {
          $user = User::findOrFail($id); // Fetch the user by ID
-         $categories = UserCategory::all(); // Fetch all categories
+         $roles = Role::whereNotIn('name', ['Staff', 'Super Admin'])->get(); // Fetch roles excluding Staff and Super Admin
+        //  $categories = UserCategory::all(); // Fetch all categories
          $selectedProperties = json_decode($user->selected_properties, true);
-         return view('backend.users.edit', compact('user', 'categories', 'selectedProperties'));
+         return view('backend.users.edit', compact('user', 'roles', 'selectedProperties'));
+        //  return view('backend.users.edit', compact('user', 'categories', 'selectedProperties'));
      }
 
 
@@ -547,10 +582,20 @@ class UserController
 
         // Concatenate first, middle, and last names to create name
         $fullName = trim($request->first_name . ' ' . $request->middle_name . ' ' . $request->last_name);
-        $category_id = $request->category_id;
+            
+        // Attach roles
+        if ($request->filled('role_ids')) {
+            // Fetch the names of each selected role
+            $roles = Role::whereIn('id', $request->role_ids)->pluck('name')->toArray();
+            
+            // Sync the user’s roles (removes any roles not in this array)
+            $user->syncRoles($roles);
+        }
+
+        // $category_id = $request->category_id;
         // Update the user
         $user->update([
-            'category_id' => $category_id,
+            // 'category_id' => $category_id,
             'first_name' => $validatedData['first_name'],
             'middle_name' => $validatedData['middle_name'],
             'last_name' => $validatedData['last_name'],
@@ -648,8 +693,17 @@ class UserController
         // Save the form data based on the form type
         switch ($formType) {
             case 'user_detail':
+                            
+                // **Sync the user’s roles** if provided
+                if ($request->filled('role_ids')) {
+                    $roleNames = Role::whereIn('id', $request->role_ids)
+                                ->pluck('name')
+                                ->toArray();
+                    $user->syncRoles($roleNames);
+                }
+                
                 $data = $request->only([
-                    'category_id',
+                    // 'category_id',
                     'first_name',
                     'middle_name',
                     'last_name',
@@ -693,53 +747,6 @@ class UserController
                 $bankDetailController = app(BankDetailController::class);
                 $bankDetailController->store($request);
                 $data = []; // <-- Prevents undefined variable error
-                // $data = $request->validate([
-                //     'bank_detail_id' => 'nullable|exists:bank_details,id',
-                //     'account_name'   => 'required|string|max:255',
-                //     'account_no'     => 'required|string|max:255',
-                //     'sort_code'      => 'required|string|max:255',
-                //     'bank_name'      => 'required|string|max:255',
-                //     'swift_code'     => 'nullable|string|max:255',
-                //     'is_active'      => 'nullable|boolean',
-                //     'is_primary'     => 'nullable|boolean',
-                // ]);
-
-                // // Default values for checkboxes
-                // $data['is_active'] = $request->has('is_active');
-                // $data['is_primary'] = $request->has('is_primary');
-
-                // if (!empty($data['is_primary'])) {
-                //     // Set all others to non-primary for this user
-                //     BankDetails::where('user_id', $user->id)->update(['is_primary' => false]);
-                // }
-
-                // if (!empty($data['bank_detail_id'])) {
-                //     // Update existing record
-                //     $bank = BankDetails::where('user_id', $user->id)
-                //                 ->findOrFail($data['bank_detail_id']);
-
-                //     $bank->update([
-                //         'account_name' => $data['account_name'],
-                //         'account_no'   => $data['account_no'],
-                //         'sort_code'    => $data['sort_code'],
-                //         'bank_name'    => $data['bank_name'],
-                //         'swift_code'   => $data['swift_code'],
-                //         'is_active'    => $data['is_active'],
-                //         'is_primary'   => $data['is_primary'],
-                //     ]);
-                // } else {
-                //     // Create new record
-                //     $user->bankDetails()->create([
-                //         'account_name' => $data['account_name'],
-                //         'account_no'   => $data['account_no'],
-                //         'sort_code'    => $data['sort_code'],
-                //         'bank_name'    => $data['bank_name'],
-                //         'swift_code'   => $data['swift_code'],
-                //         'is_active'    => $data['is_active'],
-                //         'is_primary'   => $data['is_primary'],
-                //     ]);
-                // }
-
                 break;
             case 'compliance':
                 $data = $request->only([]);
@@ -767,25 +774,6 @@ class UserController
                     'imp_notes'
                 ]);
                 break;
-            // case 'notes_tab':
-            //         $dataNotes = $request->validate([
-            //             'note_type_id'   => 'required|exists:note_types,id',
-            //             'content' => 'required|string',
-            //             'note_id' => 'nullable|exists:notes,id',
-            //         ]);
-
-            //         $notesController = new NotesController();
-
-            //         $note = $notesController->saveNoteData([
-            //             'noteable_type' => get_class($user),
-            //             'noteable_id'   => $user->id,
-            //             'note_type_id'  => $dataNotes['note_type_id'],
-            //             'content'       => $dataNotes['content'],
-            //             'note_id'       => $dataNotes['note_id'] ?? null,
-            //         ]);
-
-            //         $data = []; // <-- Prevents undefined variable error
-            //     break;
             default:
                 return response()->json(['message' => 'Invalid form type'], 400);
         }
@@ -813,9 +801,13 @@ class UserController
     {
         if ($formType === 'user_detail') {
             // Fetch categories for your filter dropdown
-            $categories = UserCategory::all();
+            // $categories = UserCategory::all();
+                
+            // Fetch full Role models (with id & name), not just names
+            $roles = Role::whereNotIn('name', ['Staff', 'Super Admin'])->get();
             
-            return compact('categories');
+            // return compact('categories');
+            return compact('roles');
         }elseif ($formType === 'compliance') {
 
             $nationalities = Nationality::orderBy('name')->pluck('name', 'id');

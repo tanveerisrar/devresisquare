@@ -29,7 +29,11 @@ class OwnerGroupController
     {
         // $users = User::all();
         // Fetch users where category_id is 1
-        $users = User::where('category_id', 1)->get();
+        // $users = User::where('category_id', 1)->get();
+
+        // Get all owners (users with role 'owner')
+        $users = User::role('Owner')->get();
+
         $properties = Property::all();
         return view('backend.owner_groups.create', compact('users', 'properties'));
     }
@@ -38,7 +42,8 @@ class OwnerGroupController
     {
         // $users = User::all();
         // Fetch users where category_id is 1
-        $users = User::where('category_id', 1)->get();
+        // $users = User::where('category_id', 1)->get();
+        $users = User::role('Owner')->get();
         $properties = Property::all();
         return view('backend.owner_groups.create-group', compact('users', 'properties'));
     }

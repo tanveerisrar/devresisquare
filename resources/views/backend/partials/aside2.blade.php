@@ -121,6 +121,48 @@
             </a>
             <ul class="nav-second-level collapse list-unstyled {{ request()->routeIs('admin.users.index') || request()->routeIs('users.create') ? 'show' : '' }}"
                 id="usersSubmenu">
+                
+                {{-- All Users --}}
+                @component('components.backend.common.sidebar-sublink')
+                    @slot('class') {{ request()->routeIs('admin.users.index') && !request()->has('role') ? 'active' : '' }} @endslot
+                    @slot('link') {{ route('admin.users.index') }} @endslot
+                    @slot('link_name') All @endslot
+                @endcomponent
+
+                {{-- Owners --}}
+                @component('components.backend.common.sidebar-sublink')
+                    @slot('class') {{ request('role') === 'Owner' ? 'active' : '' }} @endslot
+                    @slot('link') {{ route('admin.users.index', ['role' => 'Owner']) }} @endslot
+                    @slot('link_name') Owners @endslot
+                @endcomponent
+
+                {{-- Property Managers --}}
+                @component('components.backend.common.sidebar-sublink')
+                    @slot('class') {{ request('role') === 'Property Manager' ? 'active' : '' }} @endslot
+                    @slot('link') {{ route('admin.users.index', ['role' => 'Property Manager']) }} @endslot
+                    @slot('link_name') Property Managers @endslot
+                @endcomponent
+
+                {{-- Tenants --}}
+                @component('components.backend.common.sidebar-sublink')
+                    @slot('class') {{ request('role') === 'Tenant' ? 'active' : '' }} @endslot
+                    @slot('link') {{ route('admin.users.index', ['role' => 'Tenant']) }} @endslot
+                    @slot('link_name') Tenants @endslot
+                @endcomponent
+
+            </ul>
+        </li>
+
+        {{-- 
+        <li class="sidebar-list-item submenu_wrapper">
+            <a href="#usersSubmenu" data-bs-toggle="collapse"
+                aria-expanded="{{ request()->routeIs('admin.users.index') || request()->routeIs('users.create') ? 'true' : 'false' }}"
+                class="dropdown-toggle {{ request()->routeIs('admin.users.index') || request()->routeIs('users.create') ? 'active' : '' }}">
+                <span class="icon_wrapper"><i class="fa-solid fa-address-book"></i>Users</span>
+                <i class="fa fa-angle-down"></i>
+            </a>
+            <ul class="nav-second-level collapse list-unstyled {{ request()->routeIs('admin.users.index') || request()->routeIs('users.create') ? 'show' : '' }}"
+                id="usersSubmenu">
                 @component('components.backend.common.sidebar-sublink')
                     @slot('class') {{ request()->routeIs('admin.users.index') && !request()->has('category') ? 'active' : '' }} @endslot
                     @slot('link') {{ route('admin.users.index') }} @endslot
@@ -141,7 +183,7 @@
                     @slot('link') {{ route('admin.users.index', ['category' => 3]) }} @endslot
                     @slot('link_name') Tenants @endslot
                 @endcomponent
-{{--                 
+                               
                 <li class="sidebar-sub-list-item py-0 mb-0">
                     <a href="{{ route('admin.users.index') }}"
                         class="{{ request()->routeIs('admin.users.index') && !request()->has('category') ? 'active' : '' }}">
@@ -171,9 +213,10 @@
                         class="{{ request()->category == 4 ? 'active' : '' }}">
                         Landlords
                     </a>
-                </li> --}}
+                </li>
             </ul>
-        </li>
+        </li> 
+        --}}
 
         <li class="sidebar-list-item submenu_wrapper">
             <a href="#">

@@ -6,6 +6,7 @@ use App\Models\Upload;
 use App\Models\Property;
 use Illuminate\Http\Request;
 use App\Models\BusinessSetting;
+use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -544,11 +545,41 @@ if (!function_exists('get_users_by_property_and_category')) {
      * @param int $categoryId
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    function get_users_by_property_and_category($propertyId, $categoryId)
+    /*function get_users_by_property_and_category($propertyId, $categoryId)
     {
         return Cache::rememberForever("users_{$propertyId}_{$categoryId}", function () use ($propertyId, $categoryId) {
             return User::where('category_id', $categoryId)
                 ->whereRaw('JSON_CONTAINS(selected_properties, ?)', [$propertyId])
+                ->get(['id', 'name', 'address_line_1', 'address_line_2', 'postcode', 'city', 'country', 'email', 'phone'])
+                ->map(function ($user) {
+                    return array_merge($user->toArray(), [
+                        'full_address' => implode(', ', array_filter([
+                            $user->address_line_1,
+                            $user->address_line_2,
+                            $user->postcode,
+                            $user->city,
+                            $user->country
+                        ]))
+                    ]);
+                });
+        });
+    }*/
+
+    /**
+     * Fetch users by property ID and role ID.
+     *
+     * @param int $propertyId
+     * @param int $roleId
+     * @return \Illuminate\Support\Collection
+     */
+    function get_users_by_property_and_role($propertyId, $roleId)
+    {
+        // Get the role name from its ID using Spatie Role model
+        $role = Role::findById($roleId);
+
+        return Cache::rememberForever("users_{$propertyId}_role_{$roleId}", function () use ($propertyId, $role) {
+            return User::role($role->name)
+                ->whereRaw('JSON_CONTAINS(selected_properties, ?)', [json_encode($propertyId)])
                 ->get(['id', 'name', 'address_line_1', 'address_line_2', 'postcode', 'city', 'country', 'email', 'phone'])
                 ->map(function ($user) {
                     return array_merge($user->toArray(), [
