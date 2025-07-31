@@ -224,7 +224,7 @@
             </a>
         </li>
 
-        @canany(['view property repairs', 'edit property repairs', 'create property repairs'])
+        @canany(['view property repair', 'edit property repair', 'create property repair'])
         <li class="sidebar-list-item submenu_wrapper">
             <a href="#repairSubmenu" data-bs-toggle="collapse"
                 aria-expanded="{{ request()->routeIs('admin.property_repairs.*') ? 'true' : 'false' }}"
@@ -235,7 +235,7 @@
             <ul class="nav-second-level collapse list-unstyled {{ request()->routeIs('admin.property_repairs.*') ? 'show' : '' }}"
                 id="repairSubmenu">
                 <!-- Raise Repair Issue -->
-                @can('create property repairs')
+                @can('create property repair')
                 @component('components.backend.common.sidebar-sublink')
                     @slot('class') {{ request()->routeIs('admin.property_repairs.create') || request()->routeIs('admin.property_repairs.edit') ? 'active' : '' }} @endslot
                     @slot('link') {{ route('admin.property_repairs.create') }} @endslot
@@ -249,7 +249,7 @@
                     </a>
                 </li> --}}
 
-                @can('view property repairs')
+                @can('view property repair')
                 <!-- Repair Issues Section -->
                 <li class="sidebar-sub-list-item py-0 mb-0 submenu_wrapper">
                     <a href="#repairIssuesSubmenu" data-bs-toggle="collapse"

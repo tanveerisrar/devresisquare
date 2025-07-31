@@ -156,7 +156,8 @@ class PropertyRepairController
 
         // Check if it's an AJAX request
         if ($request->ajax()) {
-            return view('backend.repair.list.cards', compact('repairIssues'))->render();
+            $selectedRepairId = $repairIssues->first()?->id ?? null;
+            return view('backend.repair.list.cards', compact('repairIssues', 'selectedRepairId'))->render();
         }
 
         // Auto load the first repair issue if not an AJAX request and there is at least one issue

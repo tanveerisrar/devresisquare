@@ -100,11 +100,21 @@ class RepairIssue extends Model
         return $this->belongsTo(User::class, 'final_contractor_id');
     }
 
-    public function tenant()
+    /*public function tenant()
     {
         return $this->belongsTo(User::class, 'tenant_id')
             ->where('category_id', 3);
+    }*/
+
+    public function tenant()
+    {
+        return $this->belongsTo(User::class, 'tenant_id')
+            ->whereHas('roles', function ($query) {
+                $query->where('name', 'Tenant');
+            });
     }
+
+
     // public function workOrders()
     // {
     //     return $this->hasMany(WorkOrder::class);

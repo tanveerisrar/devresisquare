@@ -35,11 +35,14 @@
 
 @props(['repair', 'selectedRepairId' => null])
 
-@php
+{{-- @php
     $selectedRepairId = $selectedRepairId ?? null;
     $isSelected = ($repair->id == $selectedRepairId);
-@endphp
+@endphp --}}
 
+@php
+    $isSelected = isset($selectedRepairId) && $repair->id == $selectedRepairId;
+@endphp
 
 <tr class="align-middle repair-row {{ $isSelected ? 'selected' : '' }}" data-url="{{ route('admin.property_repairs.show', $repair->id) }}" onclick="loadRepairDetailByUrl(this)" style="cursor:pointer;">
     <!-- Property -->

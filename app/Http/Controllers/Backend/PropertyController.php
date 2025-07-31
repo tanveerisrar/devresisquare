@@ -39,7 +39,7 @@ class PropertyController
         $user = auth()->user();
 
         // Fetch properties based on role
-        if ($user->hasRole('Property Manager')) {
+        if ($user->hasRole('Property Manager') || $user->hasRole('Super Admin')) {
             // Property managers see all properties
             $properties = Property::orderBy('id', 'desc')->get();
         } elseif ($user->hasRole('Landlord')) {
@@ -92,12 +92,11 @@ class PropertyController
             // Check if user can access this property
             $user = auth()->user();
 
-            $isAuthorized = $user->hasRole('Property Manager') ||
-                $user->hasRole('Landlord') && $property->created_by === $user->id ||
-                $user->hasRole('Estate Agent') && (
-                    $property->created_by === $user->id ||
-                    $user->createdUsers()->pluck('id')->contains($property->created_by)
-                );
+            $isAuthorized = 
+                    $user->hasRole('Super Admin') || 
+                    $user->hasRole('Property Manager') || 
+                    $user->hasRole('Landlord') && $property->created_by === $user->id || 
+                    $user->hasRole('Estate Agent') && ($property->created_by === $user->id || $user->createdUsers()->pluck('id')->contains($property->created_by));
 
             if (! $isAuthorized) {
                 abort(403, 'Unauthorized to view this property.');

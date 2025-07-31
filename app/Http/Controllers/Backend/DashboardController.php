@@ -29,8 +29,8 @@ class DashboardController extends Controller
             abort(403);
         }
 
-        if ($user->hasAnyRole(['Landlord','Property Manager','Estate Agent','Staff'])) {
-            // dd('User is a Landlord, Property Manager, Estate Agent, or Staff');
+        if ($user->hasAnyRole(['Landlord','Estate Agent','Staff'])) {
+            // dd('User is a Landlord, Estate Agent, or Staff');
             $usersCount = User::where('created_by', $user->id)->count();
             $propertiesCount = Property::where('created_by', $user->id)->count();
             $invoicesCount = Invoice::where('created_by', $user->id)->count();

@@ -11,8 +11,14 @@ class User extends Authenticatable
     use Notifiable;
     use HasRoles;
     use TracksUser;
+    
+    protected $guarded = []; // or define fillables
 
     protected $fillable = [
+        'company_id',
+        'branch_id',
+        'designation_id',
+        'user_type',
         'name',
         'email',
         'password',
@@ -39,6 +45,9 @@ class User extends Authenticatable
     ];
 
     protected $hidden = ['password', 'remember_token'];
+    
+    // Optional: declare guard explicitly if needed
+    protected $guard_name = 'web';
 
     // Optional: define the roles() relationship manually (if needed elsewhere)
     public function roles()

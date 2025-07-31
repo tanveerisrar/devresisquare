@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Spatie\Permission\Models\Role;
 use Illuminate\Database\Eloquent\Model;
 
 class Staff extends Model
