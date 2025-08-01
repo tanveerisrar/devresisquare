@@ -12,12 +12,48 @@
                 @method('PATCH')
                 @csrf
                 <div class="card-body">
+                    {{-- Title dropdown --}}
                     <div class="form-group row">
+                        <label class="col-sm-3 col-from-label" for="title">Title</label>
+                        <div class="col-sm-9">
+                            <select id="title" name="title" class="form-control">
+                                <option value="">Select Title</option>
+                                <option value="Mr" {{ $staff->user->title == 'Mr' ? 'selected' : '' }}>Mr</option>
+                                <option value="Mrs" {{ $staff->user->title == 'Mrs' ? 'selected' : '' }}>Mrs</option>
+                                <option value="Miss" {{ $staff->user->title == 'Miss' ? 'selected' : '' }}>Miss</option>
+                                {{-- <option value="Dr" {{ $staff->user->title == 'Dr' ? 'selected' : '' }}>Dr</option> --}}
+                            </select>
+                        </div>
+                    </div>
+
+                    {{-- first name --}}
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-from-label" for="first_name">First Name</label>
+                        <div class="col-sm-9">
+                            <input type="text" placeholder="First Name" id="first_name" name="first_name" value="{{ $staff->user->first_name }}" class="form-control" required>
+                        </div>
+                    </div>
+                    {{-- middle name --}}
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-from-label" for="middle_name">Middle Name</label>
+                        <div class="col-sm-9">
+                            <input type="text" placeholder="Middle Name" id="middle_name" name="middle_name" value="{{ $staff->user->middle_name }}" class="form-control">
+                        </div>
+                    </div>
+                    {{-- last name --}}
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-from-label" for="last_name">Last Name</label>
+                        <div class="col-sm-9">
+                            <input type="text" placeholder="Last Name" id="last_name" name="last_name" value="{{ $staff->user->last_name }}" class="form-control" required>
+                        </div>
+                    </div>
+
+                    {{-- <div class="form-group row">
                         <label class="col-sm-3 col-from-label" for="name">Name</label>
                         <div class="col-sm-9">
                             <input type="text" placeholder="Name" id="name" name="name" value="{{ $staff->user->name }}" class="form-control" required>
                         </div>
-                    </div>
+                    </div> --}}
 
                     <div class="form-group row">
                         <label class="col-sm-3 col-from-label" for="email">Email</label>

@@ -11,12 +11,48 @@
             <form class="form-horizontal" action="{{ route('staffs.store') }}" method="POST" enctype="multipart/form-data">
             	@csrf
                 <div class="card-body">
+                    {{-- Title dropdown --}}
                     <div class="form-group row">
+                        <label class="col-sm-3 col-from-label" for="title">Title</label>
+                        <div class="col-sm-9">
+                            <select id="title" name="title" class="form-control">
+                                <option value="">Select Title</option>
+                                <option value="Mr">Mr</option>
+                                <option value="Mrs">Mrs</option>
+                                <option value="Miss">Miss</option>
+                                {{-- <option value="Dr">Dr</option> --}}
+                            </select>
+                        </div>
+                    </div>
+
+                    {{-- first name --}}
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-from-label" for="first_name">First Name</label>
+                        <div class="col-sm-9">
+                            <input type="text" placeholder="First Name" id="first_name" name="first_name" class="form-control" required>
+                        </div>
+                    </div>
+                    {{-- middle name --}}
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-from-label" for="middle_name">Middle Name</label>
+                        <div class="col-sm-9">
+                            <input type="text" placeholder="Middle Name" id="middle_name" name="middle_name" class="form-control">
+                        </div>
+                    </div>
+                    {{-- last name --}}
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-from-label" for="last_name">Last Name</label>
+                        <div class="col-sm-9">
+                            <input type="text" placeholder="Last Name" id="last_name" name="last_name" class="form-control" required>
+                        </div>
+                    </div>
+
+                    {{-- <div class="form-group row">
                         <label class="col-sm-3 col-from-label" for="name">Name</label>
                         <div class="col-sm-9">
                             <input type="text" placeholder="Name" id="name" name="name" class="form-control" required>
                         </div>
-                    </div>
+                    </div> --}}
                     <div class="form-group row">
                         <label class="col-sm-3 col-from-label" for="email">Email</label>
                         <div class="col-sm-9">

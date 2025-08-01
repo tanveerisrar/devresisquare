@@ -1,5 +1,6 @@
 @import url(./../../css/main-style.css);
 @import url(./../../css/toastr.min.css);
+@import url(./custom-style.css);
 @import url(./media.css);
 @import url(./components.css);
 @import url(./front-main.css); /* main css file */

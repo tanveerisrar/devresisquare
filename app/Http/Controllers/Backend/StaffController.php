@@ -44,7 +44,11 @@ class StaffController extends Controller
     {
         try {
             $data = $request->validate([
-                'name'      => 'required|string|max:255',
+                'title'     => 'required|string|max:255',
+                'first_name' => 'required|string|max:255',
+                'middle_name' => 'nullable|string|max:255',
+                'last_name' => 'required|string|max:255',
+                // 'name'      => 'required|string|max:255',
                 'email'     => 'required|email|unique:users,email',
                 'password'  => 'required',
                 'role_id'   => 'required|exists:roles,id',
@@ -60,7 +64,11 @@ class StaffController extends Controller
         DB::beginTransaction();
         try {
             $user = User::create([
-                'name'      => $data['name'],
+                'title'     => $data['title'],
+                'first_name' => $data['first_name'],
+                'middle_name' => $data['middle_name'],
+                'last_name'   => $data['last_name'],
+                // 'name'      => $data['name'],
                 'email'     => $data['email'],
                 'user_type' => 'staff',
                 'password'  => Hash::make($data['password']),
@@ -242,7 +250,11 @@ class StaffController extends Controller
 
         try {
             $data = $request->validate([
-                'name'      => 'required|string|max:255',
+                'title'     => 'required|string|max:255',
+                'first_name' => 'required|string|max:255',
+                'middle_name' => 'nullable|string|max:255',
+                'last_name' => 'required|string|max:255',
+                // 'name'      => 'required|string|max:255',
                 'email'     => "required|email|unique:users,email,{$user->id}",
                 'password'  => 'nullable|string|min:6',
                 'role_id'   => 'required|exists:roles,id',
@@ -258,7 +270,11 @@ class StaffController extends Controller
         DB::beginTransaction();
         try {
             // 1. Update user
-            $user->name  = $data['name'];
+            $user->title = $data['title'];
+            $user->first_name = $data['first_name'];
+            $user->middle_name = $data['middle_name'];
+            $user->last_name = $data['last_name'];
+            // $user->name = $data['name'];
             $user->email = $data['email'];
             if (!empty($data['password'])) {
                 $user->password = Hash::make($data['password']);
@@ -370,7 +386,7 @@ class StaffController extends Controller
         User::destroy(Staff::findOrFail($id)->user->id);
         if(Staff::destroy($id)){
             flash('Staff has been deleted successfully')->success();
-            return response(redirect()->route('staffs.index'));
+            return redirect()->route('staffs.index');
         }
         flash()->error('Something went wrong');
         return back();

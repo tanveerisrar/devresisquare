@@ -8,7 +8,7 @@
 		</div>
         @can('add staff')
             <div class="col-md-6 text-md-right">
-                <a href="{{ route('staffs.create') }}" class="btn btn-circle btn-info">
+                <a href="{{ route('staffs.create') }}" class="btn btn-sm btn-outline-primary m-2">
                     <span>Add New Staffs</span>
                 </a>
             </div>
@@ -21,7 +21,7 @@
         <h5 class="mb-0 h6">Staffs</h5>
     </div>
     <div class="card-body">
-        <table class="table aiz-table mb-0">
+        <table class="table aiz-table">
             <thead>
                 <tr>
                     <th data-breakpoints="lg" width="10%">#</th>
@@ -47,13 +47,14 @@
 							</td>
                             <td class="text-right">
                                 @can('edit staff')
-                                    <a class="btn btn-soft-primary btn-icon btn-circle btn-sm" href="{{route('staffs.edit', encrypt($staff->id))}}" title="Edid">
-                                        <i class="las la-edit"></i>
+                                    <a class="btn btn-sm btn-outline-primary mt-2" href="{{ route('staffs.edit', encrypt($staff->id)) }}" title="Edit">
+                                        <i class="fa fa-edit"></i> Edit
                                     </a>
                                 @endcan
+
                                 @can('delete staff')
-                                    <a href="#" class="btn btn-soft-danger btn-icon btn-circle btn-sm confirm-delete" data-href="{{route('staffs.destroy', $staff->id)}}" title="Delete">
-                                        <i class="las la-trash"></i>
+                                    <a href="#" class="btn btn-sm btn-outline-danger mt-2 confirm-delete" data-href="{{ route('staffs.destroy', $staff->id) }}" title="Delete">
+                                        <i class="fa fa-trash"></i> Delete
                                     </a>
                                 @endcan
                             </td>

@@ -15,6 +15,7 @@ class User extends Authenticatable
     protected $guarded = []; // or define fillables
 
     protected $fillable = [
+        'title',
         'company_id',
         'branch_id',
         'designation_id',
@@ -34,6 +35,7 @@ class User extends Authenticatable
         'postcode',
         'city',
         'country',
+        'country_id',
         'status',
         'quick_step',
         'company_id',
@@ -58,6 +60,12 @@ class User extends Authenticatable
             'model_id',
             'role_id'
         );
+    }
+
+    // country relationship
+    public function country()
+    {
+        return $this->belongsTo(Country::class, 'country_id');
     }
 
 

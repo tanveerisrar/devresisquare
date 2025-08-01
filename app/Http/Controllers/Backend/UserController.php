@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Backend;
 
+use App\Models\Country;
 use App\Models\User;
 use App\Models\NoteType;
 use App\Models\Property;
@@ -15,21 +16,28 @@ use Illuminate\Support\Facades\Log;
 // use App\Http\Controllers\Backend\NotesController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Backend\BankDetailController;
 
 class UserController
 {
     public function profile()
     {
-        $user = auth()->user();
-        return view('backend.users.profile.show', compact('user'));
+        $authUser = auth()->user();
+        // $countryName = Country::find($authUser->country_id)?->name ?? 'N/A';
+        // Use cached countries to find the user's country
+        $countryName = Country::allCached()->firstWhere('id', $authUser->country_id)->name ?? 'N/A';
+        return view('backend.users.profile.show', compact('authUser', 'countryName'));
     }
     
     public function profileEdit()
     {
-        $user = auth()->user();
+        // Fetch the authenticated user
+
+        $user = User::with('country')->find(auth()->id());
         $categories = UserCategory::all();
-        return view('backend.users.profile.edit', compact('user', 'categories'));
+        $countries = Country::allCached();
+        return view('backend.users.profile.edit', compact('user', 'categories', 'countries'));
     }
 
     public function profileUpdate(Request $request)
@@ -37,6 +45,7 @@ class UserController
         $user = auth()->user();
 
         $validatedData = $request->validate([
+            'title' => 'required|string|max:10',
             'first_name' => 'required|string|max:55',
             'middle_name' => 'nullable|string|max:55',
             'last_name' => 'required|string|max:55',
@@ -46,14 +55,39 @@ class UserController
             'address_line_2' => 'nullable|string|max:255',
             'postcode' => 'required|string|max:15',
             'city' => 'required|string|max:55',
-            'country' => 'required|string|max:55',
+            // 'country' => 'required|string|max:55',
+            'country_id' => 'nullable|exists:countries,id',
+            'profile_picture' => 'nullable|image|max:2048', // 2MB max
             // 'category_id' => 'required|exists:users_categories,id',
             // 'role' => 'required|exists:roles,name',
         ]);
 
+        // Handle profile picture removal
+        if ($request->has('remove_profile_picture') && $user->profile_picture) {
+            if (Storage::disk('public')->exists($user->profile_picture)) {
+                Storage::disk('public')->delete($user->profile_picture);
+            }
+            $user->profile_picture = null;
+        }
+
+        // Handle file upload
+        if ($request->hasFile('profile_picture')) {
+            $file = $request->file('profile_picture');
+            $filename = uniqid() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('profile_pictures', $filename, 'public');
+
+            // Delete old picture if exists
+            if ($user->profile_picture && Storage::disk('public')->exists($user->profile_picture)) {
+                Storage::disk('public')->delete($user->profile_picture);
+            }
+
+            $user->profile_picture = $path;
+        }
+        
         $fullName = trim($request->input('first_name') . ' ' . $request->input('middle_name') . ' ' . $request->input('last_name'));
 
         $user->update([
+            'title' => $validatedData['title'],
             'first_name' => $validatedData['first_name'],
             'middle_name' => $validatedData['middle_name'],
             'last_name' => $validatedData['last_name'],
@@ -64,16 +98,17 @@ class UserController
             'address_line_2' => $validatedData['address_line_2'],
             'postcode' => $validatedData['postcode'],
             'city' => $validatedData['city'],
-            'country' => $validatedData['country'],
+            // 'country' => $validatedData['country'],
+            'country_id' => $validatedData['country_id'] ?? null,
             // 'category_id' => $validatedData['category_id'],
             'updated_by' => auth()->id(),
+            'profile_picture' => $user->profile_picture, // set new path if uploaded
         ]);
             
         // Sync new role (removes old ones and assigns the new one)
         // $user->syncRoles([$validatedData['role']]);
-
         flash('Profile updated successfully!')->success();
-        return redirect()->route('admin.users.profile');
+        return redirect()->route('admin.users.profile.show');
     }
 
     public function profilePasswordUpdate(Request $request)

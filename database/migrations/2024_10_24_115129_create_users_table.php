@@ -30,7 +30,11 @@ return new class extends Migration
             $table->string('address_line_2', 255)->nullable();
             $table->string('postcode', 15)->nullable();
             $table->string('city', 55)->nullable();
-            $table->string('country', 55)->nullable();
+            $table->string('country', 55)->nullable();            
+            // Change the type to unsignedBigInteger and keep it nullable
+            $table->unsignedBigInteger('country_id')->nullable()->change();
+            // Add foreign key constraint
+            $table->foreign('country_id')->references('id')->on('countries')->onDelete('set null');
             $table->boolean('status')->default(1)->comment('1 for active, 0 for inactive');
             $table->integer('quick_step')->nullable();
             $table->integer('created_by')->nullable();
@@ -67,10 +71,16 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
+            $table->dropForeign(['country_id']);
+            $table->integer('country_id')->unsigned()->nullable()->change();
             $table->dropForeign(['company_id']);
+            $table->dropColumn('company_id');
             $table->dropForeign(['branch_id']);
+            $table->dropColumn('branch_id');
             $table->dropForeign(['designation_id']);
+            $table->dropForeign(['category_id']);
             $table->dropForeign(['created_by']);
+            $table->dropColumn('created_by');
         });
         Schema::dropIfExists('users');
         Schema::dropIfExists('password_reset_tokens');

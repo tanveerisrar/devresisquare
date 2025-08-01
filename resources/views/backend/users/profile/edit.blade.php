@@ -8,15 +8,66 @@
                 <div class="card-header bg-primary text-white">
                     <h2 class="mb-0">Edit User Profile</h2>
                 </div>
-                <form action="{{ route('admin.users.profile.update') }}" method="POST" class="needs-validation" novalidate>
+                <form action="{{ route('admin.users.profile.update') }}" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
                     @csrf
                     <div class="card-body">
                         <div class="row g-3">
+                          <div class="col-md-6">
+                                <label for="profile_picture" class="form-label">Profile Picture</label>
+                                
+                                <div class="d-flex align-items-center gap-4">
+                                    <input type="file" class="form-control" id="profile_picture" name="profile_picture" accept="image/*">
+
+                                    @if ($user->profile_picture)
+                                        <img src="{{ asset('storage/' . $user->profile_picture) }}" alt="Profile Picture" class="img-thumbnail rounded-circle profile-img-small" />
+                                    @else
+                                        <div class="default-profile-icon-small bg-secondary rounded-circle d-flex justify-content-center align-items-center">
+                                            <i class="fa-solid fa-user text-white"></i>
+                                        </div>
+                                    @endif
+                                </div>
+                                {{-- Checkbox to remove profile picture --}}
+                                @if ($user->profile_picture)
+                                    <div class="form-check mt-2">
+                                        <input class="form-check-input" type="checkbox" name="remove_profile_picture" id="remove_profile_picture" value="1">
+                                        <label class="form-check-label" for="remove_profile_picture">
+                                            Remove current profile picture
+                                        </label>
+                                    </div>
+                                @endif
+                            </div>
+
                             <div class="col-md-6">
+                                <label for="title" class="form-label">Title</label>
+                                <select class="form-select" id="title" name="title" required>
+                                    <option value="">Select Title</option>
+                                    <option value="Mr" {{ old('title', $user->title) == 'Mr' ? 'selected' : '' }}>Mr</option>
+                                    <option value="Miss" {{ old('title', $user->title) == 'Miss' ? 'selected' : '' }}>Miss</option>
+                                    <option value="Mrs" {{ old('title', $user->title) == 'Mrs' ? 'selected' : '' }}>Mrs</option>
+                                    {{-- <option value="Dr" {{ old('title', $user->title) == 'Dr' ? 'selected' : '' }}>Dr</option> --}}
+                                    <!-- Add more if needed -->
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="first_name" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" value="{{ old('first_name', $user->first_name) }}" required>
+                                <div class="invalid-feedback">Please enter your first name.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="middle_name" class="form-label">Middle Name</label>
+                                <input type="text" class="form-control" id="middle_name" name="middle_name" value="{{ old('middle_name', $user->middle_name) }}">
+                                <div class="invalid-feedback">Please enter your middle name.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="last_name" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" value="{{ old('last_name', $user->last_name) }}" required>
+                                <div class="invalid-feedback">Please enter your last name.</div>
+                            </div>
+                            {{-- <div class="col-md-6">
                                 <label for="name" class="form-label">Name</label>
                                 <input type="text" class="form-control" id="name" name="name" value="{{ old('name', $user->name) }}" required>
                                 <div class="invalid-feedback">Please enter your name.</div>
-                            </div>
+                            </div> --}}
                             <div class="col-md-6">
                                 <label for="email" class="form-label">Email</label>
                                 <input type="email" class="form-control" id="email" name="email" value="{{ old('email', $user->email) }}" required>
@@ -30,20 +81,37 @@
                             <div class="col-md-6">
                                 <label for="address_line_1" class="form-label">Address Line 1</label>
                                 <input type="text" class="form-control" id="address_line_1" name="address_line_1" value="{{ old('address_line_1', $user->address_line_1) }}" required>
+                                <div class="invalid-feedback">Please enter your address line 1.</div>
                             </div>
                             <div class="col-md-6">
                                 <label for="address_line_2" class="form-label">Address Line 2</label>
                                 <input type="text" class="form-control" id="address_line_2" name="address_line_2" value="{{ old('address_line_2', $user->address_line_2) }}">
-                            </div>
-                            <div class="col-md-4">
-                                <label for="city" class="form-label">City</label>
-                                <input type="text" class="form-control" id="city" name="city" value="{{ old('city', $user->city) }}" required>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="postcode" class="form-label">Postcode</label>
-                                <input type="text" class="form-control" id="postcode" name="postcode" value="{{ old('postcode', $user->postcode) }}" required>
+                                <div class="invalid-feedback">Please enter your address line 2.</div>
                             </div>
                             <div class="col-md-6">
+                                <label for="country_id" class="form-label">Country</label>
+                                <select class="form-control select2" id="country_id" name="country_id" required>
+                                    <option value="">Select a country</option>
+                                    @foreach ($countries as $country)
+                                        <option value="{{ $country->id }}" 
+                                            {{ old('country_id', $user->country_id) == $country->id ? 'selected' : '' }}>
+                                            {{ $country->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <div class="invalid-feedback">Please select your country.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="city" class="form-label">City</label>
+                                <input type="text" class="form-control" id="city" name="city" value="{{ old('city', $user->city) }}" required>
+                                <div class="invalid-feedback">Please enter your city.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="postcode" class="form-label">Postcode</label>
+                                <input type="text" class="form-control" id="postcode" name="postcode" value="{{ old('postcode', $user->postcode) }}" required>
+                                <div class="invalid-feedback">Please enter your postcode.</div>
+                            </div>
+                            {{-- <div class="col-md-6">
                                 <label for="category" class="form-label">Category</label>
                                 <select class="form-select" id="category" name="category_id" required>
                                     <option value="">Select Category</option>
@@ -53,7 +121,7 @@
                                         </option>
                                     @endforeach
                                 </select>
-                            </div>
+                            </div> --}}
                         </div>
                         <div class="mt-4 text-end">
                             <button type="submit" class="btn btn-primary px-4">Update Profile</button>
@@ -110,5 +178,12 @@
             }, false)
         })
     })()
+</script>
+@endsection
+@include('backend.partials.assets.select2');
+@section('page.scripts')
+<script>
+    // Initialize Select2 for country selection
+    initSelect2('.select2');
 </script>
 @endsection
