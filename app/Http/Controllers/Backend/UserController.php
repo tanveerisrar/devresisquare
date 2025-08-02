@@ -9,7 +9,7 @@ use App\Models\Property;
 // use App\Models\BankDetails;
 use App\Models\Nationality;
 use App\Models\DocumentType;
-use App\Models\UserCategory;
+// use App\Models\UserCategory;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Log;
@@ -35,7 +35,7 @@ class UserController
         // Fetch the authenticated user
 
         $user = User::with('country')->find(auth()->id());
-        $categories = UserCategory::all();
+        // $categories = UserCategory::all();
         $countries = Country::allCached();
         return view('backend.users.profile.edit', compact('user', 'categories', 'countries'));
     }
@@ -166,7 +166,23 @@ class UserController
         }
         
         // Fetch all users (newest first)
-        $users = $usersQuery->orderBy('id', 'desc')->get();
+        // $users = $usersQuery->orderBy('id', 'desc')->exclude('user_type', 'staff')->get();
+        // $users = $usersQuery->orderBy('id', 'desc')->whereDoesntHave('roles', function ($query) {
+        //     $query->whereIn('name', ['Staff', 'Super Admin']);
+        // })->get();
+
+        // Exclude users with user_type 'staff'
+        // $users = $users->where('user_type', '!=', 'staff');
+        // $users = $users->where('user_type', '!=', 'super_admin');
+
+        $users = $usersQuery->orderBy('id', 'desc')
+                ->where('user_type', '!=', 'staff')
+                ->where('user_type', '!=', 'super_admin')
+                ->whereDoesntHave('roles', function ($query) {
+                    $query->whereIn('name', ['Staff', 'Super Admin']);
+                })
+                ->get();
+
 
         // If no users at all, redirect to quick-create
         if ($users->isEmpty()) {
@@ -211,6 +227,7 @@ class UserController
         return view('backend.users.index', compact('users', 'roles','tabs', 'tabName', 'userId', 'user', 'content'));
         // return view('backend.users.index', compact('users', 'categories','tabs', 'tabName', 'userId', 'user', 'content'));
     }
+
     private function getTabContent($tabname, $userId, $user)
     {
         switch (strtolower($tabname)) {
@@ -548,7 +565,9 @@ class UserController
             'city' => 'required|string|max:55',
             'country' => 'required|string|max:55',
             'status' => 'required|in:0,1',
-            'role' => 'required|exists:roles,name',
+            // 'role' => 'required|exists:roles,name',
+            'role_ids'   => 'required|array|min:1',
+            'role_ids.*' => 'integer|exists:roles,id',
         ]);
 
         // Concatenate first, middle, and last names to create name
@@ -571,7 +590,15 @@ class UserController
             'status' => $validatedData['status'],
             'updated_by' => Auth::user()->id,
         ]);
-        $user->assignRole($validatedData['role']);
+        // $user->assignRole($validatedData['role']);
+        // Attach roles
+        if ($request->filled('role_ids')) {
+            // Fetch the names of each selected role
+            $roles = Role::whereIn('id', $request->role_ids)->pluck('name')->toArray();
+            
+            // Sync the user’s roles (removes any roles not in this array)
+            $user->syncRoles($roles);
+        }
         // Redirect or return a response
         flash("User Added Successfully!")->success();
         return redirect()->route('admin.users.index');

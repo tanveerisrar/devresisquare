@@ -127,12 +127,14 @@ class PropertyRepairController
         ]);
         $categories = RepairCategory::all();
         $maxLevel = RepairCategory::max('level');
-        $propertyManagers = User::whereHas('category', callback: function ($query) {
-        $query->where('id', 2);
-        })->get();
-        $contractors = User::whereHas('category', callback: function ($query) {
-            $query->where('name', 'Contractor');
-        })->get();
+        // $propertyManagers = User::whereHas('category', callback: function ($query) {
+        //     $query->where('id', 2);
+        // })->get();        
+        // $contractors = User::whereHas('category', callback: function ($query) {
+        //     $query->where('name', 'Contractor');
+        // })->get();
+        $propertyManagers = User::role('Property Manager')->get();
+        $contractors = User::role('Contractor')->get();
         $jobTypes = JobType::getHierarchy();
         // Apply search filter
         if ($request->has('search')) {
@@ -221,14 +223,16 @@ class PropertyRepairController
         ])->findOrFail($id);
         $categories = RepairCategory::all();
         $maxLevel = RepairCategory::max('level');
-        $propertyManagers = User::whereHas('category', callback: function ($query) {
-        $query->where('id', 2);
-        })->get();
+        // $propertyManagers = User::whereHas('category', callback: function ($query) {
+        // $query->where('id', 2);
+        // })->get();
+        $propertyManagers = User::role('Property Manager')->get();
         $assignedManagers = RepairIssuePropertyManager::where('repair_issue_id', $id)->pluck('property_manager_id')->toArray();
         $contractorAssignments = RepairIssueContractorAssignment::where('repair_issue_id', $id)->get();
-        $contractors = User::whereHas('category', callback: function ($query) {
-            $query->where('name', 'Contractor');
-        })->get();
+        // $contractors = User::whereHas('category', callback: function ($query) {
+        //     $query->where('name', 'Contractor');
+        // })->get();
+        $contractors = User::role('Contractor')->get();
         $jobTypes = JobType::getHierarchy();
 
         // Return partial HTML if request is AJAX (from jQuery)
@@ -296,20 +300,21 @@ class PropertyRepairController
         // Get the maximum level in the table
         $maxLevel = RepairCategory::max('level');
         // $propertyManagers = User::ofRole('property_manager')->get();
-        $propertyManagers = User::whereHas('category', callback: function ($query) {
-            $query->where('id', 2);
-        })->get();
-
+        // $propertyManagers = User::whereHas('category', callback: function ($query) {
+        //     $query->where('id', 2);
+        // })->get();
+        $propertyManagers = User::role('Property Manager')->get();
         // dd($repairIssue->repairPhotos);
 
         $assignedManagers = RepairIssuePropertyManager::where('repair_issue_id', $id)->pluck('property_manager_id')->toArray();
         $contractorAssignments = RepairIssueContractorAssignment::where('repair_issue_id', $id)->get();
-        $contractors = User::whereHas('category', callback: function ($query) {
-            $query->where('name', 'Contractor');
-        })->get();
+        // $contractors = User::whereHas('category', callback: function ($query) {
+        //     $query->where('name', 'Contractor');
+        // })->get();
         // $contractors = User::whereHas('role', function ($query) {
         //     $query->where('name', 'contractor');
         // })->get();
+        $contractors = User::role('Contractor')->get();
 
         $jobTypes = JobType::getHierarchy();
 

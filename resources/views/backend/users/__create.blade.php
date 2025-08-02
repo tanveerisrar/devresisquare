@@ -7,7 +7,7 @@
             @csrf
 
             <div class="row mb-3">
-                <div class="col-md-6">
+                {{-- <div class="col-md-6">
                     <div class="form-group">
                         <label for="category_id">Category</label>
                         <select name="category_id" class="form-select" required>
@@ -15,6 +15,25 @@
                                 <option value="{{ $category->id }}">{{ $category->name }}</option>
                             @endforeach
                         </select>
+                    </div>
+                </div> --}}
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="role_ids">Roles</label>
+                        <select name="role_ids[]" class="form-select select2" multiple required>
+                            @foreach ($roles as $role)
+                            <option value="{{ $role->id }}">
+                                {{ $role->name }}
+                            </option>
+                            @endforeach
+                        </select>
+                        @error('role_ids')
+                        <div class="text-danger">{{ $message }}</div>
+                        @enderror
+                        @error('role_ids.*')
+                        <div class="text-danger">{{ $message }}</div>
+                        @enderror
                     </div>
                 </div>
 

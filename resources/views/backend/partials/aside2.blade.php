@@ -125,7 +125,7 @@
             <a href="#usersSubmenu" data-bs-toggle="collapse"
                 aria-expanded="{{ request()->routeIs('admin.users.index') || request()->routeIs('users.create') ? 'true' : 'false' }}"
                 class="dropdown-toggle {{ request()->routeIs('admin.users.index') || request()->routeIs('users.create') ? 'active' : '' }}">
-                <span class="icon_wrapper"><i class="fa-solid fa-address-book"></i>Users</span>
+                <span class="icon_wrapper"><i class="fa-solid fa-address-book"></i>Contacts</span>
                 <i class="fa fa-angle-down"></i>
             </a>
             <ul class="nav-second-level collapse list-unstyled {{ request()->routeIs('admin.users.index') || request()->routeIs('users.create') ? 'show' : '' }}"

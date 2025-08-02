@@ -90,8 +90,13 @@
                                     </td>
 
                                     <!-- Position -->
-                                    <td>
+                                    {{-- <td>
                                         {{ optional($user->user->category)->name ?? 'N/A' }}
+                                    </td> --}}
+
+                                    <!-- Position / Role -->
+                                    <td>
+                                        {{ $user->user->getRoleNames()->implode(', ') ?: 'N/A' }}
                                     </td>
 
                                     <!-- Phone -->

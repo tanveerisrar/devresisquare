@@ -6,7 +6,7 @@
     $email = $user->email ?? '';
     $phone = $user->phone ?? '';
     // Normalize category name
-    $cat = strtolower($user->category->name ?? '');
+    // $cat = strtolower($user->category->name ?? '');
     // Get the user’s detail object (or null if it doesn’t exist)
     $d = $user->details ?? null;
 // var_dump($d);
@@ -136,7 +136,8 @@
         {{ $user->created_at ? formatDateTime($user->created_at) : '—' }}
     </div>
        {{-- LETTINGS & SALES APPLICANTS --}}
-    @if (in_array($cat, ['letting applicant', 'sales applicant']))
+    {{-- @if (in_array($cat, ['letting applicant', 'sales applicant'])) --}}
+    @if ($user->hasAnyRole(['Letting Applicant', 'Sales Applicant']))
         <div class="mb-3">
             <strong>Budget (rent per month):</strong>
             <p>{{ $budget !== '' ? number_format($budget, 2) : '—' }}</p>
@@ -164,7 +165,8 @@
     @endif
 
     {{-- CONTRACTOR --}}
-    @if ($cat === 'contractor')
+    {{-- @if ($cat === 'contractor') --}}
+    @if ($user->hasRole('Contractor'))
         <div class="mb-3">
             <strong>Specialisations:</strong>
             @if (count($specialisations))
@@ -487,7 +489,8 @@
         </div>
 
         {{-- LETTINGS & SALES APPLICANTS --}}
-        @if (in_array($cat, ['letting applicant', 'sales applicant']))
+        {{-- @if (in_array($cat, ['letting applicant', 'sales applicant'])) --}}
+        @if ($user->hasAnyRole(['Letting Applicant', 'Sales Applicant']))
             <div class="mb-4">
                 <label for="budget">Budget (rent per month):</label>
                 <input type="number" step="0.01" name="budget" id="budget"

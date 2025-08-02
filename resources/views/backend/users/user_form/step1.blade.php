@@ -5,7 +5,7 @@
         <div class="col-md-6 col-12 left_col">
             <div class="left_content_wrapper">
                 <div class="left_title">
-                    What is<br /> <span class="secondary-color">Role </span>for</br>this user?
+                    What is<br /> <span class="secondary-color">Category </span>for</br>this user?
                 </div>
                 {{-- <div class="left_title">
                     What is<br /> <span class="secondary-color">Category </span>for</br>this user?

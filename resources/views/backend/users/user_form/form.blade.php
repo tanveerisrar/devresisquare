@@ -11,7 +11,7 @@ $stepNames = [
 @endphp
 
 
-    <h4 class="mb-4">Quick Add User</h4>
+    <h4 class="mb-4">Quick Add Contact</h4>
     <div class="qap_breadcrumb">
             @for ($i = 1; $i <= count($stepNames); $i++)
                 <div class="form-check {{ $currentStep == $i ? 'active' : '' }}">

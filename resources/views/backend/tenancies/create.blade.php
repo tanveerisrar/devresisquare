@@ -226,7 +226,8 @@
 <div id="addUserFormContainer" style="display: none;">
     <form id="addUserForm">
         @csrf
-        <input type="hidden" class="form-control" id="category_id" name="category_id" value="3">
+        {{-- <input type="hidden" class="form-control" id="category_id" name="category_id" value="3"> --}}
+        <input type="hidden" name="role" value="Tenant">
         <div class="mb-3">
             <label for="user_name" class="form-label">Full Name</label>
             <input type="text" class="form-control" id="user_name" name="name" required>

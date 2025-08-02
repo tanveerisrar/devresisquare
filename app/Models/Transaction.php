@@ -14,7 +14,8 @@ class Transaction extends Model
         'transaction_number',
         'transaction_type',
         'invoice_id',
-        'category_id',
+        // 'category_id',
+        'transaction_category_id',
         'property_id',
         'payer_id',
         'payee_id',
@@ -29,7 +30,6 @@ class Transaction extends Model
         'transaction_reference',
         'status',
         'notes',
-        'transaction_category_id', // New field
     ];
 
     public function invoice()

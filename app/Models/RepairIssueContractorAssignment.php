@@ -31,10 +31,22 @@ class RepairIssueContractorAssignment extends Model
      * Get the contractor (user) assigned to the repair issue.
      * Filters contractors by category_id = 6.
      */
+    // public function contractor()
+    // {
+    //     return $this->belongsTo(User::class, 'contractor_id')
+    //                 ->where('category_id', 6); // Only contractors with category_id = 6
+    // }
+
+    /**
+     * Get the contractor (user) assigned to the repair issue.
+     * Filters users by the role name 'Contractor' using Spatie Roles.
+     */
     public function contractor()
     {
         return $this->belongsTo(User::class, 'contractor_id')
-                    ->where('category_id', 6); // Only contractors with category_id = 6
+                    ->whereHas('roles', function ($query) {
+                        $query->where('name', 'Contractor');
+                    });
     }
 
     /**
