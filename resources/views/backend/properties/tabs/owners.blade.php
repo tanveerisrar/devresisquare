@@ -36,7 +36,7 @@
                             ? implode(' & ', array_slice($users, 0, 2)) . ' and others'
                             : implode(' & ', $users);
                     @endphp
-                    <span class="group-name" style="cursor: pointer;" data-toggle="collapse" data-target="#details-{{ $ownerGroup->id }}" aria-expanded="false" aria-controls="details-{{ $ownerGroup->id }}">
+                    <span class="group-name" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#details-{{ $ownerGroup->id }}" aria-expanded="false" aria-controls="details-{{ $ownerGroup->id }}">
                         {{ $groupName }}
                     </span>
                 </td>
@@ -54,72 +54,74 @@
                             <i class="bi bi-pencil">Edit</i>
                         </button>
                         <button class="btn btn-sm btn-outline-danger me-1" title="Delete Owner Group" onclick="confirmModal('{{ route('admin.owner-groups.delete_group', $ownerGroup->id) }}', responseHandler)">
-                        <i class="bi bi-trash"></i> Delete
-                    </button>
+                            <i class="bi bi-trash"></i> Delete
+                        </button>
                     </div>
                 </td>
             </tr>
 
             <!-- Expandable Row for User Details -->
-            <tr class="collapse" id="details-{{ $ownerGroup->id }}">
-                <td colspan="5">
-                    <table class="table table-sm table-striped">
-                        <thead>
-                            <tr>
-                                <th>No.</th>
-                                <th>Name</th>
-                                <th>Position</th>
-                                <th>Phone</th>
-                                <th>Email</th>
-                                <th>City</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($ownerGroup->ownerGroupUsers as $userIndex => $user)
+            <tr>
+                <td colspan="5" class="p-0">
+                    <div id="details-{{ $ownerGroup->id }}" class="collapse">
+                        <table class="table table-sm table-striped mb-0">
+                            <thead>
                                 <tr>
-                                    <!-- Sr No -->
-                                    <td>{{ $userIndex + 1 }}</td>
-
-                                    <!-- Name -->
-                                    <td>
-                                        {{ $user->user->name }}
-                                        @if($user->is_main)
-                                            <span class="badge text-bg-success">Main</span>
-                                        @endif
-                                    </td>
-
-                                    <!-- Position -->
-                                    {{-- <td>
-                                        {{ optional($user->user->category)->name ?? 'N/A' }}
-                                    </td> --}}
-
-                                    <!-- Position / Role -->
-                                    <td>
-                                        {{ $user->user->getRoleNames()->implode(', ') ?: 'N/A' }}
-                                    </td>
-
-                                    <!-- Phone -->
-                                    <td>{{ $user->user->phone }}</td>
-
-                                    <!-- Email -->
-                                    <td>{{ $user->user->email }}</td>
-
-                                    <!-- City -->
-                                    <td>{{ $user->user->city }}</td>
-
-                                    <!-- Actions -->
-                                    <td>
-                                        @if(!$user->is_main)
-                                        <button class="btn btn-sm btn_secondary" onclick="setAsMain({{ $user->id }}, {{ $ownerGroup->id }})">
-                                            Set as Main
-                                        </button>
-                                        @endif
-                                    </td>
+                                    <th>No.</th>
+                                    <th>Name</th>
+                                    <th>Position</th>
+                                    <th>Phone</th>
+                                    <th>Email</th>
+                                    <th>City</th>
+                                    <th>Actions</th>
                                 </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @foreach($ownerGroup->ownerGroupUsers as $userIndex => $user)
+                                    <tr>
+                                        <!-- Sr No -->
+                                        <td>{{ $userIndex + 1 }}</td>
+
+                                        <!-- Name -->
+                                        <td>
+                                            {{ $user->user->name }}
+                                            @if($user->is_main)
+                                                <span class="badge text-bg-success">Main</span>
+                                            @endif
+                                        </td>
+
+                                        <!-- Position -->
+                                        {{-- <td>
+                                            {{ optional($user->user->category)->name ?? 'N/A' }}
+                                        </td> --}}
+
+                                        <!-- Position / Role -->
+                                        <td>
+                                            {{ $user->user->getRoleNames()->implode(', ') ?: 'N/A' }}
+                                        </td>
+
+                                        <!-- Phone -->
+                                        <td>{{ $user->user->phone }}</td>
+
+                                        <!-- Email -->
+                                        <td>{{ $user->user->email }}</td>
+
+                                        <!-- City -->
+                                        <td>{{ $user->user->city }}</td>
+
+                                        <!-- Actions -->
+                                        <td>
+                                            @if(!$user->is_main)
+                                            <button class="btn btn-sm btn_secondary" onclick="setAsMain({{ $user->id }}, {{ $ownerGroup->id }})">
+                                                Set as Main
+                                            </button>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                 </td>
             </tr>
         @endforeach

@@ -3,45 +3,43 @@
 @endphp
 <aside id="menu" class="sidebar bg-light sidebar">
     <div class="dropdown position-relative">
-    <button class="p-0 btn btn-light dropdown-toggle d-flex align-items-center gap-2 user-dropdown-toggle w-100" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-        @if(auth()->user()->profile_picture)
-            <img src="{{ asset('storage/' . auth()->user()->profile_picture) }}" alt="Profile" class="rounded-circle profile-img" />
-        @else
-            <div class="bg-secondary rounded-circle d-flex justify-content-center align-items-center default-profile-icon">
-                <i class="fa-solid fa-user text-white"></i>
+        <button class="p-0 btn btn-light dropdown-toggle d-flex align-items-center gap-2 user-dropdown-toggle w-100" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            @if(auth()->user()->profile_picture)
+                <img src="{{ asset('storage/' . auth()->user()->profile_picture) }}" alt="Profile" class="rounded-circle profile-img" />
+            @else
+                <div class="bg-secondary rounded-circle d-flex justify-content-center align-items-center default-profile-icon">
+                    <i class="fa-solid fa-user text-white"></i>
+                </div>
+            @endif
+
+            <div class="flex-grow-1 text-start user-info">
+                <h6 class="mb-0 text-truncate" title="{{ auth()->user()->name }}">{{ auth()->user()->name }}</h6>
+                <small title="{{ auth()->user()->email }}" class="text-muted d-block text-truncate">{{ auth()->user()->email }}</small>
+                <small title="{{ $roles->implode(', ') }}" class="text-muted role-text">{{ $roles->count() === 1 ? 'Role' : 'Roles' }}: {{ $roles->implode(', ') }}</small>
             </div>
-        @endif
+        </button>
 
-        <div class="flex-grow-1 text-start user-info">
-            <h6 class="mb-0 text-truncate" title="{{ auth()->user()->name }}">{{ auth()->user()->name }}</h6>
-            <small title="{{ auth()->user()->email }}" class="text-muted d-block text-truncate">{{ auth()->user()->email }}</small>
-            <small title="{{ $roles->implode(', ') }}" class="text-muted role-text">{{ $roles->count() === 1 ? 'Role' : 'Roles' }}: {{ $roles->implode(', ') }}</small>
-        </div>
-    </button>
+        <ul class="dropdown-menu dropdown-menu-end shadow border-0 user-dropdown-menu">
+            <li><a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('admin.users.profile.show') }}">
+                <i class="fas fa-user fa-fw"></i> My Profile
+            </a></li>
 
-    <ul class="dropdown-menu dropdown-menu-end shadow border-0 user-dropdown-menu">
-        <li><a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('admin.users.profile.show') }}">
-            <i class="fas fa-user fa-fw"></i> My Profile
-        </a></li>
+            <li><a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('admin.users.profile.edit') }}">
+                <i class="fas fa-edit fa-fw"></i> Edit Profile
+            </a></li>
 
-        <li><a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('admin.users.profile.edit') }}">
-            <i class="fas fa-edit fa-fw"></i> Edit Profile
-        </a></li>
+            <li><hr class="dropdown-divider"></li>
 
-        <li><hr class="dropdown-divider"></li>
-
-        <li>
-            <form action="{{ route('logout') }}" method="POST" class="m-0">
-                @csrf
-                <button type="submit" class="dropdown-item d-flex align-items-center gap-2 text-danger">
-                    <i class="fa-solid fa-sign-out-alt fa-fw"></i> Logout
-                </button>
-            </form>
-        </li>
-    </ul>
-</div>
-
-
+            <li>
+                <form action="{{ route('logout') }}" method="POST" class="m-0">
+                    @csrf
+                    <button type="submit" class="dropdown-item d-flex align-items-center gap-2 text-danger">
+                        <i class="fa-solid fa-sign-out-alt fa-fw"></i> Logout
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </div>
 
     <div class="pt-3 px-3">
         <div class="input-group mb-2">

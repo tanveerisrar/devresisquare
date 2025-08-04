@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 if (!function_exists('getPoundSymbol')) {
     function getPoundSymbol()
@@ -827,6 +829,52 @@ if (!function_exists('attachmentViewer')) {
         return $button . $modal;
     }
 }
+
+if (!function_exists('safeAssignRoles')) {
+    /**
+     * Assign multiple roles with automatic creation and fallback
+     * @param Model $model
+     * @param string|array|\Spatie\Permission\Contracts\Role $roles
+     */
+    function safeAssignRoles(Model $model, $roles)
+    {
+        // Convert single role to array for consistent processing
+        $roles = is_array($roles) ? $roles : [$roles];
+        
+        // Prepare role objects first
+        $roleObjects = [];
+        foreach ($roles as $role) {
+            $roleObjects[] = is_string($role) ? Role::firstOrCreate(['name' => $role]) : $role;
+        }
+
+        DB::transaction(function () use ($model, $roleObjects) {
+            try {
+                // Attempt native assignment for all roles at once
+                $model->assignRole($roleObjects);
+            } catch (\Exception $e) {
+                // Fallback: Handle all roles in bulk
+                $existingRoles = $model->roles()->pluck('id')->toArray();
+                $newRoles = [];
+
+                foreach ($roleObjects as $role) {
+                    if (!in_array($role->id, $existingRoles)) {
+                        $newRoles[] = [
+                            'role_id' => $role->id,
+                            'model_type' => get_class($model),
+                            'model_id' => $model->id,
+                        ];
+                    }
+                }
+
+                if (!empty($newRoles)) {
+                    DB::table('model_has_roles')->insert($newRoles);
+                    $model->unsetRelation('roles');
+                }
+            }
+        });
+    }
+}
+
 /*
 {!! attachmentViewer(uploaded_asset($quoteAttachment), 'View Quote', 'btn btn-primary', 'lg') !!}
 {!! attachmentViewer(uploaded_asset($quoteAttachment), 'View Quote', 'btn btn-primary', 'sm') !!}

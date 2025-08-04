@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers\Backend;
 
-use App\Models\Offer;
-use App\Models\Property;
-use App\Models\Tenancy;
-use App\Models\TenantMember;
 use App\Models\User;
+use App\Models\Offer;
+use App\Models\Tenancy;
+use App\Models\Property;
 use App\Models\UserDetail;
+use App\Models\TenantMember;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Spatie\Permission\Models\Role;
 
 class OfferController
 {
@@ -41,84 +43,91 @@ class OfferController
 
     public function store(Request $request)
     {
-        // Validate the incoming request data
-        $request->validate([
-            'property_id' => 'required|exists:properties,id',  // Ensure property exists in database
-            'price' => 'required|numeric',                      // Validate the price to be a number
-            'deposit' => 'required|numeric',                    // Validate the deposit to be a number
-            'term' => 'required|string|max:255',                 // Validate the term as a string
-            'moveInDate' => 'required|date',                    // Validate move-in date
-        ]);
+        DB::beginTransaction();
 
-        // Collect tenant details from the request
-        $tenantDetails = [];
-        $tenantIndex = 1;
-
-        while ($request->has("tenantName_{$tenantIndex}")) {
-            // Create a new user for each tenant
-            $user = User::create([
-                // 'category_id' => 3,
-                'name' => $request->input("tenantName_{$tenantIndex}"),
-                'phone' => $request->input("tenantPhone_{$tenantIndex}"),
-                'email' => $request->input("tenantEmail_{$tenantIndex}"),
-                'status' => 1,  // You can adjust the status accordingly
-                'updated_by' => Auth::id(),  // Assuming authenticated user updates the record
-                'added_by' => Auth::id(),    // Assuming authenticated user adds the record
+        try {
+            // Validate the incoming request data
+            $request->validate([
+                'property_id' => 'required|exists:properties,id',  // Ensure property exists in database
+                'price' => 'required|numeric',                      // Validate the price to be a number
+                'deposit' => 'required|numeric',                    // Validate the deposit to be a number
+                'term' => 'required|string|max:255',                 // Validate the term as a string
+                'moveInDate' => 'required|date',                    // Validate move-in date
             ]);
 
-            // ✅ Assign Spatie role instead of using category_id
-            $user->assignRole('Tenant');
-            
-            // Create corresponding user details (tenancy related information)
-            UserDetail::create([
-                'user_id' => $user->id,
-                'employment_status' => $request->input("employmentStatus_{$tenantIndex}"),
-                'business_name' => $request->input("businessName_{$tenantIndex}"),
-                'guarantee' => convert_to_boolean($request->input("guarantee_{$tenantIndex}")),
-                'previously_rented' => convert_to_boolean($request->input("previouslyRented_{$tenantIndex}")),
-                'poor_credit' => convert_to_boolean($request->input("poorCredit_{$tenantIndex}")),
+            // Collect tenant details from the request
+            $tenantDetails = [];
+            $tenantIndex = 1;
+
+            while ($request->has("tenantName_{$tenantIndex}")) {
+                // Create a new user for each tenant
+                $user = User::create([
+                    // 'category_id' => 3,
+                    'name' => $request->input("tenantName_{$tenantIndex}"),
+                    'phone' => $request->input("tenantPhone_{$tenantIndex}"),
+                    'email' => $request->input("tenantEmail_{$tenantIndex}"),
+                    'status' => 1,  // You can adjust the status accordingly
+                    'updated_by' => Auth::id(),  // Assuming authenticated user updates the record
+                    'added_by' => Auth::id(),    // Assuming authenticated user adds the record
+                ]);
+
+                safeAssignRoles($user, ['Tenant', 'User']);
+
+                // Create corresponding user details (tenancy related information)
+                UserDetail::create([
+                    'user_id' => $user->id,
+                    'employment_status' => $request->input("employmentStatus_{$tenantIndex}"),
+                    'business_name' => $request->input("businessName_{$tenantIndex}"),
+                    'guarantee' => convert_to_boolean($request->input("guarantee_{$tenantIndex}")),
+                    'previously_rented' => convert_to_boolean($request->input("previouslyRented_{$tenantIndex}")),
+                    'poor_credit' => convert_to_boolean($request->input("poorCredit_{$tenantIndex}")),
+                ]);
+
+                // Add the user ID to the $userIds array, with mainPerson flag as true/false
+                $isMainPerson = $request->input("mainPerson_{$tenantIndex}") == 'on' ? true : false;
+                $userIds[$user->id] = $isMainPerson;
+
+                // $tenantDetails[] = [
+                //     'tenantName' => $request->input("tenantName_{$tenantIndex}"),
+                //     'tenantPhone' => $request->input("tenantPhone_{$tenantIndex}"),
+                //     'tenantEmail' => $request->input("tenantEmail_{$tenantIndex}"),
+                //     'employmentStatus' => $request->input("employmentStatus_{$tenantIndex}"),
+                //     'businessName' => $request->input("businessName_{$tenantIndex}"),
+                //     'guarantee' => $request->input("guarantee_{$tenantIndex}"),
+                //     'previouslyRented' => $request->input("previouslyRented_{$tenantIndex}"),
+                //     'poorCredit' => $request->input("poorCredit_{$tenantIndex}"),
+                //     'mainPerson' => $request->input("mainPerson_{$tenantIndex}") == 'on' ? true : false,  // Main person flag
+                // ];
+
+                $tenantIndex++;
+            }
+
+            // Create the offer in the database
+            $offer = Offer::create([
+                'property_id' => $request->input('property_id'),
+                'price' => $request->input('price'),
+                'deposit' => $request->input('deposit'),
+                'term' => $request->input('term'),
+                'move_in_date' => $request->input('moveInDate'),
+                'tenant_details' => json_encode($userIds),  // Store tenant details as JSON
+                // 'tenant_details' => json_encode($tenantDetails),  // Store tenant details as JSON
+                'status' => 'Pending',  // Default status for the offer
             ]);
 
-            // Add the user ID to the $userIds array, with mainPerson flag as true/false
-            $isMainPerson = $request->input("mainPerson_{$tenantIndex}") == 'on' ? true : false;
-            $userIds[$user->id] = $isMainPerson;
+            $response = [
+                'status' => true,
+                'message' => 'Offer Added successfully!',
+            ];
+            DB::commit();  // Commit the transaction if everything is successful
+            return response()->json($response);
 
-            // $tenantDetails[] = [
-            //     'tenantName' => $request->input("tenantName_{$tenantIndex}"),
-            //     'tenantPhone' => $request->input("tenantPhone_{$tenantIndex}"),
-            //     'tenantEmail' => $request->input("tenantEmail_{$tenantIndex}"),
-            //     'employmentStatus' => $request->input("employmentStatus_{$tenantIndex}"),
-            //     'businessName' => $request->input("businessName_{$tenantIndex}"),
-            //     'guarantee' => $request->input("guarantee_{$tenantIndex}"),
-            //     'previouslyRented' => $request->input("previouslyRented_{$tenantIndex}"),
-            //     'poorCredit' => $request->input("poorCredit_{$tenantIndex}"),
-            //     'mainPerson' => $request->input("mainPerson_{$tenantIndex}") == 'on' ? true : false,  // Main person flag
-            // ];
-
-            $tenantIndex++;
+            // Redirect back with a success message
+            // return redirect()->route('offers.index')->with('success', 'Offer created successfully.');
         }
-
-        // Create the offer in the database
-        $offer = Offer::create([
-            'property_id' => $request->input('property_id'),
-            'price' => $request->input('price'),
-            'deposit' => $request->input('deposit'),
-            'term' => $request->input('term'),
-            'move_in_date' => $request->input('moveInDate'),
-            'tenant_details' => json_encode($userIds),  // Store tenant details as JSON
-            // 'tenant_details' => json_encode($tenantDetails),  // Store tenant details as JSON
-            'status' => 'Pending',  // Default status for the offer
-        ]);
-
-        $response = [
-            'status' => true,
-            'message' => 'Offer Added successfully!',
-        ];
-
-        return response()->json($response);
-
-        // Redirect back with a success message
-        // return redirect()->route('offers.index')->with('success', 'Offer created successfully.');
+        catch (\Exception $e) {
+            DB::rollBack();  // Rollback the transaction in case of error
+            return response()->json(['status' => false, 'message' => 'Error creating offer: ' . $e->getMessage()], 500);
+        }       
     }
 
     public function edit($id)
