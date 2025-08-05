@@ -33,6 +33,16 @@ class AppServiceProvider extends ServiceProvider
         Paginator::useBootstrapFive();
         //Paginator::useBootstrap(); // Enables Bootstrap 4 styling
 
+        // Super Admin check – this runs before all Gate checks
+        Gate::before(function ($user, $ability) {
+            return $user->isSuperAdmin() ? true : null;
+            // Option 1: check by email
+            // return $user->email === 'superadmin@example.com' ? true : null;
+
+            // Option 2: check by role
+            // return $user->hasRole('Super Admin') ? true : null;
+        });
+        
         // $permissions = cache()->remember('all_permissions', 3600, fn() => Permission::all());
         $permissions = cache()->rememberForever('all_permissions', fn() => Permission::all());
 

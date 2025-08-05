@@ -176,18 +176,20 @@ class UserController
         // $users = $users->where('user_type', '!=', 'super_admin');
 
         $users = $usersQuery->orderBy('id', 'desc')
-                ->where('user_type', '!=', 'staff')
-                ->where('user_type', '!=', 'super_admin')
-                ->whereDoesntHave('roles', function ($query) {
-                    $query->whereIn('name', ['Staff', 'Super Admin']);
-                })
-                ->get();
+            ->where(function ($query) {
+                $query->whereNull('user_type')
+                    ->orWhereNotIn('user_type', ['staff', 'super_admin']);
+            })
+            ->whereDoesntHave('roles', function ($query) {
+                $query->whereIn('name', ['Staff', 'Super Admin']);
+            })
+            ->get();
 
 
         // If no users at all, redirect to quick-create
         if ($users->isEmpty()) {
             flash("You don't have any users yet!")->error();
-            return redirect()->route('admin.users.quick');
+            return redirect()->route('admin.users.create');
         }
 
         // Decide which user/tab to show
@@ -195,9 +197,7 @@ class UserController
         $tabName   = $request->query('tabname', 'user');
 
         // Try to find the requested user or fall back to the most recent
-        $user = $userId
-            ? $users->firstWhere('id', $userId)
-            : null;
+        $user = $userId ? $users->firstWhere('id', $userId) : null;
 
         if (! $user) {
             $user = $users->first();
