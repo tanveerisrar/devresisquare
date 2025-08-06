@@ -25,11 +25,11 @@ class DashboardController extends Controller
 
         $user = Auth::user();
 
-        if (!$user->hasAnyRole(['Super Admin', 'Landlord', 'Staff', 'Property Manager', 'Estate Agent'])) {
+        if (!$user->hasAnyRole(['Super Admin', 'Landlord', 'Staff', 'Property Manager', 'Estate Agent', 'Test'])) {
             abort(403);
         }
 
-        if ($user->hasAnyRole(['Landlord','Estate Agent','Staff'])) {
+        if ($user->hasAnyRole(['Landlord', 'Estate Agent', 'Staff', 'Test'])) {
             // dd('User is a Landlord, Estate Agent, or Staff');
             $usersCount = User::where('created_by', $user->id)->count();
             $propertiesCount = Property::where('created_by', $user->id)->count();

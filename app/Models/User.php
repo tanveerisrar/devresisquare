@@ -1,10 +1,11 @@
 <?php
 namespace App\Models;
 
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Spatie\Permission\Traits\HasRoles;
 use App\Traits\TracksUser;
+use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
@@ -50,6 +51,33 @@ class User extends Authenticatable
     
     // Optional: declare guard explicitly if needed
     protected $guard_name = 'web';
+
+    protected static function booted()
+    {
+        static::creating(function ($user) {
+            // if no name is set, use default name 'temp name'
+            if(empty($user->name)){
+                $user->name = 'temp name';
+            }
+
+            // If no password is set, use default password '123456'
+            if (empty($user->password)) {
+                $user->password = Hash::make('123456');
+            }
+        });
+
+        static::updating(function ($user) {
+            // if no name is set, use default name 'temp name'
+            if(empty($user->name)){
+                $user->name = 'temp name';
+            }
+            // Optional: Prevent overriding password with null/empty string
+            if (empty($user->password)) {
+                // Retain original password (do nothing)
+                $user->password = $user->getOriginal('password');
+            }
+        });
+    }
 
     // Optional: define the roles() relationship manually (if needed elsewhere)
     public function roles()

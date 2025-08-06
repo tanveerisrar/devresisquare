@@ -8,7 +8,7 @@
                     <div class="pv_header">
                         <div class="row">
                             <div class="col-3">
-                                <div class="pv_title">Users</div>
+                                <div class="pv_title">Contacts</div>
                             </div>
                             <div class="col-9">
                                 <x-backend.forms.search
@@ -18,11 +18,13 @@
                                     onClick='onClick()'
                                 />
                             </div>
+                            @can('Create Contacts')
                             <div class="pv_btn">
                                 <a href="{{ route('admin.users.create') }}" class="btn mt-2 btn-sm btn-outline-danger">
-                                    Add User
+                                    Add Contact
                                 </a>
                             </div>
+                            @endcan
                         </div>
 
                     </div>

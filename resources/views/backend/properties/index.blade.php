@@ -14,11 +14,13 @@
                                 <x-backend.forms.search class='' placeholder='Search' value=''
                                     onClick='onClick()' />
                             </div>
+                            @can('create properties')
                             <div class="pv_btn">
                                 <a href="{{ route('admin.properties.quick') }}" class="btn mt-2 btn-sm btn-outline-danger">
                                     Add Property
                                 </a>
                             </div>
+                            @endcan
                             {{-- <div class="pv_btn">
                                 <x-backend.forms.button class='' name='Add Property' type='secondary' size='sm'
                                     isOutline={{ false }} isLinkBtn={{ true }}

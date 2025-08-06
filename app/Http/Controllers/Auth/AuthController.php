@@ -43,6 +43,7 @@ class AuthController
                     'Estate Agent',
                     'Agent',
                     'Staff',
+                    'Test',
                 ])
             ) {
                 return redirect()->route('backend.dashboard');

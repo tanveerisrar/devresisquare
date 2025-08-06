@@ -106,6 +106,7 @@ $secondHalf = array_slice($allFeatures, $halfCount);
                 <div class="pvc_ref_id"> <strong> Property Ref: {{$propRefNo}} </strong></div>
                 <div class="pvc_poperty_name">{{ $address }}</div>
             </div>
+            @can('delete properties')
             @if (isset($property) && isset($property->id))
                 <!-- Delete Button -->
                 <button type="button" class="float-end btn btn-sm btn-outline-danger"
@@ -114,6 +115,7 @@ $secondHalf = array_slice($allFeatures, $halfCount);
                 Delete
                 </button>
             @endif
+            @endcan
         </div>
         {{-- <div class="rs_property_icons">
             <div class="bed_icon rs_tooltip" data-label="Bedroom">
@@ -145,25 +147,32 @@ $secondHalf = array_slice($allFeatures, $halfCount);
     {{-- pv_content end  --}}
 </div>
 
+@canany(['edit important note', 'view important note'])
 <div class="property_note">
     <span class="fw-semibold">Important Note
     <div class="notes-update-ajax" id="section-notes-{{ $property->id }}">
         @include("backend.properties.popup_forms.notes", ['property' => $property])
     </div>
     </span>
+    @can('edit important note')
     <button class="btn btn-outline-danger btn-sm editForm" data-form="{{ 'notes' }}" data-id="{{ $property->id }}">
         Edit
     </button>
+    @endcan
 </div>
+@endcanany
+
 <div class="property_note">
     <span class="fw-semibold">
     <div class="property_status-update-ajax" id="section-property_status-{{ $property->id }}">
         @include("backend.properties.popup_forms.property_status", ['property' => $property])
     </div>
     </span>
+    @can('edit properties')
     <button class="btn btn-outline-danger btn-sm editForm" data-form="{{ 'property_status' }}" data-id="{{ $property->id }}">
         Edit
     </button>
+    @endcan
 </div>
 
 <div class="pvd_content_wrapper">
@@ -215,10 +224,11 @@ $secondHalf = array_slice($allFeatures, $halfCount);
                 id="collapse-{{ $formType }}" 
                 class="accordion-collapse collapse {{ $isFirst ? 'show' : '' }}" 
                 aria-labelledby="heading-{{ $formType }}">
-                
+                @can('edit properties')
                 <button class="btn btn_outline_secondary mt-2 float-end editForm" data-form="{{ $formType }}" data-id="{{ $property->id }}">
                     Edit
                 </button>
+                @endcan
                 <div class="accordion-body" id="section-{{ $formType }}-{{ $property->id }}">
                     @include("backend.properties.popup_forms.$formType", ['property' => $property])
                 </div>

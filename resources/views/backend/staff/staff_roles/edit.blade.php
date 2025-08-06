@@ -11,9 +11,9 @@
             <form class="p-4" action="{{ route('roles.update', $role->id) }}" method="POST">
                 <input name="_method" type="hidden" value="PATCH">
             	   @csrf
-                <div class="form-group row">
-                    <label class="col-md-3 col-from-label" for="name">Name<i class="las la-language text-danger" title="Translatable"></i></label>
-                    <div class="col-md-9">
+                <div class="form-group row align-items-center">
+                    <label class="pl-4 col-md-2 col-from-label" for="name">Role Name<i class="las la-language text-danger" title="Translatable"></i></label>
+                    <div class="col-md-10">
                         @php $roleForTranslation = \App\Models\Role::where('id',$role->id)->first(); @endphp
                         <input readonly type="text" placeholder="Name" id="name" name="name" class="form-control" value="{{ $roleForTranslation->name }}" required>
                     </div>

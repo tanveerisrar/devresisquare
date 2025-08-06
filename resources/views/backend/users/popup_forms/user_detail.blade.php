@@ -524,7 +524,8 @@
 
 
         {{-- CONTRACTOR --}}
-        @if ($cat === 'contractor')
+        @if ($user->hasAnyRole(['Contractor']))
+        {{-- @if ($cat === 'contractor') --}}
             <div class="mb-4">
                 <label for="specialisations">Specialisation:</label>
                 <select name="specialisations[]" id="specialisations" multiple class="form-multiselect">

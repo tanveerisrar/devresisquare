@@ -100,13 +100,28 @@
                             </div>
                             <div class="row">
                                 <div class="form-group col-lg-8 col-12">
+                                    <label for="country_id">Country</label>
+                                    <select name="country_id" id="country_id" class="form-control select2" required>
+                                        <option value="">-- Select Country --</option>
+                                        @foreach($countries as $country)
+                                            <option value="{{ $country->id }}"
+                                                {{ old('country_id', $user->country_id ?? '') == $country->id ? 'selected' : '' }}>
+                                                {{ $country->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('country_id')
+                                        <div class="text-danger">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                {{-- <div class="form-group col-lg-8 col-12">
                                     <label for="country">Country</label>
                                     <input required type="text" name="country" id="country" class="form-control"
                                         value="{{ isset($user) && $user->country ? $user->country : '' }}">
                                     @error('country')
                                         <div class="text-danger">{{ $message }}</div>
                                     @enderror
-                                </div>
+                                </div> --}}
                                 <div class="form-group col-lg-4 col-12">
                                     <label for="postcode">Postcode</label>
                                     <input required type="text" name="postcode" id="postcode"

@@ -10,9 +10,9 @@
         <form action="{{ route('roles.store') }}" method="POST">
             @csrf
             <div class="card-body">
-                <div class="form-group row">
-                    <label class="col-md-3 col-from-label" for="name">Name</label>
-                    <div class="col-md-9">
+                <div class="form-group align-items-center row mb-3">
+                    <label class="pl-5 col-md-2 col-from-label" for="name">Role Name</label>
+                    <div class="col-md-10">
                         <input type="text" placeholder="Name" id="name" name="name" class="form-control" required>
                     </div>
                 </div>

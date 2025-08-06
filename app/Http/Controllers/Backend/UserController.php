@@ -194,7 +194,7 @@ class UserController
 
         // Decide which user/tab to show
         $userId = $request->query('user_id');
-        $tabName   = $request->query('tabname', 'user');
+        $tabName   = $request->query('tabname', 'Contact');
 
         // Try to find the requested user or fall back to the most recent
         $user = $userId ? $users->firstWhere('id', $userId) : null;
@@ -206,11 +206,11 @@ class UserController
 
         // Define your tab list
         $tabs = [
-            ['name' => 'User'],
+            ['name' => 'Contact'],
             ['name' => 'Appointments'],
             ['name' => 'Link'],
             ['name' => 'Bank'],
-            ['name' => 'User Owner'],
+            ['name' => 'Contact Owner'],
             ['name' => 'Letters'],
             ['name' => 'Compliance'],
             ['name' => 'Documents'],
@@ -231,7 +231,7 @@ class UserController
     private function getTabContent($tabname, $userId, $user)
     {
         switch (strtolower($tabname)) {
-            case 'user':
+            case 'contact':
                 return view('backend.users.tabs.user_details', compact('userId', 'user'))->render();
             
             case 'appointments':
@@ -338,7 +338,6 @@ class UserController
                 $validatedData['name'] = $fullName;
             }
 
-
             // Check if user_id is provided in the request
             if ($user_id) {
                 $user = User::find($user_id);
@@ -386,7 +385,18 @@ class UserController
                 return view('backend.users.user_form.thankyou');
             }
 
-            return view('backend.users.user_form.step' . ($request->step + 1), compact('user'));
+            // Prepare data for the next step view
+            $nextStep = $request->step + 1;
+            $viewData = compact('user');
+
+            // If step 2 is next, load countries
+            if ($nextStep === 2) {
+                $viewData['countries'] = Country::allCached();
+            }
+
+            return view('backend.users.user_form.step' . $nextStep, $viewData);
+            
+            // return view('backend.users.user_form.step' . ($request->step + 1), compact('user'));
         } else {
             // If no step is present, return a message (optional)
             return response()->json(['message' => 'Invalid step from quick store.']);
@@ -414,7 +424,8 @@ class UserController
                     'address_line_2' => 'nullable|string|max:255',
                     'postcode' => 'required|string|max:15',
                     'city' => 'required|string|max:55',
-                    'country' => 'required|string|max:55',
+                    // 'country' => 'required|string|max:55',
+                    'country_id' => 'nullable|exists:countries,id',
                 ];
             case 3:
                 return [
@@ -503,13 +514,14 @@ class UserController
         $user = User::find($user_id);
         // $categories = UserCategory::all();
         $roles = Role::whereNotIn('name', ['Staff', 'Super Admin'])->get();
+        $countries = Country::allCached();
         $selectedProperties = $selectedProperties = json_decode($user->selected_properties, true);
         // Get the total number of steps dynamically
         $totalSteps = $this->getTotalQuickSteps();
 
         // Check if the step is valid
         if ($step > 0 && $step <= $totalSteps) {
-            return view('backend.users.user_form.step' . $step, compact('user','roles', 'selectedProperties')); // Return the corresponding Blade view
+            return view('backend.users.user_form.step' . $step, compact('user','roles', 'selectedProperties', 'countries')); // Return the corresponding Blade view
             // return view('backend.users.user_form.step' . $step, compact('user','categories', 'selectedProperties')); // Return the corresponding Blade view
         } else {
             // Return a view with an error message if the step is invalid

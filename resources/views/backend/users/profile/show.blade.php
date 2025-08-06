@@ -34,7 +34,7 @@
             <p class="text-muted mb-0">View and manage user information</p>
         </div>
         <div class="d-flex gap-2">
-            @can('manage users')
+            @can('view contacts')
             <a href="{{ route('admin.users.index') }}" class="btn btn-outline-primary">
                 <i class="bi bi-arrow-left me-2"></i>Back to Users
             </a>

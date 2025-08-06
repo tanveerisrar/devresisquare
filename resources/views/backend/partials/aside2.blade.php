@@ -56,12 +56,15 @@
             </a>
         </li>
 
+        @can('view calendar')
+        {{-- Calendar --}}
         <li class="sidebar-list-item submenu_wrapper">
             <a class="{{ request()->routeIs('backend.events.calendar') ? 'active' : '' }}"
                 href="{{ route('backend.events.calendar') }}">
                 <span class="icon_wrapper"><i class="fa-solid fa-calendar-check"></i>Calendar</span>
             </a>
         </li>
+        @endcan
         
         @canany(['view properties', 'edit properties', 'create properties'])
         {{-- Users --}}
@@ -119,6 +122,7 @@
         </li>
         @endcanany
 
+        @canany(['View Contacts', 'Create Contacts', 'Edit Contacts', 'Delete Contacts'])
         <li class="sidebar-list-item submenu_wrapper">
             <a href="#usersSubmenu" data-bs-toggle="collapse"
                 aria-expanded="{{ request()->routeIs('admin.users.index') || request()->routeIs('users.create') ? 'true' : 'false' }}"
@@ -129,6 +133,7 @@
             <ul class="nav-second-level collapse list-unstyled {{ request()->routeIs('admin.users.index') || request()->routeIs('users.create') ? 'show' : '' }}"
                 id="usersSubmenu">
                 
+                @can('View Contacts')
                 {{-- All Users --}}
                 @component('components.backend.common.sidebar-sublink')
                     @slot('class') {{ request()->routeIs('admin.users.index') && !request()->has('role') ? 'active' : '' }} @endslot
@@ -156,9 +161,10 @@
                     @slot('link') {{ route('admin.users.index', ['role' => 'Tenant']) }} @endslot
                     @slot('link_name') Tenants @endslot
                 @endcomponent
-
+                @endcan
             </ul>
         </li>
+        @endcanany
 
         {{-- 
         <li class="sidebar-list-item submenu_wrapper">
@@ -225,11 +231,13 @@
         </li> 
         --}}
 
+        @can('manage tenancies')
         <li class="sidebar-list-item submenu_wrapper">
             <a href="#">
                 <span class="icon_wrapper"><i class="fa-solid fa-home"></i>Tenancies</span>
             </a>
         </li>
+        @endcan
 
         @canany(['view property repair', 'edit property repair', 'create property repair'])
         <li class="sidebar-list-item submenu_wrapper">
@@ -348,14 +356,18 @@
         </li>
         @endcan
 
+        @can('Manage Document Types')
         <li class="sidebar-list-item submenu_wrapper">
             <a href="#">
                 <span class="icon_wrapper"><i class="fa-solid fa-file-alt"></i>Documents</span>
             </a>
         </li>
-        <hr>
+        @endcan
+       
 
-        <!-- Website Setup -->
+       <!-- Website Setup -->
+        @canany(['manage website setup', 'manage header', 'manage footer', 'manage appearance'])
+        <hr>
         <li class="sidebar-list-item submenu_wrapper">
             <a href="#websiteSetupSubmenu" data-bs-toggle="collapse"
                 aria-expanded="{{ areActiveRoutes(['website.footer', 'website.header', 'website.appearance'], 'true') }}"
@@ -366,24 +378,30 @@
             </a>
             <ul class="nav-second-level list-unstyled collapse {{ areActiveRoutes(['website.footer', 'website.header', 'website.appearance'], 'show') }}"
                 id="websiteSetupSubmenu">
+                @can('manage header')
                 @component('components.backend.common.sidebar-sublink')
                     @slot('class') {{ areActiveRoutes(['website.header']) }} @endslot
                     @slot('link') {{ route('website.header') }} @endslot
                     @slot('link_name') Header
                     @endslot
                 @endcomponent
+                @endcan
+                @can('manage footer')
                 @component('components.backend.common.sidebar-sublink')
                     @slot('class') {{ areActiveRoutes(['website.footer']) }} @endslot
                     @slot('link') {{ route('website.footer') }} @endslot
                     @slot('link_name') Footer
                     @endslot
-                @endcomponent
+                @endcomponent        
+                @endcan
+                @can('manage appearance')
                 @component('components.backend.common.sidebar-sublink')
                     @slot('class') {{ areActiveRoutes(['website.appearance']) }} @endslot
                     @slot('link') {{ route('website.appearance') }} @endslot
                     @slot('link_name') Appearance
                     @endslot
                 @endcomponent
+                @endcan
                 {{-- <li class="sidebar-sub-list-item py-0 mb-0">
                     <a href="{{ route('website.header') }}"
                         class="aiz-side-nav-link {{ areActiveRoutes(['website.header']) }}">
@@ -404,7 +422,16 @@
                 </li> --}}
             </ul>
         </li>
+        @endcanany
 
+        <!-- Master Manage -->
+        @canany([
+            'manage categories','manage branches','manage designations',
+            'manage note types','manage document types',
+            'manage tenancy types','manage tenancy sub status',
+            'manage event types','manage event sub types',
+            'manage job types'
+        ])
         <li class="sidebar-list-item submenu_wrapper">
             <a href="#masterManageSubmenu" data-bs-toggle="collapse" aria-expanded="{{ areActiveRoutes([
                 'admin.branches.index',
@@ -460,24 +487,35 @@
                 'admin.job_types.create'
             ], 'show') }}" id="masterManageSubmenu">
 
+                @can('manage categories')
                 @component('components.backend.common.sidebar-sublink')
                     @slot('class') {{ areActiveRoutes(['user-categories.index']) }} @endslot
                     @slot('link') {{ route('user-categories.index') }} @endslot
                     @slot('link_name') Categories
                     @endslot
                 @endcomponent
+                @endcan
+
+                @can('manage branches')
                 @component('components.backend.common.sidebar-sublink')
                     @slot('class') {{ areActiveRoutes(['admin.branches.index']) }} @endslot
                     @slot('link') {{ route('admin.branches.index') }} @endslot
                     @slot('link_name') Branches
                     @endslot
                 @endcomponent
+                @endcan
+
+                @can('manage designations')
                 @component('components.backend.common.sidebar-sublink')
                     @slot('class') {{ areActiveRoutes(['admin.designations.index']) }} @endslot
                     @slot('link') {{ route('admin.designations.index') }} @endslot
                     @slot('link_name') Designation
                     @endslot
                 @endcomponent
+                @endcan
+
+                <!-- Note Types -->
+                @canany(['manage note types'])
                 {{-- <li class="sidebar-sub-sub-list-item submenu_wrapper">
                     <a class="{{ areActiveRoutes(['user-categories.index']) }}"
                         href="{{ route('user-categories.index') }}">
@@ -535,7 +573,10 @@
                         </li> --}}
                     </ul>
                 </li>
-                <!-- Document Types Section -->
+                @endcanany
+                
+                <!-- Document Types -->
+                @can('manage document types')
                 <li class="sidebar-sub-list-item submenu_wrapper">
                     <a href="#documentTypesSubmenu" data-bs-toggle="collapse"
                         aria-expanded="{{ areActiveRoutes(['admin.document-types.index', 'admin.document-types.create'], 'true') }}"
@@ -572,8 +613,10 @@
                         </li> --}}
                     </ul>
                 </li>
+                @endcan
 
                 <!-- Tenancy Types Section -->
+                @can('manage tenancy types')
                 <li class="sidebar-sub-list-item submenu_wrapper">
                     <a href="#tenancyTypesSubmenu" data-bs-toggle="collapse"
                         aria-expanded="{{ areActiveRoutes(['admin.tenancy_types.index', 'admin.tenancy_types.create'], 'true') }}"
@@ -610,8 +653,10 @@
                         </li> --}}
                     </ul>
                 </li>
+                @endcan
 
                 <!-- Tenancy Sub Status Section -->
+                @can('manage tenancy sub status')
                 <li class="sidebar-sub-list-item submenu_wrapper">
                     <a href="#tenancySubStatusSubmenu" data-bs-toggle="collapse"
                         aria-expanded="{{ areActiveRoutes(['admin.tenancy_sub_statuses.index', 'admin.tenancy_sub_statuses.create'], 'true') }}"
@@ -648,8 +693,10 @@
                         </li> --}}
                     </ul>
                 </li>
+                @endcan
 
                 <!-- Event Type Section -->
+                @can('manage event types')
                 <li class="sidebar-sub-list-item submenu_wrapper">
                     <a href="#eventTypeSubmenu" data-bs-toggle="collapse"
                        aria-expanded="{{ areActiveRoutes(['backend.event_types.index', 'backend.event_types.create'], 'true') }}"
@@ -672,8 +719,10 @@
                         </li>
                     </ul>
                 </li>
+                @endcan
 
                 <!-- Event Sub Type Section -->
+                @can('manage event sub types')
                 <li class="sidebar-sub-list-item submenu_wrapper">
                     <a href="#eventSubTypeSubmenu" data-bs-toggle="collapse"
                        aria-expanded="{{ areActiveRoutes(['backend.event_sub_types.index', 'backend.event_sub_types.create'], 'true') }}"
@@ -696,8 +745,10 @@
                         </li>
                     </ul>
                 </li>
+                @endcan
 
                 <!-- Job Types Section -->
+                @can('manage job types')
                 <li class="sidebar-sub-list-item  submenu_wrapper">
                     <a href="#jobTypesSubmenu" data-bs-toggle="collapse"
                         aria-expanded="{{ areActiveRoutes(['admin.job_types.index', 'admin.job_types.create'], 'true') }}"
@@ -722,8 +773,10 @@
                         </li> --}}
                     </ul>
                 </li>
+                @endcan
             </ul>
         </li>
+        @endcanany
 
         <!-- Staffs -->
         @canany(['view all staffs', 'view staff roles'])

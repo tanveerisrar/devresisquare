@@ -42,7 +42,7 @@ class PropertyController
         if ($user->hasRole('Property Manager') || $user->hasRole('Super Admin')) {
             // Property managers see all properties
             $properties = Property::orderBy('id', 'desc')->get();
-        } elseif ($user->hasRole('Landlord')) {
+        } elseif ($user->hasRole('Landlord') || $user->hasRole('Staff')) {
             // Landlords see only properties they created
             $properties = Property::where('created_by', $user->id)
                 ->orderBy('id', 'desc')
@@ -92,11 +92,11 @@ class PropertyController
             // Check if user can access this property
             $user = auth()->user();
 
-            $isAuthorized = 
-                    $user->hasRole('Super Admin') || 
-                    $user->hasRole('Property Manager') || 
-                    $user->hasRole('Landlord') && $property->created_by === $user->id || 
-                    $user->hasRole('Estate Agent') && ($property->created_by === $user->id || $user->createdUsers()->pluck('id')->contains($property->created_by));
+            $isAuthorized = $user->hasRole('Super Admin') || 
+                $user->hasRole('Property Manager') || 
+                ($user->hasRole('Landlord') && $property->created_by === $user->id) || 
+                ($user->hasRole('Estate Agent') && ($property->created_by === $user->id || $user->createdUsers()->pluck('id')->contains($property->created_by))) ||
+                ($user->hasRole('Staff') && $property->created_by === $user->id);
 
             if (! $isAuthorized) {
                 abort(403, 'Unauthorized to view this property.');
@@ -107,22 +107,46 @@ class PropertyController
             $propertyId = $property->id;
         }
 
-        // Get tabs for properties (you can customize the tabs as per your needs)
-        $tabs = [
-            ['name' => 'Property'],
-            ['name' => 'Owners'],
-            ['name' => 'Compliance'],
-            ['name' => 'Media'],
-            ['name' => 'Offers'],
-            ['name' => 'Tenancy'],
-            ['name' => 'APS'],
-            ['name' => 'Teams'],
-            ['name' => 'Documents'],
-            // ['name' => 'Contractor'],
-            // ['name' => 'Work Offer'],
-            ['name' => 'Notes'],
-            ['name' => 'Appointments']
+        $availableTabs = [
+            'view properties'     => 'Property',
+            'view property owners'       => 'Owners',
+            'manage property compliance'   => 'Compliance',
+            'view property media'        => 'Media',
+            'view property offers'       => 'Offers',
+            'view property tenancy'      => 'Tenancy',
+            'view property aps'          => 'APS',
+            'view property teams'        => 'Teams',
+            'view property documents'    => 'Documents',
+            // 'view property contractor'    => 'Contractor',
+            // 'view property work offer'    => 'Work Offer',
+            'view property notes'        => 'Notes',
+            'view property appointments' => 'Appointments',
         ];
+
+        $tabs = [];
+
+        foreach ($availableTabs as $permission => $name) {
+            if ($user->can($permission)) {
+                $tabs[] = ['name' => $name];
+            }
+        }
+
+        // Get tabs for properties (you can customize the tabs as per your needs)
+        // $tabs = [
+        //     ['name' => 'Property'],
+        //     ['name' => 'Owners'],
+        //     ['name' => 'Compliance'],
+        //     ['name' => 'Media'],
+        //     ['name' => 'Offers'],
+        //     ['name' => 'Tenancy'],
+        //     ['name' => 'APS'],
+        //     ['name' => 'Teams'],
+        //     ['name' => 'Documents'],
+        //     // ['name' => 'Contractor'],
+        //     // ['name' => 'Work Offer'],
+        //     ['name' => 'Notes'],
+        //     ['name' => 'Appointments']
+        // ];
 
         // Retrieve the content for the selected tab and property
         $content = $this->getTabContent($tabName, $propertyId, $property); // Dynamically get content for the tab and property
