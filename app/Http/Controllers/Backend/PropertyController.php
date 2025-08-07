@@ -42,7 +42,7 @@ class PropertyController
         if ($user->hasRole('Property Manager') || $user->hasRole('Super Admin')) {
             // Property managers see all properties
             $properties = Property::orderBy('id', 'desc')->get();
-        } elseif ($user->hasRole('Landlord') || $user->hasRole('Staff')) {
+        } elseif ($user->hasRole('Landlord') || $user->hasRole('Staff') || $user->hasRole('Test')  ) {
             // Landlords see only properties they created
             $properties = Property::where('created_by', $user->id)
                 ->orderBy('id', 'desc')
@@ -96,7 +96,7 @@ class PropertyController
                 $user->hasRole('Property Manager') || 
                 ($user->hasRole('Landlord') && $property->created_by === $user->id) || 
                 ($user->hasRole('Estate Agent') && ($property->created_by === $user->id || $user->createdUsers()->pluck('id')->contains($property->created_by))) ||
-                ($user->hasRole('Staff') && $property->created_by === $user->id);
+                ($user->hasRole('Staff') || $user->hasRole('Test') && $property->created_by === $user->id);
 
             if (! $isAuthorized) {
                 abort(403, 'Unauthorized to view this property.');
