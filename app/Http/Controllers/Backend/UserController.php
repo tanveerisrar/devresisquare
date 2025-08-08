@@ -37,7 +37,8 @@ class UserController
         $user = User::with('country')->find(auth()->id());
         // $categories = UserCategory::all();
         $countries = Country::allCached();
-        return view('backend.users.profile.edit', compact('user', 'categories', 'countries'));
+        return view('backend.users.profile.edit', compact('user', 'countries'));
+        // return view('backend.users.profile.edit', compact('user', 'categories', 'countries'));
     }
 
     public function profileUpdate(Request $request)
@@ -117,12 +118,18 @@ class UserController
 
         $validatedData = $request->validate([
             'current_password' => 'required|string',
-            'new_password' => 'required|string|min:8|confirmed',
+            'new_password' => 'required|string|min:6|confirmed',
         ]);
 
         // Check if the current password is correct
         if (!Hash::check($validatedData['current_password'], $user->password)) {
             flash('Current password is incorrect.')->error();
+            return back();
+        }
+
+        // Prevent password reuse
+        if (Hash::check($validatedData['new_password'], $user->password)) {
+            flash('New password cannot be the same as your current password.')->error();
             return back();
         }
 
@@ -132,7 +139,7 @@ class UserController
         ]);
 
         flash('Password updated successfully!')->success();
-        return redirect()->route('admin.users.profile');
+        return redirect()->route('admin.users.profile.show');
     }
 
     /**

@@ -145,13 +145,13 @@
                             </div>
                             <div class="col-md-6">
                                 <label for="new_password" class="form-label">New Password</label>
-                                <input type="password" class="form-control" id="new_password" name="new_password" required autocomplete="new-password">
+                                <input type="password" minlength="6" class="form-control" id="new_password" name="new_password" required autocomplete="new-password">
                                 <div class="invalid-feedback">Please enter a new password.</div>
                             </div>
                             <div class="col-md-6">
                                 <label for="new_password_confirmation" class="form-label">Confirm New Password</label>
-                                <input type="password" class="form-control" id="new_password_confirmation" name="new_password_confirmation" required autocomplete="new-password">
-                                <div class="invalid-feedback">Please confirm your new password.</div>
+                                <input type="password" minlength="6" class="form-control" id="new_password_confirmation" name="new_password_confirmation" required autocomplete="new-password">
+                                <div class="invalid-feedback">Passwords do not match.</div>
                             </div>
                         </div>
                         <div class="mt-4 text-end">
@@ -160,25 +160,51 @@
                     </form>
                 </div>
             </div>
+
         </div>
     </div>
 </div>
+
+
 <script>
+(() => {
+    'use strict';
+
     // Bootstrap 5 form validation
-    (() => {
-        'use strict'
-        const forms = document.querySelectorAll('.needs-validation')
-        Array.from(forms).forEach(form => {
-            form.addEventListener('submit', event => {
-                if (!form.checkValidity()) {
-                    event.preventDefault()
-                    event.stopPropagation()
-                }
-                form.classList.add('was-validated')
-            }, false)
-        })
-    })()
+    const forms = document.querySelectorAll('.needs-validation');
+    Array.from(forms).forEach(form => {
+        form.addEventListener('submit', event => {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        }, false);
+    });
+
+    // Instant password match validation
+    const newPassword = document.getElementById('new_password');
+    const confirmPassword = document.getElementById('new_password_confirmation');
+
+    function validatePasswordMatch() {
+        if (confirmPassword.value.length > 0) {
+            if (newPassword.value === confirmPassword.value) {
+                confirmPassword.classList.remove('is-invalid');
+                confirmPassword.classList.add('is-valid');
+            } else {
+                confirmPassword.classList.remove('is-valid');
+                confirmPassword.classList.add('is-invalid');
+            }
+        } else {
+            confirmPassword.classList.remove('is-valid', 'is-invalid');
+        }
+    }
+
+    newPassword.addEventListener('input', validatePasswordMatch);
+    confirmPassword.addEventListener('input', validatePasswordMatch);
+})();
 </script>
+
 @endsection
 @include('backend.partials.assets.select2');
 @section('page.scripts')

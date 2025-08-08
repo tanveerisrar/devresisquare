@@ -139,7 +139,16 @@ class TenancyController
     // Display the specified tenancy
     public function show($id)
     {
-        $tenancy = Tenancy::findOrFail($id);
+        // $tenancy = Tenancy::findOrFail($id);
+        // Find the tenancy with all needed relationships
+        $tenancy = Tenancy::with([
+            'property',
+            'offer',
+            'tenantMembers.user', // eager load tenant details
+            'tenancyType',
+            'tenancySubStatus',
+            'propertyManagers'
+        ])->findOrFail($id);
         return view('backend.tenancies.show', compact('tenancy'));
     }
 

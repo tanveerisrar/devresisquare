@@ -1095,7 +1095,22 @@ var_dump($propertyId);
 
             });
         });
+        $(document).on('click', '.popup-tab-tenancy-view', function(e) {
+            e.preventDefault();
 
+            // Get the URL from data-url attribute
+            var url = $(this).attr('data-url');
+            var header = 'Tenancy Details'; // Modal header
+
+            // Open modal (assuming smallModal is your helper for loading content)
+            smallModal(url, header);
+
+            // When modal is fully shown
+            $('#smallModal').on('shown.bs.modal', function() {
+                // If you want to enhance any fields inside view (e.g., select2 if used in view)
+                initSelect3('.select2');
+            });
+        });
         $(document).on('click', '.popup-tab-tenancy-edit', function(e) {
             e.preventDefault(); // Prevent the default action (e.g., following the link)
 

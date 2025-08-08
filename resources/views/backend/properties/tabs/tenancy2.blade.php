@@ -59,6 +59,9 @@
                                     <td>{{ $tenancy->extension_date }}</td>
                                     <td>
                                         <div class="d-flex justify-content-end">
+                                            <button data-url="{{ route('admin.tenancies.show', $tenancy->id) }}" class="popup-tab-tenancy-view btn btn-sm btn-outline-info me-1" title="View Tenancy">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
                                             <button data-url="{{ route('admin.tenancies.edit', $tenancy->id) }}" class="popup-tab-tenancy-edit btn btn-sm btn-outline-warning me-1" title="Edit Tenancy">
                                                 <i class="bi bi-pencil"></i>
                                             </button>
