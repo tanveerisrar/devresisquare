@@ -156,6 +156,22 @@ class Property extends Model
         return $this->morphToMany(Event::class, 'eventable');
     }
 
+    public function getFullAddressAttribute(): string
+    {
+        $parts = [
+            $this->line_1,
+            $this->line_2,
+            $this->city,
+            $this->county,
+            $this->postcode,
+            optional($this->countryRelation)->name // if you have a country relation
+        ];
+
+        // Filter out any null/empty values and join with a comma
+        return implode(', ', array_filter($parts));
+    }
+
+
     /**
      * Return an array of [id => “PropRef — Address…”, …]
      * suitable for a <select> dropdown.

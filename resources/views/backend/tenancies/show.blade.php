@@ -1,19 +1,23 @@
 {{-- resources/views/admin/tenancies/view.blade.php --}}
-@extends('layouts.admin')
+{{-- @extends('layouts.admin') --}}
 
-@section('content')
+{{-- @section('content') --}}
 <div id="mainForm">
-    <h3>Tenancy Details</h3>
-
+    
     <div class="mb-3">
-        <strong>Property:</strong> {{ $tenancy->property->name ?? 'N/A' }}
+        <strong>Property:</strong> {{ $tenancy->property->full_address ?? 'N/A' }}
     </div>
 
     <div class="mb-3">
         <strong>Tenants:</strong>
         <ul>
             @foreach($tenancy->tenantMembers as $member)
-                <li>{{ $member->user->name ?? 'N/A' }} ({{ $member->user->email ?? '' }})</li>
+                <li>
+                    {{ $member->user->name ?? 'N/A' }} ({{ $member->user->email ?? '' }})
+                    @if($member->is_main_person)
+                        <span class="badge bg-success ms-2">Main Person</span>
+                    @endif
+                </li>
             @endforeach
         </ul>
     </div>
@@ -112,6 +116,5 @@
         </ul>
     </div>
 
-    <a href="{{ route('admin.tenancies.index') }}" class="btn btn-secondary">Back</a>
 </div>
-@endsection
+{{-- @endsection --}}
