@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Backend;
 
-use Illuminate\Http\Request;
 use App\Models\BusinessSetting;
-use Artisan;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 
 class BusinessSettingsController
 {
@@ -87,6 +87,26 @@ class BusinessSettingsController
             }
         }
         return true;
+    }
+
+    /**
+     * Update the API key's for other methods.
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function env_key_update(Request $request)
+    {
+        foreach ($request->types as $key => $type) {
+            $this->overWriteEnvFile($type, $request[$type]);
+        }
+
+        flash("Settings updated successfully")->success();
+        return back();
+    }
+
+    public function smtp_settings(Request $request)
+    {
+        return view('backend.setup_configurations.smtp_settings');
     }
 
 }

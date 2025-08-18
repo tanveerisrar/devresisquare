@@ -812,7 +812,34 @@
                 </ul>
             </li>
         @endcanany
-        
+        <!-- Setup & Configurations -->
+        @canany(['view smtp settings'])
+            <li class="sidebar-list-item submenu_wrapper">
+                <a href="#setupConfigurationsSubmenu" data-bs-toggle="collapse"
+                    aria-expanded="{{ areActiveRoutes(['smtp_settings.index'], 'true') }}"
+                    class="dropdown-toggle {{ areActiveRoutes(['smtp_settings.index']) }}">
+                    <span class="icon_wrapper pb_25">
+                        <i class="fa-solid fa-sliders"></i> Setup & Configurations
+                    </span>
+                    <i class="fa fa-angle-down"></i>
+                </a>
+
+                <ul class="nav-second-level list-unstyled collapse {{ areActiveRoutes(['smtp_settings.index'], 'show') }}"
+                    id="setupConfigurationsSubmenu">
+
+                    @can('view smtp settings')
+                        @component('components.backend.common.sidebar-sublink')
+                            @slot('class') {{ areActiveRoutes(['smtp_settings.index']) }} @endslot
+                            @slot('link') {{ route('smtp_settings.index') }} @endslot
+                            @slot('link_name') SMTP Settings @endslot
+                        @endcomponent
+                    @endcan
+
+                    {{-- Add more settings here if needed --}}
+                </ul>
+            </li>
+        @endcanany
+
         {{-- @if(!auth()->user()->hasAnyRole(['Super Admin', 'Property Manager']))
             <li class="sidebar-list-item submenu_wrapper">
                 <a href="{{ route('user.profile') }}">
