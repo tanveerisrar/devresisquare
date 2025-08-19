@@ -4,11 +4,11 @@
 <div class="aiz-titlebar text-left mt-2 mb-3">
 	<div class="row align-items-center">
 		<div class="col-md-6">
-			<h1 class="h3">{{translate('All uploaded files')}}</h1>
+			<h1 class="h3">All uploaded files</h1>
 		</div>
 		<div class="col-md-6 text-md-right">
 			<a href="{{ route('uploaded-files.create') }}" class="btn btn-circle btn-info">
-				<span>{{translate('Upload New File')}}</span>
+				<span>Upload New File</span>
 			</a>
 		</div>
 	</div>
@@ -18,29 +18,29 @@
 	<form id="sort_uploads" action="">
         <div class="card-header row gutters-5">
             <div class="col">
-                <h5 class="mb-0 h6">{{translate('All files')}}</h5>
+                <h5 class="mb-0 h6">All files</h5>
             </div>
 			<div class="dropdown mb-2 mb-md-0">
                 <button class="btn border dropdown-toggle" type="button" data-toggle="dropdown">
-                    {{translate('Bulk Action')}}
+                    Bulk Action
                 </button>
                 <div class="dropdown-menu dropdown-menu-right">
-                    <a class="dropdown-item confirm-alert" href="javascript:void(0)"  data-target="#bulk-delete-modal"> {{translate('Delete selection')}}</a>
+                    <a class="dropdown-item confirm-alert" href="javascript:void(0)"  data-target="#bulk-delete-modal"> Delete selection</a>
                 </div>
             </div>
             <div class="col-md-3 ml-auto mr-0">
                 <select class="form-control form-control-xs aiz-selectpicker" name="sort" onchange="sort_uploads()">
-                    <option value="newest" @if($sort_by == 'newest') selected="" @endif>{{ translate('Sort by newest') }}</option>
-                    <option value="oldest" @if($sort_by == 'oldest') selected="" @endif>{{ translate('Sort by oldest') }}</option>
-                    <option value="smallest" @if($sort_by == 'smallest') selected="" @endif>{{ translate('Sort by smallest') }}</option>
-                    <option value="largest" @if($sort_by == 'largest') selected="" @endif>{{ translate('Sort by largest') }}</option>
+                    <option value="newest" @if($sort_by == 'newest') selected="" @endif>Sort by newest</option>
+                    <option value="oldest" @if($sort_by == 'oldest') selected="" @endif>Sort by oldest</option>
+                    <option value="smallest" @if($sort_by == 'smallest') selected="" @endif>Sort by smallest</option>
+                    <option value="largest" @if($sort_by == 'largest') selected="" @endif>Sort by largest</option>
                 </select>
             </div>
             <div class="col-md-3">
-                <input type="text" class="form-control form-control-xs" name="search" placeholder="{{ translate('Search your files') }}" value="{{ $search }}">
+                <input type="text" class="form-control form-control-xs" name="search" placeholder="Search your files" value="{{ $search }}">
             </div>
             <div class="col-auto">
-                <button type="submit" class="btn btn-primary">{{ translate('Search') }}</button>
+                <button type="submit" class="btn btn-primary">Search</button>
             </div>
         </div>
     
@@ -48,7 +48,7 @@
 			<div class="form-group">
 				<div class="aiz-checkbox-inline">
 					<label class="aiz-checkbox">
-						{{ translate('Select All')}}
+						Select All
 						<input type="checkbox" class="check-all">
 						<span class="aiz-square-check"></span>
 					</label>
@@ -59,7 +59,7 @@
 				@foreach($all_uploads as $key => $file)
 					@php
 						if($file->file_original_name == null){
-							$file_name = translate('Unknown');
+							$file_name = 'Unknown';
 						}else{
 							$file_name = $file->file_original_name;
 						}
@@ -78,19 +78,19 @@
 								<div class="dropdown-menu dropdown-menu-right">
 									<a href="javascript:void(0)" class="dropdown-item" onclick="detailsInfo(this)" data-id="{{ $file->id }}">
 										<i class="las la-info-circle mr-2"></i>
-										<span>{{ translate('Details Info') }}</span>
+										<span>Details Info</span>
 									</a>
 									<a href="{{ my_asset($file->file_name) }}" target="_blank" download="{{ $file_name }}.{{ $file->extension }}" class="dropdown-item">
 										<i class="la la-download mr-2"></i>
-										<span>{{ translate('Download') }}</span>
+										<span>Download</span>
 									</a>
 									<a href="javascript:void(0)" class="dropdown-item" onclick="copyUrl(this)" data-url="{{ my_asset($file->file_name) }}">
 										<i class="las la-clipboard mr-2"></i>
-										<span>{{ translate('Copy Link') }}</span>
+										<span>Copy Link</span>
 									</a>
 									<a href="javascript:void(0)" class="dropdown-item confirm-delete" data-href="{{ route('uploaded-files.destroy', $file->id ) }}" data-target="#delete-modal">
 										<i class="las la-trash mr-2"></i>
-										<span>{{ translate('Delete') }}</span>
+										<span>Delete</span>
 									</a>
 								</div>
 							</div>
@@ -136,7 +136,7 @@
 	<div class="modal-dialog modal-dialog-right">
 			<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title h6">{{ translate('File Info') }}</h5>
+				<h5 class="modal-title h6">File Info</h5>
 				<button type="button" class="close" data-dismiss="modal">
 				</button>
 			</div>
@@ -202,9 +202,9 @@
 		    $temp.val(url).select();
 		    try {
 			    document.execCommand("copy");
-			    AIZ.plugins.notify('success', '{{ translate('Link copied to clipboard') }}');
+			    AIZ.plugins.notify('success', 'Link copied to clipboard');
 			} catch (err) {
-			    AIZ.plugins.notify('danger', '{{ translate('Oops, unable to copy') }}');
+			    AIZ.plugins.notify('danger', 'Oops, unable to copy');
 			}
 		    $temp.remove();
 		}
@@ -229,7 +229,7 @@
 						location.reload();
                     }
 					else{
-						AIZ.plugins.notify('danger', '{{ translate('Something Went Wrong.') }}');
+						AIZ.plugins.notify('danger', 'Something Went Wrong.');
 					}
                 }
             });

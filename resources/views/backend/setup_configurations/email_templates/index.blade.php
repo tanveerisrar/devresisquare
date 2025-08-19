@@ -2,31 +2,29 @@
 
 @section('content')
 
-    <div class="aiz-titlebar text-left mt-2 mb-3">
+    <div class="text-left mt-2 mb-3">
         <div class="align-items-center">
             <h1 class="h3">Email Templates</h1>
         </div>
     </div>
 
     <div class="card">
-        <div class="card-header row gutters-5">
-            <div class="col text-center text-md-left">
-                <h5 class="mb-md-0 h6">{{ ucfirst($emailReceiver).' '.translate('Email Templates') }}</h5>
+        <div class="card-header row gutters-5 align-items-center">
+            <div class="col text-left">
+                <h5 class="mb-md-0 h6">{{ ucfirst($emailReceiver).' '.'Email Templates' }}</h5>
             </div>
             <div class="col-md-4">
                 <form class="" id="sort_email_templates" action="" method="GET">
                     <div class="input-group input-group-sm">
-                        <input type="text" class="form-control form-control-sm h-100"
-                            name="email_template_sort_search"
-                            @isset($email_template_sort_search) value="{{ $email_template_sort_search }}" @endisset
-                            placeholder="Type & Enter">
+                        <input type="text" class="form-control form-control-sm h-100" name="email_template_sort_search" @isset($email_template_sort_search) value="{{ $email_template_sort_search }}" @endisset placeholder="Type & Enter">
+                        <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
                     </div>
                 </form>
             </div>
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table aiz-table mb-0">
+                <table class="table mb-0">
                     <thead>
                         <tr>
                             <th>#</th>
@@ -37,10 +35,10 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($emailTemplates as $key => $emailTemplate)
+                        @forelse ($emailTemplates as $key => $emailTemplate)
                             <tr>
                                 <td>{{ ($key+1) + ($emailTemplates->currentPage() - 1)*$emailTemplates->perPage() }}</td>
-                                <td>{{ translate($emailTemplate->email_type) }}</td>
+                                <td>{{ $emailTemplate->email_type }}</td>
                                 <td>
                                     {{ $emailTemplate->subject }}</td>
                                 <td>
@@ -54,14 +52,19 @@
                                     </label>
                                 </td>
                                 <td class="text-right">
-                                    <a class="btn btn-soft-primary btn-icon btn-circle btn-sm"
-                                        href="{{ route('email-templates.edit', $emailTemplate->id) }}"
-                                        title="Edit">
-                                        <i class="las la-edit"></i>
+                                     <a class="btn btn-sm btn-outline-primary" href="{{ route('email-templates.edit', $emailTemplate->id) }}" title="Edit">
+                                        <i class="fa fa-edit"></i> Edit
                                     </a>
                                 </td>
                             </tr>
-                        @endforeach
+                            @empty
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox fs-4 d-block mb-2"></i>
+                                    No email templates found
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
                 <div class="aiz-pagination">

@@ -840,6 +840,64 @@
             </li>
         @endcanany
 
+        <!-- marketing -->
+        @canany(['manage email templates'])
+            <li class="sidebar-list-item submenu_wrapper">
+                <a href="#emailTemplatesSubmenu" data-bs-toggle="collapse"
+                    aria-expanded="{{ areActiveRoutes(['email_templates.index'], 'true') }}"
+                    class="dropdown-toggle {{ areActiveRoutes(['email_templates.index']) }}">
+                    <span class="icon_wrapper pb_25">
+                        <i class="fa-solid fa-envelope"></i> Email Templates
+                    </span>
+                    <i class="fa fa-angle-down"></i>
+                </a>
+
+                <ul class="nav-second-level list-unstyled collapse {{ areActiveRoutes(['email_templates.index'], 'show') }}"
+                    id="emailTemplatesSubmenu">
+
+                    @can('manage email templates')
+                        @component('components.backend.common.sidebar-sublink')
+                            @slot('class') {{ request()->is('email-templates*') ? 'active' : '' }} @endslot
+                            @slot('link') {{ route('email-templates.index', 'all') }} @endslot
+                            @slot('link_name') Common Templates @endslot
+                        @endcomponent
+
+                        @component('components.backend.common.sidebar-sublink')
+                            @slot('class') {{ request()->is('email-templates*') ? 'active' : '' }} @endslot
+                            @slot('link') {{ route('email-templates.index', 'admin') }} @endslot
+                            @slot('link_name') Admin Templates @endslot
+                        @endcomponent                    
+
+                        @component('components.backend.common.sidebar-sublink')
+                            @slot('class') {{ request()->is('email-templates*') ? 'active' : '' }} @endslot
+                            @slot('link') {{ route('email-templates.index', 'agent') }} @endslot
+                            @slot('link_name') Agent Templates @endslot
+                        @endcomponent
+
+                        @component('components.backend.common.sidebar-sublink')
+                            @slot('class') {{ request()->is('email-templates*') ? 'active' : '' }} @endslot
+                            @slot('link') {{ route('email-templates.index', 'contractor') }} @endslot
+                            @slot('link_name') Contractor Templates @endslot
+                        @endcomponent
+
+                        @component('components.backend.common.sidebar-sublink')
+                            @slot('class') {{ request()->is('email-templates*') ? 'active' : '' }} @endslot
+                            @slot('link') {{ route('email-templates.index', 'owner') }} @endslot
+                            @slot('link_name') Owner Templates @endslot
+                        @endcomponent
+
+                        @component('components.backend.common.sidebar-sublink')
+                            @slot('class') {{ request()->is('email-templates*') ? 'active' : '' }} @endslot
+                            @slot('link') {{ route('email-templates.index', 'tenant') }} @endslot
+                            @slot('link_name') Tenant Templates @endslot
+                        @endcomponent
+                    @endcan
+
+                </ul>
+            </li>
+        @endcanany
+
+
         {{-- @if(!auth()->user()->hasAnyRole(['Super Admin', 'Property Manager']))
             <li class="sidebar-list-item submenu_wrapper">
                 <a href="{{ route('user.profile') }}">

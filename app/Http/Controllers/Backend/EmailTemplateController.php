@@ -28,57 +28,36 @@ class EmailTemplateController extends Controller
         return view('backend.setup_configurations.email_templates.index', compact('emailTemplates', 'email_template_sort_search', 'emailReceiver'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
-        //
+        return view('backend.setup_configurations.email_templates.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
-        //
+        $emailTemplate = new EmailTemplate();
+        $emailTemplate->subject = $request->subject;
+        $emailTemplate->default_text = $request->default_text;
+        $emailTemplate->receiver = $request->receiver;
+        $emailTemplate->save();
+
+        flash('Email Template has been created successfully')->success();
+        return redirect()->route('backend.email_templates.index');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function show($id)
     {
-        //
+        $emailTemplate = EmailTemplate::findOrFail($id);
+        return view('backend.setup_configurations.email_templates.show', compact('emailTemplate'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function edit($id)
     {
         $emailTemplate  = EmailTemplate::findOrFail($id);
         return view('backend.setup_configurations.email_templates.edit', compact('emailTemplate'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+    
     public function update(Request $request, $id)
     {
         $emailTemplate = EmailTemplate::findOrFail($id);
@@ -97,15 +76,13 @@ class EmailTemplateController extends Controller
         return 1;
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
-        //
+        $emailTemplate = EmailTemplate::findOrFail($id);
+        $emailTemplate->delete();
+
+        flash('Email Template has been deleted successfully')->success();
+        return back();
     }
 
     public function testEmail(Request $request){
@@ -115,7 +92,7 @@ class EmailTemplateController extends Controller
         $array['content'] = "This is a test email.";
 
         try {
-            Mail::to($request->email)->queue(new EmailManager($array));
+            Mail::to($request->email)->send(new EmailManager($array));
         } catch (\Exception $e) {
             // dd($e);
             Log::error('SMTP Test Email Failed: ' . $e->getMessage(), [

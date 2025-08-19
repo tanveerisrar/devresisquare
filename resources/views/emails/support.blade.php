@@ -1,9 +1,9 @@
-<h1>{{ translate('Ticket') }}</h1>
+<h1>Ticket</h1>
 <p>{{ $content }}</p>
-<p><b>{{ translate('Sender') }}: </b>{{ $sender }}</p>
+<p><b>Sender: </b>{{ $sender }}</p>
 <p>
-	<b>{{ translate('Details') }}:</b>
+	<b>Details:</b>
 	<br>
 	@php echo $details; @endphp
 </p>
-<a class="btn btn-primary btn-md" href="{{ $link }}">{{ translate('See ticket') }}</a>
+<a class="btn btn-primary btn-md" href="{{ $link }}">See ticket</a>

@@ -3,7 +3,7 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title h6">{{translate('Generate Product Description')}}</h5>
+                <h5 class="modal-title h6">Generate Product Description</h5>
                 <button type="button" class="close" data-dismiss="modal"></button>
             </div>
             <div class="modal-body" style="min-height: 300px;">

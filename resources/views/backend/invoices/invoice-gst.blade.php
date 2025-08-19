@@ -1,7 +1,7 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{  translate('INVOICE') }}</title>
+    <title>INVOICE</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta charset="UTF-8">
 	<style media="all">
@@ -91,10 +91,10 @@
 					
 					<td class="text-right" style="line-height:22px;">
 					  <p style="font-size:18px; color:#c38127; padding-bottom:20px; line-height:40px;"><b>Atfleurs</b></p>
-					  <p style="padding-top:30px;"><b>{{  translate('GSTIN') }}:</b> {{ get_setting('user_gst') }}</p>
-					  <p><b>{{  translate('CIN No') }}:</b> {{ get_setting('user_cin') }}</p>
-					  <p><b>{{  translate('PAN') }}:</b> {{ get_setting('user_pan') }}</p>
-					  <p><b>{{  translate('Email') }}:</b> {{ get_setting('user_email') }}</p>
+					  <p style="padding-top:30px;"><b>GSTIN:</b> {{ get_setting('user_gst') }}</p>
+					  <p><b>CIN No:</b> {{ get_setting('user_cin') }}</p>
+					  <p><b>PAN:</b> {{ get_setting('user_pan') }}</p>
+					  <p><b>Email:</b> {{ get_setting('user_email') }}</p>
 					</td>
 				</tr>
 			</table>
@@ -177,18 +177,18 @@
 				    
 				    
 				    <td width="40%" class="strong small gry-color" style="line-height:20px;">
-				     <p> <b>{{ translate('Billing Details') }}:</b>  </p>
+				     <p> <b>Billing Details:</b>  </p>
 				     <p>  </p>
 				     <p> {{ $shipping_address->address }}, {{ $shipping_address->city }},  @if(isset(json_decode($order->shipping_address)->state)) {{ json_decode($order->shipping_address)->state }} - @endif {{ $shipping_address->postal_code }}, {{ $shipping_address->country }} </p>
-				     <p> {{ translate('Email') }}: {{ $shipping_address->email }} </p>
-				     <p> {{ translate('Phone') }}: {{ $shipping_address->phone }}  </p>
-				     <p><span class="gry-color small">{{  translate('State Code') }}:</span> <span class=" strong">27</span></p>
+				     <p> Email: {{ $shipping_address->email }} </p>
+				     <p> Phone: {{ $shipping_address->phone }}  </p>
+				     <p><span class="gry-color small">State Code:</span> <span class=" strong">27</span></p>
 				    </td>
 				    
 				    <td width="30%" class="text-right" style="line-height:20px;">
-					  <p><span class="gry-color small"><b>{{  translate('Invoice No') }}:</b></span> <span class="strong">{{ $order->id }}</span></p>
-					  <p><span class="gry-color small"><b>{{  translate('Order ID') }}:</b></span> <span class="strong">{{ $order->code }}</span></p>
-					  <p><span class="gry-color small"><b>{{  translate('Order Date') }}:</b></span> <span class=" strong">{{ date('d-m-Y', $order->date) }}</span></p>
+					  <p><span class="gry-color small"><b>Invoice No:</b></span> <span class="strong">{{ $order->id }}</span></p>
+					  <p><span class="gry-color small"><b>Order ID:</b></span> <span class="strong">{{ $order->code }}</span></p>
+					  <p><span class="gry-color small"><b>Order Date:</b></span> <span class=" strong">{{ date('d-m-Y', $order->date) }}</span></p>
 					 
 					</td>
 					
@@ -214,20 +214,20 @@
 			<table class="hed padding text-left small border-bottom">
 				<thead>
 	                <tr style="background: #f6f6f6;">
-	                    <th width="20%" class="text-left" style="padding-top:12px; padding-bottom:12px;"><b>{{ translate('Product Name') }}</b></th>
-	                    <th width="10%" class="text-left" style="padding-top:12px; padding-bottom:12px;"><b>{{ translate('HSN / SAC') }}</b></th>
+	                    <th width="20%" class="text-left" style="padding-top:12px; padding-bottom:12px;"><b>Product Name</b></th>
+	                    <th width="10%" class="text-left" style="padding-top:12px; padding-bottom:12px;"><b>HSN / SAC</b></th>
 	                    <th width="8%" class="text-left" style="padding-top:12px; padding-bottom:12px;"><b>GST(%)</b></th>
-						<!--<th width="15%" class="text-left" style="padding-top:12px; padding-bottom:12px;"><b>{{ translate('Delivery Type') }}</b></th>-->
-	                    <th width="7%" class="text-left" style="padding-top:12px; padding-bottom:12px;"><b>{{ translate('Qty') }}</b></th>
-	                    <th width="10%" class="text-left" style="padding-top:12px; padding-bottom:12px;"><b>{{ translate('Unit Price') }}</b></th>
+						<!--<th width="15%" class="text-left" style="padding-top:12px; padding-bottom:12px;"><b>Delivery Type</b></th>-->
+	                    <th width="7%" class="text-left" style="padding-top:12px; padding-bottom:12px;"><b>Qty</b></th>
+	                    <th width="10%" class="text-left" style="padding-top:12px; padding-bottom:12px;"><b>Unit Price</b></th>
 	                    @if( strtolower(json_decode($order->shipping_address)->state) == strtolower("Maharashtra") )
-	                    <th width="9%" class="text-left" style="padding-top:12px; padding-bottom:12px;"><b>{{ translate('CGST(₹)') }}</b></th>
-	                    <th width="8%" class="text-left" style="padding-top:12px; padding-bottom:12px;"><b>{{ translate('SGST(₹)') }}</b></th>
+	                    <th width="9%" class="text-left" style="padding-top:12px; padding-bottom:12px;"><b>CGST(₹)</b></th>
+	                    <th width="8%" class="text-left" style="padding-top:12px; padding-bottom:12px;"><b>SGST(₹)</b></th>
 	                    @else
 	                    <th width="8%" class="text-left" style="padding-top:12px; padding-bottom:12px;"><b>IGST(₹)</b></th>
 	                    @endif
 	                    <th width="8%" class="text-left" style="padding-top:12px; padding-bottom:12px;"><b>GST(₹)</b></th>
-	                    <th width="11%" class="text-right" style="padding-top:12px; padding-bottom:12px;"><b>{{ translate('Total') }}</b></th>
+	                    <th width="11%" class="text-right" style="padding-top:12px; padding-bottom:12px;"><b>Total</b></th>
 	                   
 	                </tr>
 				</thead>
@@ -273,27 +273,27 @@
                                         @php
                                             $product_stock = json_decode($orderDetail->product->stocks->first(), true);
                                         @endphp
-                                        {{translate('SKU')}}: {{ $product_stock['sku'] }}
+                                        SKU: {{ $product_stock['sku'] }}
                                     </small>
                                 </td>
                                 <td>{{$HSN}}</td>
                                 <td>{{$gstPercent}}%</td>
 								<!--<td>
 									@if ($order->shipping_type != null && $order->shipping_type == 'home_delivery')
-										{{ translate('Home Delivery') }}
+										Home Delivery
 									@elseif ($order->shipping_type == 'pickup_point')
 										@if ($order->pickup_point != null)
-											{{ $order->pickup_point->getTranslation('name') }} ({{ translate('Pickip Point') }})
+											{{ $order->pickup_point->getTranslation('name') }} (Pickip Point)
 										@else
-                                            {{ translate('Pickup Point') }}
+                                            Pickup Point
 										@endif
 									@elseif ($order->shipping_type == 'carrier')
 										@if ($order->carrier != null)
-											{{ $order->carrier->name }} ({{ translate('Carrier') }})
+											{{ $order->carrier->name }} (Carrier)
 											<br>
-											{{ translate('Transit Time').' - '.$order->carrier->transit_time }}
+											{{ "Transit Time - ".$order->carrier->transit_time }}
 										@else
-											{{ translate('Carrier') }}
+											Carrier
 										@endif
 									@endif
 								</td>-->
@@ -372,15 +372,15 @@
 			                <table class="hed text-left small strong">
 						        <tbody>
 							        <tr style="background: #f6f6f6;">
-							            <th class="text-left" style="padding-top:12px; padding-bottom:12px; padding-left:10px"><b>{{ translate('HSN / SAC') }}</b></th>
+							            <th class="text-left" style="padding-top:12px; padding-bottom:12px; padding-left:10px"><b>HSN / SAC</b></th>
 							            <th class="text-left" style="padding-top:12px; padding-bottom:12px; padding-left:10px"><b>GST(%)</b></th>
 							             @if( strtolower(json_decode($order->shipping_address)->state) == strtolower("Maharashtra") ) 
-							            <th class="text-left" style="padding-top:12px; padding-bottom:12px; padding-left:10px"><b>{{ translate('CGST(₹)') }}</b></th>
-							            <th class="text-left" style="padding-top:12px; padding-bottom:12px; padding-left:10px"><b>{{ translate('SGST(₹)') }}</b></th>
+							            <th class="text-left" style="padding-top:12px; padding-bottom:12px; padding-left:10px"><b>CGST(₹)</b></th>
+							            <th class="text-left" style="padding-top:12px; padding-bottom:12px; padding-left:10px"><b>SGST(₹)</b></th>
 							             @else 
-							            <th class="text-left" style="padding-top:12px; padding-bottom:12px; padding-left:10px"><b>{{ translate('IGST(₹)') }}</b></th>
+							            <th class="text-left" style="padding-top:12px; padding-bottom:12px; padding-left:10px"><b>IGST(₹)</b></th>
 							             @endif 
-							            <th class="text-left" style="padding-top:12px; padding-bottom:12px; padding-left:10px"><b>{{ translate('GST(₹)') }}</b></th>
+							            <th class="text-left" style="padding-top:12px; padding-bottom:12px; padding-left:10px"><b>GST(₹)</b></th>
 							            <th class="text-left" style="padding-top:12px; padding-bottom:12px; padding-left:10px"><b>Amount</b></th>
 							        </tr>
 							        
@@ -430,21 +430,21 @@
 					        <table class="text-right small" style="line-height:23px; font-size:14px;">
 						        <tbody>
 							        <tr>
-							            <th class="text-right" width="50%"><b>{{ translate('Sub Total') }}</b></th>
+							            <th class="text-right" width="50%"><b>Sub Total</b></th>
 							            <td width="50%"><b>{{ single_price($order->orderDetails->sum('price')) }}</b></td>
 							        </tr>
 							        <tr>
-							            <th class="text-right" width="50%"><b>{{ translate('Shipping Cost') }}</b></th>
+							            <th class="text-right" width="50%"><b>Shipping Cost</b></th>
 							            <td width="50%"><b>{{ single_price($order->orderDetails->sum('shipping_cost')) }}</b></td>
 							        </tr>
 							       
 							        <tr>
-							            <th class="text-right" width="50%"><b>{{ translate('Coupon Disc.') }}</b></th>
+							            <th class="text-right" width="50%"><b>Coupon Disc.</b></th>
 							            <td width="50%"><b>{{ single_price($order->coupon_discount) }}</b></td>
 							        </tr>
 				                   
 							        <tr>
-							            <th class="text-right strong" width="50%"><b>{{ translate('Grand Total') }}</b></th>
+							            <th class="text-right strong" width="50%"><b>Grand Total</b></th>
 							            <td width="50%"><b>{{ single_price($order->grand_total) }}</b></td>
 							        </tr>
 						        </tbody>
