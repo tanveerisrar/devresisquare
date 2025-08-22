@@ -1947,7 +1947,7 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
     // AIZ.plugins.metismenu();
     AIZ.plugins.bootstrapSelect();
     AIZ.plugins.tagify();
-    AIZ.plugins.textEditor();
+    // AIZ.plugins.textEditor();
     // AIZ.plugins.tooltip();
     AIZ.plugins.countDown();
     AIZ.plugins.dateRange();

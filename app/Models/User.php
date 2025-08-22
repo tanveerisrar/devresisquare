@@ -5,6 +5,7 @@ use App\Traits\TracksUser;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
@@ -93,6 +94,24 @@ class User extends Authenticatable
     public function isSuperAdmin()
     {
         return $this->hasRole('Super Admin');
+    }
+
+    /**
+     * Create a password reset link for this user.
+     */
+    public function createResetLink(): string
+    {
+        $token = Password::broker()->createToken($this);
+
+        // Generate route with token in the path
+        $relative = route('password.reset.form', [
+            'token' => $token,
+        ], false);
+
+        // Append email as query param manually
+        // $relative .= '?email=' . urlencode($this->email);
+
+        return url($relative);
     }
 
     // country relationship

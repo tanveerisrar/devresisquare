@@ -5,15 +5,16 @@ use App\Models\User;
 use App\Models\Upload;
 use App\Models\Property;
 use Illuminate\Http\Request;
+use App\Models\EmailTemplate;
 use App\Models\BusinessSetting;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 
 if (!function_exists('getPoundSymbol')) {
     function getPoundSymbol()
@@ -873,6 +874,44 @@ if (!function_exists('safeAssignRoles')) {
             }
         });
     }
+
+        // email template data
+    if (!function_exists('get_email_template_data')) {
+        function get_email_template_data($identifier, $colmn_name = null)
+        {
+            $value = EmailTemplate::where('identifier', $identifier)->first()->$colmn_name;
+            return $value;
+        }
+    }
+    
+    if (!function_exists('render_template')) {
+        /**
+         * Render template HTML/text by replacing [[key]] placeholders with values.
+         *
+         * @param string $templateHtml
+         * @param array $placeholders (associative: 'key' => 'value')
+         * @param array $rawKeys Optional list of keys that should NOT be escaped (e.g. links)
+         * @return string
+         */
+        function render_template(string $templateHtml, array $placeholders = [], array $rawKeys = []): string
+        {
+            $search = $replace = [];
+
+            foreach ($placeholders as $key => $value) {
+                $search[] = '[[' . $key . ']]';
+
+                if (in_array($key, $rawKeys, true)) {
+                    // raw insertion (not escaped)
+                    $replace[] = $value;
+                } else {
+                    $replace[] = e($value);
+                }
+            }
+
+            return str_replace($search, $replace, $templateHtml);
+        }
+    }
+
 }
 
 /*

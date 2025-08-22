@@ -64,6 +64,11 @@
     <script src="asset/js/toastr.min.js"></script>
     @yield('page.scripts') 
     <script>
+        @foreach (session('flash_notification', collect())->toArray() as $message)
+            AIZ.plugins.notify('{{ $message['level'] }}', '{{ $message['message'] }}');
+        @endforeach
+    </script>
+    {{-- <script>
 $(document).ready(function() {
     @if(session('error'))
         toastr.error("{{ session('error') }}", "Login Failed", {
@@ -90,7 +95,7 @@ $(document).ready(function() {
 };
 });
 
-</script>
+</script> --}}
 
 
 </body>

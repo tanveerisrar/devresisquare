@@ -1,55 +1,39 @@
-<table width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="#e8ebef">
-    @php
-    $logo = get_setting('header_logo');
-    @endphp
+<table width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="#f4f6f9" style="font-family: Arial, sans-serif;">
+    @php $logo = get_setting('header_logo'); @endphp
     <tr>
-        <td align="center" valign="top" style="padding:50px 10px;">
+        <td align="center" style="padding:40px 10px;">
             <!-- Container -->
-            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <table width="650" border="0" cellspacing="0" cellpadding="0" bgcolor="#ffffff" style="max-width:650px; border-radius:8px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+                <!-- Header -->
                 <tr>
-                    <td align="center">
-                        <table width="650" border="0" cellspacing="0" cellpadding="0">
+                    <td bgcolor="#ffffff" style="padding:20px 30px; background-color:#f8fafa; border-bottom:1px solid #eaeaea;">
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
                             <tr>
-                                <td bgcolor="#ffffff" style="width:650px; min-width:650px; line-height:0pt; padding:0; margin:0; font-weight:normal;">
-                                    <!-- Header -->
-                                    <table width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="#ffffff" style="background-color: #f8fafa" >
-                                        <tr>
-                                            <td style="padding: 40px 30px 40px 30px;">
-                                                <table width="100%" border="0" cellspacing="0" cellpadding="0">
-                                                    <tr>
-                                                        <th style="line-height:0pt; padding:0; margin:0; font-weight:normal;">
-                                                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
-                                                                <tr>
-                                                                    <td style="line-height:0pt; text-align:left;"><img src="{{ uploaded_asset($logo) }}" width="" height="26" border="0" alt="" /></td>
-                                                                </tr>
-                                                            </table>
-                                                        </th>
-                                                        <th width="170" style="line-height:0pt; padding:0; margin:0; font-weight:normal;">
-                                                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
-                                                                <tr>
-                                                                    <td style="color:#000000; font-family:'Public Sans', sans-serif; font-size:14px; line-height:16px; text-align:right;">
-                                                                        <a href="{{ env('APP_URL') }}" target="_blank" style="color:#000001; text-decoration:none; font-weight: 500">
-                                                                            <span  style="color:#000001; text-decoration:none;">{{ env('APP_NAME') }}</span>
-                                                                        </a>
-                                                                    </td>
-                                                                </tr>
-                                                            </table>
-                                                        </th>
-                                                    </tr>
-                                                </table>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                    <!-- END Header -->
-
-                                    <!-- Content -->
-                                    <div style="padding: 10px 30px 70px 30px;">
-                                        <p>{!! $content !!}</p>
-                                    </div>
-                                    
+                                <td align="left">
+                                    {{-- <img src="https://laravel.resisquare.co.uk/storage/uploads/all/SHB1anFRGQ093q3fewMx6K5r8LcgJcLyRFsh2ate.png" alt="{{ env('APP_NAME') }}" height="32" style="display:block;"> --}}
+                                    <img src="{{ uploaded_asset($logo) }}" alt="{{ env('APP_NAME') }}" height="32" style="display:block;">
+                                </td>
+                                <td align="right" style="font-size:14px; color:#555;">
+                                    <a href="{{ config('app.url') }}" target="_blank" style="color:#2a7ae2; text-decoration:none; font-weight:600;">
+                                        {{ config('app.name') }}
+                                    </a>
                                 </td>
                             </tr>
                         </table>
+                    </td>
+                </tr>
+
+                <!-- Content -->
+                <tr>
+                    <td style="padding:40px 30px; font-size:15px; line-height:1.6; color:#333;">
+                        {!! $content !!}
+                    </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr>
+                    <td bgcolor="#f8fafa" style="padding:20px 30px; font-size:12px; color:#777; text-align:center; border-top:1px solid #eaeaea;">
+                        © {{ date('Y') }} {{ config('app.name') }}. All rights reserved.
                     </td>
                 </tr>
             </table>

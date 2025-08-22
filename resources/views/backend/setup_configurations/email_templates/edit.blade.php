@@ -40,7 +40,7 @@
                                     id="default_text" 
                                     class="aiz-text-editor" 
                                     data-min-height="350px" 
-                                    data-buttons='[["font", ["bold", "underline", "italic"]],["para", ["ul", "ol"]],["insert", ["link"]],["view", ["undo","redo"]]]'
+                                    data-buttons='[["font", ["bold", "underline", "italic"]],["para", ["ul", "ol"]],["insert", ["link"]],["view", ["undo","redo"]],["codeview"] ]'
                                     placeholder="Default Text" required>
                                     {{ $emailTemplate->default_text }}
                                 </textarea>
@@ -64,5 +64,9 @@
 <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-bs5.min.css" rel="stylesheet">
 @endpush
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-bs5.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        AIZ.plugins.textEditor();
+    });
+</script>
 @endpush

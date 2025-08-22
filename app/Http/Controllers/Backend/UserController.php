@@ -2,21 +2,26 @@
 
 namespace App\Http\Controllers\Backend;
 
-use App\Models\Country;
 use App\Models\User;
+use App\Models\Country;
 use App\Models\NoteType;
 use App\Models\Property;
 // use App\Models\BankDetails;
 use App\Models\Nationality;
 use App\Models\DocumentType;
 // use App\Models\UserCategory;
+use App\Models\UserCategory;
 use Illuminate\Http\Request;
+use App\Models\EmailTemplate;
+use App\Mail\MailManager;
+// use App\Http\Controllers\Backend\NotesController;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Log;
-// use App\Http\Controllers\Backend\NotesController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\Backend\NotesController;
 use App\Http\Controllers\Backend\BankDetailController;
 
 class UserController
@@ -331,6 +336,10 @@ class UserController
     {
         // Validate data based on the current step
         if ($request->has('step')) {
+
+            // ✅ track whether we just created a new user
+            $isNewUser = false;
+
             // Validate the request data
             $validatedData = $request->validate($this->getValidationRulesQuick($request->step));
 
@@ -362,6 +371,9 @@ class UserController
                     }
 
                     $user->update($validatedData);
+                                                        
+                    // ✅ Mark as new only if email is present
+                    $isNewUser = !empty($user->email);
                 }
             } else {
                 // Create new user only empty user id
@@ -384,9 +396,14 @@ class UserController
             // Get total number of steps
             $totalSteps = $this->getTotalQuickSteps();
 
+            // ✅ Only if it's the final step AND the user was just created
+            if ($request->step >= $totalSteps && $isNewUser) {
+                Log::info('Sending password reset email to user ID ' . $user->id);
+                $this->sendPasswordResetMail($user);
+            }
+            
             // Check if the current step is the last one
             if ($request->step >= $totalSteps) {
-
                 // Final submission handling
                 flash("User Added/Updated successfully!")->success();
                 return view('backend.users.user_form.thankyou');
@@ -994,4 +1011,44 @@ class UserController
 
         return response()->json(['results' => $results]);
     }
+
+
+    private function sendPasswordResetMail(User $user): void
+    {
+        try {
+            $resetLink = $user->createResetLink();
+            $template = EmailTemplate::getByIdentifier('password_reset');
+
+            $placeholders = [
+                'user_name'   => $user->name ?? $user->email,
+                'user_email'  => $user->email,
+                'reset_link'  => $resetLink,
+                'crm_name'    => config('app.name'),
+                'admin_email' => config('mail.from.address'),
+            ];
+
+            if ($template) {
+                $renderedHtml = $template->replace($placeholders, ['reset_link']);
+                $subject = render_template($template->subject, $placeholders);
+            } else {
+                $subject = 'Set your password for ' . config('app.name');
+                $renderedHtml = "<p>Hi {$placeholders['user_name']},</p>"
+                    . "<p>Welcome to " . e(config('app.name')) . ". Please set your password:</p>"
+                    . "<p><a href='{$resetLink}'>Set your password</a></p>";
+            }
+
+            Mail::to($user->email)->send(new MailManager([
+                'subject' => $subject,
+                'content' => $renderedHtml,
+            ]));
+
+            Log::info("Password reset email sent to {$user->email}");
+        } catch (\Exception $e) {
+            Log::error("Failed to send password reset email: {$e->getMessage()}", [
+                'email'   => $user->email,
+                'user_id' => $user->id,
+            ]);
+        }
+    }
+
 }
