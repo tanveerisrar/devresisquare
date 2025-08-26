@@ -912,6 +912,23 @@ if (!function_exists('safeAssignRoles')) {
         }
     }
 
+    if (!function_exists('booleanBadge')) {
+        /**
+         * Returns a badge HTML for boolean values.
+         *
+         * @param bool $value
+         * @param string $trueText
+         * @param string $falseText
+         * @return string
+         */
+        function booleanBadge($value, $trueText = 'Yes', $falseText = 'No')
+        {
+            return $value
+                ? '<span class="badge bg-success">' . e($trueText) . '</span>'
+                : '<span class="badge bg-secondary">' . e($falseText) . '</span>';
+        }
+    }
+
 }
 
 /*

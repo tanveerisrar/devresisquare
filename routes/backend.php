@@ -2,6 +2,7 @@
 // routes/backend.php
 
 use App\Http\Controllers\Backend\AuthenticateController;
+use App\Http\Controllers\Backend\AccountHeaderController;
 use App\Http\Controllers\Backend\BankDetailController;
 use App\Http\Controllers\Backend\BranchController;
 use App\Http\Controllers\Backend\BusinessSettingsController;
@@ -434,6 +435,20 @@ Route::middleware('auth')->group(function () {
             ->name('api.event_sub_types.byType');
     });
     
+    Route::prefix('backend')->group(function () {
+        Route::resource('account-headers', AccountHeaderController::class)
+            ->names([
+                'index'   => 'backend.account_headers.index',
+                'create'  => 'backend.account_headers.create',
+                'store'   => 'backend.account_headers.store',
+                'show'    => 'backend.account_headers.show',
+                'edit'    => 'backend.account_headers.edit',
+                'update'  => 'backend.account_headers.update',
+                'destroy' => 'backend.account_headers.destroy',
+            ]);
+    });
+
+
     // website setting
     Route::group(['prefix' => 'website', 'as' => 'website.'], function () {
         Route::controller(WebsiteController::class)->group(function () {

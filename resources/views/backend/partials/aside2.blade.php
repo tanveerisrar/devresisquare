@@ -840,6 +840,34 @@
             </li>
         @endcanany
 
+        <!-- Account Headers -->
+        @canany(['view account headers'])
+            <li class="sidebar-list-item submenu_wrapper">
+                <a href="#accountHeadersSubmenu" data-bs-toggle="collapse"
+                    aria-expanded="{{ areActiveRoutes(['backend.account_headers.index'], 'true') }}"
+                    class="dropdown-toggle {{ areActiveRoutes(['backend.account_headers.index']) }}">
+                    <span class="icon_wrapper pb_25">
+                        <i class="fa-solid fa-file-invoice-dollar"></i> Account Headers
+                    </span>
+                    <i class="fa fa-angle-down"></i>
+                </a>
+
+                <ul class="nav-second-level list-unstyled collapse {{ areActiveRoutes(['backend.account_headers.index'], 'show') }}"
+                    id="accountHeadersSubmenu">
+
+                    @can('view account headers')
+                        @component('components.backend.common.sidebar-sublink')
+                            @slot('class') {{ areActiveRoutes(['backend.account_headers.index']) }} @endslot
+                            @slot('link') {{ route('backend.account_headers.index') }} @endslot
+                            @slot('link_name') Account Headers @endslot
+                        @endcomponent
+                    @endcan
+
+                </ul>
+            </li>
+        @endcanany
+
+
         <!-- marketing -->
         @canany(['manage email templates'])
             <li class="sidebar-list-item submenu_wrapper">
