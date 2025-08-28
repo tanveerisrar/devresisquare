@@ -200,7 +200,7 @@ class InvoiceController
         $users = User::all(); // Fetch clients
         $taxRates = TaxRates::all(); // Fetch all tax rates from the database
 
-        return view('backend.invoices.edit', compact('invoice', 'users', 'taxRates'));
+        return view('backend.invoices.edit-page', compact('invoice', 'users', 'taxRates'));
     }
 
     public function update(Request $request, $invoiceId)

@@ -206,15 +206,15 @@
             });
 
             function loadInvoiceToDetails(invoiceTo, propertyId) {
-                let categoryId = null;
+                let roleId = null;
                 $("#userDetails").hide();
                 let existingInvoiceToId = $("#existingInvoiceToId").val(); // Get preselected invoice_to_id
                 // console.log('Existing ID: ' + existingInvoiceToId);
 
                 if (invoiceTo === "Landlord") {
-                    categoryId = 4; // Landlord
-                    var endpoint = "{{ route('admin.getUsersByProperty', ['propertyId' => 'PROPERTYID', 'categoryId' => 'CATEGORYID']) }}";
-                    endpoint = endpoint.replace('PROPERTYID', propertyId).replace('CATEGORYID', categoryId);
+                    roleId = 5; // Landlord
+                    var endpoint = "{{ route('admin.getUsersByProperty', ['propertyId' => 'PROPERTYID', 'roleId' => 'ROLEID']) }}";
+                    endpoint = endpoint.replace('PROPERTYID', propertyId).replace('ROLEID', roleId);
                 } else if (invoiceTo === "Tenant") {
                     var endpoint = "{{ route('admin.getTenantsByProperty', ['propertyId' => 'PROPERTYID']) }}";
                     endpoint = endpoint.replace('PROPERTYID', propertyId);
