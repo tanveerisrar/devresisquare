@@ -11,10 +11,12 @@ class Transaction extends Model
     use HasFactory;
 
     protected $fillable = [
+        'date',
+        'payment_method_id',
+        'bank_account_id',
         'transaction_number',
         'transaction_type',
         'invoice_id',
-        // 'category_id',
         'transaction_category_id',
         'property_id',
         'payer_id',
@@ -26,8 +28,10 @@ class Transaction extends Model
         'amount',
         'tax_amount',
         'total_amount',
-        'payment_method',
         'transaction_reference',
+        'credit',
+        'debit',
+        'balance',
         'status',
         'notes',
     ];
@@ -55,5 +59,15 @@ class Transaction extends Model
     public function category()
     {
         return $this->belongsTo(TransactionCategory::class, 'transaction_category_id');
+    }
+
+    public function paymentMethod()
+    {
+        return $this->belongsTo(PaymentMethod::class, 'payment_method_id');
+    }
+
+    public function bankAccount()
+    {
+        return $this->belongsTo(BankAccount::class, 'bank_account_id');
     }
 }

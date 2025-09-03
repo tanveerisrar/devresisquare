@@ -679,18 +679,6 @@
                             @slot('link_name') Add
                             @endslot
                         @endcomponent
-                        {{-- <li class="sidebar-sub-sub-list-item">
-                            <a class="{{ areActiveRoutes(['admin.tenancy_sub_statuses.index']) }}"
-                                href="{{ route('admin.tenancy_sub_statuses.index') }}">
-                                View All
-                            </a>
-                        </li>
-                        <li class="sidebar-sub-sub-list-item">
-                            <a class="{{ areActiveRoutes(['admin.tenancy_sub_statuses.create']) }}"
-                                href="{{ route('admin.tenancy_sub_statuses.create') }}">
-                                Add
-                            </a>
-                        </li> --}}
                     </ul>
                 </li>
                 @endcan
@@ -774,6 +762,35 @@
                     </ul>
                 </li>
                 @endcan
+
+                <!-- Transaction Categories -->
+                @can('manage transaction categories')
+                    <li class="sidebar-sub-list-item submenu_wrapper">
+                        <a href="#transactionCategoriesSubmenu" data-bs-toggle="collapse"
+                            aria-expanded="{{ areActiveRoutes(['backend.transaction_categories.index', 'backend.transaction_categories.create'], 'true') }}"
+                            class="dropdown-toggle {{ areActiveRoutes(['backend.transaction_categories.index', 'backend.transaction_categories.create']) }}">
+                            
+                            <span class="icon_wrapper">Transaction Categories</span>
+                            <i class="fa fa-angle-down"></i>
+                        </a>
+                        <ul class="nav-third-level collapse list-unstyled {{ areActiveRoutes(['backend.transaction_categories.index', 'backend.transaction_categories.create'], 'show') }}"
+                            id="transactionCategoriesSubmenu">
+
+                            @component('components.backend.common.sidebar-sublink')
+                                @slot('class') {{ areActiveRoutes(['backend.transaction_categories.index']) }} @endslot
+                                @slot('link') {{ route('backend.transaction_categories.index') }} @endslot
+                                @slot('link_name') View All @endslot
+                            @endcomponent
+
+                            @component('components.backend.common.sidebar-sublink')
+                                @slot('class') {{ areActiveRoutes(['backend.transaction_categories.create']) }} @endslot
+                                @slot('link') {{ route('backend.transaction_categories.create') }} @endslot
+                                @slot('link_name') Add @endslot
+                            @endcomponent
+                        </ul>
+                    </li>
+                @endcan
+                
             </ul>
         </li>
         @endcanany

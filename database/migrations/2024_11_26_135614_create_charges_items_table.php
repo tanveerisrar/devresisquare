@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('estate_charges_items', function (Blueprint $table) {
+        Schema::create('charges_items', function (Blueprint $table) {
             $table->id();
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
-            $table->bigInteger('estate_charge_id')->unsigned();   // Use unsigned bigInteger to match the id of estate_charges
+            $table->bigInteger('charge_id')->unsigned();   // Use unsigned bigInteger to match the id of charges
             $table->decimal('amount', 65, 2);
             $table->decimal('tax', 10, 2);
             $table->decimal('tax_amount', 65, 2);
@@ -23,10 +23,10 @@ return new class extends Migration
             $table->string('status', 155);
             $table->timestamps();
 
-            // Foreign key reference to estate_charges
-            $table->foreign('estate_charge_id')
+            // Foreign key reference to charges
+            $table->foreign('charge_id')
                 ->references('id')
-                ->on('estate_charges')
+                ->on('charges')
                 ->onDelete('cascade');
         });
     }
@@ -37,11 +37,11 @@ return new class extends Migration
 
     public function down()
     {
-        Schema::table('estate_charges_items', function (Blueprint $table) {
+        Schema::table('charges_items', function (Blueprint $table) {
             // Drop foreign key constraint before dropping the column
-            $table->dropForeign(['estate_charge_id']);
+            $table->dropForeign(['charge_id']);
         });
 
-        Schema::dropIfExists('estate_charges_items');
+        Schema::dropIfExists('charges_items');
     }
 };

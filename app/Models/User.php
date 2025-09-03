@@ -272,4 +272,9 @@ class User extends Authenticatable
     {
         return $this->morphToMany(Event::class, 'eventable');
     }
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
 }

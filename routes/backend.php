@@ -1,43 +1,45 @@
 <?php
 // routes/backend.php
 
-use App\Http\Controllers\Backend\AuthenticateController;
-use App\Http\Controllers\Backend\AccountHeaderController;
-use App\Http\Controllers\Backend\BankDetailController;
-use App\Http\Controllers\Backend\BranchController;
-use App\Http\Controllers\Backend\BusinessSettingsController;
-use App\Http\Controllers\Backend\ComplianceController;
-use App\Http\Controllers\Backend\DashboardController;
-use App\Http\Controllers\Backend\DesignationController;
-use App\Http\Controllers\Backend\DocumentsController;
-use App\Http\Controllers\Backend\DocumentTypeController;
-use App\Http\Controllers\Backend\EmailTemplateController;
-use App\Http\Controllers\Backend\EstateChargeController;
-use App\Http\Controllers\Backend\EstateChargeItemController;
-use App\Http\Controllers\Backend\EventController;
-use App\Http\Controllers\Backend\EventSubTypeController;
-use App\Http\Controllers\Backend\EventTypeController;
-use App\Http\Controllers\Backend\InvoiceController;
-use App\Http\Controllers\Backend\JobTypeController;
-use App\Http\Controllers\Backend\NotesController;
-use App\Http\Controllers\Backend\NoteTypeController;
-use App\Http\Controllers\Backend\OfferController;
-use App\Http\Controllers\Backend\OwnerGroupController;
-use App\Http\Controllers\Backend\PropertyController;
-use App\Http\Controllers\Backend\PropertyRepairController;
-use App\Http\Controllers\Backend\RoleController;
-use App\Http\Controllers\Backend\StaffController;
-use App\Http\Controllers\Backend\TenancyController;
-use App\Http\Controllers\Backend\TenancySubStatusController;
-use App\Http\Controllers\Backend\TenancyTypeController;
-use App\Http\Controllers\Backend\UserCategoryController;
-use App\Http\Controllers\Backend\UserController;
-use App\Http\Controllers\Backend\WebsiteController;
-use App\Http\Controllers\Backend\WorkOrderController;
 use App\Models\Upload;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
+use App\Http\Controllers\Backend\RoleController;
+use App\Http\Controllers\Backend\UserController;
+use App\Http\Controllers\Backend\EventController;
+use App\Http\Controllers\Backend\NotesController;
+use App\Http\Controllers\Backend\OfferController;
+use App\Http\Controllers\Backend\StaffController;
+use App\Http\Controllers\Backend\BranchController;
+use App\Http\Controllers\Backend\InvoiceController;
+use App\Http\Controllers\Backend\JobTypeController;
+use App\Http\Controllers\Backend\TenancyController;
+use App\Http\Controllers\Backend\WebsiteController;
+use App\Http\Controllers\Backend\NoteTypeController;
+use App\Http\Controllers\Backend\PropertyController;
+use App\Http\Controllers\Backend\DashboardController;
+use App\Http\Controllers\Backend\DocumentsController;
+use App\Http\Controllers\Backend\EventTypeController;
+use App\Http\Controllers\Backend\WorkOrderController;
+use App\Http\Controllers\Backend\BankDetailController;
+use App\Http\Controllers\Backend\ComplianceController;
+use App\Http\Controllers\Backend\OwnerGroupController;
+use App\Http\Controllers\Backend\DesignationController;
+use App\Http\Controllers\Backend\TenancyTypeController;
+use App\Http\Controllers\Backend\TransactionController;
+use App\Http\Controllers\Backend\TransactionCategoryController;
+use App\Http\Controllers\Backend\AuthenticateController;
+use App\Http\Controllers\Backend\DocumentTypeController;
+use App\Http\Controllers\Backend\EstateChargeController;
+use App\Http\Controllers\Backend\EventSubTypeController;
+use App\Http\Controllers\Backend\UserCategoryController;
+use App\Http\Controllers\Backend\AccountHeaderController;
+use App\Http\Controllers\Backend\EmailTemplateController;
+use App\Http\Controllers\Backend\PropertyRepairController;
+use App\Http\Controllers\Backend\BusinessSettingsController;
+use App\Http\Controllers\Backend\EstateChargeItemController;
+use App\Http\Controllers\Backend\TenancySubStatusController;
 
 
 // Login Routes
@@ -445,6 +447,34 @@ Route::middleware('auth')->group(function () {
                 'edit'    => 'backend.account_headers.edit',
                 'update'  => 'backend.account_headers.update',
                 'destroy' => 'backend.account_headers.destroy',
+            ]);
+    });
+    
+    // Transactions CRUD
+    Route::prefix('backend')->group(function () {
+        Route::resource('transactions', TransactionController::class)
+            ->names([
+                'index'   => 'backend.transactions.index',
+                'create'  => 'backend.transactions.create',
+                'store'   => 'backend.transactions.store',
+                'show'    => 'backend.transactions.show',
+                'edit'    => 'backend.transactions.edit',
+                'update'  => 'backend.transactions.update',
+                'destroy' => 'backend.transactions.destroy',
+            ]);
+    });
+
+    // Transaction Categories CRUD
+    Route::prefix('backend')->group(function () {
+        Route::resource('transaction-categories', TransactionCategoryController::class)
+            ->names([
+                'index'   => 'backend.transaction_categories.index',
+                'create'  => 'backend.transaction_categories.create',
+                'store'   => 'backend.transaction_categories.store',
+                'show'    => 'backend.transaction_categories.show',
+                'edit'    => 'backend.transaction_categories.edit',
+                'update'  => 'backend.transaction_categories.update',
+                'destroy' => 'backend.transaction_categories.destroy',
             ]);
     });
 
