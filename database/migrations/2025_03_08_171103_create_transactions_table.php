@@ -13,8 +13,7 @@ return new class extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
-            $table->date('date');
-
+            
             // Dynamic FK references
             $table->unsignedBigInteger('payment_method_id')->nullable();
             $table->unsignedBigInteger('bank_account_id')->nullable();

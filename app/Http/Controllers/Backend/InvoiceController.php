@@ -146,7 +146,11 @@ class InvoiceController
     public function show($invoiceId)
     {
         $invoice = Invoice::with(['workOrder.repairIssue.property', 'user', 'items'])->findOrFail($invoiceId);
-        return view('backend.invoices.show', compact('invoice'));
+            
+        // nice helpers available on model:
+        $paid = $invoice->paidAmount();
+        $outstanding = $invoice->outstandingAmount();
+        return view('backend.invoices.show', compact('invoice', 'paid', 'outstanding'));
     }
 
     /**

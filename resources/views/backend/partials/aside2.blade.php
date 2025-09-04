@@ -364,6 +364,32 @@
         </li>
         @endcan
        
+        <!-- Transactions -->
+        @canany(['view transactions'])
+            <li class="sidebar-list-item submenu_wrapper">
+                <a href="#transactionsSubmenu" data-bs-toggle="collapse"
+                    aria-expanded="{{ areActiveRoutes(['backend.transactions.index'], 'true') }}"
+                    class="dropdown-toggle {{ areActiveRoutes(['backend.transactions.index']) }}">
+                    <span class="icon_wrapper pb_25">
+                        <i class="fa-solid fa-money-bill-transfer"></i> Transactions
+                    </span>
+                    <i class="fa fa-angle-down"></i>
+                </a>
+
+                <ul class="nav-second-level list-unstyled collapse {{ areActiveRoutes(['backend.transactions.index'], 'show') }}"
+                    id="transactionsSubmenu">
+
+                    @can('view transactions')
+                        @component('components.backend.common.sidebar-sublink')
+                            @slot('class') {{ areActiveRoutes(['backend.transactions.index']) }} @endslot
+                            @slot('link') {{ route('backend.transactions.index') }} @endslot
+                            @slot('link_name') All Transactions @endslot
+                        @endcomponent
+                    @endcan
+                </ul>
+            </li>
+        @endcanany
+
 
        <!-- Website Setup -->
         @canany(['manage website setup', 'manage header', 'manage footer', 'manage appearance'])
@@ -432,42 +458,9 @@
             'manage event types','manage event sub types',
             'manage job types'
         ])
-        <li class="sidebar-list-item submenu_wrapper">
-            <a href="#masterManageSubmenu" data-bs-toggle="collapse" aria-expanded="{{ areActiveRoutes([
-                'admin.branches.index',
-                'admin.designations.index',
-                'admin.note-types.index',
-                'admin.note-types.create',
-                'admin.document-types.index',
-                'admin.document-types.create',
-                'admin.tenancy_types.index',
-                'admin.tenancy_types.create',
-                'admin.tenancy_sub_statuses.index',
-                'admin.tenancy_sub_statuses.create',
-                    'backend.event_types.index', 
-                    'backend.event_types.create', 
-                    'backend.event_sub_types.index', 
-                    'backend.event_sub_types.create', 
-                'admin.job_types.index',
-                'admin.job_types.create'
-                ], 'true') }}" class="dropdown-toggle {{ areActiveRoutes([
-                    'admin.branches.index',
-                    'admin.designations.index',
-                    'admin.tenancy_types.index',
-                    'admin.tenancy_types.create',
-                    'admin.tenancy_sub_statuses.index',
-                    'admin.tenancy_sub_statuses.create',
-                    'backend.event_types.index', 
-                    'backend.event_types.create', 
-                    'backend.event_sub_types.index', 
-                    'backend.event_sub_types.create', 
-                    'admin.job_types.index',
-                    'admin.job_types.create'
-                ]) }}">
-                <span class="icon_wrapper pb_25"><i class="fa-solid fa-cogs"></i>Master Manage</span>
-                <i class="fa fa-angle-down"></i>
-            </a>
-            <ul class="nav-second-level list-unstyled collapse {{ areActiveRoutes([
+
+        @php
+            $masterManageRoutes = [
                 'user-categories.index',
                 'admin.branches.index',
                 'admin.designations.index',
@@ -479,13 +472,23 @@
                 'admin.tenancy_types.create',
                 'admin.tenancy_sub_statuses.index',
                 'admin.tenancy_sub_statuses.create',
-                'backend.event_types.index', 
-                'backend.event_types.create', 
-                'backend.event_sub_types.index', 
+                'backend.event_types.index',
+                'backend.event_types.create',
+                'backend.event_sub_types.index',
                 'backend.event_sub_types.create',
                 'admin.job_types.index',
-                'admin.job_types.create'
-            ], 'show') }}" id="masterManageSubmenu">
+                'admin.job_types.create',
+                'backend.transaction_categories.index',
+                'backend.transaction_categories.create'
+            ];
+        @endphp
+
+        <li class="sidebar-list-item submenu_wrapper">
+            <a href="#masterManageSubmenu" data-bs-toggle="collapse" aria-expanded="{{ areActiveRoutes($masterManageRoutes, 'true') }}" class="dropdown-toggle {{ areActiveRoutes($masterManageRoutes) }}">
+                <span class="icon_wrapper pb_25"><i class="fa-solid fa-cogs"></i>Master Manage</span>
+                <i class="fa fa-angle-down"></i>
+            </a>
+            <ul class="nav-second-level list-unstyled collapse {{ areActiveRoutes($masterManageRoutes, 'show') }}" id="masterManageSubmenu">
 
                 @can('manage categories')
                 @component('components.backend.common.sidebar-sublink')
@@ -687,24 +690,27 @@
                 @can('manage event types')
                 <li class="sidebar-sub-list-item submenu_wrapper">
                     <a href="#eventTypeSubmenu" data-bs-toggle="collapse"
-                       aria-expanded="{{ areActiveRoutes(['backend.event_types.index', 'backend.event_types.create'], 'true') }}"
-                       class="dropdown-toggle {{ areActiveRoutes(['backend.event_types.index', 'backend.event_types.create']) }}">
-                        <i class="fa-solid fa-stream"></i> Event Type
+                    aria-expanded="{{ areActiveRoutes(['backend.event_types.index', 'backend.event_types.create'], 'true') }}"
+                    class="dropdown-toggle {{ areActiveRoutes(['backend.event_types.index', 'backend.event_types.create']) }}">
+                        
+                        <span class="icon_wrapper">Event Type</span>
+                        <i class="fa fa-angle-down"></i>
                     </a>
                     <ul class="nav-third-level collapse list-unstyled {{ areActiveRoutes(['backend.event_types.index', 'backend.event_types.create'], 'show') }}"
                         id="eventTypeSubmenu">
-                        <li class="sidebar-sub-sub-list-item">
-                            <a class="{{ areActiveRoutes(['backend.event_types.index']) }}"
-                               href="{{ route('backend.event_types.index') }}">
-                                <i class="fa-solid fa-eye"></i> View All
-                            </a>
-                        </li>
-                        <li class="sidebar-sub-sub-list-item">
-                            <a class="{{ areActiveRoutes(['backend.event_types.create']) }}"
-                               href="{{ route('backend.event_types.create') }}">
-                                <i class="fa-solid fa-plus"></i> Add
-                            </a>
-                        </li>
+
+                        @component('components.backend.common.sidebar-sublink')
+                            @slot('class') {{ areActiveRoutes(['backend.event_types.index']) }} @endslot
+                            @slot('link') {{ route('backend.event_types.index') }} @endslot
+                            @slot('link_name') View All @endslot
+                        @endcomponent
+
+                        @component('components.backend.common.sidebar-sublink')
+                            @slot('class') {{ areActiveRoutes(['backend.event_types.create']) }} @endslot
+                            @slot('link') {{ route('backend.event_types.create') }} @endslot
+                            @slot('link_name') Add @endslot
+                        @endcomponent
+
                     </ul>
                 </li>
                 @endcan
@@ -713,24 +719,27 @@
                 @can('manage event sub types')
                 <li class="sidebar-sub-list-item submenu_wrapper">
                     <a href="#eventSubTypeSubmenu" data-bs-toggle="collapse"
-                       aria-expanded="{{ areActiveRoutes(['backend.event_sub_types.index', 'backend.event_sub_types.create'], 'true') }}"
-                       class="dropdown-toggle {{ areActiveRoutes(['backend.event_sub_types.index', 'backend.event_sub_types.create']) }}">
-                        <i class="fa-solid fa-stream"></i> Event Sub Type
+                    aria-expanded="{{ areActiveRoutes(['backend.event_sub_types.index', 'backend.event_sub_types.create'], 'true') }}"
+                    class="dropdown-toggle {{ areActiveRoutes(['backend.event_sub_types.index', 'backend.event_sub_types.create']) }}">
+
+                        <span class="icon_wrapper">Event Sub Type</span>
+                        <i class="fa fa-angle-down"></i>
                     </a>
                     <ul class="nav-third-level collapse list-unstyled {{ areActiveRoutes(['backend.event_sub_types.index', 'backend.event_sub_types.create'], 'show') }}"
                         id="eventSubTypeSubmenu">
-                        <li class="sidebar-sub-sub-list-item">
-                            <a class="{{ areActiveRoutes(['backend.event_sub_types.index']) }}"
-                               href="{{ route('backend.event_sub_types.index') }}">
-                                <i class="fa-solid fa-eye"></i> View All
-                            </a>
-                        </li>
-                        <li class="sidebar-sub-sub-list-item">
-                            <a class="{{ areActiveRoutes(['backend.event_sub_types.create']) }}"
-                               href="{{ route('backend.event_sub_types.create') }}">
-                                <i class="fa-solid fa-plus"></i> Add
-                            </a>
-                        </li>
+
+                        @component('components.backend.common.sidebar-sublink')
+                            @slot('class') {{ areActiveRoutes(['backend.event_sub_types.index']) }} @endslot
+                            @slot('link') {{ route('backend.event_sub_types.index') }} @endslot
+                            @slot('link_name') View All @endslot
+                        @endcomponent
+
+                        @component('components.backend.common.sidebar-sublink')
+                            @slot('class') {{ areActiveRoutes(['backend.event_sub_types.create']) }} @endslot
+                            @slot('link') {{ route('backend.event_sub_types.create') }} @endslot
+                            @slot('link_name') Add @endslot
+                        @endcomponent
+
                     </ul>
                 </li>
                 @endcan

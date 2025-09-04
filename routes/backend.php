@@ -435,46 +435,42 @@ Route::middleware('auth')->group(function () {
         // AJAX route to fetch subtypes by type ID:
         Route::get('api/event-sub-types/{typeId}', [EventSubTypeController::class, 'byType'])
             ->name('api.event_sub_types.byType');
-    });
-    
-    Route::prefix('backend')->group(function () {
+
+        // Account Headers CRUD
         Route::resource('account-headers', AccountHeaderController::class)
             ->names([
-                'index'   => 'backend.account_headers.index',
-                'create'  => 'backend.account_headers.create',
-                'store'   => 'backend.account_headers.store',
-                'show'    => 'backend.account_headers.show',
-                'edit'    => 'backend.account_headers.edit',
-                'update'  => 'backend.account_headers.update',
-                'destroy' => 'backend.account_headers.destroy',
+                'index'   => 'account_headers.index',
+                'create'  => 'account_headers.create',
+                'store'   => 'account_headers.store',
+                'show'    => 'account_headers.show',
+                'edit'    => 'account_headers.edit',
+                'update'  => 'account_headers.update',
+                'destroy' => 'account_headers.destroy',
             ]);
-    });
-    
-    // Transactions CRUD
-    Route::prefix('backend')->group(function () {
+        
+        
+        // Transactions CRUD
         Route::resource('transactions', TransactionController::class)
             ->names([
-                'index'   => 'backend.transactions.index',
-                'create'  => 'backend.transactions.create',
-                'store'   => 'backend.transactions.store',
-                'show'    => 'backend.transactions.show',
-                'edit'    => 'backend.transactions.edit',
-                'update'  => 'backend.transactions.update',
-                'destroy' => 'backend.transactions.destroy',
+                'index'   => 'transactions.index',
+                'create'  => 'transactions.create',
+                'store'   => 'transactions.store',
+                'show'    => 'transactions.show',
+                'edit'    => 'transactions.edit',
+                'update'  => 'transactions.update',
+                'destroy' => 'transactions.destroy',
             ]);
-    });
-
-    // Transaction Categories CRUD
-    Route::prefix('backend')->group(function () {
+    
+        // Transaction Categories CRUD
         Route::resource('transaction-categories', TransactionCategoryController::class)
             ->names([
-                'index'   => 'backend.transaction_categories.index',
-                'create'  => 'backend.transaction_categories.create',
-                'store'   => 'backend.transaction_categories.store',
-                'show'    => 'backend.transaction_categories.show',
-                'edit'    => 'backend.transaction_categories.edit',
-                'update'  => 'backend.transaction_categories.update',
-                'destroy' => 'backend.transaction_categories.destroy',
+                'index'   => 'transaction_categories.index',
+                'create'  => 'transaction_categories.create',
+                'store'   => 'transaction_categories.store',
+                'show'    => 'transaction_categories.show',
+                'edit'    => 'transaction_categories.edit',
+                'update'  => 'transaction_categories.update',
+                'destroy' => 'transaction_categories.destroy',
             ]);
     });
 

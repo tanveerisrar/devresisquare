@@ -120,6 +120,60 @@
                 </div>
             </div>
 
+            <!-- Payments / Transactions linked to this Invoice -->
+            <div class="mt-4">
+                <h5 class="fw-bold">Payments</h5>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p><strong>Paid:</strong> £{{ number_format($paid ?? $invoice->paidAmount(), 2) }}</p>
+                        <p><strong>Outstanding:</strong> £{{ number_format($outstanding ?? $invoice->outstandingAmount(), 2) }}</p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <a href="{{ route('backend.transactions.create') }}?invoice_id={{ $invoice->id }}" class="btn btn-primary">Add Payment</a>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Txn Number</th>
+                                <th>Date</th>
+                                <th>Method / Bank</th>
+                                <th class="text-end">Amount</th>
+                                <th class="text-center">Status</th>
+                                <th>Notes</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($invoice->payments as $i => $payment)
+                                <tr>
+                                    <td>{{ $i + 1 }}</td>
+                                    <td>{{ $payment->transaction_number ?? '-' }}</td>
+                                    <td>{{ formatDate($payment->transaction_date ?? $payment->date) }}</td>
+                                    <td>
+                                        {{ optional($payment->paymentMethod)->name ?? '' }}
+                                        @if($payment->bankAccount) <br> <small>{{ $payment->bankAccount->account_name }}</small> @endif
+                                    </td>
+                                    <td class="text-end">{{ getPoundSymbol() }}{{ number_format($payment->total_amount ?? $payment->amount, 2) }}</td>
+                                    <td class="text-center">{{ ucfirst($payment->status) }}</td>
+                                    <td>{{ Str::limit($payment->notes ?? '-', 80) }}</td>
+                                    <td>
+                                        <a href="{{ route('backend.transactions.show', $payment) }}" class="btn btn-sm btn-info">View</a>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="8" class="text-center">No payments recorded for this invoice.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
             <!-- Terms & Conditions -->
             <div class="mt-4">
                 <hr>
