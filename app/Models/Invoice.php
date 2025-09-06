@@ -3,9 +3,10 @@
 namespace App\Models;
 
 use App\Models\WorkOrder;
+use App\Traits\TracksUser;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Traits\TracksUser;
 
 class Invoice extends Model
 {
@@ -98,6 +99,87 @@ class Invoice extends Model
                 $this->save();
             }
         }
+    }
+
+    /**
+     * Efficient AJAX search used by Select2 or similar.
+     *
+     * Returns a collection of arrays:
+     * [
+     *   { id, text, outstanding, property_id, total_amount }
+     * ]
+     *
+     * @param string|null $q
+     * @param bool $onlyOutstanding
+     * @param int $limit
+     * @return \Illuminate\Support\Collection
+     */
+    public static function ajaxSearchForSelect(?string $q = null, bool $onlyOutstanding = false, int $limit = 50)
+    {
+        $query = self::select([
+                'invoices.id',
+                'invoices.invoice_number',
+                'invoices.property_id',
+                'invoices.total_amount',
+                DB::raw("COALESCE(SUM(CASE WHEN transactions.status = 'completed' THEN transactions.total_amount ELSE 0 END), 0) as paid_amount"),
+            ])
+            ->leftJoin('transactions', 'transactions.invoice_id', '=', 'invoices.id')
+            ->groupBy('invoices.id', 'invoices.invoice_number', 'invoices.property_id', 'invoices.total_amount');
+
+        if (!is_null($q) && $q !== '') {
+            $query->where(function ($w) use ($q) {
+                $w->where('invoices.invoice_number', 'like', "%{$q}%");
+
+                // if $q is numeric, allow id search too
+                if (is_numeric($q)) {
+                    $w->orWhere('invoices.id', (int)$q);
+                }
+            });
+        }
+
+        if ($onlyOutstanding) {
+            // Use HAVING because of aggregate SUM()
+            $query->havingRaw('(invoices.total_amount - COALESCE(SUM(CASE WHEN transactions.status = \'completed\' THEN transactions.total_amount ELSE 0 END), 0)) > 0');
+        }
+
+        $results = $query->orderBy('invoices.invoice_number', 'desc')
+            ->limit($limit)
+            ->get();
+
+        return $results->map(function ($inv) {
+            $paid = (float) $inv->paid_amount;
+            $total = (float) $inv->total_amount;
+            $outstanding = max(0, $total - $paid);
+
+            return [
+                'id' => $inv->id,
+                'text' => "{$inv->invoice_number} — £" . number_format($total, 2),
+                'outstanding' => $outstanding,
+                'property_id' => $inv->property_id,
+                'total_amount' => $total,
+            ];
+        })->values();
+    }
+
+    /**
+     * Return a single invoice formatted for AJAX/Select2 preselect.
+     *
+     * @return array
+     */
+    public function toAjaxData(): array
+    {
+        // compute paid only for this invoice (single query)
+        $paid = (float) $this->payments()->where('status', 'completed')->sum('total_amount');
+        $total = (float) $this->total_amount;
+        $outstanding = max(0, $total - $paid);
+
+        return [
+            'id' => $this->id,
+            'text' => "{$this->invoice_number} — £" . number_format($total, 2),
+            'outstanding' => $outstanding,
+            'property_id' => $this->property_id,
+            'total_amount' => $total,
+        ];
     }
 
 }

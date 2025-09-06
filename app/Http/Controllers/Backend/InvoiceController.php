@@ -287,4 +287,26 @@ class InvoiceController
         return redirect()->route('admin.invoices.index');
     }
 
+    /**
+     * AJAX search for invoices (Select2).
+     */
+    public function ajaxSearch(Request $request)
+    {
+        $q = $request->query('q', null);
+        $onlyOutstanding = (bool) $request->query('only_outstanding', false);
+        $limit = (int) $request->query('limit', 50);
+
+        $results = Invoice::ajaxSearchForSelect($q, $onlyOutstanding, $limit);
+
+        return response()->json(['results' => $results]);
+    }
+
+    /**
+     * Return single invoice details (for Select2 preselect or detail fetch).
+     */
+    public function ajaxGet(Invoice $invoice)
+    {
+        return response()->json($invoice->toAjaxData());
+    }
+    
 }

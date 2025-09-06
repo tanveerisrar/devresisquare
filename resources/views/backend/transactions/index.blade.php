@@ -27,7 +27,7 @@
             @forelse($transactions as $txn)
                 <tr>
                     <td>{{ $txn->id }}</td>
-                    <td>{{ $txn->date }}</td>
+                    <td>{{ formatDate($txn->transaction_date) }}</td>
                     <td>{{ ucfirst($txn->transaction_type) }}</td>
                     <td>{{ $txn->category->name ?? '-' }}</td>
                     <td>{{ number_format($txn->amount, 2) }}</td>

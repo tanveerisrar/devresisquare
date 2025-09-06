@@ -43,8 +43,11 @@
                 <!-- Company Info -->
                 <div class="col-md-6">
                     <h4 class="fw-bold">Invoice #</span> {{ $invoice->invoice_number }}</h4>
-                    <span class="mb-2 badge {{ getInvoiceStatusBadge($invoice->status_id) }}">
+                    {{-- <span class="mb-2 badge {{ getInvoiceStatusBadge($invoice->status_id) }}">
                         {{ getInvoiceStatusText($invoice->status_id) }}
+                    </span> --}}
+                    <span class="mb-2 badge {{ getInvoiceStatusDetails($invoice->status_id)['badge'] }}">
+                        {{ getInvoiceStatusDetails($invoice->status_id)['text'] }}
                     </span>
                     <address class="text-muted">
                         <strong>{{get_setting('company_name') }}</strong><br>
@@ -129,9 +132,11 @@
                         <p><strong>Paid:</strong> £{{ number_format($paid ?? $invoice->paidAmount(), 2) }}</p>
                         <p><strong>Outstanding:</strong> £{{ number_format($outstanding ?? $invoice->outstandingAmount(), 2) }}</p>
                     </div>
+                    @if(($outstanding ?? $invoice->outstandingAmount()) > 0)
                     <div class="col-md-6 text-md-end">
                         <a href="{{ route('backend.transactions.create') }}?invoice_id={{ $invoice->id }}" class="btn btn-primary">Add Payment</a>
                     </div>
+                    @endif
                 </div>
 
                 <div class="table-responsive">
@@ -158,7 +163,7 @@
                                         {{ optional($payment->paymentMethod)->name ?? '' }}
                                         @if($payment->bankAccount) <br> <small>{{ $payment->bankAccount->account_name }}</small> @endif
                                     </td>
-                                    <td class="text-end">{{ getPoundSymbol() }}{{ number_format($payment->total_amount ?? $payment->amount, 2) }}</td>
+                                    <td class="text-end">{{ getPoundSymbol() }}{{ number_format($payment->amount, 2) }}</td>
                                     <td class="text-center">{{ ucfirst($payment->status) }}</td>
                                     <td>{{ Str::limit($payment->notes ?? '-', 80) }}</td>
                                     <td>

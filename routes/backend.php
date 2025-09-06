@@ -75,6 +75,8 @@ Route::middleware('auth')->group(function () {
         return searchProperties($request);
     })->name('properties.search');
 
+    Route::get('properties/search-ajax', [PropertyController::class, 'searchAjax'])->name('backend.properties.search-ajax');
+
     // Route::get('/get_users_info_by_property/{propertyId}/users/{categoryId}', function ($propertyId, $categoryId) {
     //     return response()->json(get_users_by_property_and_category($propertyId, $categoryId));
     // })->name('admin.getUsersByProperty');
@@ -364,6 +366,9 @@ Route::middleware('auth')->group(function () {
 
                 Route::get('/edit/{invoice}', 'edit')->name('invoices.edit');
                 Route::put('/update/{invoice}', 'update')->name('invoices.update');
+
+                Route::get('/search', 'ajaxSearch')->name('invoices.search');
+                Route::get('/{invoice}/json', 'ajaxGet')->name('invoices.json');
             });
         });
     });

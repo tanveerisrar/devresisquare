@@ -16,6 +16,7 @@
                     <option value="">All Status</option>
                     <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
                     <option value="paid" {{ request('status') == 'paid' ? 'selected' : '' }}>Paid</option>
+                    <option value="partially paid" {{ request('status') == 'partially_paid' ? 'selected' : '' }}>Partially Paid</option>
                     <option value="overdue" {{ request('status') == 'overdue' ? 'selected' : '' }}>Overdue</option>
                     <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
                 </select>
@@ -49,24 +50,10 @@
                 <td>{{ optional($invoice->workOrder)->works_order_no }}</td>
                 <td>{{ getPropertyDetails($invoice->property_id, ['prop_ref_no', 'prop_name', 'line_1', 'line_2', 'city', 'country']) }}</td>
                 <td>{{ optional($invoice->user)->name ?? 'N/A' }}</td>
-                <td>£{{ number_format($invoice->total_amount, 2) }}</td>
+                <td>{{ getPoundSymbol() }} {{ number_format($invoice->total_amount, 2) }}</td>
                 <td>
-                    @php
-                        $statusColors = [
-                            1 => 'bg-warning',  // Pending
-                            2 => 'bg-success',  // Paid
-                            3 => 'bg-danger',   // Overdue
-                            4 => 'bg-secondary' // Cancelled
-                        ];
-                        $statusText = [
-                            1 => 'Pending',
-                            2 => 'Paid',
-                            3 => 'Overdue',
-                            4 => 'Cancelled'
-                        ];
-                    @endphp
-                    <span class="badge {{ $statusColors[$invoice->status_id] ?? 'bg-secondary' }}">
-                        {{ $statusText[$invoice->status_id] ?? 'Unknown' }}
+                    <span class="mb-2 badge {{ getInvoiceStatusDetails($invoice->status_id)['badge'] }}">
+                        {{ getInvoiceStatusDetails($invoice->status_id)['text'] }}
                     </span>
                 </td>
                 <td>

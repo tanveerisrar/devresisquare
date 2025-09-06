@@ -752,6 +752,42 @@ class PropertyController
         return response()->json($properties);
     }
 
+    public function searchAjax(Request $request)
+    {
+        $query = $request->input('query');
+
+        $properties = Property::query()
+            ->with('countryRelation:id,name') // eager load country
+            ->where(function ($q) use ($query) {
+                $q->where('prop_ref_no', 'LIKE', '%' . $query . '%')
+                ->orWhere('prop_name', 'LIKE', '%' . $query . '%')
+                ->orWhere('line_1', 'LIKE', '%' . $query . '%')
+                ->orWhere('line_2', 'LIKE', '%' . $query . '%')
+                ->orWhere('city', 'LIKE', '%' . $query . '%')
+                ->orWhere('county', 'LIKE', '%' . $query . '%')
+                ->orWhere('postcode', 'LIKE', '%' . $query . '%')
+                ->orWhereHas('countryRelation', function ($q2) use ($query) {
+                    $q2->where('name', 'LIKE', '%' . $query . '%');
+                });
+            })
+            ->limit(10)
+            ->get(['id', 'prop_ref_no', 'prop_name', 'line_1', 'line_2', 'city', 'county', 'postcode', 'country']);
+
+        return response()->json(
+            $properties->map(function ($property) {
+                return [
+                    'id'            => $property->id,
+                    'prop_ref_no'   => $property->prop_ref_no,
+                    'prop_name'     => $property->prop_name,
+                    'city'          => $property->city,
+                    'country'       => optional($property->countryRelation)->name,
+                    'display_label' => $property->display_label,
+                ];
+            })
+        );
+    }
+
+
     public function destroy($id)
     {
         $property = Property::findOrFail($id);

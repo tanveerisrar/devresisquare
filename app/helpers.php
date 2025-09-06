@@ -737,11 +737,28 @@ if (!function_exists('getInvoiceStatusText')) {
         return [
             1 => 'Pending',
             2 => 'Paid',
-            3 => 'Overdue',
-            4 => 'Cancelled'
+            3 => 'Partially Paid',
+            4 => 'Overdue',
+            5 => 'Cancelled'
         ][$statusId] ?? 'Unknown';
     }
 }
+
+if (!function_exists('getInvoiceStatusDetails')) {
+    function getInvoiceStatusDetails($statusId)
+    {
+        $statuses = [
+            1 => ['text' => 'Pending',         'badge' => 'bg-warning'],
+            2 => ['text' => 'Paid',            'badge' => 'bg-success'],
+            3 => ['text' => 'Partially Paid',  'badge' => 'bg-info'],
+            4 => ['text' => 'Overdue',         'badge' => 'bg-danger'],
+            5 => ['text' => 'Cancelled',       'badge' => 'bg-secondary'],
+        ];
+
+        return $statuses[$statusId] ?? ['text' => 'Unknown', 'badge' => 'bg-dark'];
+    }
+}
+
 
 if (!function_exists('get_property_address_by_id')) {
     /**

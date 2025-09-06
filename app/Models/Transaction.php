@@ -20,17 +20,14 @@ class Transaction extends Model
         'property_id',
         'payer_id',
         'payee_id',
-        'credit',
-        'debit',
-        'balance',
+        // 'credit',
+        // 'debit',
+        // 'balance',
         'transaction_date',
         'amount',
-        'tax_amount',
+        // 'tax_amount',
         'total_amount',
         'transaction_reference',
-        'credit',
-        'debit',
-        'balance',
         'status',
         'notes',
     ];
@@ -69,4 +66,37 @@ class Transaction extends Model
     {
         return $this->belongsTo(BankAccount::class, 'bank_account_id');
     }
+
+    protected static function booted()
+    {
+        static::created(fn ($transaction) => $transaction->updateInvoiceStatus());
+        static::updated(fn ($transaction) => $transaction->updateInvoiceStatus());
+        static::deleted(fn ($transaction) => $transaction->updateInvoiceStatus());
+    }
+
+    public function updateInvoiceStatus()
+    {
+        if (! $this->invoice_id) {
+            return;
+        }
+
+        $invoice = $this->invoice()->first();
+        if (! $invoice) {
+            return;
+        }
+
+        $outstanding = $invoice->outstandingAmount();
+
+        if ($invoice->status_id !== 5) { // if not cancelled
+            if ($outstanding <= 0) {
+                $invoice->status_id = 2; // Paid
+            } elseif ($outstanding < $invoice->total_amount) {
+                $invoice->status_id = 3; // Partially Paid
+            } else {
+                $invoice->status_id = 1; // Pending
+            }
+            $invoice->saveQuietly();
+        }
+    }
+
 }
