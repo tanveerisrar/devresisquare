@@ -195,26 +195,23 @@ class TransactionController extends Controller
             'status'                  => 'required|string|in:pending,completed,cancelled',
             'notes'                   => 'nullable|string',
         ]);
+        // inside controller update()
+        $isFinal = $transaction->status === 'completed' && $transaction->invoice_id;
 
-        // 🔒 If linked to invoice, validate against outstanding
-        if (!empty($validated['invoice_id'])) {
-            $invoice = Invoice::find($validated['invoice_id']);
-            if ($invoice) {
-                $outstanding = $invoice->outstandingAmount();
+        // detect attempted money/core changes
+        $moneyChanged = false;
+        if ($isFinal) {
+            if (isset($validated['amount']) && (float)$validated['amount'] !== (float)$transaction->amount) $moneyChanged = true;
+            if (isset($validated['transaction_type']) && $validated['transaction_type'] !== $transaction->transaction_type) $moneyChanged = true;
+            if (isset($validated['invoice_id']) && $validated['invoice_id'] != $transaction->invoice_id) $moneyChanged = true;
+            if (isset($validated['bank_account_id']) && $validated['bank_account_id'] != $transaction->bank_account_id) $moneyChanged = true;
+            if (isset($validated['transaction_number']) && $validated['transaction_number'] != $transaction->transaction_number) $moneyChanged = true;
+        }
 
-                // Compute total payments except this transaction
-                $alreadyPaid = $invoice->payments()
-                    ->where('id', '!=', $transaction->id)
-                    ->sum('amount');
-
-                $newTotalPaid = $alreadyPaid + $validated['amount'];
-
-                if ($newTotalPaid > $invoice->total_amount) {
-                    return back()
-                        ->withInput()
-                        ->withErrors(['amount' => 'Payment exceeds invoice total. Outstanding is £' . number_format($outstanding, 2)]);
-                }
-            }
+        if ($moneyChanged) {
+            return back()
+                ->withInput()
+                ->withErrors(['amount' => 'You cannot change amount/type/invoice/account of a completed invoice payment. Create an adjustment transaction instead.']);
         }
 
         $transaction->update($validated);

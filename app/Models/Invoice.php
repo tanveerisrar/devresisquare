@@ -56,13 +56,19 @@ class Invoice extends Model
 
     /**
      * Sum of completed payments applied to this invoice.
-     * Uses Transaction::total_amount for payment amounts and only counts transactions with status 'completed'.
+     * Credits add to paid, Debits subtract (refunds/adjustments).
      */
     public function paidAmount(): float
     {
         return (float) $this->payments()
             ->where('status', 'completed')
-            ->sum('total_amount');
+            ->sum(DB::raw("
+                CASE 
+                    WHEN transaction_type = 'credit' THEN amount
+                    WHEN transaction_type = 'debit' THEN -amount
+                    ELSE 0
+                END
+            "));
     }
 
     /**
@@ -121,7 +127,13 @@ class Invoice extends Model
                 'invoices.invoice_number',
                 'invoices.property_id',
                 'invoices.total_amount',
-                DB::raw("COALESCE(SUM(CASE WHEN transactions.status = 'completed' THEN transactions.total_amount ELSE 0 END), 0) as paid_amount"),
+                DB::raw("COALESCE(SUM(
+                    CASE 
+                        WHEN transactions.status = 'completed' AND transactions.transaction_type = 'credit' THEN transactions.amount
+                        WHEN transactions.status = 'completed' AND transactions.transaction_type = 'debit' THEN -transactions.amount
+                        ELSE 0 
+                    END
+                ), 0) as paid_amount"),
             ])
             ->leftJoin('transactions', 'transactions.invoice_id', '=', 'invoices.id')
             ->groupBy('invoices.id', 'invoices.invoice_number', 'invoices.property_id', 'invoices.total_amount');
@@ -139,7 +151,7 @@ class Invoice extends Model
 
         if ($onlyOutstanding) {
             // Use HAVING because of aggregate SUM()
-            $query->havingRaw('(invoices.total_amount - COALESCE(SUM(CASE WHEN transactions.status = \'completed\' THEN transactions.total_amount ELSE 0 END), 0)) > 0');
+            $query->havingRaw('(invoices.total_amount - COALESCE(SUM(CASE WHEN transactions.status = \'completed\' THEN transactions.amount ELSE 0 END), 0)) > 0');
         }
 
         $results = $query->orderBy('invoices.invoice_number', 'desc')
@@ -169,7 +181,7 @@ class Invoice extends Model
     public function toAjaxData(): array
     {
         // compute paid only for this invoice (single query)
-        $paid = (float) $this->payments()->where('status', 'completed')->sum('total_amount');
+        $paid = (float) $this->payments()->where('status', 'completed')->sum('amount');
         $total = (float) $this->total_amount;
         $outstanding = max(0, $total - $paid);
 

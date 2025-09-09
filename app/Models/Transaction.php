@@ -26,7 +26,7 @@ class Transaction extends Model
         'transaction_date',
         'amount',
         // 'tax_amount',
-        'total_amount',
+        // 'total_amount',
         'transaction_reference',
         'status',
         'notes',
@@ -80,7 +80,7 @@ class Transaction extends Model
             return;
         }
 
-        $invoice = $this->invoice()->first();
+        $invoice = Invoice::with('payments')->find($this->invoice_id);
         if (! $invoice) {
             return;
         }

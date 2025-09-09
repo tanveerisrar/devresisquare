@@ -768,9 +768,11 @@ class PropertyController
                 ->orWhere('postcode', 'LIKE', '%' . $query . '%')
                 ->orWhereHas('countryRelation', function ($q2) use ($query) {
                     $q2->where('name', 'LIKE', '%' . $query . '%');
-                });
+                })
+                ->orderBy('id', 'desc')
+                ;
             })
-            ->limit(10)
+            ->limit(5)
             ->get(['id', 'prop_ref_no', 'prop_name', 'line_1', 'line_2', 'city', 'county', 'postcode', 'country']);
 
         return response()->json(

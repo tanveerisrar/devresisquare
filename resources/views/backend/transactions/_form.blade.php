@@ -2,7 +2,21 @@
 @if(isset($transaction))
     <input type="hidden" name="id" value="{{ $transaction->id }}">
 @endif
-
+@php
+    $isFinal = isset($transaction) && $transaction->status === 'completed' && !empty($transaction->invoice_id);
+@endphp
+@if($isFinal)
+    <input type="hidden" name="transaction_type" value="{{ $transaction->transaction_type }}">
+    <input type="hidden" name="invoice_id" value="{{ $transaction->invoice_id }}">
+    <input type="hidden" name="bank_account_id" value="{{ $transaction->bank_account_id }}">
+    <input type="hidden" name="status" value="{{ $transaction->status }}">
+@endif
+<style>
+input[readonly], select[disabled], .select2-container--default.select2-container--disabled .select2-selection {
+    background-color: var(--bs-secondary-bg);
+    cursor: not-allowed;
+}
+</style>
 {{-- Transaction Details --}}
 <div class="card mb-4">
     <div class="card-header">Transaction Details</div>
@@ -20,7 +34,7 @@
         </div>
         <div class="col-md-4 mb-3">
             <label>Transaction Type</label>
-            <select name="transaction_type" class="form-control" required>
+            <select name="transaction_type" class="form-control" @if($isFinal) disabled @endif required>
                 <option value="credit" {{ old('transaction_type', $transaction->transaction_type ?? '') === 'credit' ? 'selected' : '' }}>Credit</option>
                 <option value="debit" {{ old('transaction_type', $transaction->transaction_type ?? '') === 'debit' ? 'selected' : '' }}>Debit</option>
             </select>
@@ -43,24 +57,13 @@
 <div class="card mb-4">
     <div class="card-header">Associations</div>
     <div class="card-body row">
-            <div class="col-md-6 mb-3">
-                <label>Invoice (optional)</label>
-                <select name="invoice_id" class="form-control" id="invoice_id"></select>
-            </div>
-        {{-- <div class="col-md-6 mb-3">
-            <label>Property (optional)</label>
-            <select name="property_id" class="form-control">
-                <option value="">-- Select Property --</option>
-                @foreach($properties as $id => $label)
-                    <option value="{{ $id }}" {{ old('property_id', $transaction->property_id ?? '') == $id ? 'selected' : '' }}>
-                        {{ $label }}
-                    </option>
-                @endforeach
-            </select>
-        </div> --}}
+        <div class="col-md-6 mb-3">
+            <label>Invoice (optional)</label>
+            <select name="invoice_id" class="form-control" id="invoice_id" @if($isFinal) disabled @endif></select>
+        </div>
         <div class="col-md-6 mb-3">
             <label>Property (optional)</label>
-            <x-backend.property-select id="property_id" name="property_id" :selected="old('property_id', $transaction->property_id ?? null)" />
+            <x-backend.property-select id="property_id" name="property_id" :selected="old('property_id', $transaction->property_id ?? null)" :disabled="$isFinal" />
         </div>
         <div class="col-md-6 mb-3">
             <label>Payer (optional)</label>
@@ -104,7 +107,7 @@
         </div>
         <div class="col-md-4 mb-3">
             <label>Bank Account</label>
-            <select name="bank_account_id" class="form-control">
+            <select name="bank_account_id" class="form-control" @if($isFinal) disabled @endif required>
                 <option value="">-- Select Bank Account --</option>
                 @foreach($accounts as $id => $label)
                     <option value="{{ $id }}" {{ old('bank_account_id', $transaction->bank_account_id ?? '') == $id ? 'selected' : '' }}>
@@ -121,11 +124,11 @@
         <div class="col-md-4 mb-3">
             <label>Amount</label>
             <input type="number" step="0.01" id="amount" name="amount" class="form-control"
-                value="{{ old('amount', $transaction->amount ?? '') }}" required>
+                value="{{ old('amount', $transaction->amount ?? '') }}" @if($isFinal) readonly @endif required>
         </div>
         <div class="col-md-4 mb-3">
             <label>Status</label>
-            <select name="status" class="form-control" required>
+            <select name="status" class="form-control" @if($isFinal) disabled @endif required>
                 <option value="pending" {{ old('status', $transaction->status ?? '') === 'pending' ? 'selected' : '' }}>
                     Pending</option>
                 <option value="completed" {{ old('status', $transaction->status ?? '') === 'completed' ? 'selected' : '' }}>Completed</option>
@@ -144,6 +147,7 @@
 
 @push('scripts')
     <script>
+        const isEdit = {{ isset($transaction) && $transaction->id ? 'true' : 'false' }};
         // route endpoints
         const searchUrl = "{{ route('admin.invoices.search') }}";
         const getInvoiceUrl = function (id) {
@@ -299,7 +303,7 @@
                         url: '{{ route("backend.properties.search-ajax") }}',
                         data: { q: propertyId },
                         dataType: 'json'
-                    }).done(function(resp) {
+                    }).done(function (resp) {
                         let property = resp.find(p => p.id == propertyId);
                         if (property) {
                             let option = new Option(property.display_label, property.id, true, true);
