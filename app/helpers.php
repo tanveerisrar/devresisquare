@@ -946,6 +946,46 @@ if (!function_exists('safeAssignRoles')) {
         }
     }
 
+    if (! function_exists('generateDocumentNumber')) {
+        function generateDocumentNumber(string $docType = 'refund', string $prefix = 'RFND', $branchId = null): string
+        {
+            return DB::transaction(function () use ($docType, $prefix, $branchId) {
+                $row = DB::table('document_sequences')
+                    ->where('document_type', $docType)
+                    ->where(function($q) use ($branchId) {
+                        if (is_null($branchId)) {
+                            $q->whereNull('branch_id');
+                        } else {
+                            $q->where('branch_id', $branchId);
+                        }
+                    })
+                    ->lockForUpdate()
+                    ->first();
+
+                if (! $row) {
+                    DB::table('document_sequences')->insert([
+                        'document_type' => $docType,
+                        'prefix' => $prefix,
+                        'next_number' => 2,
+                        'branch_id' => $branchId,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                    $num = 1;
+                } else {
+                    $num = $row->next_number;
+                    DB::table('document_sequences')->where('id', $row->id)
+                        ->update(['next_number' => DB::raw('next_number + 1'), 'updated_at' => now()]);
+                    if (is_null($prefix)) {
+                        $prefix = $row->prefix;
+                    }
+                }
+
+                return ($prefix ? $prefix . '-' : '') . str_pad($num, 6, '0', STR_PAD_LEFT);
+            });
+        }
+    }
+
 }
 
 /*

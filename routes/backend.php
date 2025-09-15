@@ -1,6 +1,7 @@
 <?php
 // routes/backend.php
 
+use App\Http\Controllers\Backend\AccountsNoteApplicationController;
 use App\Models\Upload;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -28,7 +29,6 @@ use App\Http\Controllers\Backend\OwnerGroupController;
 use App\Http\Controllers\Backend\DesignationController;
 use App\Http\Controllers\Backend\TenancyTypeController;
 use App\Http\Controllers\Backend\TransactionController;
-use App\Http\Controllers\Backend\TransactionCategoryController;
 use App\Http\Controllers\Backend\AuthenticateController;
 use App\Http\Controllers\Backend\DocumentTypeController;
 use App\Http\Controllers\Backend\EstateChargeController;
@@ -37,9 +37,11 @@ use App\Http\Controllers\Backend\UserCategoryController;
 use App\Http\Controllers\Backend\AccountHeaderController;
 use App\Http\Controllers\Backend\EmailTemplateController;
 use App\Http\Controllers\Backend\PropertyRepairController;
+use App\Http\Controllers\Backend\PurchaseInvoiceController;
 use App\Http\Controllers\Backend\BusinessSettingsController;
 use App\Http\Controllers\Backend\EstateChargeItemController;
 use App\Http\Controllers\Backend\TenancySubStatusController;
+use App\Http\Controllers\Backend\TransactionCategoryController;
 
 
 // Login Routes
@@ -477,6 +479,27 @@ Route::middleware('auth')->group(function () {
                 'update'  => 'transaction_categories.update',
                 'destroy' => 'transaction_categories.destroy',
             ]);
+
+        // Purchase invoices
+        Route::resource('purchase_invoices', PurchaseInvoiceController::class)->only(['index','create','store','show','edit','update']);
+
+        // Notes (credit/debit)
+        Route::controller(AccountsNoteApplicationController::class)->group(function () {
+            Route::get('credit-notes/create','createCredit')->name('credit_notes.create');
+            Route::post('credit-notes','storeCredit')->name('credit_notes.store');
+            Route::get('credit-notes/{creditNote}','showCredit')->name('credit_notes.show');
+
+            Route::get('debit-notes/create','createDebit')->name('debit_notes.create');
+            Route::post('debit-notes','storeDebit')->name('debit_notes.store');
+            Route::get('debit-notes/{debitNote}','showDebit')->name('debit_notes.show');
+                
+            // Apply note
+            Route::post('note-applications',[AccountsNoteApplicationController::class,'store'])->name('note_applications.store');
+        });
+
+        // Refunds route you already added earlier
+        Route::post('notes/refund',[AccountsNoteApplicationController::class,'store'])->name('notes.refund.store');
+
     });
 
 
