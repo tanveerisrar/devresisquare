@@ -45,6 +45,19 @@
                     </select>
                 </div>
 
+                <!-- Account Header -->
+                <div class="mt-4">
+                    <label class="form-label">Account Header</label>
+                    <select name="account_header_id" class="form-select">
+                        <option value="">-- Optional: Link header --</option>
+                        @foreach($accountHeaders as $header)
+                            <option value="{{ $header->id }}" {{ old('account_header_id', $invoice->account_header_id) == $header->id ? 'selected' : '' }}>
+                                {{ ucfirst(str_replace('_',' ', $header->header_type)) }} — {{ $header->name }} ({{ $header->reference_number ?? 'auto' }})
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
                 <!-- Invoice Items -->
                 <div class="mt-5">
                     <h5><i class="bi bi-list-ul"></i> Invoice Items</h5>

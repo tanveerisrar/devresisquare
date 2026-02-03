@@ -336,8 +336,13 @@
                 <span class="icon_wrapper"><i class="fas fa-file-invoice-dollar aiz-side-nav-icon"></i>Invoices</span>
                 <i class="fa fa-angle-down"></i>
             </a>
-            <ul class="nav-second-level list-unstyled collapse {{ request()->routeIs('admin.invoices.index') ? 'show' : '' }}"
+            <ul class="nav-second-level list-unstyled collapse {{ request()->routeIs('admin.invoices.*') ? 'show' : '' }}"
                 id="invoiceSubmenu">
+                @component('components.backend.common.sidebar-sublink')
+                    @slot('class') {{ request()->routeIs('admin.invoices.create') ? 'active' : '' }} @endslot
+                    @slot('link') {{ route('admin.invoices.create') }} @endslot
+                    @slot('link_name') Create Invoice @endslot
+                @endcomponent
                 @foreach($invoiceStatuses as $key => $status)
                     @component('components.backend.common.sidebar-sublink')
                         @slot('class') {{ $currentInvoiceStatus === $key ? 'active' : '' }} @endslot
@@ -355,6 +360,49 @@
             </ul>
         </li>
         @endcan
+
+        @canany(['view invoices'])
+        <li class="sidebar-list-item submenu_wrapper">
+            <a href="#receiptsSubmenu" data-bs-toggle="collapse"
+                aria-expanded="{{ request()->routeIs('backend.receipts.*') ? 'true' : 'false' }}"
+                class="dropdown-toggle {{ request()->routeIs('backend.receipts.*') ? 'active' : '' }}">
+                <span class="icon_wrapper"><i class="fa-solid fa-receipt"></i>Receipts</span>
+                <i class="fa fa-angle-down"></i>
+            </a>
+            <ul class="nav-second-level list-unstyled collapse {{ request()->routeIs('backend.receipts.*') ? 'show' : '' }}"
+                id="receiptsSubmenu">
+                @component('components.backend.common.sidebar-sublink')
+                    @slot('class') {{ request()->routeIs('backend.receipts.create') ? 'active' : '' }} @endslot
+                    @slot('link') {{ route('backend.receipts.create') }} @endslot
+                    @slot('link_name') Create Receipt @endslot
+                @endcomponent
+            </ul>
+        </li>
+        @endcanany
+
+        @canany(['view invoices'])
+        <li class="sidebar-list-item submenu_wrapper">
+            <a href="#notesSubmenu" data-bs-toggle="collapse"
+                aria-expanded="{{ request()->routeIs('backend.credit_notes.*') || request()->routeIs('backend.debit_notes.*') ? 'true' : 'false' }}"
+                class="dropdown-toggle {{ request()->routeIs('backend.credit_notes.*') || request()->routeIs('backend.debit_notes.*') ? 'active' : '' }}">
+                <span class="icon_wrapper"><i class="fa-solid fa-file-invoice"></i>Notes</span>
+                <i class="fa fa-angle-down"></i>
+            </a>
+            <ul class="nav-second-level list-unstyled collapse {{ request()->routeIs('backend.credit_notes.*') || request()->routeIs('backend.debit_notes.*') ? 'show' : '' }}"
+                id="notesSubmenu">
+                @component('components.backend.common.sidebar-sublink')
+                    @slot('class') {{ request()->routeIs('backend.credit_notes.create') ? 'active' : '' }} @endslot
+                    @slot('link') {{ route('backend.credit_notes.create') }} @endslot
+                    @slot('link_name') Create Credit Note @endslot
+                @endcomponent
+                @component('components.backend.common.sidebar-sublink')
+                    @slot('class') {{ request()->routeIs('backend.debit_notes.create') ? 'active' : '' }} @endslot
+                    @slot('link') {{ route('backend.debit_notes.create') }} @endslot
+                    @slot('link_name') Create Debit Note @endslot
+                @endcomponent
+            </ul>
+        </li>
+        @endcanany
 
         @can('Manage Document Types')
         <li class="sidebar-list-item submenu_wrapper">

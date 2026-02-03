@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\WorkOrder;
+use App\Models\AccountHeader;
 use App\Traits\TracksUser;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
@@ -17,8 +18,18 @@ class Invoice extends Model
         'work_order_id',
         'property_id',
         'user_id',
+        'account_header_id',
         'invoice_date',
         'due_date',
+        'tax_included',
+        'tax_rate',
+        'funds_goes_to',
+        'frequency',
+        'penalty_late_fee',
+        'commission_type',
+        'commission_charged_to',
+        'commission_payable_to',
+        'commission_value',
         'subtotal',
         'tax_amount',
         'total_amount',
@@ -52,6 +63,11 @@ class Invoice extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function accountHeader()
+    {
+        return $this->belongsTo(AccountHeader::class);
     }
 
     /**

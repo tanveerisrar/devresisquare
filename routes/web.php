@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Frontend\FormController;
 use App\Http\Controllers\Backend\AizUploadController;
 use App\Http\Controllers\Backend\DashboardController;
+use App\Http\Controllers\Backend\AccountHeaderController;
 use App\Http\Controllers\Frontend\FrontendController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Backend\AuthenticateController;
@@ -47,6 +48,9 @@ Route::group(['middleware' => 'web'], function () {
 Route::group(['middleware' => 'auth', 'prefix' => 'admin'], function () {
     Route::get('/login', [AuthenticateController::class, 'index'])->name('backend.login');
     Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('backend.dashboard');
+
+    Route::resource('account-headers', AccountHeaderController::class)
+        ->names('backend.account_headers');
 });
 
 // Optional: Redirect from '/admin' to the login page if not authenticated

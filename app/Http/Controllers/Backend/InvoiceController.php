@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Backend;
 
 use App\Models\User;
 use App\Models\Invoice;
+use App\Models\AccountHeader;
 use App\Models\TaxRates;
 use App\Models\WorkOrder;
 use App\Models\InvoiceItems;
+use App\Models\DocumentSequence;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use niklasravnsborg\LaravelPdf\Facades\Pdf;
@@ -48,6 +50,83 @@ class InvoiceController
     
         $invoices = $query->latest()->paginate(10); // Pagination with 10 records per page
         return view('backend.invoices.index', compact('invoices'));
+    }
+
+    /**
+     * Manual create form.
+     */
+    public function create()
+    {
+        $users = User::orderBy('name')->get();
+        $taxRates = TaxRates::all();
+        $accountHeaders = AccountHeader::where('header_type', 'invoice')->where('status', true)->orderBy('name')->get();
+        return view('backend.invoices.create', compact('users', 'taxRates', 'accountHeaders'));
+    }
+
+    /**
+     * Store manual invoice.
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'invoice_date' => 'required|date',
+            'due_date' => 'required|date',
+            'description' => 'nullable|string',
+            'amount' => 'required|numeric|min:0',
+            'tax_included' => 'nullable|boolean',
+            'tax_rate' => 'nullable|numeric|min:0',
+            'funds_goes_to' => 'nullable|string|max:100',
+            'frequency' => 'nullable|string|max:100',
+            'penalty_late_fee' => 'nullable|numeric|min:0',
+            'commission_type' => 'nullable|in:percent,flat',
+            'commission_charged_to' => 'nullable|string|max:100',
+            'commission_payable_to' => 'nullable|string|max:100',
+            'commission_value' => 'nullable|numeric|min:0',
+            'account_header_id' => 'nullable|exists:account_headers,id',
+        ]);
+
+        $subtotal = $validated['amount'];
+        $taxRate = (float)($validated['tax_rate'] ?? 0);
+        if ($request->boolean('tax_included')) {
+            $taxAmount = $taxRate > 0 ? $subtotal - ($subtotal / (1 + $taxRate / 100)) : 0;
+            $total = $subtotal;
+        } else {
+            $taxAmount = $taxRate > 0 ? $subtotal * ($taxRate / 100) : 0;
+            $total = $subtotal + $taxAmount;
+        }
+
+        $invoiceNumber = function_exists('generateDocumentNumber')
+            ? generateDocumentNumber('invoice', 'INV')
+            : (method_exists(DocumentSequence::class, 'generate')
+                ? DocumentSequence::generate('invoice', 'INV')
+                : 'INV-' . str_pad((Invoice::max('id') ?? 0) + 1, 6, '0', STR_PAD_LEFT));
+
+        $invoice = Invoice::create([
+            'invoice_number' => $invoiceNumber,
+            'user_id' => $validated['user_id'],
+            'invoice_date' => $validated['invoice_date'],
+            'due_date' => $validated['due_date'],
+            'account_header_id' => $validated['account_header_id'] ?? null,
+            'tax_included' => $request->boolean('tax_included'),
+            'tax_rate' => $taxRate,
+            'funds_goes_to' => $validated['funds_goes_to'] ?? null,
+            'frequency' => $validated['frequency'] ?? null,
+            'penalty_late_fee' => $validated['penalty_late_fee'] ?? null,
+            'commission_type' => $validated['commission_type'] ?? null,
+            'commission_charged_to' => $validated['commission_charged_to'] ?? null,
+            'commission_payable_to' => $validated['commission_payable_to'] ?? null,
+            'commission_value' => $validated['commission_value'] ?? null,
+            'subtotal' => $subtotal,
+            'tax_amount' => $taxAmount,
+            'total_amount' => $total,
+            'notes' => $validated['description'] ?? null,
+            'status_id' => 1,
+            'created_by' => auth()->id(),
+        ]);
+
+        flash('Invoice created successfully!')->success();
+        return redirect()->route('admin.invoices.show', $invoice->id);
     }
 
     /**
@@ -203,8 +282,12 @@ class InvoiceController
         $invoice = Invoice::with('items')->findOrFail($invoiceId);
         $users = User::all(); // Fetch clients
         $taxRates = TaxRates::all(); // Fetch all tax rates from the database
+        $accountHeaders = AccountHeader::where('header_type', 'invoice')
+            ->where('status', true)
+            ->orderBy('name')
+            ->get();
 
-        return view('backend.invoices.edit-page', compact('invoice', 'users', 'taxRates'));
+        return view('backend.invoices.edit-page', compact('invoice', 'users', 'taxRates', 'accountHeaders'));
     }
 
     public function update(Request $request, $invoiceId)
@@ -216,6 +299,7 @@ class InvoiceController
             'invoice_to' => 'required|string|max:255',
             // 'invoice_to_id' => 'required|exists:users,id',
             'user_id' => 'required|exists:users,id',
+            'account_header_id' => 'nullable|exists:account_headers,id',
             'items' => 'required|array',
             'items.*.title' => 'required|string|max:255',
             'items.*.description' => 'nullable|string|max:255',
@@ -263,6 +347,7 @@ class InvoiceController
             'due_date' => $request->due_date,
             'user_id' => $request->user_id,
             'notes' => $request->notes,
+            'account_header_id' => $request->account_header_id,
             'subtotal' => $subtotal,
             'tax_amount' => $taxTotal,
             'total_amount' => $grandTotal,

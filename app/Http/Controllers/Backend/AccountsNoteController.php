@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\CreditNote;
 use App\Models\DebitNote;
 use App\Models\DocumentSequence;
+use App\Models\AccountHeader;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -14,7 +15,12 @@ class AccountsNoteController extends Controller
     // show form to create credit note
     public function createCredit()
     {
-        return view('backend.notes.create_credit');
+        $accountHeaders = AccountHeader::where('header_type', 'credit_note')
+            ->where('status', true)
+            ->orderBy('name')
+            ->get();
+
+        return view('backend.notes.create_credit', compact('accountHeaders'));
     }
 
     public function storeCredit(Request $request)
@@ -24,6 +30,7 @@ class AccountsNoteController extends Controller
             'party_role' => 'required|in:client,vendor',
             'note_date' => 'required|date',
             'total_amount' => 'required|numeric|min:0',
+            'account_header_id' => 'nullable|exists:account_headers,id',
             'notes' => 'nullable|string',
         ]);
 
@@ -41,7 +48,12 @@ class AccountsNoteController extends Controller
 
     public function createDebit()
     {
-        return view('backend.notes.create_debit');
+        $accountHeaders = AccountHeader::where('header_type', 'debit_note')
+            ->where('status', true)
+            ->orderBy('name')
+            ->get();
+
+        return view('backend.notes.create_debit', compact('accountHeaders'));
     }
 
     public function storeDebit(Request $request)
@@ -51,6 +63,7 @@ class AccountsNoteController extends Controller
             'party_role' => 'required|in:client,vendor',
             'note_date' => 'required|date',
             'total_amount' => 'required|numeric|min:0',
+            'account_header_id' => 'nullable|exists:account_headers,id',
             'notes' => 'nullable|string',
         ]);
 

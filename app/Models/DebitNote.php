@@ -2,13 +2,18 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\AccountHeader;
 
 class DebitNote extends Model
 {
-    protected $fillable = ['note_number','note_date','party_id','party_role','total_amount','currency','status','notes','created_by'];
+    protected $fillable = ['note_number','note_date','party_id','party_role','total_amount','currency','status','notes','created_by','account_header_id'];
 
     public function party() {
         return $this->belongsTo(User::class, 'party_id');
+    }
+
+    public function accountHeader() {
+        return $this->belongsTo(AccountHeader::class);
     }
 
     public function applications() {

@@ -10,9 +10,16 @@ class AccountHeader extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name', 'description', 'charge_on', 'who_can_view', 'reminders',
-        'agent_fees', 'require_bank_details', 'charge_in', 'can_have_duration',
-        'settle_through', 'duration_parameter_required', 'penalty_type',
-        'tax_included', 'tax_type', 'transaction_between'
+        'header_type',
+        'name',
+        'description',
+        'status',
+        'reference_number',
+        'created_by',
+        'updated_by',
+    ];
+
+    protected $casts = [
+        'status' => 'boolean',
     ];
 }

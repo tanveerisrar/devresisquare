@@ -12,38 +12,22 @@
     <table class="table table-bordered table-striped">
         <thead>
             <tr>
+                <th>Type</th>
                 <th>Name</th>
-                <th>Charge On</th>
-                <th>Who Can View</th>
-                <th>Reminders</th>
-                <th>Agent Fees</th>
-                <th>Bank Details Required</th>
-                <th>Charge In</th>
-                <th>Duration</th>
-                <th>Settle Through</th>
-                <th>Penalty Type</th>
-                <th>Tax Included</th>
-                <th>Tax Type</th>
-                <th>Transaction Between</th>
+                <th>Reference</th>
+                <th>Status</th>
+                <th>Description</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             @forelse($accountHeaders as $header)
             <tr>
+                <td>{{ ucwords(str_replace('_',' ', $header->header_type)) }}</td>
                 <td>{{ $header->name }}</td>
-                <td>{{ ucfirst($header->charge_on) }}</td>
-                <td>{{ ucfirst($header->who_can_view) }}</td>
-                <td>{!! booleanBadge($header->reminders) !!}</td>
-                <td>{!! booleanBadge($header->agent_fees) !!}</td>
-                <td>{!! booleanBadge($header->require_bank_details) !!}</td>
-                <td>{{ ucfirst($header->charge_in) }}</td>
-                <td>{!! booleanBadge($header->can_have_duration) !!}</td>
-                <td>{{ ucwords(str_replace('_', ' ', $header->settle_through)) }}</td>
-                <td>{{ $header->penalty_type ? ucfirst($header->penalty_type) : '-' }}</td>
-                <td>{!! booleanBadge($header->tax_included) !!}</td>
-                <td>{{ $header->tax_type ? ucfirst($header->tax_type) : '-' }}</td>
-                <td>{{ ucwords(str_replace('_', ' ', $header->transaction_between)) }}</td>
+                <td>{{ $header->reference_number ?? '—' }}</td>
+                <td>{!! booleanBadge($header->status ?? false) !!}</td>
+                <td>{{ $header->description }}</td>
                 <td>
                     <a href="{{ route('backend.account_headers.edit', $header->id) }}" class="btn btn-warning btn-sm">Edit</a>
                     <form action="{{ route('backend.account_headers.destroy', $header->id) }}" method="POST" style="display:inline;">

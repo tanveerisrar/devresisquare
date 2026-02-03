@@ -4,7 +4,10 @@ namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
 use App\Models\AccountHeader;
+use App\Models\DocumentSequence;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 
 class AccountHeaderController extends Controller
 {
@@ -22,7 +25,8 @@ class AccountHeaderController extends Controller
      */
     public function create()
     {
-        return view('backend.account_headers.create');
+        $headerTypes = ['invoice', 'credit_note', 'debit_note'];
+        return view('backend.account_headers.create', compact('headerTypes'));
     }
 
     /**
@@ -30,29 +34,26 @@ class AccountHeaderController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
+            'header_type' => 'required|in:invoice,credit_note,debit_note',
             'name' => 'required|string|max:255',
-            'charge_on' => 'required',
-            'who_can_view' => 'required',
-            'transaction_between' => 'required'
+            'description' => 'nullable|string',
+            'status' => 'nullable|boolean',
         ]);
 
+        $referenceNumber = function_exists('generateDocumentNumber')
+            ? generateDocumentNumber('account_header', 'HDR')
+            : (Schema::hasTable('document_sequences')
+                ? DocumentSequence::generate('account_header', 'HDR')
+                : 'HDR-' . str_pad((AccountHeader::max('id') ?? 0) + 1, 6, '0', STR_PAD_LEFT));
+
         AccountHeader::create([
-            'name' => $request->name,
-            'description' => $request->description,
-            'charge_on' => $request->charge_on,
-            'who_can_view' => $request->who_can_view,
-            'reminders' => $request->reminders ? 1 : 0,
-            'agent_fees' => $request->agent_fees ? 1 : 0,
-            'require_bank_details' => $request->require_bank_details ? 1 : 0,
-            'charge_in' => $request->charge_in,
-            'can_have_duration' => $request->can_have_duration ? 1 : 0,
-            'settle_through' => $request->settle_through,
-            'duration_parameter_required' => $request->duration_parameter_required ? 1 : 0,
-            'penalty_type' => $request->penalty_type,
-            'tax_included' => $request->tax_included ? 1 : 0,
-            'tax_type' => $request->tax_type,
-            'transaction_between' => $request->transaction_between,
+            'header_type' => $validated['header_type'],
+            'name' => $validated['name'],
+            'description' => $validated['description'] ?? null,
+            'status' => $validated['status'] ?? true,
+            'reference_number' => $referenceNumber,
+            'created_by' => Auth::id(),
         ]);
 
         return redirect()->route('backend.account_headers.index')
@@ -64,7 +65,8 @@ class AccountHeaderController extends Controller
      */
     public function edit(AccountHeader $accountHeader)
     {
-        return view('backend.account_headers.edit', compact('accountHeader'));
+        $headerTypes = ['invoice', 'credit_note', 'debit_note'];
+        return view('backend.account_headers.edit', compact('accountHeader', 'headerTypes'));
     }
 
     /**
@@ -72,35 +74,23 @@ class AccountHeaderController extends Controller
      */
     public function update(Request $request, AccountHeader $accountHeader)
     {
-        $request->validate([
+        $validated = $request->validate([
+            'header_type' => 'required|in:invoice,credit_note,debit_note',
             'name' => 'required|string|max:255',
-            'charge_on' => 'required',
-            'who_can_view' => 'required',
-            'transaction_between' => 'required'
+            'description' => 'nullable|string',
+            'status' => 'nullable|boolean',
         ]);
 
         $accountHeader->update([
-            'name' => $request->name,
-            'description' => $request->description,
-            'charge_on' => $request->charge_on,
-            'who_can_view' => $request->who_can_view,
-            'reminders' => $request->reminders ? 1 : 0,
-            'agent_fees' => $request->agent_fees ? 1 : 0,
-            'require_bank_details' => $request->require_bank_details ? 1 : 0,
-            'charge_in' => $request->charge_in,
-            'can_have_duration' => $request->can_have_duration ? 1 : 0,
-            'settle_through' => $request->settle_through,
-            'duration_parameter_required' => $request->duration_parameter_required ? 1 : 0,
-            'penalty_type' => $request->penalty_type,
-            'tax_included' => $request->tax_included ? 1 : 0,
-            'tax_type' => $request->tax_type,
-            'transaction_between' => $request->transaction_between,
+            'header_type' => $validated['header_type'],
+            'name' => $validated['name'],
+            'description' => $validated['description'] ?? null,
+            'status' => $validated['status'] ?? false,
+            'updated_by' => Auth::id(),
         ]);
 
         flash('Account Header updated successfully.')->success();
         return back();
-        // return redirect()->route('backend.account_headers.index')
-        //                  ->with('success', 'Account Header updated successfully.');
     }
 
     /**

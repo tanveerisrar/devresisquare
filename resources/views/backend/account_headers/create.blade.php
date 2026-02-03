@@ -16,6 +16,7 @@
     @endif
 
     <form action="{{ route('backend.account_headers.store') }}" method="POST" id="accountHeaderForm">
+        @php($accountHeader = $accountHeader ?? null)
         @include('backend.account_headers._form', ['buttonText' => 'Create'])
     </form>
 </div>
