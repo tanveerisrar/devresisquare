@@ -39,6 +39,7 @@ class DatabaseSeeder extends Seeder
             CountrySeeder::class,
             NationalitySeeder::class,
             EventTypeSeeder::class,
+            SysAccountingSeeder::class,
         ]);
 
         // User::factory()->create([

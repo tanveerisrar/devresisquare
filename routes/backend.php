@@ -29,6 +29,16 @@ use App\Http\Controllers\Backend\OwnerGroupController;
 use App\Http\Controllers\Backend\DesignationController;
 use App\Http\Controllers\Backend\TenancyTypeController;
 use App\Http\Controllers\Backend\TransactionController;
+use App\Http\Controllers\Backend\Accounting\Masters\BankController;
+use App\Http\Controllers\Backend\Accounting\Masters\TaxController;
+use App\Http\Controllers\Backend\Accounting\Sale\CreditNoteController;
+use App\Http\Controllers\Backend\Accounting\Sale\SaleInvoiceController;
+use App\Http\Controllers\Backend\Accounting\Payments\PaymentController;
+use App\Http\Controllers\Backend\Accounting\Purchase\DebitNoteController;
+use App\Http\Controllers\Backend\Accounting\Purchase\PurchaseInvoiceController as AccountingPurchaseInvoiceController;
+use App\Http\Controllers\Backend\Accounting\Masters\PaymentMethodController as AccountingPaymentMethodController;
+use App\Http\Controllers\Backend\Accounting\Masters\IncomeCategoryController as AccountingIncomeCategoryController;
+use App\Http\Controllers\Backend\Accounting\Masters\ExpenseCategoryController as AccountingExpenseCategoryController;
 use App\Http\Controllers\Backend\AuthenticateController;
 use App\Http\Controllers\Backend\DocumentTypeController;
 use App\Http\Controllers\Backend\EstateChargeController;
@@ -454,6 +464,56 @@ Route::middleware('auth')->group(function () {
                 'update'  => 'account_headers.update',
                 'destroy' => 'account_headers.destroy',
             ]);
+
+        Route::prefix('accounting')->name('accounting.')->group(function () {
+            Route::resource('masters/banks', BankController::class)
+                ->except(['show'])
+                ->names('masters.banks');
+
+            Route::resource('masters/payment-methods', AccountingPaymentMethodController::class)
+                ->except(['show'])
+                ->names('masters.payment_methods');
+
+            Route::resource('masters/income-categories', AccountingIncomeCategoryController::class)
+                ->except(['show'])
+                ->names('masters.income_categories');
+
+            Route::resource('masters/expense-categories', AccountingExpenseCategoryController::class)
+                ->except(['show'])
+                ->names('masters.expense_categories');
+
+            Route::resource('masters/taxes', TaxController::class)
+                ->except(['show'])
+                ->names('masters.taxes');
+
+            Route::resource('sale/invoices', SaleInvoiceController::class)
+                ->names('sale.invoices');
+            Route::post('sale/invoices/{invoice}/pay', [SaleInvoiceController::class, 'pay'])
+                ->name('sale.invoices.pay');
+            Route::get('sale/invoices/{invoice}/paid', [SaleInvoiceController::class, 'markPaid'])
+                ->name('sale.invoices.paid');
+
+            Route::resource('sale/credit-notes', CreditNoteController::class)
+                ->except(['show'])
+                ->names('sale.credit_notes');
+
+            Route::resource('purchase/invoices', AccountingPurchaseInvoiceController::class)
+                ->except(['show'])
+                ->names('purchase.invoices');
+
+            Route::resource('purchase/debit-notes', DebitNoteController::class)
+                ->except(['show'])
+                ->names('purchase.debit_notes');
+
+            Route::get('payments/all-transactions', [PaymentController::class, 'all'])->name('payments.all');
+            Route::get('payments/incomes', [PaymentController::class, 'incomes'])->name('payments.incomes');
+            Route::get('payments/expenses', [PaymentController::class, 'expenses'])->name('payments.expenses');
+            Route::get('payments/general-entry', [PaymentController::class, 'general'])->name('payments.general');
+
+            Route::resource('payments', PaymentController::class)
+                ->except(['show'])
+                ->names('payments');
+        });
         
         
         // Transactions CRUD

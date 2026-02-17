@@ -5,9 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PaymentMethod extends Model
+class SysTax extends Model
 {
     use HasFactory;
 
+    protected $table = 'sys_taxes';
     protected $guarded = [];
+    const UPDATED_AT = null;
 }

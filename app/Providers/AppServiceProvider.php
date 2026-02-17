@@ -8,8 +8,12 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use OwenIt\Auditing\Contracts\Auditor as AuditorContract;
 use Spatie\Permission\Models\Permission;
+use App\Models\SysSaleInvoice;
+use App\Models\SysPurchaseInvoice;
+use App\Models\User;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -52,5 +56,15 @@ class AppServiceProvider extends ServiceProvider
             });
         }
         
+        Relation::enforceMorphMap([
+            // preferred short keys
+            'sale_invoice' => SysSaleInvoice::class,
+            'purchase_invoice' => SysPurchaseInvoice::class,
+            'user' => User::class,
+            // allow legacy stored class names to keep working
+            'App\\Models\\SysSaleInvoice' => SysSaleInvoice::class,
+            'App\\Models\\SysPurchaseInvoice' => SysPurchaseInvoice::class,
+            'App\\Models\\User' => User::class,
+        ]);
     }
 }
