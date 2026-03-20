@@ -15,6 +15,11 @@ use App\Models\SysSaleInvoice;
 use App\Models\SysPurchaseInvoice;
 use App\Models\User;
 use App\Models\SysReceipt;
+use App\Models\Property;
+use App\Models\Tenancy;
+use App\Models\Owner;
+use App\Models\Tenant;
+use App\Models\Contractor;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -63,11 +68,21 @@ class AppServiceProvider extends ServiceProvider
             'purchase_invoice' => SysPurchaseInvoice::class,
             'user' => User::class,
             'receipt' => SysReceipt::class,
+            'Property' => Property::class,
+            'Tenancy' => Tenancy::class,
+            'Owner' => Owner::class,
+            'Tenant' => Tenant::class,
+            'Contractor' => Contractor::class,
             // allow legacy stored class names to keep working
             'App\\Models\\SysSaleInvoice' => SysSaleInvoice::class,
             'App\\Models\\SysPurchaseInvoice' => SysPurchaseInvoice::class,
             'App\\Models\\User' => User::class,
             'App\\Models\\SysReceipt' => SysReceipt::class,
+            'App\\Models\\Property' => Property::class,
+            'App\\Models\\Tenancy' => Tenancy::class,
+            'App\\Models\\Owner' => Owner::class,
+            'App\\Models\\Tenant' => Tenant::class,
+            'App\\Models\\Contractor' => Contractor::class,
         ]);
     }
 }

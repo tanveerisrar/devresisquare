@@ -8,15 +8,24 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany as MorphManyRelation;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use App\Models\GlJournal;
 
 class SysSaleInvoice extends Model
 {
     use HasFactory;
 
+    public const LINK_TO_TYPES = ['Property', 'Tenancy', 'Contractor'];
+    public const CHARGE_TO_TYPES = ['Owner', 'Tenant', 'Contractor'];
+
     protected $table = 'sys_sale_invoices';
     protected $guarded = [];
     const UPDATED_AT = null;
+    protected $casts = [
+        'link_to_id' => 'integer',
+        'charge_to_id' => 'integer',
+        'bank_account_id' => 'integer',
+    ];
 
     public function receipts(): MorphMany
     {
@@ -36,6 +45,21 @@ class SysSaleInvoice extends Model
     public function invoiceHeader(): BelongsTo
     {
         return $this->belongsTo(SysInvoiceHeader::class, 'invoice_header_id');
+    }
+
+    public function linkTo(): MorphTo
+    {
+        return $this->morphTo(__FUNCTION__, 'link_to_type', 'link_to_id');
+    }
+
+    public function chargeTo(): MorphTo
+    {
+        return $this->morphTo(__FUNCTION__, 'charge_to_type', 'charge_to_id');
+    }
+
+    public function bankAccount(): BelongsTo
+    {
+        return $this->belongsTo(BankAccount::class, 'bank_account_id');
     }
 
     public function getCustomerAvailableCreditAttribute(): float
