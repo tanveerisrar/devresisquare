@@ -16,7 +16,7 @@ class BankController extends BaseCrudController
     protected array $defaults = ['is_active' => true, 'is_primary' => false, 'balance_type' => 'savings'];
     protected array $columns = [
         ['key' => 'id', 'label' => '#'],
-        ['key' => 'account_name', 'label' => 'Account Name'],
+        ['key' => 'account_name', 'label' => 'Account Holder Name'],
         ['key' => 'account_no', 'label' => 'Account No'],
         ['key' => 'sort_code', 'label' => 'Sort Code'],
         ['key' => 'bank_name', 'label' => 'Bank'],
@@ -34,7 +34,7 @@ class BankController extends BaseCrudController
     protected function fields(): array
     {
         return [
-            ['name' => 'account_name', 'label' => 'Account Name', 'type' => 'text'],
+            ['name' => 'account_name', 'label' => 'Account Holder Name', 'type' => 'text'],
             ['name' => 'account_no', 'label' => 'Account No', 'type' => 'text'],
             ['name' => 'sort_code', 'label' => 'Sort Code', 'type' => 'text'],
             ['name' => 'bank_name', 'label' => 'Bank Name', 'type' => 'text'],

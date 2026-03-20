@@ -14,6 +14,7 @@ use Spatie\Permission\Models\Permission;
 use App\Models\SysSaleInvoice;
 use App\Models\SysPurchaseInvoice;
 use App\Models\User;
+use App\Models\SysReceipt;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -61,10 +62,12 @@ class AppServiceProvider extends ServiceProvider
             'sale_invoice' => SysSaleInvoice::class,
             'purchase_invoice' => SysPurchaseInvoice::class,
             'user' => User::class,
+            'receipt' => SysReceipt::class,
             // allow legacy stored class names to keep working
             'App\\Models\\SysSaleInvoice' => SysSaleInvoice::class,
             'App\\Models\\SysPurchaseInvoice' => SysPurchaseInvoice::class,
             'App\\Models\\User' => User::class,
+            'App\\Models\\SysReceipt' => SysReceipt::class,
         ]);
     }
 }

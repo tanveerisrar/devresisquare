@@ -26,12 +26,23 @@
     .status-DRAFT { color: #3b82f6; }
     .status-CANCELLED { color: #6b7280; text-decoration: line-through; }
     .btn-stripe { padding: 10px 16px; border: none; background: #635bff; color: #fff; border-radius: 4px; cursor: pointer; }
+    .btn-pdf { display: inline-block; padding: 8px 16px; border: none; background: #111; color: #fff; border-radius: 4px; cursor: pointer; font-size: 13px; text-decoration: none; }
+    .btn-pdf:hover { background: #333; color: #fff; }
     .notes-box { background: #f9fafb; border: 1px solid #e5e7eb; padding: 10px 12px; }
 </style>
 @endpush
 
 @section('content')
 <div class="mt-md-4 me-md-4 me-3 mt-3">
+    @if(($customer->available_credit ?? 0) > 0)
+        <div class="alert alert-info d-flex justify-content-between align-items-center" style="max-width:900px;margin:0 auto 12px auto;">
+            <span>Customer available credit: {{ number_format($customer->available_credit ?? 0, 2) }}</span>
+            @if(($balance ?? 0) > 0)
+                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#applyCreditModal">Apply Credit</button>
+            @endif
+        </div>
+    @endif
+
     <div class="invoice-shell">
         <div class="invoice-hero">
             <div class="invoice-grid">
@@ -52,6 +63,9 @@
                         <div>Invoice Date: {{ $invoice->invoice_date }}</div>
                         <div>Invoice Due Date: {{ $invoice->due_date ?? '-' }}</div>
                     </div>
+                    <a href="{{ route($routeName . '.pdf', $invoice->id) }}" class="btn-pdf" style="margin-top:10px;" target="_blank">
+                        Print PDF
+                    </a>
                 </div>
             </div>
             <div class="billto">
@@ -108,8 +122,20 @@
                 <div style="margin-top:4px;">{{ $invoice->notes ?? 'N/A' }}</div>
             </div>
 
-            <div class="mt-12">
-                <h6 style="margin-bottom:6px;">Payments</h6>
+            <div class="mt-5">
+                <div class="d-flex justify-content-between">
+                    <h5 class="m-3">Payments</h5>
+                    @if(($balance ?? 0) > 0)
+                        <button type="button" class="btn-stripe" data-bs-toggle="modal" data-bs-target="#stripePayModal">
+                            Pay with Stripe (Test)
+                        </button>
+                        {{-- @if(($customer->available_credit ?? 0) > 0)
+                            <button type="button" class="btn btn-outline-primary ms-2" data-bs-toggle="modal" data-bs-target="#applyCreditModal">
+                                Apply Credit
+                            </button>
+                        @endif --}}
+                    @endif
+                </div>
                 <table class="table-items">
                     <thead>
                         <tr>
@@ -119,6 +145,7 @@
                             <th>Bank</th>
                             <th class="text-right">Amount</th>
                             <th>Notes</th>
+                            <th style="width:100px;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -130,23 +157,178 @@
                                 <td>{{ optional($pay->bankAccount)->account_name ?? '-' }}</td>
                                 <td class="text-right">{{ number_format($pay->amount, 2) }}</td>
                                 <td>{{ $pay->notes }}</td>
+                                <td class="text-center">
+                                    @if($pay->is_voided)
+                                        <span class="badge bg-secondary">Voided</span>
+                                    @elseif($pay->source_receipt_id)
+                                        <form action="{{ route($routeName . '.undoCredit', [$invoice->id, $pay->id]) }}" method="POST" onsubmit="return confirm('Undo this credit application?');">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">Undo</button>
+                                        </form>
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center">No payments recorded.</td>
+                                <td colspan="7" class="text-center">No payments recorded.</td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
-
-            @if(($balance ?? 0) > 0)
-                <form action="{{ route($routeName . '.pay', $invoice->id) }}" method="POST" style="margin-top:14px;">
-                    @csrf
-                    <button type="submit" class="btn-stripe">Pay with Stripe (Test)</button>
-                </form>
-            @endif
         </div>
     </div>
 </div>
+
+@if(($balance ?? 0) > 0)
+    <div class="modal fade" id="stripePayModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Stripe Payment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ route($routeName . '.pay', $invoice->id) }}" method="POST">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Amount</label>
+                            <input type="number" name="amount" class="form-control" min="0.50" step="0.01" max="{{ $balance }}" value="{{ $balance }}" required>
+                            <small class="text-muted">Max: {{ number_format($balance, 2) }} (current balance)</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Currency</label>
+                            <input type="text" name="currency" class="form-control" value="gbp" maxlength="3">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Proceed to Stripe</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+@endif
+
+@if(($customer->available_credit ?? 0) > 0 && ($balance ?? 0) > 0)
+    <div class="modal fade" id="applyCreditModal" tabindex="-1" aria-hidden="true" data-credit-modal data-balance="{{ $balance }}">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Apply Credits - {{ $invoice->invoice_no }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ route($routeName . '.applyCredit', $invoice->id) }}" method="POST">
+                    @csrf
+                    <div class="modal-body">
+                        @if($credits->isEmpty())
+                            <p class="text-muted mb-0">No available credits.</p>
+                        @else
+                            <div class="table-responsive">
+                                <table class="table table-bordered align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Credit Note #</th>
+                                            <th>Date</th>
+                                            <th class="text-end">Credit Amount</th>
+                                            <th class="text-end">Credits Available</th>
+                                            <th class="text-end">Amount to Credit</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($credits as $idx => $credit)
+                                            <tr>
+                                                <td>{{ $credit->receipt_no }}</td>
+                                                <td>{{ \Carbon\Carbon::parse($credit->receipt_date)->format('Y-m-d') }}</td>
+                                                <td class="text-end">{{ number_format($credit->amount, 2) }}</td>
+                                                <td class="text-end">{{ number_format($credit->remaining_amount, 2) }}</td>
+                                                <td style="max-width: 160px;">
+                                                    <input type="hidden" name="credits[{{ $idx }}][receipt_id]" value="{{ $credit->id }}">
+                                                    <input
+                                                        type="number"
+                                                        name="credits[{{ $idx }}][amount]"
+                                                        class="form-control form-control-sm credit-input"
+                                                        min="0"
+                                                        step="0.01"
+                                                        max="{{ min($credit->remaining_amount, $balance) }}"
+                                                        data-available="{{ $credit->remaining_amount }}"
+                                                    >
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="d-flex justify-content-end gap-4 mt-3">
+                                <div><strong>Amount to Credit:</strong> <span data-credit-total>0.00</span></div>
+                                <div><strong>Balance Due:</strong> <span data-credit-remaining>{{ number_format($balance, 2) }}</span></div>
+                            </div>
+                            <small class="text-muted d-block mt-1">Total credit cannot exceed the invoice balance or individual credit availability.</small>
+                        @endif
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Apply</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+@endif
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('[data-credit-modal]').forEach(function (modal) {
+        const balance = parseFloat(modal.dataset.balance || '0');
+        const totalEl = modal.querySelector('[data-credit-total]');
+        const remainingEl = modal.querySelector('[data-credit-remaining]');
+        const inputs = modal.querySelectorAll('input.credit-input');
+
+        const recalc = () => {
+            let sum = 0;
+            inputs.forEach((input) => {
+                const val = parseFloat(input.value || '0') || 0;
+                sum += val;
+            });
+            const remaining = balance - sum;
+            if (totalEl) {
+                totalEl.textContent = sum.toFixed(2);
+                totalEl.classList.toggle('text-danger', sum > balance + 0.0001);
+            }
+            if (remainingEl) {
+                remainingEl.textContent = remaining.toFixed(2);
+                remainingEl.classList.toggle('text-danger', remaining < -0.0001);
+            }
+        };
+
+        inputs.forEach((input) => input.addEventListener('input', (e) => {
+            const maxAvail = parseFloat(input.dataset.available || '0');
+            let val = parseFloat(input.value || '0') || 0;
+
+            if (val > maxAvail) val = maxAvail;
+            if (val < 0) val = 0;
+
+            // enforce invoice balance across all rows
+            let otherSum = 0;
+            inputs.forEach((el) => {
+                if (el !== input) {
+                    otherSum += parseFloat(el.value || '0') || 0;
+                }
+            });
+            const remainingForThis = Math.max(0, balance - otherSum);
+            if (val > remainingForThis) {
+                val = remainingForThis;
+            }
+
+            input.value = val ? val.toFixed(2) : '';
+            recalc();
+        }));
+    });
+});
+</script>
+@endpush

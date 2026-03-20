@@ -7,6 +7,7 @@ use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use App\Models\SysReceipt;
 
 class User extends Authenticatable
 {
@@ -89,6 +90,18 @@ class User extends Authenticatable
             'model_id',
             'role_id'
         );
+    }
+
+    public function creditReceipts()
+    {
+        return $this->hasMany(SysReceipt::class, 'receiptable_id')
+            ->where('receiptable_type', 'user')
+            ->whereIn('status', ['unapplied', 'partially_applied']);
+    }
+
+    public function getAvailableCreditAttribute(): float
+    {
+        return $this->creditReceipts->pluck('remaining_amount')->sum();
     }
 
     public function isSuperAdmin()

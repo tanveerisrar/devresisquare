@@ -62,11 +62,11 @@
         <div class="row g-3 mt-2">
             <div class="col-md-4">
                 <label class="form-label">Invoice Date <span class="text-danger">*</span></label>
-                <input type="date" name="invoice_date" class="form-control" value="{{ $oldVal('invoice_date') }}" required>
+                <input type="date" name="invoice_date" id="invoice-date" class="form-control" value="{{ $oldVal('invoice_date') ?? now()->format('Y-m-d') }}" required>
             </div>
             <div class="col-md-4">
                 <label class="form-label">Due Date</label>
-                <input type="date" name="due_date" class="form-control" value="{{ $oldVal('due_date') }}">
+                <input type="date" name="due_date" id="due-date" class="form-control" value="{{ $oldVal('due_date') }}">
             </div>
             <div class="col-md-4">
                 <label class="form-label">Discount Type</label>
@@ -80,7 +80,7 @@
     </div>
 </div>
 
-<div class="card shadow-sm mb-3">
+<div class="card shadow-sm mb-3 d-none">
     <div class="card-body">
         <div class="row g-3">
             <div class="col-md-6">
@@ -194,6 +194,22 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    const invoiceDateInput = document.getElementById('invoice-date');
+    const dueDateInput = document.getElementById('due-date');
+
+    function setDueDate() {
+        if (!invoiceDateInput.value) return;
+        const d = new Date(invoiceDateInput.value);
+        d.setDate(d.getDate() + 30);
+        dueDateInput.value = d.toISOString().split('T')[0];
+    }
+
+    invoiceDateInput.addEventListener('change', setDueDate);
+
+    if (!dueDateInput.value && invoiceDateInput.value) {
+        setDueDate();
+    }
+
     const tableBody = document.querySelector('#items-table tbody');
     const addBtn = document.querySelector('#add-item-row');
     const totalField = document.querySelector('input[name="total_amount"]');

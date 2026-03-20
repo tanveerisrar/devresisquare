@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Backend\Accounting\Purchase;
 use App\Http\Controllers\Backend\Accounting\BaseCrudController;
 use App\Models\SysPurchaseInvoice;
 use App\Models\User;
+use App\Models\GlJournal;
+use App\Services\Accounting\PostingService;
 use Illuminate\Validation\Rule;
+use Illuminate\Http\Request;
 
 class PurchaseInvoiceController extends BaseCrudController
 {
@@ -63,5 +66,58 @@ class PurchaseInvoiceController extends BaseCrudController
             'status' => ['nullable', Rule::in(['draft', 'received', 'paid', 'partial', 'cancelled'])],
             'notes' => ['nullable', 'string'],
         ];
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate($this->rules());
+        $data = $this->preparePayload($request, $data);
+
+        /** @var SysPurchaseInvoice $invoice */
+        $invoice = SysPurchaseInvoice::create($data);
+        $this->postInvoiceIfNeeded($invoice);
+
+        return redirect()->route($this->routeName . '.index')
+            ->with('success', $this->title . ' created successfully.');
+    }
+
+    public function update(Request $request, int $id)
+    {
+        $invoice = SysPurchaseInvoice::findOrFail($id);
+        $data = $request->validate($this->rules($id));
+        $data = $this->preparePayload($request, $data);
+
+        $invoice->update($data);
+        $this->postInvoiceIfNeeded($invoice);
+
+        return redirect()->route($this->routeName . '.index')
+            ->with('success', $this->title . ' updated successfully.');
+    }
+
+    private function postInvoiceIfNeeded(SysPurchaseInvoice $invoice): void
+    {
+        $status = $invoice->status ?? 'draft';
+        $needsPosting = in_array($status, ['received', 'paid', 'partial', 'posted'], true);
+        $issueJournals = GlJournal::issueFor('purchase', $invoice->id)->get();
+        if ($issueJournals->count() > 1) {
+            $keeper = $issueJournals->first();
+            $issueJournals->slice(1)->each(function (GlJournal $jnl) {
+                app(PostingService::class)->deleteJournalAndBalances($jnl);
+            });
+            $issueJournals = collect([$keeper]);
+        }
+
+        if ($needsPosting) {
+            if ($issueJournals->isNotEmpty()) {
+                app(PostingService::class)->updatePurchaseIssueJournal($invoice, $issueJournals->first());
+            } else {
+                $journal = app(PostingService::class)->postPurchaseInvoice($invoice);
+                if (!$journal) {
+                    throw new \RuntimeException('Purchase invoice posting failed.');
+                }
+            }
+        } elseif ($issueJournals->isNotEmpty()) {
+            app(PostingService::class)->deleteJournalAndBalances($issueJournals->first());
+        }
     }
 }

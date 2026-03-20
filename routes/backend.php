@@ -39,6 +39,15 @@ use App\Http\Controllers\Backend\Accounting\Purchase\PurchaseInvoiceController a
 use App\Http\Controllers\Backend\Accounting\Masters\PaymentMethodController as AccountingPaymentMethodController;
 use App\Http\Controllers\Backend\Accounting\Masters\IncomeCategoryController as AccountingIncomeCategoryController;
 use App\Http\Controllers\Backend\Accounting\Masters\ExpenseCategoryController as AccountingExpenseCategoryController;
+use App\Http\Controllers\Backend\Accounting\Receipts\ReceiptController;
+use App\Http\Controllers\Backend\Accounting\GlAccountBalanceController;
+use App\Http\Controllers\Backend\Accounting\GlAccountController;
+use App\Http\Controllers\Backend\Accounting\GlJournalController;
+use App\Http\Controllers\Backend\Accounting\GlJournalLineController;
+use App\Http\Controllers\Backend\Accounting\StatementController;
+use App\Http\Controllers\Backend\Accounting\ReportController;
+use App\Http\Controllers\Backend\Accounting\BankReconciliationController;
+use App\Http\Controllers\Backend\Accounting\FixedAssetController;
 use App\Http\Controllers\Backend\AuthenticateController;
 use App\Http\Controllers\Backend\DocumentTypeController;
 use App\Http\Controllers\Backend\EstateChargeController;
@@ -486,12 +495,40 @@ Route::middleware('auth')->group(function () {
                 ->except(['show'])
                 ->names('masters.taxes');
 
+            Route::resource('gl-accounts', GlAccountController::class)
+                ->except(['show'])
+                ->names('gl_accounts');
+
+            Route::resource('gl-account-balances', GlAccountBalanceController::class)
+                ->except(['show'])
+                ->names('gl_account_balances');
+
+            Route::resource('gl-journals', GlJournalController::class)
+                ->except(['show'])
+                ->names('gl_journals');
+
+            Route::resource('gl-journal-lines', GlJournalLineController::class)
+                ->except(['show'])
+                ->names('gl_journal_lines');
+
+            Route::get('sale/invoices/search', [SaleInvoiceController::class, 'ajaxSearchForReceipts'])
+                ->name('sale.invoices.search');
+            Route::get('sale/invoices/{invoice}/json', [SaleInvoiceController::class, 'ajaxGetForReceipts'])
+                ->name('sale.invoices.json');
             Route::resource('sale/invoices', SaleInvoiceController::class)
                 ->names('sale.invoices');
             Route::post('sale/invoices/{invoice}/pay', [SaleInvoiceController::class, 'pay'])
                 ->name('sale.invoices.pay');
             Route::get('sale/invoices/{invoice}/paid', [SaleInvoiceController::class, 'markPaid'])
                 ->name('sale.invoices.paid');
+            Route::post('sale/invoices/{invoice}/apply-credit', [SaleInvoiceController::class, 'applyCredit'])
+                ->name('sale.invoices.applyCredit');
+            Route::post('sale/invoices/advance', [SaleInvoiceController::class, 'storeAdvance'])
+                ->name('sale.invoices.storeAdvance');
+            Route::post('sale/invoices/{invoice}/undo-credit/{payment}', [SaleInvoiceController::class, 'undoCredit'])
+                ->name('sale.invoices.undoCredit');
+            Route::get('sale/invoices/{invoice}/pdf', [SaleInvoiceController::class, 'pdf'])
+                ->name('sale.invoices.pdf');
 
             Route::resource('sale/credit-notes', CreditNoteController::class)
                 ->except(['show'])
@@ -504,6 +541,24 @@ Route::middleware('auth')->group(function () {
             Route::resource('purchase/debit-notes', DebitNoteController::class)
                 ->except(['show'])
                 ->names('purchase.debit_notes');
+
+            Route::resource('receipts', ReceiptController::class)
+                ->names('receipts');
+            Route::get('receipts/{receipt}/pdf', [ReceiptController::class, 'pdf'])->name('receipts.pdf');
+
+            Route::get('statements/customers', [StatementController::class, 'customer'])->name('statements.customers');
+            Route::get('statements/accounts', [StatementController::class, 'account'])->name('statements.accounts');
+
+            Route::get('reports/trial-balance', [ReportController::class, 'trialBalance'])->name('reports.trial_balance');
+            Route::get('reports/profit-loss', [ReportController::class, 'profitLoss'])->name('reports.profit_loss');
+            Route::get('reports/balance-sheet', [ReportController::class, 'balanceSheet'])->name('reports.balance_sheet');
+            Route::get('reports/ar-aging', [ReportController::class, 'arAging'])->name('reports.ar_aging');
+            Route::get('reports/ap-aging', [ReportController::class, 'apAging'])->name('reports.ap_aging');
+
+            Route::get('bank-reconciliation', [BankReconciliationController::class, 'index'])->name('bank_reconciliation.index');
+            Route::post('bank-reconciliation/reconcile', [BankReconciliationController::class, 'reconcile'])->name('bank_reconciliation.reconcile');
+
+            Route::resource('fixed-assets', FixedAssetController::class)->names('fixed_assets');
 
             Route::get('payments/all-transactions', [PaymentController::class, 'all'])->name('payments.all');
             Route::get('payments/incomes', [PaymentController::class, 'incomes'])->name('payments.incomes');
