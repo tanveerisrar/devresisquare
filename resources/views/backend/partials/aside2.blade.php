@@ -868,25 +868,25 @@
 
         <li class="sidebar-list-item submenu_wrapper">
             <a href="#accountingSubmenu" data-bs-toggle="collapse"
-                aria-expanded="{{ request()->routeIs('backend.accounting.*') || request()->routeIs('backend.account_headers.*') ? 'true' : 'false' }}"
-                class="dropdown-toggle {{ request()->routeIs('backend.accounting.*') || request()->routeIs('backend.account_headers.*') ? 'active' : '' }}">
+                aria-expanded="{{ request()->routeIs('backend.accounting.*') ? 'true' : 'false' }}"
+                class="dropdown-toggle {{ request()->routeIs('backend.accounting.*') ? 'active' : '' }}">
                 <span class="icon_wrapper pb_25">
                     <i class="fa-solid fa-calculator"></i> Accounting
                 </span>
                 <i class="fa fa-angle-down"></i>
             </a>
 
-            <ul class="nav-second-level list-unstyled collapse {{ request()->routeIs('backend.accounting.*') || request()->routeIs('backend.account_headers.*') ? 'show' : '' }}"
+            <ul class="nav-second-level list-unstyled collapse {{ request()->routeIs('backend.accounting.*') ? 'show' : '' }}"
                 id="accountingSubmenu">
 
                 <li class="sidebar-sub-list-item submenu_wrapper">
                     <a href="#accountingMastersSubmenu" data-bs-toggle="collapse"
-                        aria-expanded="{{ request()->routeIs('backend.accounting.masters.*') || request()->routeIs('backend.account_headers.*') ? 'true' : 'false' }}"
-                        class="dropdown-toggle {{ request()->routeIs('backend.accounting.masters.*') || request()->routeIs('backend.account_headers.*') ? 'active' : '' }}">
+                        aria-expanded="{{ request()->routeIs('backend.accounting.masters.*') ? 'true' : 'false' }}"
+                        class="dropdown-toggle {{ request()->routeIs('backend.accounting.masters.*') ? 'active' : '' }}">
                         <span class="icon_wrapper">Masters</span>
                         <i class="fa fa-angle-down"></i>
                     </a>
-                    <ul class="nav-third-level collapse list-unstyled {{ request()->routeIs('backend.accounting.masters.*') || request()->routeIs('backend.account_headers.*') ? 'show' : '' }}"
+                    <ul class="nav-third-level collapse list-unstyled {{ request()->routeIs('backend.accounting.masters.*') ? 'show' : '' }}"
                         id="accountingMastersSubmenu">
                         <li class="sidebar-sub-sub-list-item">
                             <a class="{{ request()->routeIs('backend.accounting.masters.banks.*') ? 'active' : '' }}" href="{{ route('backend.accounting.masters.banks.index') }}">Banks</a>
@@ -904,7 +904,7 @@
                             <a class="{{ request()->routeIs('backend.accounting.masters.taxes.*') ? 'active' : '' }}" href="{{ route('backend.accounting.masters.taxes.index') }}">Taxes</a>
                         </li>
                         <li class="sidebar-sub-sub-list-item">
-                            <a class="{{ request()->routeIs('backend.account_headers.*') ? 'active' : '' }}" href="{{ route('backend.account_headers.index') }}">Invoice Headers</a>
+                            <a class="{{ request()->routeIs('backend.accounting.masters.invoice_headers.*') ? 'active' : '' }}" href="{{ route('backend.accounting.masters.invoice_headers.index') }}">Invoice Headers</a>
                         </li>
                     </ul>
                 </li>

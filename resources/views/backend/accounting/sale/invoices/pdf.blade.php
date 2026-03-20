@@ -99,8 +99,24 @@
                     <span class="strong">{{ $invoice->due_date ?? '-' }}</span>
                 </td>
             </tr>
+            <tr>
+                <td class="gry-color small"></td>
+                <td class="text-right small">
+                    <span class="gry-color small">Invoice Header:</span>
+                    <span class="strong">{{ $invoice->invoiceHeader?->header_name ?? '-' }}</span>
+                </td>
+            </tr>
         </table>
     </div>
+
+    @if($invoice->invoiceHeader)
+        <div style="padding: 0 1.5rem 12px 1.5rem;">
+            <p style="margin: 0 0 4px;"><strong>Header Reference:</strong> {{ $invoice->invoiceHeader->unique_reference_number }}</p>
+            @if($invoice->invoiceHeader->header_description)
+                <p style="margin: 0;"><strong>Header Description:</strong> {{ $invoice->invoiceHeader->header_description }}</p>
+            @endif
+        </div>
+    @endif
 
     <div style="padding: 0 1.5rem;">
         <table class="invoice-table">

@@ -33,6 +33,11 @@ class SysSaleInvoice extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    public function invoiceHeader(): BelongsTo
+    {
+        return $this->belongsTo(SysInvoiceHeader::class, 'invoice_header_id');
+    }
+
     public function getCustomerAvailableCreditAttribute(): float
     {
         return $this->user?->available_credit ?? 0;

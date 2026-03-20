@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backend\Accounting\Sale;
 
 use App\Http\Controllers\Backend\Accounting\BaseCrudController;
+use App\Models\SysInvoiceHeader;
 use App\Models\SysSaleInvoice;
 use App\Models\SysSaleInvoiceItem;
 use App\Models\SysTax;
@@ -27,10 +28,11 @@ class SaleInvoiceController extends BaseCrudController
     protected string $routeName = 'backend.accounting.sale.invoices';
     protected string $title = 'Sale Invoices';
     protected array $defaults = ['status' => 'draft', 'invoice_date' => null];
-    protected array $with = ['items', 'user.creditReceipts'];
+    protected array $with = ['items', 'user.creditReceipts', 'invoiceHeader'];
     protected array $columns = [
         ['key' => 'id', 'label' => '#'],
         ['key' => 'invoice_no', 'label' => 'Invoice No'],
+        ['key' => 'invoiceHeader.header_name', 'label' => 'Invoice Header'],
         ['key' => 'user_id', 'label' => 'Customer'],
         ['key' => 'customer_available_credit', 'label' => 'Customer Credit', 'type' => 'money'],
         ['key' => 'invoice_date', 'label' => 'Invoice Date', 'type' => 'date'],
@@ -52,12 +54,29 @@ class SaleInvoiceController extends BaseCrudController
             'fields' => $this->fields(),
             'selectOptions' => $this->options(),
             'defaults' => $defaults,
+            'selectedInvoiceHeader' => $this->resolveSelectedInvoiceHeader(),
+        ]);
+    }
+
+    public function edit(int $id)
+    {
+        $item = $this->query()->findOrFail($id);
+
+        return view($this->viewPath . '.edit', [
+            'title' => $this->title,
+            'routeName' => $this->routeName,
+            'fields' => $this->fields(),
+            'selectOptions' => $this->options(),
+            'item' => $item,
+            'defaults' => $this->defaults,
+            'selectedInvoiceHeader' => $this->resolveSelectedInvoiceHeader($item),
         ]);
     }
 
     protected function fields(): array
     {
         return [
+            ['name' => 'invoice_header_id', 'label' => 'Invoice Header', 'type' => 'select'],
             ['name' => 'user_id', 'label' => 'Customer', 'type' => 'select', 'required' => true],
             ['name' => 'invoice_no', 'label' => 'Invoice No', 'type' => 'text', 'required' => true],
             ['name' => 'invoice_date', 'label' => 'Invoice Date', 'type' => 'date', 'required' => true],
@@ -77,6 +96,7 @@ class SaleInvoiceController extends BaseCrudController
         }
 
         return [
+            'invoice_header_id' => ['nullable', 'exists:sys_invoice_headers,id'],
             'user_id' => ['required', 'exists:users,id'],
             'invoice_no' => ['required', 'string', 'max:50', $uniqueInvoiceNo],
             'invoice_date' => ['required', 'date'],
@@ -259,6 +279,7 @@ class SaleInvoiceController extends BaseCrudController
     {
         $invoice = SysSaleInvoice::with([
             'items',
+            'invoiceHeader',
             'payments.bankAccount',
             'payments.paymentMethod',
             'receipts'
@@ -300,6 +321,7 @@ class SaleInvoiceController extends BaseCrudController
     {
         $invoice = SysSaleInvoice::with([
             'items',
+            'invoiceHeader',
             'payments.bankAccount',
             'payments.paymentMethod',
         ])->findOrFail($id);
@@ -731,6 +753,17 @@ class SaleInvoiceController extends BaseCrudController
     {
         $next = (SysReceipt::max('id') ?? 0) + 1;
         return 'RCPT-' . str_pad($next, 6, '0', STR_PAD_LEFT);
+    }
+
+    private function resolveSelectedInvoiceHeader(?SysSaleInvoice $invoice = null): ?SysInvoiceHeader
+    {
+        $selectedId = old('invoice_header_id');
+
+        if ($selectedId) {
+            return SysInvoiceHeader::find($selectedId);
+        }
+
+        return $invoice?->invoiceHeader;
     }
 
     private function formatPaymentMetaSummary(?array $meta, ?int $paymentMethodId): string

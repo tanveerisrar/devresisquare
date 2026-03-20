@@ -39,6 +39,7 @@ use App\Http\Controllers\Backend\Accounting\Purchase\PurchaseInvoiceController a
 use App\Http\Controllers\Backend\Accounting\Masters\PaymentMethodController as AccountingPaymentMethodController;
 use App\Http\Controllers\Backend\Accounting\Masters\IncomeCategoryController as AccountingIncomeCategoryController;
 use App\Http\Controllers\Backend\Accounting\Masters\ExpenseCategoryController as AccountingExpenseCategoryController;
+use App\Http\Controllers\Backend\Accounting\Masters\SysInvoiceHeaderController;
 use App\Http\Controllers\Backend\Accounting\Receipts\ReceiptController;
 use App\Http\Controllers\Backend\Accounting\GlAccountBalanceController;
 use App\Http\Controllers\Backend\Accounting\GlAccountController;
@@ -490,6 +491,14 @@ Route::middleware('auth')->group(function () {
             Route::resource('masters/expense-categories', AccountingExpenseCategoryController::class)
                 ->except(['show'])
                 ->names('masters.expense_categories');
+
+            Route::get('masters/invoice-headers/search', [SysInvoiceHeaderController::class, 'ajaxSearch'])
+                ->name('masters.invoice_headers.search');
+            Route::get('masters/invoice-headers/{invoiceHeader}/json', [SysInvoiceHeaderController::class, 'ajaxGet'])
+                ->name('masters.invoice_headers.json');
+            Route::resource('masters/invoice-headers', SysInvoiceHeaderController::class)
+                ->except(['show'])
+                ->names('masters.invoice_headers');
 
             Route::resource('masters/taxes', TaxController::class)
                 ->except(['show'])

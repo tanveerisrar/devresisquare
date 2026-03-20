@@ -9,6 +9,7 @@
         data_get($item ?? null, $key, data_get($defaults ?? [], $key, $default))
     );
     $users = $selectOptions['user_id'] ?? [];
+    $selectedInvoiceHeader = $selectedInvoiceHeader ?? null;
     $statuses = ['draft' => 'Draft', 'issued' => 'Issued', 'paid' => 'Paid', 'partial' => 'Partial', 'cancelled' => 'Cancelled'];
     $taxes = $selectOptions['tax_id'] ?? [];
     $taxRatesMap = $selectOptions['tax_rates'] ?? [];
@@ -36,11 +37,11 @@
 <div class="card shadow-sm mb-3">
     <div class="card-body">
         <div class="row g-3">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label class="form-label">Invoice No <span class="text-danger">*</span></label>
                 <input type="text" name="invoice_no" class="form-control" value="{{ $oldVal('invoice_no') }}" required readonly>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label class="form-label">Customer <span class="text-danger">*</span></label>
                 <select name="user_id" class="form-select" required>
                     <option value="">Select</option>
@@ -49,7 +50,19 @@
                     @endforeach
                 </select>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
+                <label class="form-label">Invoice Header</label>
+                <select name="invoice_header_id" id="invoice-header-id" class="form-select">
+                    <option value="">Select invoice header</option>
+                    @if($selectedInvoiceHeader)
+                        <option value="{{ $selectedInvoiceHeader->id }}" selected>
+                            {{ $selectedInvoiceHeader->header_name }} ({{ $selectedInvoiceHeader->unique_reference_number }})
+                        </option>
+                    @endif
+                </select>
+                <small class="text-muted">Search active invoice headers by name or reference number.</small>
+            </div>
+            <div class="col-md-3">
                 <label class="form-label">Status</label>
                 <select name="status" class="form-select">
                     @foreach($statuses as $key => $label)
@@ -75,6 +88,16 @@
                     <option value="before_tax" {{ $oldVal('discount_type') === 'before_tax' ? 'selected' : '' }}>Before Tax</option>
                     <option value="after_tax" {{ $oldVal('discount_type') === 'after_tax' ? 'selected' : '' }}>After Tax</option>
                 </select>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-12">
+                <div id="invoice-header-preview" class="alert alert-light border mb-0 {{ $selectedInvoiceHeader ? '' : 'd-none' }}">
+                    <div><strong>Header Name:</strong> <span data-header-name>{{ $selectedInvoiceHeader->header_name ?? '' }}</span></div>
+                    <div><strong>Reference:</strong> <span data-header-reference>{{ $selectedInvoiceHeader->unique_reference_number ?? '' }}</span></div>
+                    <div><strong>Description:</strong> <span data-header-description>{{ $selectedInvoiceHeader->header_description ?? '-' }}</span></div>
+                </div>
             </div>
         </div>
     </div>
@@ -196,6 +219,13 @@
 document.addEventListener('DOMContentLoaded', () => {
     const invoiceDateInput = document.getElementById('invoice-date');
     const dueDateInput = document.getElementById('due-date');
+    const invoiceHeaderSelect = $('#invoice-header-id');
+    const invoiceHeaderPreview = document.getElementById('invoice-header-preview');
+    const headerName = invoiceHeaderPreview?.querySelector('[data-header-name]');
+    const headerReference = invoiceHeaderPreview?.querySelector('[data-header-reference]');
+    const headerDescription = invoiceHeaderPreview?.querySelector('[data-header-description]');
+    const headerSearchUrl = "{{ route('backend.accounting.masters.invoice_headers.search') }}";
+    const headerJsonUrl = (id) => "{{ route('backend.accounting.masters.invoice_headers.json', ['invoiceHeader' => '___ID___']) }}".replace('___ID___', id);
 
     function setDueDate() {
         if (!invoiceDateInput.value) return;
@@ -208,6 +238,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!dueDateInput.value && invoiceDateInput.value) {
         setDueDate();
+    }
+
+    if (invoiceHeaderSelect.length) {
+        invoiceHeaderSelect.select2({
+            placeholder: 'Search invoice header',
+            allowClear: true,
+            ajax: {
+                url: headerSearchUrl,
+                dataType: 'json',
+                delay: 250,
+                data: params => ({ q: params.term }),
+                processResults: data => ({
+                    results: (data.results || []).map(row => ({
+                        id: row.id,
+                        text: row.text,
+                        header_name: row.header_name,
+                        unique_reference_number: row.unique_reference_number,
+                        header_description: row.header_description
+                    }))
+                })
+            },
+            minimumInputLength: 0
+        });
+
+        invoiceHeaderSelect.on('select2:select', async (e) => {
+            const selected = e.params.data;
+            hydrateHeaderPreview(selected);
+
+            try {
+                const res = await fetch(headerJsonUrl(selected.id));
+                if (res.ok) {
+                    const full = await res.json();
+                    hydrateHeaderPreview(full);
+                }
+            } catch (err) {
+                console.warn('Invoice header fetch failed', err);
+            }
+        });
+
+        invoiceHeaderSelect.on('select2:clear', () => {
+            clearHeaderPreview();
+        });
     }
 
     const tableBody = document.querySelector('#items-table tbody');
@@ -341,6 +413,22 @@ document.addEventListener('DOMContentLoaded', () => {
         bindRow(tr);
         recalcRow(tr);
     });
+
+    function hydrateHeaderPreview(data) {
+        if (!invoiceHeaderPreview || !data) return;
+        if (headerName) headerName.textContent = data.header_name || '';
+        if (headerReference) headerReference.textContent = data.unique_reference_number || '';
+        if (headerDescription) headerDescription.textContent = data.header_description || '-';
+        invoiceHeaderPreview.classList.remove('d-none');
+    }
+
+    function clearHeaderPreview() {
+        if (!invoiceHeaderPreview) return;
+        if (headerName) headerName.textContent = '';
+        if (headerReference) headerReference.textContent = '';
+        if (headerDescription) headerDescription.textContent = '-';
+        invoiceHeaderPreview.classList.add('d-none');
+    }
 });
 </script>
 @endpush

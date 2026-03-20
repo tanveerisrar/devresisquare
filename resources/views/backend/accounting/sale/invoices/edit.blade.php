@@ -1,6 +1,7 @@
-﻿@extends('backend.layout.app')
+@extends('backend.layout.app')
 
 @section('content')
+    @include('backend.partials.assets.select2')
 <div class="container py-4">
     <h2>Edit {{ $title }}</h2>
 

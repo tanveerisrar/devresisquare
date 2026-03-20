@@ -62,12 +62,21 @@
                     <div style="margin-top:10px; font-size: 12px;">
                         <div>Invoice Date: {{ $invoice->invoice_date }}</div>
                         <div>Invoice Due Date: {{ $invoice->due_date ?? '-' }}</div>
+                        <div>Invoice Header: {{ $invoice->invoiceHeader?->header_name ?? '-' }}</div>
                     </div>
                     <a href="{{ route($routeName . '.pdf', $invoice->id) }}" class="btn-pdf" style="margin-top:10px;" target="_blank">
                         Print PDF
                     </a>
                 </div>
             </div>
+            @if($invoice->invoiceHeader)
+                <div class="billto mt-12">
+                    <strong>Invoice Header:</strong>
+                    <div>{{ $invoice->invoiceHeader->header_name }}</div>
+                    <div style="font-size:12px;color:#4b5563;">Reference: {{ $invoice->invoiceHeader->unique_reference_number }}</div>
+                    <div style="font-size:12px;color:#4b5563;">{{ $invoice->invoiceHeader->header_description ?: '-' }}</div>
+                </div>
+            @endif
             <div class="billto">
                 <strong>Bill To:</strong>
                 <div>{{ optional($customer)->name ?? 'N/A' }}</div>

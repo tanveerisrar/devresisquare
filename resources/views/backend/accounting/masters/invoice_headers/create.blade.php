@@ -1,7 +1,6 @@
 @extends('backend.layout.app')
 
 @section('content')
-    @include('backend.partials.assets.select2')
 <div class="container py-4">
     <h2>Create {{ $title }}</h2>
 
@@ -16,7 +15,7 @@
     @endif
 
     <form action="{{ route($routeName . '.store') }}" method="POST">
-        @include('backend.accounting.sale.invoices._form')
+        @include('backend.accounting.masters.invoice_headers._form')
     </form>
 </div>
 @endsection
